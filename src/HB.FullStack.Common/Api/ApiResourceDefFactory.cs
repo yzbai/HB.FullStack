@@ -45,7 +45,7 @@ namespace HB.FullStack.Common.Api
 
             propertyDef.PropertyName = propertyInfo.Name;
 
-            var queryItemAttribute = propertyInfo.GetCustomAttribute<QueryItemAttribute>(true);
+            var queryItemAttribute = propertyInfo.GetCustomAttribute<RequestDataAttribute>(true);
 
             if (queryItemAttribute != null)
             {

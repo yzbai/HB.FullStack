@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UpdateRequest() { }
 
-        public UpdateRequest(T res) : base(typeof(T).Name, ApiMethodName.Put, null, null)
+        public UpdateRequest(T res) : base(typeof(T).Name, ApiMethod.Update, null, null)
         {
             Resource = res;
         }

@@ -1,26 +1,24 @@
 ﻿
 
-using HB.FullStack.Common;
-
 using System;
 using System.Data;
 
 namespace HB.FullStack.Database.Converter
 {
-    public class SimpleDateTypeConverter : ITypeConverter
+    public class JsonTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.String;
 
-        public string Statement => "VARCHAR(14)";
+        public string DbTypeStatement => "VARCHAR";
 
         public object TypeValueToDbValue(object typeValue, Type propertyType)
         {
-            return typeValue;
+            return SerializeUtil.ToJson(typeValue);
         }
 
         public object DbValueToTypeValue(object dbValue, Type propertyType)
         {
-            return SimpleDate.ParseExactly(dbValue.ToString()!);
+            return SerializeUtil.FromJson(propertyType, dbValue.ToString())!;
         }
     }
 }

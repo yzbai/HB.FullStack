@@ -1,15 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using HB.FullStack.Common.Models;
 
-namespace HB.FullStack.Database.DBModels
+namespace HB.FullStack.Database.DbModels
 {
     /// <summary>
     /// 实体定义
     /// </summary>
-    public class DBModelDef
+    public class DbModelDef
     {
-        public bool IsTimestampDBModel{ get; set; }
+        #region Common ModelDef
+
+        /// <summary>
+        /// 实体名
+        /// </summary>
+        public string ModelFullName { get; set; } = null!;
+
+        /// <summary>
+        /// 实体类型
+        /// </summary>
+        public Type ModelType { get; set; } = null!;
+
+        /// <summary>
+        /// 属性字典
+        /// </summary>
+        public Dictionary<string, DbModelPropertyDef> PropertyDict { get; } = new Dictionary<string, DbModelPropertyDef>();
+
+        /// <summary>
+        /// 属性枚举
+        /// </summary>
+        public IList<DbModelPropertyDef> PropertyDefs { get; } = new List<DbModelPropertyDef>();
+
+        #endregion
+
+        public bool IsTimestampDBModel { get; set; }
 
         /// <summary>
         /// 是否是GuidModel
@@ -25,16 +50,6 @@ namespace HB.FullStack.Database.DBModels
         /// 是否是AutoincrementIdModel
         /// </summary>
         public bool IsIdAutoIncrement { get; set; }
-
-        /// <summary>
-        /// 实体名
-        /// </summary>
-        public string ModelFullName { get; set; } = null!;
-
-        /// <summary>
-        /// 实体类型
-        /// </summary>
-        public Type ModelType { get; set; } = null!;
 
         /// <summary>
         /// 所属数据库
@@ -63,21 +78,11 @@ namespace HB.FullStack.Database.DBModels
 
         public int UniqueFieldCount { get; set; }
 
-        /// <summary>
-        /// 属性字典
-        /// </summary>
-        public Dictionary<string, DBModelPropertyDef> PropertyDict { get; } = new Dictionary<string, DBModelPropertyDef>();
+        public DbModelPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
 
-        /// <summary>
-        /// 属性枚举
-        /// </summary>
-        public IList<DBModelPropertyDef> PropertyDefs { get; } = new List<DBModelPropertyDef>();
-
-        public DBModelPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
-
-        public DBModelPropertyDef? GetPropertyDef(string propertyName)
+        public DbModelPropertyDef? GetPropertyDef(string propertyName)
         {
-            if (PropertyDict.TryGetValue(propertyName, out DBModelPropertyDef? propertyDef))
+            if (PropertyDict.TryGetValue(propertyName, out DbModelPropertyDef? propertyDef))
             {
                 return propertyDef;
             }

@@ -8,16 +8,16 @@ using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
-namespace HB.FullStack.Database.DBModels
+namespace HB.FullStack.Database.DbModels
 {
-    internal class DBModelDefFactory : IDBModelDefFactory
+    internal class DbModelDefFactory : IDbModelDefFactory
     {
         /// <summary>
         /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经ConstructModelDefs，后续只有read，没有write
         /// </summary>
-        private readonly IDictionary<Type, DBModelDef> _defDict = new Dictionary<Type, DBModelDef>();
+        private readonly IDictionary<Type, DbModelDef> _defDict = new Dictionary<Type, DbModelDef>();
 
-        public DBModelDefFactory(IDatabaseEngine databaseEngine)
+        public DbModelDefFactory(IDatabaseEngine databaseEngine)
         {
             DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
@@ -38,7 +38,7 @@ namespace HB.FullStack.Database.DBModels
 
             static bool modelTypeCondition(Type t)
             {
-                return t.IsSubclassOf(typeof(DBModel)) && !t.IsAbstract;
+                return t.IsSubclassOf(typeof(DbModel)) && !t.IsAbstract;
             }
         }
 
@@ -135,19 +135,19 @@ namespace HB.FullStack.Database.DBModels
             return resusltModelSchemaDict;
         }
 
-        public DBModelDef? GetDef<T>() where T : DBModel
+        public DbModelDef? GetDef<T>() where T : DbModel
         {
             return GetDef(typeof(T));
         }
 
-        public DBModelDef? GetDef(Type? modelType)
+        public DbModelDef? GetDef(Type? modelType)
         {
             if (modelType == null)
             {
                 return null;
             }
 
-            if (_defDict.TryGetValue(modelType, out DBModelDef? modelDef))
+            if (_defDict.TryGetValue(modelType, out DbModelDef? modelDef))
             {
                 return modelDef;
             }
@@ -155,7 +155,7 @@ namespace HB.FullStack.Database.DBModels
             return null;
         }
 
-        private static DBModelDef CreateModelDef(Type modelType, EngineType engineType, IDictionary<string, DatabaseModelSetting> modelSettingDict)
+        private static DbModelDef CreateModelDef(Type modelType, EngineType engineType, IDictionary<string, DatabaseModelSetting> modelSettingDict)
         {
             //GlobalSettings.Logger.LogInformation($"{modelType} : {modelType.GetHashCode()}");
 
@@ -164,17 +164,17 @@ namespace HB.FullStack.Database.DBModels
                 throw DatabaseExceptions.ModelError(type: modelType.FullName, "", cause: "不是Model，或者没有DatabaseModelAttribute.");
             }
 
-            DBModelDef modelDef = new DBModelDef
+            DbModelDef modelDef = new DbModelDef
             {
                 ModelType = modelType,
                 ModelFullName = modelType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
                 TableName = dbSchema.TableName,
-                
-                IsTimestampDBModel = typeof(TimestampDBModel).IsAssignableFrom(modelType),
+
+                IsTimestampDBModel = typeof(TimestampDbModel).IsAssignableFrom(modelType),
                 IsIdAutoIncrement = typeof(IAutoIncrementId).IsAssignableFrom(modelType),
                 IsIdGuid = typeof(IGuidId).IsAssignableFrom(modelType),
-                IsIdLong = typeof(ILongId).IsAssignableFrom( modelType)
+                IsIdLong = typeof(ILongId).IsAssignableFrom(modelType)
             };
 
             modelDef.DbTableReservedName = SqlHelper.GetReserved(modelDef.TableName!, engineType);
@@ -200,13 +200,13 @@ namespace HB.FullStack.Database.DBModels
                         modelPropertyAttribute = new DBModelPropertyAttribute();
                     }
 
-                    if (info.Name == nameof(TimestampDBModel.LastUser))
+                    if (info.Name == nameof(TimestampDbModel.LastUser))
                     {
                         modelPropertyAttribute.MaxLength = DefaultLengthConventions.MAX_LAST_USER_LENGTH;
                     }
                 }
 
-                DBModelPropertyDef propertyDef = CreatePropertyDef(modelDef, info, modelPropertyAttribute, engineType);
+                DbModelPropertyDef propertyDef = CreatePropertyDef(modelDef, info, modelPropertyAttribute, engineType);
 
                 modelDef.FieldCount++;
 
@@ -222,9 +222,9 @@ namespace HB.FullStack.Database.DBModels
             return modelDef;
         }
 
-        private static DBModelPropertyDef CreatePropertyDef(DBModelDef modelDef, PropertyInfo propertyInfo, DBModelPropertyAttribute propertyAttribute, EngineType engineType)
+        private static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DBModelPropertyAttribute propertyAttribute, EngineType engineType)
         {
-            DBModelPropertyDef propertyDef = new DBModelPropertyDef
+            DbModelPropertyDef propertyDef = new DbModelPropertyDef
             {
                 ModelDef = modelDef,
                 Name = propertyInfo.Name,
@@ -249,7 +249,7 @@ namespace HB.FullStack.Database.DBModels
 
             if (propertyAttribute.Converter != null)
             {
-                propertyDef.TypeConverter = (ITypeConverter)Activator.CreateInstance(propertyAttribute.Converter)!;
+                propertyDef.TypeConverter = (IDbValueConverter)Activator.CreateInstance(propertyAttribute.Converter)!;
             }
 
             //判断是否是主键
@@ -281,12 +281,12 @@ namespace HB.FullStack.Database.DBModels
             return propertyDef;
         }
 
-        public IEnumerable<DBModelDef> GetAllDefsByDatabase(string databaseName)
+        public IEnumerable<DbModelDef> GetAllDefsByDatabase(string databaseName)
         {
             return _defDict.Values.Where(def => databaseName.Equals(def.DatabaseName, GlobalSettings.ComparisonIgnoreCase));
         }
 
-        public ITypeConverter? GetPropertyTypeConverter(Type modelType, string propertyName)
+        public IDbValueConverter? GetPropertyTypeConverter(Type modelType, string propertyName)
         {
             return GetDef(modelType)?.GetPropertyDef(propertyName)!.TypeConverter;
         }

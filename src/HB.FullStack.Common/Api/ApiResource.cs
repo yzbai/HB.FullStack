@@ -1,9 +1,11 @@
-﻿namespace HB.FullStack.Common.Api
+﻿using HB.FullStack.Common.Models;
+
+namespace HB.FullStack.Common.Api
 {
     /// <summary>
     /// One kind of Data Transfer Objects. Mainly using on net.
     /// </summary>
-    public class ApiResource : ValidatableObject, IDTO
+    public class ApiResource : DTO
     {
         //[Range(0, int.MaxValue)]
         //public int Version { get; set; } = -1;

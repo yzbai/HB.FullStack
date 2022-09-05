@@ -1,7 +1,7 @@
 ﻿
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.SQL;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddDatabase(this IServiceCollection services)
         {
             //public
-            services.AddSingleton<IDBModelDefFactory, DBModelDefFactory>();
+            services.AddSingleton<IDbModelDefFactory, DbModelDefFactory>();
             services.AddSingleton<ISQLExpressionVisitor, SQLExpressionVisitor>(); 
             services.AddSingleton<IDbCommandBuilder, DbCommandBuilder>();
             services.AddSingleton<ITransaction, DefaultTransaction>();

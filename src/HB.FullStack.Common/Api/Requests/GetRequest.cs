@@ -11,7 +11,7 @@ namespace HB.FullStack.Common.Api
     /// </summary>
     public class GetRequest : ApiRequest
     {
-        public string? Id { get; set; }
+        public IList<string> Ids { get; } = new List<string>();
 
         public int? Page { get; set; }
 
@@ -22,14 +22,14 @@ namespace HB.FullStack.Common.Api
         /// <summary>
         /// 包含哪些子资源
         /// </summary>
-        public string? Includes { get; set; }
+        public IList<string> ResIncludes { get; } = new List<string>();
 
         /// <summary>
         /// 只支持PropertyName=PropertyStringValue这种Equal形式。其他形式请自行定义GetByCondition Request
         /// </summary>
         public IList<PropertyFilter> PropertyFilters { get; } = new List<PropertyFilter>();
 
-        public GetRequest(string resName) : base(resName, ApiMethodName.Get, null, null) { }
+        public GetRequest(string resName) : base(resName, ApiMethod.Get, null, null) { }
     }
 
     public sealed class GetRequest<T> : GetRequest where T : ApiResource

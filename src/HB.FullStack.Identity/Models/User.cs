@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Database.DBModels;
+﻿using HB.FullStack.Database.DbModels;
 
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -10,7 +10,7 @@ namespace HB.FullStack.Identity.Models
     /// <summary>
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
     /// </summary>
-    public class User : TimestampGuidDBModel
+    public class User : TimestampGuidDbModel
     {
         [Required]
         [Guid32String(NotNull = true)]

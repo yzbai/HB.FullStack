@@ -6,7 +6,7 @@ using AsyncAwaitBestPractices;
 
 using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
@@ -50,7 +50,7 @@ namespace HB.FullStack.Repository.CacheStrategies
                 //这样设计是合理的，因为ModelCache是按Model角度，存入的Model会复用，就像一个KVStore一样，而CachedItem纯粹是一个查询结果，不思考查询结果的内容。
                 if (dbRt != null)
                 {
-                    long timestamp = (dbRt as TimestampDBModel)?.Timestamp ?? TimeUtil.UtcNowTicks;
+                    long timestamp = (dbRt as TimestampDbModel)?.Timestamp ?? TimeUtil.UtcNowTicks;
                     SetCache(cacheItem.SetValue(dbRt).SetTimestamp(timestamp), cache);
                     logger.LogInformation("缓存 Missed. Model:{ModelName}, CacheKey:{CacheKey}", cacheItem.GetType().Name, cacheItem.CacheKey);
                 }

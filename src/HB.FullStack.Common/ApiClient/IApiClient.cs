@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.ApiClient
     {
         IPreferenceProvider UserTokenProvider { get; }
 
-        ResBinding? UserTokenResBinding { get; }
+        ResEndpoint? UserTokenResBinding { get; }
 
         event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting;
 

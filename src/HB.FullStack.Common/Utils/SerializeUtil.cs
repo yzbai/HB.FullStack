@@ -255,5 +255,6 @@ namespace System
         }
 
         #endregion MsgPack Serialize
+
     }
 }

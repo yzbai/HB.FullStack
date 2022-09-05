@@ -1,18 +1,17 @@
 ﻿
-
-using HB.FullStack.Common;
-
 using System;
 using System.Data;
 using System.Globalization;
 
+using HB.FullStack.Common;
+
 namespace HB.FullStack.Database.Converter
 {
-    internal class SqliteDateTimeOffsetTypeConverter : ITypeConverter
+    internal class SqliteDateTimeOffsetTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.String;
 
-        public string Statement => "VARCHAR";
+        public string DbTypeStatement => "VARCHAR";
 
         public object TypeValueToDbValue(object typeValue, Type propertyType)
         {

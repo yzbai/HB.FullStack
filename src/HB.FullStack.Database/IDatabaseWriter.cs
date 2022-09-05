@@ -9,36 +9,78 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
     public interface IDatabaseWriter
     {
-        Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DBModel, new();
-
-        Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DBModel, new();
-
-        Task UpdateFieldsAsync<T>(object id, IList<(string propertyName, object? propertyValue)> propertyNameValues, long curTimestamp, string lastUser, TransactionContext? transContext) where T : TimestampDBModel, new();
+        Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         /// <summary>
-        /// 通过比较oldvalue来实现字段力度乐观锁.
+        /// Update Entire Model. Using timestamp method optimistic locking if a TimestampDbModel
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+
+        /// <summary>
+        /// Update Fields for TimestampDbModel. Using timestamp method optimistic locking.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <param name="propertyNameValues"></param>
+        /// <param name="timestamp">TimestampDbModel.Timestamp</param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        Task UpdateFieldsAsync<T>(
+            object id,
+            IList<(string propertyName, object? propertyValue)> propertyNameValues,
+            long timestamp,
+            string lastUser,
+            TransactionContext? transContext) where T : TimestampDbModel, new();
+
+        /// <summary>
+        /// Update Fields for DbModel. Using property value compare method optimistic locking
         /// </summary>
         /// <param name="propertyOldNewValues">(propertyName-oldvalue-newvalue）</param>
-        Task UpdateFieldsAsync<T>(object id, IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues, string lastUser, TransactionContext? transContext) where T : DBModel, new();
+        Task UpdateFieldsAsync<T>(
+            object id,
+            IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues,
+            string lastUser,
+            TransactionContext? transContext) where T : DbModel, new();
 
-        Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DBModel, new();
+        /// <summary>
+        /// Delete DbModel. Using timestamp method optimistic locking if a TimestampDbModel
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <param name="lastUser"></param>
+        /// <param name="transContext"></param>
+        /// <returns></returns>
+        Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimelessDBModel, new();
+        /// <summary>
+        /// Delete TimelessDbModel
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="whereExpr"></param>
+        /// <param name="transactionContext"></param>
+        /// <returns></returns>
+        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimelessDbModel, new();
 
-        Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new();
+        Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new();
+        Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new();
+        Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDBModel, new();
+        Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDbModel, new();
 
-        Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDBModel, new();
+        Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDbModel, new();
     }
 }

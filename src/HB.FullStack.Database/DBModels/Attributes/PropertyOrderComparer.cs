@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.Database.DBModels
+namespace HB.FullStack.Database.DbModels
 {
     public class PropertyOrderComparer : Comparer<PropertyInfo>
     {
@@ -47,11 +47,11 @@ namespace HB.FullStack.Database.DBModels
         {
             return info.Name switch
             {
-                nameof(TimestampGuidDBModel.Id) => new DBModelPropertyAttribute(0),
-                nameof(TimestampDBModel.LastUser) => new DBModelPropertyAttribute(1),
-                nameof(TimestampDBModel.Timestamp) => new DBModelPropertyAttribute(2),
-                nameof(TimestampDBModel.Deleted) => new DBModelPropertyAttribute(3),
-                //nameof(DBModel.CreateTime) => new DBModelPropertyAttribute(6),
+                nameof(TimestampGuidDbModel.Id) => new DBModelPropertyAttribute(0),
+                nameof(TimestampDbModel.LastUser) => new DBModelPropertyAttribute(1),
+                nameof(TimestampDbModel.Timestamp) => new DBModelPropertyAttribute(2),
+                nameof(TimestampDbModel.Deleted) => new DBModelPropertyAttribute(3),
+                //nameof(DbModel.CreateTime) => new DBModelPropertyAttribute(6),
                 _ => null
             };
         }

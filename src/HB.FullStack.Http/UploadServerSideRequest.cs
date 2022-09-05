@@ -17,7 +17,7 @@ namespace HB.FullStack.Common.Api
 
         }
 
-        public UploadServerSideRequest(string resName, ApiRequestAuth2 auth, string? condition) : base(resName, ApiMethodName.Patch, auth, condition) { }
+        public UploadServerSideRequest(string resName, ApiRequestAuth2 auth, string? condition) : base(resName, ApiMethod.UpdateFields, auth, condition) { }
 
         [CollectionNotNullOrEmpty]
         public IEnumerable<IFormFile> Files { get; set; } = null!;

@@ -8,17 +8,17 @@ namespace HB.FullStack.Common.ApiClient
     /// <summary>
     /// Endpoint(站点)的描述文档
     /// </summary>
-    public class EndpointSetting
+    public class SiteSetting
     {
-        public string EndpointName { get; set; } = null!;
+        public string SiteName { get; set; } = null!;
 
         public string? Version { get; set; }
 
         public Uri? BaseUrl { get; set; }
 
-        public IList<ResBinding> ResBindings { get; set; } = new List<ResBinding>();
+        public IList<ResEndpoint> Endpoints { get; set; } = new List<ResEndpoint>();
 
-        #region Server系统设置
+        #region 由 Site 决定的设置
 
         public HttpMethodOverrideMode HttpMethodOverrideMode { get; set; }
 
@@ -37,15 +37,7 @@ namespace HB.FullStack.Common.ApiClient
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(EndpointName, Version, BaseUrl, HttpMethodOverrideMode, Challenge);
-        }
-    }
-
-    public static class EndpointSettingExtensions
-    {
-        public static string GetHttpClientName(this EndpointSetting endpointSettings)
-        {
-            return $"{endpointSettings.EndpointName}_{endpointSettings.Version ?? "0"}";
+            return HashCode.Combine(SiteName, Version, BaseUrl, HttpMethodOverrideMode, Challenge);
         }
     }
 }

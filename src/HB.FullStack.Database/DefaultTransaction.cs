@@ -3,7 +3,7 @@ using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
@@ -11,9 +11,9 @@ namespace HB.FullStack.Database
     public class DefaultTransaction : ITransaction
     {
         private readonly IDatabaseEngine _databaseEngine;
-        private readonly IDBModelDefFactory _modelDefFactory;
+        private readonly IDbModelDefFactory _modelDefFactory;
 
-        public DefaultTransaction(IDatabaseEngine datbaseEngine, IDBModelDefFactory modelDefFactory)
+        public DefaultTransaction(IDatabaseEngine datbaseEngine, IDbModelDefFactory modelDefFactory)
         {
             _databaseEngine = datbaseEngine;
             _modelDefFactory = modelDefFactory;
@@ -28,9 +28,9 @@ namespace HB.FullStack.Database
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
         }
 
-        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DBModel
+        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DbModel
         {
-            DBModelDef modelDef = _modelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = _modelDefFactory.GetDef<T>()!;
 
             return BeginTransactionAsync(modelDef.DatabaseName!, isolationLevel);
         }

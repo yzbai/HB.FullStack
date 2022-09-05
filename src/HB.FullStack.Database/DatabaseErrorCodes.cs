@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
 [assembly: InternalsVisibleTo("HB.Infrastructure.MySQL")]
@@ -343,7 +343,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception UpdateVersionError<T>(int originalVersion, int updateToVersion, T item) where T : DBModel, new()
+        internal static Exception UpdateVersionError<T>(int originalVersion, int updateToVersion, T item) where T : DbModel, new()
         {
             DatabaseException exception = new DatabaseException(DatabaseErrorCodes.UpdateVersionError, nameof(UpdateVersionError), null, null);
 

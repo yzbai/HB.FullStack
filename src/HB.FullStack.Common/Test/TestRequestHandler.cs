@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.Test
 
         public TestRequestHandler(
             string url,
-            ApiMethodName httpMethod,
+            ApiMethod httpMethod,
             Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>?> handlerAction
         )
         {
@@ -27,7 +27,7 @@ namespace HB.FullStack.Common.Test
         }
 
         public TestRequestHandler(string url, Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>?> handlerAction)
-            : this(url, ApiMethodName.None, handlerAction) { }
+            : this(url, ApiMethod.None, handlerAction) { }
 
         string Url { get; }
         string HttpMethod { get; }

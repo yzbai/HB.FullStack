@@ -1,15 +1,16 @@
-﻿using HB.FullStack.Common.Api;
-using System;
+﻿using System;
 using System.Net.Http;
+
+using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
     public class ApiEventArgs : EventArgs
     {
         public string RequestId { get; }
-        public ApiMethodName RequestHttpMethod { get;}
+        public ApiMethod RequestHttpMethod { get; }
 
-        public ApiEventArgs(string requestId, ApiMethodName requestHttpMethod)
+        public ApiEventArgs(string requestId, ApiMethod requestHttpMethod)
         {
             RequestId = requestId;
             RequestHttpMethod = requestHttpMethod;

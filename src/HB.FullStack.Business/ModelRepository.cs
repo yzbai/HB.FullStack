@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository.CacheStrategies;
 
@@ -26,7 +26,7 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// Cache架构策略可以参考笔记
     /// </summary>
-    public abstract class ModelRepository<TMainDBModel> where TMainDBModel : TimestampDBModel, new()
+    public abstract class ModelRepository<TMainDBModel> where TMainDBModel : TimestampDbModel, new()
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
         protected ILogger Logger { get; }
@@ -51,7 +51,7 @@ namespace HB.FullStack.Repository
             RegisterModelChangedEvents(InvalidateCacheItemsOnChanged);
         }
 
-        public void RegisterModelChangedEvents(AsyncEventHandler<IEnumerable<DBModel>, DBChangedEventArgs> OnModelsChanged)
+        public void RegisterModelChangedEvents(AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> OnModelsChanged)
         {
             ModelsAdded += OnModelsChanged;
 
@@ -63,112 +63,112 @@ namespace HB.FullStack.Repository
         /// <summary>
         /// //NOTICE: 为什么再基类中要abstract而不是virtual，就是强迫程序员思考这里需要释放的Cache有没有
         /// </summary>
-        protected abstract Task InvalidateCacheItemsOnChanged(IEnumerable<DBModel> sender, DBChangedEventArgs args);
+        protected abstract Task InvalidateCacheItemsOnChanged(IEnumerable<DbModel> sender, DBChangedEventArgs args);
 
         #region Events
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangingEventArgs> ModelUpdating
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangingEventArgs> ModelUpdating
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangedEventArgs> ModelsUpdated
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelsUpdated
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangedEventArgs> ModelUpdateFailed
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelUpdateFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangingEventArgs> ModelAdding
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangingEventArgs> ModelAdding
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangedEventArgs> ModelsAdded
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelsAdded
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangedEventArgs> ModelAddFailed
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelAddFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangingEventArgs> ModelDeleting
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangingEventArgs> ModelDeleting
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangedEventArgs> ModelsDeleted
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelsDeleted
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DBModel>, DBChangedEventArgs> ModelDeleteFailed
+        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelDeleteFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        protected virtual Task OnModelUpdatingAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelUpdatingAsync(IEnumerable<DbModel> models)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), models, new DBChangingEventArgs { ChangeType = DBChangeType.Update });
         }
 
-        protected virtual Task OnModelUpdatedAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelUpdatedAsync(IEnumerable<DbModel> models)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelsUpdated), models, new DBChangedEventArgs { ChangeType = DBChangeType.Update });
         }
 
-        protected virtual Task OnModelUpdateFailedAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelUpdateFailedAsync(IEnumerable<DbModel> models)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), models, new DBChangedEventArgs { ChangeType = DBChangeType.Update });
         }
 
-        protected virtual Task OnModelAddingAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelAddingAsync(IEnumerable<DbModel> models)
         {
             //events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelAdding), models, new DBChangingEventArgs { ChangeType = DBChangeType.Add });
         }
 
-        protected virtual Task OnModelAddedAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelAddedAsync(IEnumerable<DbModel> models)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelsAdded), models, new DBChangedEventArgs { ChangeType = DBChangeType.Add });
         }
 
-        protected virtual Task OnModelAddFailedAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelAddFailedAsync(IEnumerable<DbModel> models)
         {
             return AsyncEventManager.RaiseEventAsync(nameof(ModelAddFailed), models, new DBChangedEventArgs { ChangeType = DBChangeType.Add });
         }
 
-        protected virtual Task OnModelDeletingAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelDeletingAsync(IEnumerable<DbModel> models)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleting), models, new DBChangingEventArgs { ChangeType = DBChangeType.Delete });
         }
 
-        protected virtual Task OnModelDeletedAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelDeletedAsync(IEnumerable<DbModel> models)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelsDeleted), models, new DBChangedEventArgs { ChangeType = DBChangeType.Delete });
         }
 
-        protected virtual Task OnModelDeleteFailedAsync(IEnumerable<DBModel> models)
+        protected virtual Task OnModelDeleteFailedAsync(IEnumerable<DbModel> models)
         {
             return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleteFailed), models, new DBChangedEventArgs { ChangeType = DBChangeType.Delete });
         }
@@ -177,7 +177,7 @@ namespace HB.FullStack.Repository
 
         #region Database Write Wrapper
 
-        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             await OnModelUpdatingAsync(new T[] { model }).ConfigureAwait(false);
 
@@ -197,7 +197,7 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
-        public async Task AddAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task AddAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             await OnModelAddingAsync(new T[] { model }).ConfigureAwait(false);
 
@@ -214,7 +214,7 @@ namespace HB.FullStack.Repository
             await OnModelAddedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task DeleteAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             await OnModelDeletingAsync(new T[] { model }).ConfigureAwait(false);
 
@@ -234,7 +234,7 @@ namespace HB.FullStack.Repository
             await OnModelDeletedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<object>> AddAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task<IEnumerable<object>> AddAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             await OnModelAddingAsync(models).ConfigureAwait(false);
 
@@ -256,7 +256,7 @@ namespace HB.FullStack.Repository
             return results;
         }
 
-        public async Task UpdateAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task UpdateAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             await OnModelUpdatingAsync(models).ConfigureAwait(false);
 
@@ -276,7 +276,7 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedAsync(models).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task DeleteAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             await OnModelDeletingAsync(models).ConfigureAwait(false);
 
@@ -308,12 +308,12 @@ namespace HB.FullStack.Repository
         //    return Database.RetrieveByForeignKeyAsync(foreignKeyExp, foreignKeyValue, transactionContext, page, perPage, orderBy);
         //}
 
-        //public Task<IEnumerable<T>> GetAsync<T>(int? page, int? perPage, string? orderBy) where T : DBModel
+        //public Task<IEnumerable<T>> GetAsync<T>(int? page, int? perPage, string? orderBy) where T : DbModel
         //{
         //    throw new NotImplementedException();
         //}
 
-        //public Task<T> GetById<T>(object id) where T : DBModel
+        //public Task<T> GetById<T>(object id) where T : DbModel
         //{
         //    throw new NotImplementedException();
         //}
@@ -363,12 +363,12 @@ namespace HB.FullStack.Repository
 
         #region Timestamp Cache Strategy
 
-        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : TimestampDBModel
+        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : TimestampDbModel
         {
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : TimestampDBModel
+        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : TimestampDbModel
         {
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }

@@ -8,14 +8,14 @@ namespace HB.FullStack.Common.ApiClient
 {
     public class HttpRequestMessageBuilder
     {
-        internal ResBinding ResBinding { get; }
+        internal ResEndpoint ResBinding { get; }
         internal ApiRequest Request { get; }
 
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
-        public EndpointSetting EndpointSetting => ResBinding.EndpointSetting!;
+        public SiteSetting EndpointSetting => ResBinding.SiteSetting!;
 
-        public HttpRequestMessageBuilder(ResBinding resBinding, ApiRequest request)
+        public HttpRequestMessageBuilder(ResEndpoint resBinding, ApiRequest request)
         {
             ResBinding = resBinding;
             Request = request;
@@ -23,18 +23,18 @@ namespace HB.FullStack.Common.ApiClient
             EnsureApiRequestAuth(resBinding);
         }
 
-        private void EnsureApiRequestAuth(ResBinding resBinding)
+        private void EnsureApiRequestAuth(ResEndpoint resBinding)
         {
             if (Request.Auth == null)
             {
-                Request.Auth = Request.ApiMethodName switch
+                Request.Auth = Request.ApiMethod switch
                 {
-                    ApiMethodName.Get => resBinding.ReadAuth,
-                    ApiMethodName.Post => resBinding.WriteAuth,
-                    ApiMethodName.Put => resBinding.WriteAuth,
-                    ApiMethodName.Delete => resBinding.WriteAuth,
-                    ApiMethodName.Patch => resBinding.WriteAuth,
-                    ApiMethodName.None => throw new NotImplementedException(),
+                    ApiMethod.Get => resBinding.ReadAuth,
+                    ApiMethod.Add => resBinding.WriteAuth,
+                    ApiMethod.Update => resBinding.WriteAuth,
+                    ApiMethod.Delete => resBinding.WriteAuth,
+                    ApiMethod.UpdateFields => resBinding.WriteAuth,
+                    ApiMethod.None => throw new NotImplementedException(),
                     _ => throw new NotImplementedException(),
                 };
             }

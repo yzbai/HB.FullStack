@@ -1,11 +1,11 @@
-﻿using HB.FullStack.Database.DBModels;
+﻿using HB.FullStack.Database.DbModels;
 
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class SignInToken : TimestampGuidDBModel
+    public class SignInToken : TimestampGuidDbModel
     {
         [NoEmptyGuid]
         [ForeignKey(typeof(User), false)]

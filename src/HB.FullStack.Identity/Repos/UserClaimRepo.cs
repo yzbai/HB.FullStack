@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
@@ -20,7 +20,7 @@ namespace HB.FullStack.Identity
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DBModel> sender, DBChangedEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DbModel> sender, DBChangedEventArgs args)
         {
             if (sender is IEnumerable<UserClaim> userClaims)
             {

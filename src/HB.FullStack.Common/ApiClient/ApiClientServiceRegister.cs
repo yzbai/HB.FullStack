@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
             //添加各站点的HttpClient
-            foreach (EndpointSetting endpoint in options.EndpointSettings)
+            foreach (SiteSetting endpoint in options.SiteSettings)
             {
                 IHttpClientBuilder builder = services.AddHttpClient(endpoint.GetHttpClientName(), httpClient =>
                 {

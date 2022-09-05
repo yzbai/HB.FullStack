@@ -5,11 +5,11 @@ using System.Data;
 
 namespace HB.FullStack.Database.Converter
 {
-    internal class MySqlDateTimeOffsetTypeConverter : ITypeConverter
+    internal class MySqlDateTimeOffsetTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.Int64;
 
-        public string Statement => "BIGINT";
+        public string DbTypeStatement => "BIGINT";
 
         public object TypeValueToDbValue(object typeValue, Type propertyType)
         {

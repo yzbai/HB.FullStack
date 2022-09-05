@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace HB.FullStack.Database.DBModels
+namespace HB.FullStack.Database.DbModels
 {
     public sealed class Guid32StringAttribute : DBModelPropertyAttribute
     {

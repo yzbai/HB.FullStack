@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Database.DBModels;
+﻿using HB.FullStack.Database.DbModels;
 using HB.FullStack.KVStore;
 using HB.FullStack.KVStore.KVStoreModels;
 

@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.Api
 
         [OnlyForJsonConstructor]
 
-        public PatchRequest() : base(typeof(T).Name, ApiMethodName.Patch, null, null) { }
+        public PatchRequest() : base(typeof(T).Name, ApiMethod.UpdateFields, null, null) { }
 
         public PatchRequest<T> AddProperty(string propertyName, object? oldValue, object? newValue)
         {

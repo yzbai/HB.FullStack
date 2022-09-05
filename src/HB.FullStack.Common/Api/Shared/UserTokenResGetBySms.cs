@@ -5,12 +5,10 @@ namespace HB.FullStack.Common.Api
 {
     public class UserTokenResGetBySms : ApiRequest
     {
-        [Required]
-        [Mobile]
+        [Mobile(CanBeNull = false)]
         public string Mobile { get; set; } = null!;
 
-        [Required]
-        [SmsCode]
+        [SmsCode(CanBeNull = false)]
         public string SmsCode { get; set; } = null!;
 
         [Required]
@@ -22,12 +20,13 @@ namespace HB.FullStack.Common.Api
         [Required]
         public string DeviceVersion { get; set; } = null!;
 
+        [Required]
         public DeviceInfos DeviceInfos { get; set; } = null!;
 
         public UserTokenResGetBySms() { }
 
         public UserTokenResGetBySms(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
-            : base(nameof(UserTokenRes), ApiMethodName.Get, ApiRequestAuth2.NONE, "BySms")
+            : base(nameof(UserTokenRes), ApiMethod.Get, ApiRequestAuth2.NONE, "BySms")
         {
             Mobile = mobile;
             SmsCode = smsCode;

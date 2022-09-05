@@ -17,7 +17,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public DeleteByBatchRequest() { }
 
-        public DeleteByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethodName.Delete, null, "ByBatch")
+        public DeleteByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethod.Delete, null, "ByBatch")
         {
             Resources.AddRange(ress);
         }

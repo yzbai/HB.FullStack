@@ -4,9 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
 
-namespace HB.FullStack.Database.DBModels
+namespace HB.FullStack.Database.DbModels
 {
-    public abstract class TimestampDBModel : DBModel, ITimestampModel
+    /// <summary>
+    /// 使用timestamp做行乐观锁
+    /// </summary>
+    public abstract class TimestampDbModel : DbModel, ITimestampModel
     {
         //public int Version { get; set; } = -1;
 
@@ -22,13 +25,13 @@ namespace HB.FullStack.Database.DBModels
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }
 
-    public abstract class TimestampLongIdDBModel : TimestampDBModel, ILongId
+    public abstract class TimestampLongIdDbModel : TimestampDbModel, ILongId
     {
         [DBModelProperty(0)]
         public abstract long Id { get; set; }
     }
 
-    public abstract class TimestampAutoIncrementIdDBModel : TimestampLongIdDBModel, IAutoIncrementId
+    public abstract class TimestampAutoIncrementIdDbModel : TimestampLongIdDbModel, IAutoIncrementId
     {
         [AutoIncrementPrimaryKey]
         [DBModelProperty(0)]
@@ -36,7 +39,7 @@ namespace HB.FullStack.Database.DBModels
         public override long Id { get; set; } = -1;
     }
 
-    public abstract class TimestampFlackIdDBModel : TimestampLongIdDBModel
+    public abstract class TimestampFlackIdDbModel : TimestampLongIdDbModel
     {
         [PrimaryKey]
         [DBModelProperty(0)]
@@ -45,7 +48,7 @@ namespace HB.FullStack.Database.DBModels
         public override long Id { get; set; } = StaticIdGen.GetId();
     }
 
-    public abstract class TimestampGuidDBModel : TimestampDBModel, IGuidId
+    public abstract class TimestampGuidDbModel : TimestampDbModel, IGuidId
     {
         [DBModelProperty(0)]
         [NoEmptyGuid]

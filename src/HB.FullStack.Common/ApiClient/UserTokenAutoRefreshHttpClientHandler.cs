@@ -37,7 +37,7 @@ namespace HB.FullStack.Common.ApiClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            EndpointSetting? endpointSettings = GetEndpointByUri(request.RequestUri);
+            SiteSetting? endpointSettings = GetEndpointByUri(request.RequestUri);
 
             if (endpointSettings == null)
             {
@@ -89,11 +89,11 @@ namespace HB.FullStack.Common.ApiClient
             request.RequestUri = new Uri(UriUtil.AddQuerys(request.RequestUri?.ToString(), parameters));
         }
 
-        private EndpointSetting? GetEndpointByUri(Uri? requestUri)
+        private SiteSetting? GetEndpointByUri(Uri? requestUri)
         {
             string authority = requestUri!.Authority;
 
-            return _options.EndpointSettings.FirstOrDefault(endpoint =>
+            return _options.SiteSettings.FirstOrDefault(endpoint =>
             {
                 return authority.StartsWith(endpoint.BaseUrl!.Authority, StringComparison.OrdinalIgnoreCase);
             });

@@ -1,15 +1,17 @@
 ﻿
-
 using System;
 using System.Data;
 
 namespace HB.FullStack.Database.Converter
 {
-    public interface ITypeConverter
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IDbValueConverter
     {
         DbType DbType { get; }
 
-        string Statement { get; }
+        string DbTypeStatement { get; }
 
         /// <summary>
         /// 

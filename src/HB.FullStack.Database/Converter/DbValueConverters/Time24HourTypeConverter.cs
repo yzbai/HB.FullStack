@@ -5,11 +5,11 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Database.Converter
 {
-    public class Time24HourTypeConverter : ITypeConverter
+    public class Time24HourTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.String;
 
-        public string Statement => "VARCHAR(10)";
+        public string DbTypeStatement => "VARCHAR(10)";
 
         public object DbValueToTypeValue(object dbValue, Type propertyType)
         {

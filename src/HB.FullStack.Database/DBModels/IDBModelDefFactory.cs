@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 using HB.FullStack.Database.Converter;
 
-namespace HB.FullStack.Database.DBModels
+namespace HB.FullStack.Database.DbModels
 {
-    public interface IDBModelDefFactory
+    public interface IDbModelDefFactory
     {
-        DBModelDef? GetDef<T>() where T : DBModel;
+        DbModelDef? GetDef<T>() where T : DbModel;
 
-        DBModelDef? GetDef(Type? modelType);
+        DbModelDef? GetDef(Type? modelType);
 
-        IEnumerable<DBModelDef> GetAllDefsByDatabase(string databaseName);
+        IEnumerable<DbModelDef> GetAllDefsByDatabase(string databaseName);
 
-        ITypeConverter? GetPropertyTypeConverter(Type modelType, string propertyName);
+        IDbValueConverter? GetPropertyTypeConverter(Type modelType, string propertyName);
     }
 }

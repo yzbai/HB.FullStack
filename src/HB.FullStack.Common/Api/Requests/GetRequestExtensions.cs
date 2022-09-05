@@ -7,7 +7,7 @@ namespace HB.FullStack.Common.Api
     {
         public static GetRequest Id(this GetRequest request, object id)
         {
-            request.Id = id.ToString();
+            request.Ids.Add(id.ToString()!);
 
             return request;
         }
@@ -27,7 +27,7 @@ namespace HB.FullStack.Common.Api
 
         public static GetRequest Include(this GetRequest request, string resName)
         {
-            request.Includes = request.Includes.Append(resName, ',');
+            request.ResIncludes.Add(resName);
 
             return request;
         }

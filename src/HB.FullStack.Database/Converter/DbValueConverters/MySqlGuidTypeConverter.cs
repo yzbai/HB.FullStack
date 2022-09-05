@@ -5,11 +5,11 @@ using System.Data;
 
 namespace HB.FullStack.Database.Converter
 {
-    internal class MySqlGuidTypeConverter : ITypeConverter
+    internal class MySqlGuidTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.Binary;
 
-        public string Statement => "Binary(16)";
+        public string DbTypeStatement => "Binary(16)";
 
         public object DbValueToTypeValue(object dbValue, Type propertyType)
         {

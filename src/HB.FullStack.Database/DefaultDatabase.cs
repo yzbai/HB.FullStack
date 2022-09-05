@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Extensions;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
@@ -36,7 +36,7 @@ namespace HB.FullStack.Database
         private readonly ILogger _logger;
         private readonly string _deletedPropertyReservedName;
 
-        public IDBModelDefFactory ModelDefFactory { get; }
+        public IDbModelDefFactory ModelDefFactory { get; }
         public IDbCommandBuilder DbCommandBuilder { get; }
 
         public EngineType EngineType { get; }
@@ -46,7 +46,7 @@ namespace HB.FullStack.Database
 
         public DefaultDatabase(
             IDatabaseEngine databaseEngine,
-            IDBModelDefFactory modelDefFactory,
+            IDbModelDefFactory modelDefFactory,
             IDbCommandBuilder commandBuilder,
             ITransaction transaction,
             ILogger<DefaultDatabase> logger)
@@ -67,7 +67,7 @@ namespace HB.FullStack.Database
 
             VarcharDefaultLength = _databaseSettings.DefaultVarcharLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : _databaseSettings.DefaultVarcharLength;
 
-            _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(DBModel.Deleted), _databaseEngine.EngineType);
+            _deletedPropertyReservedName = SqlHelper.GetReserved(nameof(DbModel.Deleted), _databaseEngine.EngineType);
         }
 
         #region Initialize
@@ -157,7 +157,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private Task<int> CreateTableAsync(DBModelDef def, TransactionContext transContext, bool addDropStatement)
+        private Task<int> CreateTableAsync(DbModelDef def, TransactionContext transContext, bool addDropStatement)
         {
             var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, addDropStatement, VarcharDefaultLength);
 
@@ -168,7 +168,7 @@ namespace HB.FullStack.Database
 
         private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext, bool addDropStatement)
         {
-            foreach (DBModelDef modelDef in ModelDefFactory.GetAllDefsByDatabase(databaseName))
+            foreach (DbModelDef modelDef in ModelDefFactory.GetAllDefsByDatabase(databaseName))
             {
                 await CreateTableAsync(modelDef, transactionContext, addDropStatement).ConfigureAwait(false);
             }
@@ -332,20 +332,20 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : DBModel, new() => DbCommandBuilder.From<T>(EngineType);
+        public FromExpression<T> From<T>() where T : DbModel, new() => DbCommandBuilder.From<T>(EngineType);
 
-        public WhereExpression<T> Where<T>() where T : DBModel, new() => DbCommandBuilder.Where<T>(EngineType);
+        public WhereExpression<T> Where<T>() where T : DbModel, new() => DbCommandBuilder.Where<T>(EngineType);
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DBModel, new() => DbCommandBuilder.Where<T>(EngineType, sqlFilter, filterParams);
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DbModel, new() => DbCommandBuilder.Where<T>(EngineType, sqlFilter, filterParams);
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DBModel, new() => DbCommandBuilder.Where(EngineType, predicate);
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DbModel, new() => DbCommandBuilder.Where(EngineType, predicate);
 
         #endregion
 
         #region 单表查询 From, Where
 
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             IEnumerable<T> lst = await RetrieveAsync(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -363,18 +363,18 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, TransactionContext? transContext = null)
-            where TSelect : DBModel, new()
-            where TFrom : DBModel, new()
-            where TWhere : DBModel, new()
+            where TSelect : DbModel, new()
+            where TFrom : DbModel, new()
+            where TWhere : DbModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<TWhere>();
             }
 
-            DBModelDef selectDef = ModelDefFactory.GetDef<TSelect>()!;
-            DBModelDef fromDef = ModelDefFactory.GetDef<TFrom>()!;
-            DBModelDef whereDef = ModelDefFactory.GetDef<TWhere>()!;
+            DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>()!;
+            DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>()!;
+            DbModelDef whereDef = ModelDefFactory.GetDef<TWhere>()!;
 
             whereCondition.And($"{whereDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
@@ -393,14 +393,14 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<T>();
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             whereCondition.And($"{modelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
@@ -418,14 +418,14 @@ namespace HB.FullStack.Database
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<T>();
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             whereCondition.And($"{modelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
 
@@ -446,7 +446,7 @@ namespace HB.FullStack.Database
         #region 单表查询, Where
 
         public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             WhereExpression<T> where = Where<T>().AddOrderAndLimits(page, perPage, orderBy);
 
@@ -454,25 +454,25 @@ namespace HB.FullStack.Database
         }
 
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             return ScalarAsync(null, whereCondition, transContext);
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
         public Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             return CountAsync(null, condition, transContext);
         }
 
         public Task<long> CountAsync<T>(TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             return CountAsync<T>(null, null, transContext);
         }
@@ -482,7 +482,7 @@ namespace HB.FullStack.Database
         #region 单表查询, Expression Where
 
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : DBModel, ILongId, new()
+            where T : DbModel, ILongId, new()
         {
             WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(ILongId.Id), EngineType)}={{0}}", id);
 
@@ -490,15 +490,15 @@ namespace HB.FullStack.Database
         }
 
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
-            where T : DBModel, IGuidId, new()
+            where T : DbModel, IGuidId, new()
         {
-            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(TimestampGuidDBModel.Id), EngineType)}={{0}}", guid);
+            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(TimestampGuidDbModel.Id), EngineType)}={{0}}", guid);
             WhereExpression<T> where = Where<T>(t => t.Id == id);
 
             return ScalarAsync(where, transContext);
         }
 
-        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DBModel, new()
+        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DbModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -506,7 +506,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr).AddOrderAndLimits(page, perPage, orderBy);
 
@@ -514,7 +514,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -526,13 +526,13 @@ namespace HB.FullStack.Database
         /// 根据给出的外键值获取 page从0开始
         /// </summary>
         public async Task<IEnumerable<T>> RetrieveByForeignKeyAsync<T>(Expression<Func<T, object>> foreignKeyExp, object foreignKeyValue, TransactionContext? transactionContext, int? page, int? perPage, string? orderBy)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            DBModelPropertyDef? foreignKeyProperty = modelDef.GetPropertyDef(foreignKeyName);
+            DbModelPropertyDef? foreignKeyProperty = modelDef.GetPropertyDef(foreignKeyName);
 
             if (foreignKeyProperty == null || !foreignKeyProperty.IsForeignKey)
             {
@@ -557,16 +557,16 @@ namespace HB.FullStack.Database
         #region 双表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DBModel, new()
-            where TTarget : DBModel, new()
+            where TSource : DbModel, new()
+            where TTarget : DbModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<TSource>();
             }
 
-            DBModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
-            DBModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>()!;
+            DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
+            DbModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>()!;
 
             switch (fromCondition.JoinType)
             {
@@ -607,8 +607,8 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DBModel, new()
-            where TTarget : DBModel, new()
+            where TSource : DbModel, new()
+            where TTarget : DbModel, new()
         {
             IEnumerable<Tuple<TSource, TTarget?>> lst = await RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -630,18 +630,18 @@ namespace HB.FullStack.Database
         #region 三表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DBModel, new()
-            where TTarget1 : DBModel, new()
-            where TTarget2 : DBModel, new()
+            where TSource : DbModel, new()
+            where TTarget1 : DbModel, new()
+            where TTarget2 : DbModel, new()
         {
             if (whereCondition == null)
             {
                 whereCondition = Where<TSource>();
             }
 
-            DBModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
-            DBModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>()!;
-            DBModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>()!;
+            DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
+            DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>()!;
+            DbModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>()!;
 
             switch (fromCondition.JoinType)
             {
@@ -682,9 +682,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DBModel, new()
-            where TTarget1 : DBModel, new()
-            where TTarget2 : DBModel, new()
+            where TSource : DbModel, new()
+            where TTarget1 : DbModel, new()
+            where TTarget2 : DbModel, new()
         {
             IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> lst = await RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -708,11 +708,11 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 增加,并且item被重新赋值，反应Version变化
         /// </summary>
-        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -724,7 +724,7 @@ namespace HB.FullStack.Database
             try
             {
                 //Prepare
-                if (item is TimestampDBModel serverModel)
+                if (item is TimestampDbModel serverModel)
                 {
                     oldTimestamp = serverModel.Timestamp;
                     oldLastUser = serverModel.LastUser;
@@ -765,7 +765,7 @@ namespace HB.FullStack.Database
 
             static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
             {
-                if (item is TimestampDBModel serverModel)
+                if (item is TimestampDbModel serverModel)
                 {
                     serverModel.Timestamp = oldTimestamp;
                     serverModel.LastUser = oldLastUser;
@@ -776,11 +776,11 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Version控制,反应Version变化
         /// </summary>
-        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -791,14 +791,14 @@ namespace HB.FullStack.Database
 
             try
             {
-                if (item is TimestampDBModel serverModel)
+                if (item is TimestampDbModel timestampDBModel)
                 {
-                    oldTimestamp = serverModel.Timestamp;
-                    oldLastUser = serverModel.LastUser;
+                    oldTimestamp = timestampDBModel.Timestamp;
+                    oldLastUser = timestampDBModel.LastUser;
 
-                    serverModel.Deleted = true;
-                    serverModel.Timestamp = TimeUtil.UtcNowTicks;
-                    serverModel.LastUser = lastUser;
+                    timestampDBModel.Deleted = true;
+                    timestampDBModel.Timestamp = TimeUtil.UtcNowTicks;
+                    timestampDBModel.LastUser = lastUser;
                 }
 
                 var command = DbCommandBuilder.CreateDeleteCommand(EngineType, modelDef, item, oldTimestamp);
@@ -839,18 +839,18 @@ namespace HB.FullStack.Database
 
             static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
             {
-                if (item is TimestampDBModel serverModel)
+                if (item is TimestampDbModel timestampDBModel)
                 {
-                    serverModel.Deleted = false;
-                    serverModel.Timestamp = oldTimestamp;
-                    serverModel.LastUser = oldLastUser;
+                    timestampDBModel.Deleted = false;
+                    timestampDBModel.Timestamp = oldTimestamp;
+                    timestampDBModel.LastUser = oldLastUser;
                 }
             }
         }
 
-        public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimelessDBModel, new()
+        public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimelessDbModel, new()
         {
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             if (!modelDef.DatabaseWriteable)
             {
@@ -871,11 +871,11 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -887,13 +887,13 @@ namespace HB.FullStack.Database
             try
             {
                 //Prepare
-                if (item is TimestampDBModel serverModel)
+                if (item is TimestampDbModel timestampDBModel)
                 {
-                    oldTimestamp = serverModel.Timestamp;
-                    oldLastUser = serverModel.LastUser;
+                    oldTimestamp = timestampDBModel.Timestamp;
+                    oldLastUser = timestampDBModel.LastUser;
 
-                    serverModel.Timestamp = TimeUtil.UtcNowTicks;
-                    serverModel.LastUser = lastUser;
+                    timestampDBModel.Timestamp = TimeUtil.UtcNowTicks;
+                    timestampDBModel.LastUser = lastUser;
                 }
 
                 EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, modelDef, item, oldTimestamp);
@@ -943,15 +943,20 @@ namespace HB.FullStack.Database
 
             static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
             {
-                if (item is TimestampDBModel serverModel)
+                if (item is TimestampDbModel timestampDBModel)
                 {
-                    serverModel.Timestamp = oldTimestamp;
-                    serverModel.LastUser = oldLastUser;
+                    timestampDBModel.Timestamp = oldTimestamp;
+                    timestampDBModel.LastUser = oldLastUser;
                 }
             }
         }
 
-        public async Task UpdateFieldsAsync<T>(object id, IList<(string propertyName, object? propertyValue)> propertyNameValues, long curTimestamp, string lastUser, TransactionContext? transContext) where T : TimestampDBModel, new()
+        public async Task UpdateFieldsAsync<T>(
+            object id,
+            IList<(string propertyName, object? propertyValue)> propertyNameValues,
+            long timestamp,
+            string lastUser,
+            TransactionContext? transContext) where T : TimestampDbModel, new()
         {
             if (propertyNameValues.Count <= 0)
             {
@@ -968,12 +973,12 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
-            if (curTimestamp <= 0)
+            if (timestamp <= 0)
             {
-                throw DatabaseExceptions.TimestampShouldBePositive(curTimestamp);
+                throw DatabaseExceptions.TimestampShouldBePositive(timestamp);
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -985,7 +990,7 @@ namespace HB.FullStack.Database
                     engineType: EngineType,
                     modelDef: modelDef,
                     id: id,
-                    oldTimestamp: curTimestamp,
+                    oldTimestamp: timestamp,
                     newTimestamp: TimeUtil.UtcNowTicks,
                     lastUser: lastUser,
                     propertyNames: propertyNameValues.Select(t => t.propertyName).ToList(),
@@ -999,21 +1004,21 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Timestamp版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, curTimestamp:{curTimestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Timestamp版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
                 }
                 else
                 {
-                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, curTimestamp:{curTimestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
+                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
                 }
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, curTimestamp:{curTimestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
             }
         }
 
         public async Task UpdateFieldsAsync<T>(object id, IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues, string lastUser, TransactionContext? transContext)
-            where T : DBModel, new()
+            where T : DbModel, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
             {
@@ -1030,7 +1035,7 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -1072,11 +1077,11 @@ namespace HB.FullStack.Database
         /// <summary>
         /// AddOrUpdate,即override,不检查Timestamp
         /// </summary>
-        public async Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDBModel, new()
+        public async Task SetByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             if (!modelDef.DatabaseWriteable)
             {
@@ -1089,13 +1094,13 @@ namespace HB.FullStack.Database
             try
             {
                 ////Prepare
-                //if (item is TimestampDBModel serverModel)
+                //if (item is TimestampDbModel timestampDBModel)
                 //{
-                //    oldTimestamp = serverModel.Timestamp;
-                //    oldLastUser = serverModel.LastUser;
+                //    oldTimestamp = timestampDBModel.Timestamp;
+                //    oldLastUser = timestampDBModel.LastUser;
 
-                //    serverModel.Timestamp = TimeUtil.UtcNowTicks;
-                //    serverModel.LastUser = lastUser;
+                //    timestampDBModel.Timestamp = TimeUtil.UtcNowTicks;
+                //    timestampDBModel.LastUser = lastUser;
                 //}
 
                 var command = DbCommandBuilder.CreateAddOrUpdateCommand(EngineType, modelDef, item, false);
@@ -1115,7 +1120,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
-        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1129,7 +1134,7 @@ namespace HB.FullStack.Database
                 return new List<object>();
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -1205,7 +1210,7 @@ namespace HB.FullStack.Database
 
         }
 
-        private static void PrepareBatchItems<T>(IEnumerable<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DBModelDef modelDef) where T : DBModel, new()
+        private static void PrepareBatchItems<T>(IEnumerable<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
         {
             if (!modelDef.IsTimestampDBModel)
             {
@@ -1216,7 +1221,7 @@ namespace HB.FullStack.Database
 
             foreach (var item in items)
             {
-                if (item is TimestampDBModel tsItem)
+                if (item is TimestampDbModel tsItem)
                 {
                     oldTimestamps.Add(tsItem.Timestamp);
                     oldLastUsers.Add(tsItem.LastUser);
@@ -1227,7 +1232,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void RestoreBatchItems<T>(IEnumerable<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DBModelDef modelDef) where T : DBModel, new()
+        private static void RestoreBatchItems<T>(IEnumerable<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
         {
             if (!modelDef.IsTimestampDBModel)
             {
@@ -1236,7 +1241,7 @@ namespace HB.FullStack.Database
 
             for (int i = 0; i < items.Count(); ++i)
             {
-                if (items.ElementAt(i) is TimestampDBModel tsItem)
+                if (items.ElementAt(i) is TimestampDbModel tsItem)
                 {
                     tsItem.Timestamp = oldTimestamps[i];
                     tsItem.LastUser = oldLastUsers[i] ?? "";
@@ -1247,7 +1252,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
-        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1261,7 +1266,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -1320,7 +1325,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DBModel, new()
+        public async Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
             {
@@ -1334,7 +1339,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
 
@@ -1393,7 +1398,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDBModel, new()
+        public async Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDbModel, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -1402,7 +1407,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DBModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             if (!modelDef.DatabaseWriteable)
             {
@@ -1424,7 +1429,7 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        private static void ThrowIfNotWriteable(DBModelDef modelDef)
+        private static void ThrowIfNotWriteable(DbModelDef modelDef)
         {
             if (!modelDef.DatabaseWriteable)
             {
@@ -1432,7 +1437,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private void TruncateLastUser<T>(ref string lastUser, T item, DBModelDef modelDef) where T : DBModel, new()
+        private void TruncateLastUser<T>(ref string lastUser, T item, DbModelDef modelDef) where T : DbModel, new()
         {
             if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
@@ -1453,7 +1458,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private void TruncateLastUser<T>(ref string lastUser, IEnumerable<T> items, DBModelDef modelDef) where T : DBModel, new()
+        private void TruncateLastUser<T>(ref string lastUser, IEnumerable<T> items, DbModelDef modelDef) where T : DbModel, new()
         {
             foreach (T item in items)
             {

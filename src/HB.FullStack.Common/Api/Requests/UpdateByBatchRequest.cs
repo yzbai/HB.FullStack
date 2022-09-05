@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public UpdateByBatchRequest() { }
 
-        public UpdateByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethodName.Put, null, "ByBatch")
+        public UpdateByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethod.Update, null, "ByBatch")
         {
             Resources.AddRange(ress);
         }

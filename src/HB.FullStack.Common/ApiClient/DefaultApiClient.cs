@@ -27,11 +27,11 @@ namespace HB.FullStack.Common.ApiClient
 
         private readonly Type _streamType = typeof(Stream);
 
-        private readonly IDictionary<string, ResBinding> _resBindings = new Dictionary<string, ResBinding>();
+        private readonly IDictionary<string, ResEndpoint> _resBindings = new Dictionary<string, ResEndpoint>();
 
         public IPreferenceProvider UserTokenProvider { get; }
 
-        public ResBinding? UserTokenResBinding { get; private set; }
+        public ResEndpoint? UserTokenResBinding { get; private set; }
 
         public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider tokenProvider)
         {
@@ -44,7 +44,7 @@ namespace HB.FullStack.Common.ApiClient
 
             GlobalApiClientAccessor.ApiClient = this;
 
-            if (_resBindings.TryGetValue(nameof(UserTokenRes), out ResBinding? userTokenResBinding))
+            if (_resBindings.TryGetValue(nameof(UserTokenRes), out ResEndpoint? userTokenResBinding))
             {
                 UserTokenResBinding = userTokenResBinding;
             }
@@ -56,16 +56,16 @@ namespace HB.FullStack.Common.ApiClient
 
             void RangeEndpoints()
             {
-                foreach (var endpoint in _options.EndpointSettings)
+                foreach (var endpoint in _options.SiteSettings)
                 {
-                    foreach (var binding in endpoint.ResBindings)
+                    foreach (var binding in endpoint.Endpoints)
                     {
                         if (!_resBindings.TryAdd(binding.ResName, binding))
                         {
                             throw ApiExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = binding });
                         }
 
-                        binding.EndpointSetting = endpoint;
+                        binding.SiteSetting = endpoint;
                     }
                 }
             }
@@ -106,14 +106,14 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiModelError("Request没有通过Validate", null, new { ValidateErrorMessage = request.GetValidateErrorMessage() });
             }
 
-            if (!_resBindings.TryGetValue(request.ResName, out ResBinding? resBinding))
+            if (!_resBindings.TryGetValue(request.ResName, out ResEndpoint? resBinding))
             {
                 throw ApiExceptions.ApiClientInnerError($"No ResBinding for {request.ResName}.", null, null);
             }
 
             HttpRequestMessageBuilder requestBuilder = new HttpRequestMessageBuilder(resBinding, request);
 
-            HttpClient httpClient = GetHttpClient(resBinding.EndpointSetting!);
+            HttpClient httpClient = GetHttpClient(resBinding.SiteSetting!);
 
             try
             {
@@ -121,7 +121,7 @@ namespace HB.FullStack.Common.ApiClient
 
                 //NOTICE: 这里没有必要用using. https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0#httpclient-and-lifetime-management-1
 
-                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.ApiMethodName)).ConfigureAwait(false);
+                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.ApiMethod)).ConfigureAwait(false);
 
                 TResponse? rt;
 
@@ -135,7 +135,7 @@ namespace HB.FullStack.Common.ApiClient
                     rt = await httpClient.GetAsync<TResponse>(request, requestBuilder, cancellationToken).ConfigureAwait(false);
                 }
 
-                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.ApiMethodName)).ConfigureAwait(false);
+                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.ApiMethod)).ConfigureAwait(false);
 
                 return rt;
             }
@@ -205,7 +205,7 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private HttpClient GetHttpClient(EndpointSetting endpointSettings)
+        private HttpClient GetHttpClient(SiteSetting endpointSettings)
         {
             string httpClientName = endpointSettings.GetHttpClientName();
 

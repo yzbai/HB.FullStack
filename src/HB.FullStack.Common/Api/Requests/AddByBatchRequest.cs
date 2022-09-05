@@ -17,7 +17,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public AddByBatchRequest() { }
 
-        public AddByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethodName.Post, null, "ByBatch")
+        public AddByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethod.Add, null, "ByBatch")
         {
             Resources.AddRange(ress);
         }

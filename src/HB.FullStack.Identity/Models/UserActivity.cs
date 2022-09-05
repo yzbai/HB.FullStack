@@ -1,10 +1,10 @@
-﻿using HB.FullStack.Database.DBModels;
+﻿using HB.FullStack.Database.DbModels;
 
 using System;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class UserActivity : TimestampGuidDBModel
+    public class UserActivity : TimestampGuidDbModel
     {
         [ForeignKey(typeof(User), false)]
         public Guid? UserId { get; set; }

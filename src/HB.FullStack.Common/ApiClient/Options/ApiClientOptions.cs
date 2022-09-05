@@ -12,7 +12,7 @@ namespace HB.FullStack.Common.ApiClient
     {
         public ApiClientOptions Value => this;
 
-        public IList<EndpointSetting> EndpointSettings { get; set; } = new List<EndpointSetting>();
+        public IList<SiteSetting> SiteSettings { get; set; } = new List<SiteSetting>();
 
         public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 

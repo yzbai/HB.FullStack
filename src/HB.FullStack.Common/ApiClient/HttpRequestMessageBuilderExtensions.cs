@@ -38,9 +38,9 @@ namespace HB.FullStack.Common.ApiClient
         public static HttpRequestMessage Build(this HttpRequestMessageBuilder builder)
         {
             //1. Mthod
-            HttpMethod httpMethod = builder.Request.ApiMethodName.ToHttpMethod();
+            HttpMethod httpMethod = builder.Request.ApiMethod.ToHttpMethod();
 
-            switch (builder.ResBinding.EndpointSetting!.HttpMethodOverrideMode)
+            switch (builder.ResBinding.SiteSetting!.HttpMethodOverrideMode)
             {
                 case HttpMethodOverrideMode.None:
                     break;
@@ -60,7 +60,7 @@ namespace HB.FullStack.Common.ApiClient
             //2. url
             HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.GenerateUrl())
             {
-                Version = builder.ResBinding.EndpointSetting.HttpVersion
+                Version = builder.ResBinding.SiteSetting.HttpVersion
             };
 
             //3. headers
@@ -91,12 +91,12 @@ namespace HB.FullStack.Common.ApiClient
 
         public static string GenerateUrlCore(this HttpRequestMessageBuilder httpRequestBuilder)
         {
-            if (httpRequestBuilder.ResBinding.Type == ResBindingType.PlainUrl)
+            if (httpRequestBuilder.ResBinding.Type == ResEndpointType.PlainUrl)
             {
-                return httpRequestBuilder.ResBinding.BindingValue;
+                return httpRequestBuilder.ResBinding.ControllerOrUrl;
             }
 
-            if (httpRequestBuilder.ResBinding.Type != ResBindingType.ControllerModel)
+            if (httpRequestBuilder.ResBinding.Type != ResEndpointType.ControllerModel)
             {
                 throw new NotImplementedException("Other ResBindingType not implemented.");
             }
@@ -104,14 +104,14 @@ namespace HB.FullStack.Common.ApiClient
             StringBuilder builder = new StringBuilder();
 
             //Version
-            if (httpRequestBuilder.ResBinding.EndpointSetting!.Version.IsNotNullOrEmpty())
+            if (httpRequestBuilder.ResBinding.SiteSetting!.Version.IsNotNullOrEmpty())
             {
-                builder.Append(httpRequestBuilder.ResBinding.EndpointSetting.Version);
+                builder.Append(httpRequestBuilder.ResBinding.SiteSetting.Version);
                 builder.Append('/');
             }
 
             //ControllerModelName
-            builder.Append(httpRequestBuilder.ResBinding.BindingValue);
+            builder.Append(httpRequestBuilder.ResBinding.ControllerOrUrl);
 
             //Condition
             if (httpRequestBuilder.Request.Condition.IsNotNullOrEmpty())

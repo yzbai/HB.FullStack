@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace HB.FullStack.Database.Converter
 {
-    public class LongIdListTypeConverter : ITypeConverter
+    public class LongIdListTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.String;
 
-        public string Statement => "VARCHAR";
+        public string DbTypeStatement => "VARCHAR";
 
         public object DbValueToTypeValue(object dbValue, Type propertyType)
         {

@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Reflection;
 
+using HB.FullStack.Common.Models;
 using HB.FullStack.Database.Converter;
 
-namespace HB.FullStack.Database.DBModels
+namespace HB.FullStack.Database.DbModels
 {
     /// <summary>
     /// 实体内属性定义（一个）
     /// </summary>
-    public class DBModelPropertyDef
+    public class DbModelPropertyDef
     {
-        public DBModelDef ModelDef { get; set; } = null!;
+        #region Common ModelPropertyDef
+
+        public DbModelDef ModelDef { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 
@@ -21,6 +24,8 @@ namespace HB.FullStack.Database.DBModels
         public MethodInfo GetMethod { get; set; } = null!;
 
         public MethodInfo SetMethod { get; set; } = null!;
+
+        #endregion
 
         public string DbReservedName { get; set; } = null!;
 
@@ -42,7 +47,7 @@ namespace HB.FullStack.Database.DBModels
 
         public int? DbMaxLength { get; set; }
 
-        public ITypeConverter? TypeConverter { get; set; }
+        public IDbValueConverter? TypeConverter { get; set; }
 
         public object? GetValueFrom(object model)
         {

@@ -17,7 +17,7 @@ namespace HB.FullStack.Common.Api
         [OnlyForJsonConstructor]
         public AddRequest() { }
 
-        public AddRequest(T res) : base(typeof(T).Name, ApiMethodName.Post, null, null)
+        public AddRequest(T res) : base(typeof(T).Name, ApiMethod.Add, null, null)
         {
             Resource = res;
         }

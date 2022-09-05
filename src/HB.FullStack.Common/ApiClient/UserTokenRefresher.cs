@@ -24,7 +24,7 @@ namespace HB.FullStack.Common.ApiClient
                 return false;
             }
 
-            ResBinding? resBinding = apiClient.UserTokenResBinding;
+            ResEndpoint? resBinding = apiClient.UserTokenResBinding;
 
             if (resBinding == null)
             {
@@ -34,7 +34,7 @@ namespace HB.FullStack.Common.ApiClient
             string accessTokenHashKey = SecurityUtil.GetHash(tokenProvider.AccessToken);
 
             //这个AccessToken不久前刷新过
-            if (!_requestLimiter.NoWaitLock(nameof(RefreshUserTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(resBinding.EndpointSetting!.UserTokenRefreshIntervalSeconds)))
+            if (!_requestLimiter.NoWaitLock(nameof(RefreshUserTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(resBinding.SiteSetting!.UserTokenRefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))

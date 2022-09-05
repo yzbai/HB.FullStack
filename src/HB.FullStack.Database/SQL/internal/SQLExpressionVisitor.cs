@@ -10,13 +10,13 @@ using System.Reflection;
 using System.Text;
 
 using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database.SQL
 {
     internal class SQLExpressionVisitor : ISQLExpressionVisitor
     {       
-        public SQLExpressionVisitor(IDBModelDefFactory modelDefFactory)
+        public SQLExpressionVisitor(IDbModelDefFactory modelDefFactory)
         {
             _modelDefFactory = modelDefFactory;
         }
@@ -139,7 +139,7 @@ namespace HB.FullStack.Database.SQL
                     object result = Expression.Lambda(b).Compile().DynamicInvoke()!;
 
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = TypeConvert.TypeValueToDbValue(result, null, context.EngineType);
+                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(result, null, context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -172,7 +172,7 @@ namespace HB.FullStack.Database.SQL
                     object result = Expression.Lambda(b).Compile().DynamicInvoke()!;
 
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = TypeConvert.TypeValueToDbValue(result, null, context.EngineType);
+                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(result, null, context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -181,7 +181,7 @@ namespace HB.FullStack.Database.SQL
                 else if (left as PartialSqlString == null)
                 {
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = TypeConvert.TypeValueToDbValue(left, null, context.EngineType);
+                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(left, null, context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -190,7 +190,7 @@ namespace HB.FullStack.Database.SQL
                 else if (right as PartialSqlString == null)
                 {
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = TypeConvert.TypeValueToDbValue(right, GetPropertyDef(b.Left as MemberExpression), context.EngineType);
+                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(right, GetPropertyDef(b.Left as MemberExpression), context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -241,8 +241,8 @@ namespace HB.FullStack.Database.SQL
                     }
                 }
 
-                DBModelDef modelDef = _modelDefFactory.GetDef(modelType)!;
-                DBModelPropertyDef propertyDef = modelDef.GetPropertyDef(m.Member.Name)
+                DbModelDef modelDef = _modelDefFactory.GetDef(modelType)!;
+                DbModelPropertyDef propertyDef = modelDef.GetPropertyDef(m.Member.Name)
                     ?? throw DatabaseExceptions.ModelError(modelDef.ModelFullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
@@ -417,7 +417,7 @@ namespace HB.FullStack.Database.SQL
 
                     StringBuilder sIn = new StringBuilder();
 
-                    DBModelPropertyDef? propertyDef = GetPropertyDef(m);
+                    DbModelPropertyDef? propertyDef = GetPropertyDef(m);
 
                     foreach (object e in inArgs)
                     {
@@ -445,10 +445,10 @@ namespace HB.FullStack.Database.SQL
 
             return new PartialSqlString(statement);
 
-            static void AddParameter(SQLExpressionVisitorContenxt context, StringBuilder sIn, DBModelPropertyDef? propertyDef, object e)
+            static void AddParameter(SQLExpressionVisitorContenxt context, StringBuilder sIn, DbModelPropertyDef? propertyDef, object e)
             {
                 string paramPlaceHoder = context.GetNextParamPlaceholder();
-                object paramValue = propertyDef == null ? e : TypeConvert.TypeValueToDbValue(e, propertyDef, context.EngineType);
+                object paramValue = propertyDef == null ? e : DbValueConvertFactory.TypeValueToDbValue(e, propertyDef, context.EngineType);
 
                 context.AddParameter(paramPlaceHoder, paramValue);
 
@@ -481,7 +481,7 @@ namespace HB.FullStack.Database.SQL
 
                     List<string> sIn = new List<string>();
                     TypeInfo collectionTypeInfo = typeof(ICollection).GetTypeInfo();
-                    DBModelPropertyDef? propertyDef = m.Arguments[0] is MemberExpression memExp ? GetPropertyDef(memExp) : null;
+                    DbModelPropertyDef? propertyDef = m.Arguments[0] is MemberExpression memExp ? GetPropertyDef(memExp) : null;
 
                     foreach (object e in inArgs)
                     {
@@ -548,10 +548,10 @@ namespace HB.FullStack.Database.SQL
 
             return new PartialSqlString(statement);
 
-            static void AddParameter(SQLExpressionVisitorContenxt context, List<string> sIn, DBModelPropertyDef? propertyDef, object originValue)
+            static void AddParameter(SQLExpressionVisitorContenxt context, List<string> sIn, DbModelPropertyDef? propertyDef, object originValue)
             {
                 string paramPlaceholder = context.GetNextParamPlaceholder();
-                object paramValue = propertyDef == null ? originValue : TypeConvert.TypeValueToDbValue(originValue, propertyDef, context.EngineType);
+                object paramValue = propertyDef == null ? originValue : DbValueConvertFactory.TypeValueToDbValue(originValue, propertyDef, context.EngineType);
 
                 context.AddParameter(paramPlaceholder, paramValue);
 
@@ -575,11 +575,11 @@ namespace HB.FullStack.Database.SQL
                 List<object> args0 = VisitExpressionList(m.Arguments, context);
                 object quotedColName0 = Visit(m.Object, context);
 
-                DBModelPropertyDef? propertyDef = GetPropertyDef(m);
+                DbModelPropertyDef? propertyDef = GetPropertyDef(m);
                 string paramPlaceholder = context.GetNextParamPlaceholder();
                 object paramValue = propertyDef == null ?
                     args0[0] :
-                    TypeConvert.TypeValueToDbValue(args0[0], propertyDef, context.EngineType);
+                    DbValueConvertFactory.TypeValueToDbValue(args0[0], propertyDef, context.EngineType);
 
                 context.AddParameter(paramPlaceholder, paramValue);
 
@@ -708,14 +708,14 @@ namespace HB.FullStack.Database.SQL
 #pragma warning restore CA1307 // Specify StringComparison for clarity
             //#endif
 
-            DBModelDef? modelDef = _modelDefFactory.GetDef(type);
+            DbModelDef? modelDef = _modelDefFactory.GetDef(type);
 
             if (modelDef == null)
             {
                 return false;
             }
 
-            DBModelPropertyDef? property = modelDef.GetPropertyDef(name);
+            DbModelPropertyDef? property = modelDef.GetPropertyDef(name);
 
             return property != null;
         }
@@ -723,7 +723,7 @@ namespace HB.FullStack.Database.SQL
         private static readonly object _trueExpression = new PartialSqlString("(1=1)");
 
         private static readonly object _falseExpression = new PartialSqlString("(1=0)");
-        private readonly IDBModelDefFactory _modelDefFactory;
+        private readonly IDbModelDefFactory _modelDefFactory;
 
         private static bool IsArrayMethod(MethodCallExpression m)
         {
@@ -736,12 +736,12 @@ namespace HB.FullStack.Database.SQL
             return false;
         }
 
-        private DBModelPropertyDef? GetPropertyDef(MemberExpression? memberExpression)
+        private DbModelPropertyDef? GetPropertyDef(MemberExpression? memberExpression)
         {
             return _modelDefFactory.GetDef(memberExpression?.Expression?.Type)?.GetPropertyDef(memberExpression!.Member.Name);
         }
 
-        private DBModelPropertyDef? GetPropertyDef(MethodCallExpression methodCallExpression)
+        private DbModelPropertyDef? GetPropertyDef(MethodCallExpression methodCallExpression)
         {
             return GetPropertyDef(methodCallExpression.Object as MemberExpression);
         }

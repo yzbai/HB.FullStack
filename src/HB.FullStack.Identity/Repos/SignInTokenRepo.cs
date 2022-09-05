@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Cache;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
@@ -30,7 +30,7 @@ namespace HB.FullStack.Identity
             return DbReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DBModel> sender, DBChangedEventArgs args) => Task.CompletedTask;
+        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DbModel> sender, DBChangedEventArgs args) => Task.CompletedTask;
 
         //public Task<SignInToken?> GetByConditionAsync(Guid signInTokenId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
         //{
