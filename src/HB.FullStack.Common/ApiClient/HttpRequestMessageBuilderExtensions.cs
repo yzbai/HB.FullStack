@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.ApiClient
     {
         public static void SetJwt(this HttpRequestMessageBuilder builder, string jwt)
         {
-            builder.Headers[ApiHeaderNames.Authorization] = $"{builder.EndpointSetting.Challenge} {jwt}";
+            builder.Headers[ApiHeaderNames.Authorization] = $"{builder.SiteSetting.Challenge} {jwt}";
         }
 
         public static void SetApiKey(this HttpRequestMessageBuilder builder, string apiKey)
@@ -40,7 +40,7 @@ namespace HB.FullStack.Common.ApiClient
             //1. Mthod
             HttpMethod httpMethod = builder.Request.ApiMethod.ToHttpMethod();
 
-            switch (builder.ResBinding.SiteSetting!.HttpMethodOverrideMode)
+            switch (builder.SiteSetting.HttpMethodOverrideMode)
             {
                 case HttpMethodOverrideMode.None:
                     break;
@@ -60,7 +60,7 @@ namespace HB.FullStack.Common.ApiClient
             //2. url
             HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.GenerateUrl())
             {
-                Version = builder.ResBinding.SiteSetting.HttpVersion
+                Version = builder.SiteSetting.HttpVersion
             };
 
             //3. headers
@@ -89,57 +89,53 @@ namespace HB.FullStack.Common.ApiClient
             return httpRequest;
         }
 
-        public static string GenerateUrlCore(this HttpRequestMessageBuilder httpRequestBuilder)
+        public static string GenerateUrl(this HttpRequestMessageBuilder httpRequestBuilder)
         {
-            if (httpRequestBuilder.ResBinding.Type == ResEndpointType.PlainUrl)
+            List<KeyValuePair<string, string>> queryParameters = new List<KeyValuePair<string, string>>
             {
-                return httpRequestBuilder.ResBinding.ControllerOrUrl;
+                new KeyValuePair<string, string>(ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) ),
+                new KeyValuePair<string, string>(ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture))
+            };
+
+            if (httpRequestBuilder.ResEndpoint.Type == ResEndpointType.PlainUrl)
+            {
+                return UriUtil.AddQuerys(httpRequestBuilder.ResEndpoint.ControllerOrPlainUrl, queryParameters);
             }
 
-            if (httpRequestBuilder.ResBinding.Type != ResEndpointType.ControllerModel)
+            if (httpRequestBuilder.ResEndpoint.Type != ResEndpointType.ControllerModel)
             {
-                throw new NotImplementedException("Other ResBindingType not implemented.");
+                throw new NotImplementedException("Other ResEndpointType not implemented.");
             }
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder uriBuilder = new StringBuilder();
 
             //Version
-            if (httpRequestBuilder.ResBinding.SiteSetting!.Version.IsNotNullOrEmpty())
+            if (httpRequestBuilder.SiteSetting.Version.IsNotNullOrEmpty())
             {
-                builder.Append(httpRequestBuilder.ResBinding.SiteSetting.Version);
-                builder.Append('/');
+                uriBuilder.Append(httpRequestBuilder.SiteSetting.Version);
+                uriBuilder.Append('/');
             }
 
             //ControllerModelName
-            builder.Append(httpRequestBuilder.ResBinding.ControllerOrUrl);
+            uriBuilder.Append(httpRequestBuilder.ResEndpoint.ControllerOrPlainUrl);
 
             //Condition
             if (httpRequestBuilder.Request.Condition.IsNotNullOrEmpty())
             {
-                builder.Append('/');
-                builder.Append(httpRequestBuilder.Request.Condition);
+                uriBuilder.Append('/');
+                uriBuilder.Append(httpRequestBuilder.Request.Condition);
             }
 
-            //Query
-            if(httpRequestBuilder.EndpointSetting.HttpMethodOverrideMode == HttpMethodOverrideMode.All)
-            {
-                return builder.ToString();
-            }
+            string uri = uriBuilder.ToString();
 
-            return builder.ToString();
-        }
+            //Queries
+            //将ApiRequest中标记RequestQueryAttribute的属性放到queryParameters中
 
-        public static string GenerateUrl(this HttpRequestMessageBuilder builder)
-        {
-            string uri = builder.GenerateUrlCore();
+            ApiRequest request = httpRequestBuilder.Request;
 
-            IDictionary<string, string?> parameters = new Dictionary<string, string?>
-                {
-                    { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
-                    { ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture)}
-                };
 
-            return UriUtil.AddQuerys(uri, parameters);
+
+            return UriUtil.AddQuerys(uri, queryParameters);
         }
 
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope",

@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace System
 {
+    /// <summary>
+    /// 一些常见的Emit组合
+    /// </summary>
     public static class EmitUtil
     {
         public static MethodInfo? ResolveOperator(MethodInfo[] methods, Type from, Type to, string name)
@@ -109,7 +112,7 @@ namespace System
                 {
                     il.Emit(OpCodes.Ldtoken, to); // stack is now [target][target][value][member-type-token]
                     il.EmitCall(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!, null); // stack is now [target][target][value][member-type]
-                    il.EmitCall(OpCodes.Call, InvariantCultureMethodInfo, null); // stack is now [target][target][value][member-type][culture]
+                    il.EmitCall(OpCodes.Call, CommonReflectionInfos.InvariantCultureMethodInfo, null); // stack is now [target][target][value][member-type][culture]
                     il.EmitCall(OpCodes.Call, typeof(Convert).GetMethod(nameof(Convert.ChangeType), new Type[] { typeof(object), typeof(Type), typeof(IFormatProvider) })!, null); // stack is now [target][target][boxed-member-type-value]
                     il.Emit(OpCodes.Unbox_Any, to); // stack is now [target][target][typed-value]
                 }
@@ -143,6 +146,66 @@ namespace System
             }
         }
 
-        public static readonly MethodInfo InvariantCultureMethodInfo = typeof(CultureInfo).GetProperty(nameof(CultureInfo.InvariantCulture), BindingFlags.Public | BindingFlags.Static)!.GetGetMethod()!;
+        public static void EmitCastToReference(ILGenerator il, Type type)
+        {
+            if (type.IsValueType)
+                il.Emit(OpCodes.Unbox_Any, type);
+            else
+                il.Emit(OpCodes.Castclass, type);
+        }
+
+        public static void EmitLoadType(ILGenerator il, Type type)
+        {
+            il.Emit(OpCodes.Ldtoken, type); //[...][RuntimeHandle]
+            il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);//[...][type]
+        }
+
+        public static void EmitGetPropertyValue(ILGenerator il, LocalBuilder objectLocal, PropertyInfo propertyInfo)
+        {
+            Type propertyType = propertyInfo.PropertyType;
+            MethodInfo getMethodInfo = propertyInfo.GetGetMethod()!;
+
+            if (!getMethodInfo.IsStatic)
+            {
+                il.Emit(OpCodes.Ldloc, objectLocal);//[type-value]
+            }
+
+            if (propertyType.IsValueType || getMethodInfo.IsStatic)
+            {
+                il.EmitCall(OpCodes.Call, getMethodInfo, null); //[property-type-value]
+            }
+            else
+            {
+                il.EmitCall(OpCodes.Callvirt, getMethodInfo, null);//[property-object-value]
+            }
+
+            if (propertyType.IsValueType)
+            {
+                il.Emit(OpCodes.Box, propertyInfo.PropertyType);//[property-object-value]
+            }
+        }
+
+        public static void EmitSetPropertyValue(ILGenerator il, LocalBuilder objectLocal, LocalBuilder propertyValueLocal, PropertyInfo propertyInfo)
+        {
+            MethodInfo setMethod = propertyInfo.GetSetMethod(true)!;
+
+            if (!setMethod.IsStatic)
+            {
+                il.Emit(OpCodes.Ldloc, objectLocal);
+            }
+
+            il.Emit(OpCodes.Ldloc, propertyValueLocal);
+
+            EmitUtil.EmitCastToReference(il, propertyInfo.PropertyType);
+
+            if (!setMethod.IsStatic && !propertyInfo.DeclaringType!.IsValueType)
+            {
+                il.EmitCall(OpCodes.Callvirt, setMethod, null);
+            }
+            else
+            {
+                il.EmitCall(OpCodes.Call, setMethod, null);
+            }
+        }
     }
 }

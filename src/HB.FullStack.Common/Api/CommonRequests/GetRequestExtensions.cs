@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq.Expressions;
 
+using HB.FullStack.Common.ApiClient;
+
 namespace HB.FullStack.Common.Api
 {
     public static class GetRequestExtensions
@@ -63,7 +65,7 @@ namespace HB.FullStack.Common.Api
             request.PropertyFilters.Add(new PropertyFilter
             {
                 PropertyName = propertyName,
-                PropertyStringValue = TypeStringConverter.ConvertToString(propertyValue)
+                PropertyStringValue = propertyValue?.ToString()
             });
 
             return request;

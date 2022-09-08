@@ -22,9 +22,6 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string FileName { get; set; } = null!;
 
-        [OnlyForJsonConstructor]
-        public UploadRequest() { }
-
         public UploadRequest(byte[] file, string fileName, ApiRequestAuth2 auth, string? condition) : base(typeof(T).Name, ApiMethod.UpdateFields, auth, condition)
         {
             _file = file;

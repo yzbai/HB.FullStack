@@ -24,11 +24,11 @@ namespace HB.FullStack.KVStore.KVStoreModels
 
             if (_settings.AssembliesIncludeModel.IsNullOrEmpty())
             {
-                allModelTypes = ReflectUtil.GetAllTypeByCondition(kvstoreModelTypeCondition);
+                allModelTypes = ReflectionUtil.GetAllTypeByCondition(kvstoreModelTypeCondition);
             }
             else
             {
-                allModelTypes = ReflectUtil.GetAllTypeByCondition(kVStoreEngine.Settings.AssembliesIncludeModel, kvstoreModelTypeCondition);
+                allModelTypes = ReflectionUtil.GetAllTypeByCondition(kVStoreEngine.Settings.AssembliesIncludeModel, kvstoreModelTypeCondition);
             }
 
             _typeSchemaDict = ConstructeSchemaDict(allModelTypes);

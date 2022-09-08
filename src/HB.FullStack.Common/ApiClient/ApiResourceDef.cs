@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Common.ApiClient
 {
     public class ApiResourceDef
     {

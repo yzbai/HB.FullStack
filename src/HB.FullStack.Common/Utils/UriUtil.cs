@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Web;
 
 namespace System
@@ -10,52 +13,47 @@ namespace System
         /// <summary>
         /// 在字符串末尾添加参数
         /// </summary>
-        /// <param name="urlStr"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        public static string AddQuerys(string? urlStr, IDictionary<string, string?> parameters)
+        public static string AddQuerys(string? urlStr, IList<KeyValuePair<string, string>> parameters)
         {
             //不能用UriBuilder，会将相对uri转为绝对uri
 
-            if (urlStr == null)
-            {
-                string? query = AddQuerysCore("", parameters);
+            string queryString = ConvertToQueryString(parameters);
 
-                return query ?? "";
+            if (urlStr.IsNullOrEmpty())
+            {
+                return queryString;
+            }
+            if (urlStr.Contains('?', StringComparison.Ordinal))
+            {
+                return urlStr + '&' + queryString;
             }
             else
             {
-                int index = urlStr.IndexOf("?", StringComparison.Ordinal);
-
-                string oldQuery = index > 0 ? urlStr.Substring(index + 1) : "";
-
-                string? query = AddQuerysCore(oldQuery, parameters);
-
-                if (index > 0)
-                {
-#if NET5_0_OR_GREATER
-                    return string.Concat(urlStr.AsSpan(0, index + 1), query);
-#elif NETSTANDARD2_0 || NETSTANDARD2_1
-                    return urlStr.Substring(0, index + 1) + query;
-#endif
-                }
-                else
-                {
-                    return urlStr + "?" + query;
-                }
+                return urlStr + '?' + queryString;
             }
 
-            static string? AddQuerysCore(string oldQuery, IDictionary<string, string?> parameters)
+        }
+
+        public static string ConvertToQueryString(IList<KeyValuePair<string, string>>? parameters)
+        {
+            if (parameters.IsNullOrEmpty())
             {
-                NameValueCollection queries = HttpUtility.ParseQueryString(oldQuery);
-
-                foreach (var kv in parameters)
-                {
-                    queries[kv.Key] = kv.Value;
-                }
-
-                return queries.ToString();
+                return string.Empty;
             }
+
+            StringBuilder builder = new StringBuilder();
+
+            foreach (KeyValuePair<string, string> kv in parameters)
+            {
+                builder.Append(kv.Key);
+                builder.Append('=');
+                builder.Append(HttpUtility.UrlEncode(kv.Value));
+                builder.Append('&');
+            }
+
+            builder.RemoveLast();
+
+            return builder.ToString();
         }
     }
 }

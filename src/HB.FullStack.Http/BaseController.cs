@@ -30,7 +30,7 @@ namespace HB.FullStack.WebApi
 
             //deal with page & perPage & orderBys & inclues & propertyFilters
 
-            throw new NotImplementedException();
+            return Ok();
         }
     }
 }

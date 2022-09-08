@@ -20,7 +20,7 @@ namespace HB.FullStack.Common.ApiClient
 
         #region 由 Site 决定的设置
 
-        public HttpMethodOverrideMode HttpMethodOverrideMode { get; set; }
+        public bool UseHttpMethodOverride { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the challenge to put in the "WWW-Authenticate" header.
@@ -37,7 +37,7 @@ namespace HB.FullStack.Common.ApiClient
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(SiteName, Version, BaseUrl, HttpMethodOverrideMode, Challenge);
+            return HashCode.Combine(SiteName, Version, BaseUrl, UseHttpMethodOverride, Challenge);
         }
     }
 }

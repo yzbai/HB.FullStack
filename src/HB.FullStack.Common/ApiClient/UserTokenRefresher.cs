@@ -24,7 +24,7 @@ namespace HB.FullStack.Common.ApiClient
                 return false;
             }
 
-            ResEndpoint? resBinding = apiClient.UserTokenResBinding;
+            ResEndpoint? resBinding = apiClient.UserTokenResEndpoint;
 
             if (resBinding == null)
             {

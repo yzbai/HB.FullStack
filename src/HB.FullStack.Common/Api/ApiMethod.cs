@@ -22,7 +22,8 @@ namespace HB.FullStack.Common.Api
         Add = 2,
         Update = 3,
         Delete = 4,
-        UpdateFields = 5
+        UpdateFields = 5,
+        UpdateRelation = 6
     }
 
     public static class ApiMethodExtensions
@@ -40,6 +41,7 @@ namespace HB.FullStack.Common.Api
                 ApiMethod.Update => HttpMethod.Put,
                 ApiMethod.Delete => HttpMethod.Delete,
                 ApiMethod.UpdateFields => HttpMethod.Patch,
+                ApiMethod.UpdateRelation => HttpMethod.Patch,
                 _ => throw new System.NotImplementedException(),
             };
         }

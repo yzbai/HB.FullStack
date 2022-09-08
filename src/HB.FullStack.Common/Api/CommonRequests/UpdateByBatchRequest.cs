@@ -8,10 +8,8 @@ namespace HB.FullStack.Common.Api
     {
         [IdBarrier]
         [CollectionMemeberValidated(CanBeNullOrEmpty = false)]
+        [RequestBody]
         public IList<T> Resources { get; set; } = new List<T>();
-
-        [OnlyForJsonConstructor]
-        public UpdateByBatchRequest() { }
 
         public UpdateByBatchRequest(IEnumerable<T> ress) : base(typeof(T).Name, ApiMethod.Update, null, "ByBatch")
         {

@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.Api
 {
-    public enum HttpMethodOverrideMode
+    [AttributeUsage(AttributeTargets.Property)]
+    public sealed class RequestBodyAttribute : Attribute
     {
-        None,
-        Normal, //覆盖除了get 和 post之外的
-        All //任何都覆盖
+
     }
 }

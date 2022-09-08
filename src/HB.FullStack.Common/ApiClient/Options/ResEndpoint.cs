@@ -21,7 +21,7 @@ namespace HB.FullStack.Common.ApiClient
         /// 当Type为ControllerModel时，BindingValue为Controller名称
         /// 当Type为PlainUrl时，BindingValue为除去BaseUrl剩下的url
         /// </summary>
-        public string ControllerOrUrl { get; set; } = null!;
+        public string ControllerOrPlainUrl { get; set; } = null!;
 
         /// <summary>
         /// 默认的GetRequest的Auth
@@ -41,7 +41,7 @@ namespace HB.FullStack.Common.ApiClient
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Type, ResName, ControllerOrUrl);
+            return HashCode.Combine(Type, ResName, ControllerOrPlainUrl);
         }
     }
 }

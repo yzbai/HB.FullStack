@@ -7,28 +7,29 @@ namespace HB.FullStack.Common.Api
 {
     public class UserTokenResGetByRefresh : ApiRequest
     {
+        [RequestQuery]
         [NoEmptyGuid]
         public Guid UserId { get; set; }
 
+        [RequestQuery]
         [Required]
         public string AccessToken { get; set; } = null!;
 
+        [RequestQuery]
         [Required]
         public string RefreshToken { get; set; } = null!;
 
+        [RequestQuery]
         [Required]
         public string DeviceId { get; set; } = null!;
 
+        [RequestQuery]
         [Required]
         public string DeviceVersion { get; set; } = null!;
 
+        [RequestQuery]
         [Required]
         public DeviceInfos DeviceInfos { get; set; } = null!;
-
-        /// <summary>
-        /// Only for Deserialization
-        /// </summary>
-        public UserTokenResGetByRefresh() { }
 
         public UserTokenResGetByRefresh(
             Guid userId,

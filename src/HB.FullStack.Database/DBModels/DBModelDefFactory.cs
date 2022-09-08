@@ -25,11 +25,11 @@ namespace HB.FullStack.Database.DbModels
 
             if (databaseSettings.Assemblies.IsNullOrEmpty())
             {
-                allModelTypes = ReflectUtil.GetAllTypeByCondition(modelTypeCondition);
+                allModelTypes = ReflectionUtil.GetAllTypeByCondition(modelTypeCondition);
             }
             else
             {
-                allModelTypes = ReflectUtil.GetAllTypeByCondition(databaseSettings.Assemblies, modelTypeCondition);
+                allModelTypes = ReflectionUtil.GetAllTypeByCondition(databaseSettings.Assemblies, modelTypeCondition);
             }
 
             IDictionary<string, DatabaseModelSetting> modelSettingDict = ConstructeSettingDict(databaseSettings, databaseEngine, allModelTypes);

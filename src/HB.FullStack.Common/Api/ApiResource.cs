@@ -5,7 +5,7 @@ namespace HB.FullStack.Common.Api
     /// <summary>
     /// One kind of Data Transfer Objects. Mainly using on net.
     /// </summary>
-    public class ApiResource : DTO
+    public class ApiResource : ApiRequestData
     {
         //[Range(0, int.MaxValue)]
         //public int Version { get; set; } = -1;

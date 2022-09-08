@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Common.Api
+﻿namespace HB.FullStack.Common.ApiClient
 {
     public class ApiResourcePropertyDef
     {

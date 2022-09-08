@@ -8,10 +8,8 @@ namespace HB.FullStack.Common.Api
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]
+        [RequestBody]
         public T Resource { get; set; } = null!;
-
-        [OnlyForJsonConstructor]
-        public UpdateRequest() { }
 
         public UpdateRequest(T res) : base(typeof(T).Name, ApiMethod.Update, null, null)
         {

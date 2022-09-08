@@ -23,7 +23,7 @@ namespace HB.FullStack.Database.Mapper
         public static IList<T> ToModels<T>(this IDataReader reader, EngineType engineType, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
             where T : DbModel, new()
         {
-            Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedToModelFunc(reader, modelDef, 0, reader.FieldCount, false, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedDataReaderRowToModelFunc(reader, modelDef, 0, reader.FieldCount, false, engineType);
 
             List<T> lst = new List<T>();
 
@@ -41,8 +41,8 @@ namespace HB.FullStack.Database.Mapper
             where TSource : DbModel, new()
             where TTarget : DbModel, new()
         {
-            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false, engineType);
-            Func<IDbModelDefFactory, IDataReader, object?> targetFunc = GetCachedToModelFunc(reader, targetModelDef, sourceModelDef.FieldCount, reader.FieldCount - sourceModelDef.FieldCount, true, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> targetFunc = GetCachedDataReaderRowToModelFunc(reader, targetModelDef, sourceModelDef.FieldCount, reader.FieldCount - sourceModelDef.FieldCount, true, engineType);
 
             IList<Tuple<TSource, TTarget?>> lst = new List<Tuple<TSource, TTarget?>>();
 
@@ -62,9 +62,9 @@ namespace HB.FullStack.Database.Mapper
             where TTarget2 : DbModel, new()
             where TTarget3 : DbModel, new()
         {
-            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false, engineType);
-            Func<IDbModelDefFactory, IDataReader, object?> targetFunc1 = GetCachedToModelFunc(reader, targetModelDef1, sourceModelDef.FieldCount, targetModelDef1.FieldCount, true, engineType);
-            Func<IDbModelDefFactory, IDataReader, object?> targetFunc2 = GetCachedToModelFunc(reader, targetModelDef2, sourceModelDef.FieldCount + targetModelDef1.FieldCount, reader.FieldCount - (sourceModelDef.FieldCount + targetModelDef1.FieldCount), true, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> targetFunc1 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef1, sourceModelDef.FieldCount, targetModelDef1.FieldCount, true, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> targetFunc2 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef2, sourceModelDef.FieldCount + targetModelDef1.FieldCount, reader.FieldCount - (sourceModelDef.FieldCount + targetModelDef1.FieldCount), true, engineType);
 
             IList<Tuple<TSource, TTarget2?, TTarget3?>> lst = new List<Tuple<TSource, TTarget2?, TTarget3?>>();
 
@@ -80,11 +80,11 @@ namespace HB.FullStack.Database.Mapper
             return lst;
         }
 
-        private static Func<IDbModelDefFactory, IDataReader, object?> GetCachedToModelFunc(IDataReader reader, DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
+        private static Func<IDbModelDefFactory, IDataReader, object?> GetCachedDataReaderRowToModelFunc(IDataReader reader, DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
         {
             string key = GetKey(modelDef, startIndex, length, returnNullIfFirstNull, engineType);
 
-            return _toModelFuncDict.GetOrAdd(key, _ => CreateToModelDelegate(modelDef, reader, startIndex, length, returnNullIfFirstNull, engineType));
+            return _toModelFuncDict.GetOrAdd(key, _ => CreateDataReaderRowToModelDelegate(modelDef, reader, startIndex, length, returnNullIfFirstNull, engineType));
 
             //if (!_toModelFuncDict.ContainsKey(key))
             //{
@@ -92,7 +92,7 @@ namespace HB.FullStack.Database.Mapper
             //    {
             //        if (!_toModelFuncDict.ContainsKey(key))
             //        {
-            //            _toModelFuncDict[key] = DBModelConverterEmit.CreateToModelDelegate(modelDef, reader, startIndex, length, returnNullIfFirstNull, engineType);
+            //            _toModelFuncDict[key] = DBModelConverterEmit.CreateDataReaderRowToModelDelegate(modelDef, reader, startIndex, length, returnNullIfFirstNull, engineType);
             //        }
             //    }
             //}
@@ -150,7 +150,7 @@ namespace HB.FullStack.Database.Mapper
         {
             string key = GetKey(modelDef, engineType);
 
-            return _entiryToParametersFuncDict.GetOrAdd(key, _ => CreateModelToParametersDelegate(modelDef, engineType));
+            return _entiryToParametersFuncDict.GetOrAdd(key, _ => CreateModelToDbParametersDelegate(modelDef, engineType));
 
             static string GetKey(DbModelDef modelDef, EngineType engineType)
             {

@@ -24,7 +24,7 @@ namespace System.Net.Http
 
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.EndpointSetting.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.SiteSetting.Challenge).ConfigureAwait(false);
 
             if (typeof(TResource) == _emptyResourceType)
             {
@@ -56,7 +56,7 @@ namespace System.Net.Http
             //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
             HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.EndpointSetting.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.SiteSetting.Challenge).ConfigureAwait(false);
 
 #if NET5_0_OR_GREATER
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), responseMessage);

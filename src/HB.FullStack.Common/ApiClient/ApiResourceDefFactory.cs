@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace HB.FullStack.Common.Api
+using HB.FullStack.Common.Api;
+
+namespace HB.FullStack.Common.ApiClient
 {
     public static class ApiResourceDefFactory
     {
@@ -12,7 +14,7 @@ namespace HB.FullStack.Common.Api
         {
             //TODO: Do we have a Pefermance problem ?
 
-            IEnumerable<Type> allResTypes = ReflectUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(ApiResource)) && !t.IsAbstract);
+            IEnumerable<Type> allResTypes = ReflectionUtil.GetAllTypeByCondition(t => t.IsSubclassOf(typeof(ApiResource)) && !t.IsAbstract);
 
             foreach (Type type in allResTypes)
             {

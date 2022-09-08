@@ -34,9 +34,6 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string? Condition { get; set; }
 
-        //OnlyForJsonConstructor
-        protected ApiRequest() { }
-
         protected ApiRequest(string resName, ApiMethod apiMethod, ApiRequestAuth2? auth, string? condition)
         {
             ResName = resName;

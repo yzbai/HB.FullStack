@@ -9,9 +9,8 @@ namespace HB.FullStack.Common.Api
         /// <summary>
         /// 将PropertyValue转换成字符串
         /// </summary>
+        [RequestBody]
         public IList<ChangedProperty> ChangedProperties { get; set; } = new List<ChangedProperty>();
-
-        [OnlyForJsonConstructor]
 
         public PatchRequest() : base(typeof(T).Name, ApiMethod.UpdateFields, null, null) { }
 
@@ -20,8 +19,8 @@ namespace HB.FullStack.Common.Api
             ChangedProperties.Add(new ChangedProperty
             {
                 PropertyName = propertyName,
-                PropertyOldStringValue = TypeStringConverter.ConvertToString(oldValue),
-                PropertyNewStringValue = TypeStringConverter.ConvertToString(newValue)
+                PropertyOldStringValue = oldValue?.ToString(),
+                PropertyNewStringValue = newValue?.ToString(),
             });
 
             return this;

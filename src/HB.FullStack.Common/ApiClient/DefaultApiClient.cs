@@ -27,11 +27,11 @@ namespace HB.FullStack.Common.ApiClient
 
         private readonly Type _streamType = typeof(Stream);
 
-        private readonly IDictionary<string, ResEndpoint> _resBindings = new Dictionary<string, ResEndpoint>();
+        private readonly IDictionary<string, ResEndpoint> _resEndpoints = new Dictionary<string, ResEndpoint>();
 
         public IPreferenceProvider UserTokenProvider { get; }
 
-        public ResEndpoint? UserTokenResBinding { get; private set; }
+        public ResEndpoint? UserTokenResEndpoint { get; private set; }
 
         public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider tokenProvider)
         {
@@ -44,9 +44,9 @@ namespace HB.FullStack.Common.ApiClient
 
             GlobalApiClientAccessor.ApiClient = this;
 
-            if (_resBindings.TryGetValue(nameof(UserTokenRes), out ResEndpoint? userTokenResBinding))
+            if (_resEndpoints.TryGetValue(nameof(UserTokenRes), out ResEndpoint? userTokenResEndpoint))
             {
-                UserTokenResBinding = userTokenResBinding;
+                UserTokenResEndpoint = userTokenResEndpoint;
             }
 
             void RangeApiKeys()
@@ -56,16 +56,16 @@ namespace HB.FullStack.Common.ApiClient
 
             void RangeEndpoints()
             {
-                foreach (var endpoint in _options.SiteSettings)
+                foreach (var siteSetting in _options.SiteSettings)
                 {
-                    foreach (var binding in endpoint.Endpoints)
+                    foreach (var endpoint in siteSetting.Endpoints)
                     {
-                        if (!_resBindings.TryAdd(binding.ResName, binding))
+                        if (!_resEndpoints.TryAdd(endpoint.ResName, endpoint))
                         {
-                            throw ApiExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = binding });
+                            throw ApiExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
                         }
 
-                        binding.SiteSetting = endpoint;
+                        endpoint.SiteSetting = siteSetting;
                     }
                 }
             }
@@ -106,14 +106,14 @@ namespace HB.FullStack.Common.ApiClient
                 throw ApiExceptions.ApiModelError("Request没有通过Validate", null, new { ValidateErrorMessage = request.GetValidateErrorMessage() });
             }
 
-            if (!_resBindings.TryGetValue(request.ResName, out ResEndpoint? resBinding))
+            if (!_resEndpoints.TryGetValue(request.ResName, out ResEndpoint? resEndpoint))
             {
                 throw ApiExceptions.ApiClientInnerError($"No ResBinding for {request.ResName}.", null, null);
             }
 
-            HttpRequestMessageBuilder requestBuilder = new HttpRequestMessageBuilder(resBinding, request);
+            HttpRequestMessageBuilder requestBuilder = new HttpRequestMessageBuilder(resEndpoint, request);
 
-            HttpClient httpClient = GetHttpClient(resBinding.SiteSetting!);
+            HttpClient httpClient = GetHttpClient(resEndpoint.SiteSetting!);
 
             try
             {

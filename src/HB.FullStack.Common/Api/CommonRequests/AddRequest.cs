@@ -12,10 +12,8 @@ namespace HB.FullStack.Common.Api
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]
+        [RequestBody]
         public T Resource { get; set; } = null!;
-
-        [OnlyForJsonConstructor]
-        public AddRequest() { }
 
         public AddRequest(T res) : base(typeof(T).Name, ApiMethod.Add, null, null)
         {
