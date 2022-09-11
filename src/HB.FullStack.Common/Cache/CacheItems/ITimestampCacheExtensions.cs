@@ -28,7 +28,9 @@ namespace HB.FullStack.Common.Cache
                     return null;
                 }
 
-                return Convert.ToInt32(value, GlobalSettings.Culture);
+
+
+                return System.Convert.ToInt32(value, GlobalSettings.Culture);
             }
             catch (FormatException ex)
             {
@@ -67,7 +69,6 @@ namespace HB.FullStack.Common.Cache
                 throw CacheExceptions.Unkown(key, null, nameof(GetStringAsync), ex);
             }
         }
-
 
         /// <summary>
         /// timestamp是ICacheModel.Timestamp

@@ -40,25 +40,14 @@ namespace HB.FullStack.Common.ApiClient
             //1. Mthod
             HttpMethod httpMethod = builder.Request.ApiMethod.ToHttpMethod();
 
-            switch (builder.SiteSetting.HttpMethodOverrideMode)
+            if (builder.SiteSetting.UseHttpMethodOverride && httpMethod != HttpMethod.Get && httpMethod != HttpMethod.Post)
             {
-                case HttpMethodOverrideMode.None:
-                    break;
-                case HttpMethodOverrideMode.Normal:
-                    if (httpMethod != HttpMethod.Get && httpMethod != HttpMethod.Post)
-                    {
-                        builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
-                        httpMethod = HttpMethod.Post;
-                    }
-                    break;
-                case HttpMethodOverrideMode.All:
-                    builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
-                    httpMethod = HttpMethod.Post;
-                    break;
+                builder.Headers["X-HTTP-Method-Override"] = httpMethod.Method;
+                httpMethod = HttpMethod.Post;
             }
 
             //2. url
-            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.GenerateUrl())
+            HttpRequestMessage httpRequest = new HttpRequestMessage(httpMethod, builder.BuildUriString())
             {
                 Version = builder.SiteSetting.HttpVersion
             };
@@ -74,32 +63,20 @@ namespace HB.FullStack.Common.ApiClient
             {
                 httpRequest.Content = BuildMultipartContent(uploadRequest);
             }
-            else if (httpRequest.Method == HttpMethod.Get)
-            {
-                //TODO: Implement this
-                throw new NotImplementedException("还没有实现Http Get 把参数都放到Query中去，请先使用HttpMethodOverrideMode=ALL");
-            }
             else
             {
-                //具体传递的数据
-                //包括Get的参数也放到body中去
-                httpRequest.Content = new StringContent(SerializeUtil.ToJson(builder.Request), Encoding.UTF8, "application/json");
+                httpRequest.Content = BuildContent(builder.Request);
             }
 
             return httpRequest;
         }
 
-        public static string GenerateUrl(this HttpRequestMessageBuilder httpRequestBuilder)
+        public static string BuildUriString(this HttpRequestMessageBuilder httpRequestBuilder)
         {
-            List<KeyValuePair<string, string>> queryParameters = new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>(ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) ),
-                new KeyValuePair<string, string>(ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture))
-            };
 
             if (httpRequestBuilder.ResEndpoint.Type == ResEndpointType.PlainUrl)
             {
-                return UriUtil.AddQuerys(httpRequestBuilder.ResEndpoint.ControllerOrPlainUrl, queryParameters);
+                return UriUtil.AddQueryString(httpRequestBuilder.ResEndpoint.ControllerOrPlainUrl, UriUtil.NoiseQueryString);
             }
 
             if (httpRequestBuilder.ResEndpoint.Type != ResEndpointType.ControllerModel)
@@ -126,16 +103,30 @@ namespace HB.FullStack.Common.ApiClient
                 uriBuilder.Append(httpRequestBuilder.Request.Condition);
             }
 
-            string uri = uriBuilder.ToString();
-
             //Queries
-            //将ApiRequest中标记RequestQueryAttribute的属性放到queryParameters中
+            string? query = httpRequestBuilder.Request.BuildQueryString();
 
-            ApiRequest request = httpRequestBuilder.Request;
+            if (query.IsNotNullOrEmpty())
+            {
+                uriBuilder.Append('?');
+                uriBuilder.Append(query);
+                uriBuilder.Append('&');
+                uriBuilder.Append(UriUtil.NoiseQueryString);
+            }
+            else
+            {
+                uriBuilder.Append('?');
+                uriBuilder.Append(UriUtil.NoiseQueryString);
+            }
 
+            return uriBuilder.ToString();
+        }
 
+        private static HttpContent BuildContent(ApiRequest request)
+        {
+            object? requestBody = request.GetRequestBody();
 
-            return UriUtil.AddQuerys(uri, queryParameters);
+            return new StringContent(SerializeUtil.ToJson(requestBody) ?? String.Empty, Encoding.UTF8, "application/json");
         }
 
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope",

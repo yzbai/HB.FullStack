@@ -45,7 +45,7 @@ namespace HB.FullStack.Common.ApiClient
                 return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
 
-            AddTokenInfo(request, _tokenProvider);
+            AddRequestInfo(request, _tokenProvider);
 
             HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -68,25 +68,19 @@ namespace HB.FullStack.Common.ApiClient
             return responseMessage;
         }
 
-        private static void AddTokenInfo(HttpRequestMessage request, IPreferenceProvider tokenProvider)
+        private static void AddRequestInfo(HttpRequestMessage request, IPreferenceProvider tokenProvider)
         {
-            //Jwt
+            //Headers
             if (tokenProvider.AccessToken.IsNotNullOrEmpty())
             {
                 request.Headers.Add("Authorization", "Bearer " + tokenProvider.AccessToken);
             }
 
-            //BaseUrl
-            IDictionary<string, string?> parameters = new Dictionary<string, string?>
-            {
-                { ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) },
-                { ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture)},
-                
-                //额外添加DeviceId，为了验证jwt中的DeviceId与本次请求deviceiId一致
-                { ClientNames.DEVICE_ID, tokenProvider.DeviceId }
-            };
-
-            request.RequestUri = new Uri(UriUtil.AddQuerys(request.RequestUri?.ToString(), parameters));
+            //Query
+            request.RequestUri = request.RequestUri?.ToString()
+                    .AddQuery(ClientNames.DEVICE_ID, tokenProvider.DeviceId)
+                    .AddNoiseQuery()
+                    .ToUri();
         }
 
         private SiteSetting? GetEndpointByUri(Uri? requestUri)

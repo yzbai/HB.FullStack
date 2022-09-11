@@ -5,6 +5,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
+using HB.FullStack.Common.Convert;
+using HB.FullStack.Common.Meta;
+
 namespace System
 {
     public static class CommonReflectionInfos
@@ -18,7 +21,7 @@ namespace System
         public static readonly MethodInfo ArrayGetLengthMethod = typeof(Array).GetMethod(nameof(Array.GetLength), new Type[] { typeof(int) })!;
 
         public static readonly MethodInfo StringConcatMethod = typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) })!;
-        public static readonly MethodInfo ConvertToStringMethod = typeof(MetaAccess).GetMethod(nameof(MetaAccess.ConvertToString), new Type[] { typeof(object), typeof(Type) })!;
+        public static readonly MethodInfo ConvertToStringMethod = typeof(ConvertCenter).GetMethod(nameof(ConvertCenter.ConvertToString), new Type[] { typeof(object), typeof(Type), typeof(StringConvertPurpose) })!;
 
         public static readonly ConstructorInfo StringListConstructorInfo = typeof(List<>).MakeGenericType(typeof(string)).GetConstructor(Array.Empty<Type>())!;
         public static readonly MethodInfo StringListAddMethod = typeof(List<>).MakeGenericType(typeof(string)).GetMethod("Add")!;

@@ -8,11 +8,15 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Convert;
+
 namespace System
 {
     public static partial class MetaAccess
     {
-        public static Func<object, object> CreatePropertyGetDeleagteByExpression(this Type declareType, string propertyName)
+        #region Property Access
+
+        public static Func<object, object?> CreatePropertyGetDeleagteByExpression(this Type declareType, string propertyName)
         {
             // (object instance) => (object)((declaringType)instance).propertyName
 
@@ -23,7 +27,7 @@ namespace System
             return Expression.Lambda<Func<object, object>>(body_return, param_instance).Compile();
         }
 
-        public static Action<object, object> CreatePropertySetDelagateByExpression(this PropertyInfo property)
+        public static Action<object, object?> CreatePropertySetDelagateByExpression(this PropertyInfo property)
         {
             // (object instance, object value) => 
             //     ((instanceType)instance).Set_XXX((propertyType)value)
@@ -36,18 +40,30 @@ namespace System
             var body_value = Expression.Convert(param_value, property.PropertyType);
             var body_call = Expression.Call(body_instance, property.GetSetMethod()!, body_value);
 
-            return Expression.Lambda<Action<object, object>>(body_call, param_instance, param_value).Compile();
+            return Expression.Lambda<Action<object, object?>>(body_call, param_instance, param_value).Compile();
         }
 
-        public static Func<object, object> CreatePropertyGetDelegateByIL(this PropertyInfo propertyInfo)
+        private static object? ReturnNull(object obj)
+        {
+            return null;
+        }
+
+        private static void DoNothing(object obj, object? value)
+        {
+            //Do Nothing
+        }
+
+        public static Func<object, object?> CreatePropertyGetDelegateByIL(this PropertyInfo? propertyInfo)
         {
             if (propertyInfo == null)
-                throw new ArgumentNullException(nameof(propertyInfo));
+            {
+                return ReturnNull;
+            }
 
             MethodInfo getMethod = propertyInfo.GetGetMethod(true)!;
 
             DynamicMethod dm = new DynamicMethod(
-                "PropertyGetDelegateByIL" + Guid.NewGuid(),
+                $"PropertyGetByIL_{propertyInfo.Name}_{Guid.NewGuid()}",
                 typeof(object),
                 new Type[] { typeof(object) },
                 propertyInfo.DeclaringType!,
@@ -67,18 +83,20 @@ namespace System
 
             il.Emit(OpCodes.Ret);
 
-            return (Func<object, object>)dm.CreateDelegate(typeof(Func<object, object>));
+            return (Func<object, object?>)dm.CreateDelegate(typeof(Func<object, object?>));
         }
 
-        public static Action<object, object> CreatePropertySetDelegateByIL(this PropertyInfo propertyInfo)
+        public static Action<object, object?> CreatePropertySetDelegateByIL(this PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
-                throw new ArgumentNullException(nameof(propertyInfo));
+            {
+                return DoNothing;
+            }
 
             MethodInfo setMethod = propertyInfo.GetSetMethod(true)!;
 
             DynamicMethod dm = new DynamicMethod(
-                "PropertySetDelegateByIL" + Guid.NewGuid(),
+                $"PropertySetByIL_{propertyInfo.Name}_{Guid.NewGuid()}",
                 null,
                 new Type[] { typeof(object), typeof(object) },
                 propertyInfo.DeclaringType!,
@@ -102,13 +120,12 @@ namespace System
 
             il.Emit(OpCodes.Ret);
 
-            return (Action<object, object>)dm.CreateDelegate(typeof(Action<object, object>));
+            return (Action<object, object?>)dm.CreateDelegate(typeof(Action<object, object?>));
         }
 
-        public static string? ConvertToString(object? value, Type valueType)
-        {
-            return value?.ToString();
-        }
+        #endregion
+
+        #region Convert Object
 
         public static Func<object, object[]> CreateGetPropertyValuesDelegate(Type type, PropertyInfo[] propertyInfos)
         {
@@ -223,6 +240,8 @@ namespace System
 
                     EmitUtil.EmitLoadType(il, propertyType);
 
+                    EmitUtil.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
+
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][propertyInfo-string]
 
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=propertyInfo-string"]
@@ -278,7 +297,7 @@ namespace System
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetValueMethod, null); //[rtList]["propertyName="][item]
 
                     EmitUtil.EmitLoadType(il, propertyType.GetElementType()!);//[rtList]["propertyName="][item][itemType]
-
+                    EmitUtil.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][item-string]
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=item-string"]
 
@@ -341,6 +360,7 @@ namespace System
                     il.EmitCall(OpCodes.Callvirt, CommonReflectionInfos.EnumeratorGetCurrentMethod, null); //[rtList]["propertyName="][item]
 
                     EmitUtil.EmitLoadType(il, propertyType.GetGenericArguments()[0]);//[rtList]["propertyName="][item][itemType]
+                    EmitUtil.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][item-string]
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=item-string"]
 
@@ -370,6 +390,8 @@ namespace System
                 #endregion
             }
         }
+
+        #endregion
 
     }
 }

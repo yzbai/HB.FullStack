@@ -50,15 +50,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.4" />
-		<PackageReference Include="CommunityToolkit.Maui" Version="1.0.0" />
-		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0" />
+		<PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="1.2.0" />
+		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="6.0.403" />
 		<PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
-		<PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.1-preview.1" />
-		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.1-preview.1" />
-		<PackageReference Include="Svg.Skia" Version="0.5.14" />
+		<PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.2" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.2" />
+		<PackageReference Include="Svg.Skia" Version="0.5.16" />
 	</ItemGroup>
 
 	<ItemGroup>

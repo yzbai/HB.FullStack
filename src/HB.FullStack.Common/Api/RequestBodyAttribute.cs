@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.Api
 {
+    /// <summary>
+    /// 同一个Request中只能有一个RequestBody
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class RequestBodyAttribute : Attribute
     {

@@ -185,7 +185,7 @@ namespace HB.FullStack.Common.ApiClient
                         }
                         else
                         {
-                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.GenerateUrl() });
+                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.BuildUriString() });
                         }
 
                         break;
@@ -194,7 +194,7 @@ namespace HB.FullStack.Common.ApiClient
                 case ApiAuthType.Jwt:
                     if (UserTokenProvider.AccessToken.IsNullOrEmpty())
                     {
-                        throw ApiExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.GenerateUrl() });
+                        throw ApiExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
                     }
 
                     requestBuilder.SetJwt(UserTokenProvider.AccessToken);

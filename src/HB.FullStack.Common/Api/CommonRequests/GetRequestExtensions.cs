@@ -55,12 +55,12 @@ namespace HB.FullStack.Common.Api
             //TODO: 考虑提高性能
             //是否建立统一的ApiResourceDefFactory?
 
-            var resDef = ApiResourceDefFactory.GetDef(request.ResName);
+            //var resDef = ApiResourceDefFactory.GetDef(request.ResName);
 
-            if (resDef?.GetPropertyDef(propertyName) == null)
-            {
-                throw ApiExceptions.ApiResourceError("不存在这样的属性", null, new { ResName = request.ResName, PropertyName = propertyName });
-            }
+            //if (resDef?.GetPropertyDef(propertyName) == null)
+            //{
+            //    throw ApiExceptions.ApiResourceError("不存在这样的属性", null, new { ResName = request.ResName, PropertyName = propertyName });
+            //}
 
             request.PropertyFilters.Add(new PropertyFilter
             {
