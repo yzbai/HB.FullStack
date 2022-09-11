@@ -30,7 +30,7 @@ namespace HB.FullStack.CommonTests.ApiClient
             return false;
         }
 
-        public void OnTokenFetched(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
+        public void OnTokenReceived(Guid userId, DateTimeOffset userCreateTime, string mobile, string email, string loginName, string accessToken, string refreshToken)
         {
             AccessToken = accessToken;
             RefreshToken = refreshToken;

@@ -35,6 +35,10 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Api\" />
+	</ItemGroup>
+
 	<ProjectExtensions>
 		<VisualStudio>
 			<UserProperties app_1json__JsonSchema="https://json.schemastore.org/appsettings.json" />

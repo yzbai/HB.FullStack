@@ -9,7 +9,7 @@ using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public static class ApiRequestExtensions
+    public static class ApiRequestAccessExtensions
     {
         #region RequestQuery
 

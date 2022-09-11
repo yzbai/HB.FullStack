@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
-using System.Threading.Tasks;
-using HB.FullStack.CommonTests.Data;
-using HB.FullStack.Common.Api.Requests;
-using HB.FullStack.Common.Api;
+﻿using System;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Test;
+using HB.FullStack.CommonTests.Data;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.CommonTests.ApiClient
 {
@@ -20,14 +20,20 @@ namespace HB.FullStack.CommonTests.ApiClient
 
         }
 
-
         [TestMethod()]
         public async Task GetAsyncTest()
         {
-            PreferenceProvider.OnTokenFetched(userId: Guid.NewGuid(), userCreateTime: DateTimeOffset.Now, mobile: null, email: null, loginName: null, accessToken: Guid.NewGuid().ToString(), refreshToken: Guid.NewGuid().ToString());
+            PreferenceProvider.OnTokenReceived(
+                userId: Guid.NewGuid(),
+                userCreateTime: DateTimeOffset.Now,
+                mobile: null,
+                email: null,
+                loginName: null,
+                accessToken: Guid.NewGuid().ToString(),
+                refreshToken: Guid.NewGuid().ToString());
 
             TestHttpServer httpServer = StartHttpServer(
-                new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", ApiMethodName.Get, (request, response, parameters) =>
+                new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", ApiMethod.Get, (request, response, parameters) =>
                 {
                     using StreamReader streamReader = new StreamReader(request.InputStream);
                     string requestJson = streamReader.ReadToEnd();
@@ -51,7 +57,6 @@ namespace HB.FullStack.CommonTests.ApiClient
             Assert.IsNotNull(bookRes);
         }
 
-
         [TestMethod()]
         public void SendAsyncTest()
         {
@@ -66,7 +71,7 @@ namespace HB.FullStack.CommonTests.ApiClient
         [JsonConstructor]
         public GetBookByNameRequest() { }
 
-        public GetBookByNameRequest(string name) : base( ApiRequestAuth.JWT, "ByName")
+        public GetBookByNameRequest(string name)
         {
             Name = name;
         }
