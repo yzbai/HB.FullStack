@@ -5,7 +5,7 @@ using System.Globalization;
 
 using HB.FullStack.Common;
 
-namespace HB.FullStack.Database.Converter
+namespace HB.FullStack.Database.Convert
 {
     internal class SqliteDateTimeOffsetTypeConverter : IDbValueConverter
     {

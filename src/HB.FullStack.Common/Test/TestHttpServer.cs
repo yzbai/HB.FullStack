@@ -2,8 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,11 +23,18 @@ namespace HB.FullStack.Common.Test
         public TestHttpServer(
             int port,
             string url,
+            HttpMethod httpMethod,
             Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>?> handlerAction,
             string hostName = "localhost"
         )
-            : this(port, new List<TestRequestHandler> { new(url, handlerAction) }, hostName) { }
+            : this(port, new List<TestRequestHandler> { new(url, httpMethod, handlerAction) }, hostName) { }
 
+        /// <summary>
+        /// 生成并启动TestHttpServer
+        /// </summary>
+        /// <param name="port">0表示使用随机端口</param>
+        /// <param name="handlers"></param>
+        /// <param name="hostName"></param>
         public TestHttpServer(
             int port,
             IList<TestRequestHandler> handlers,

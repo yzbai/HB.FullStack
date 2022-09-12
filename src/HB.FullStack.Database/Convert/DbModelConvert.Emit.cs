@@ -12,13 +12,12 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 
-using HB.FullStack.Database.Converter;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
-namespace HB.FullStack.Database.Mapper
+namespace HB.FullStack.Database.Convert
 {
-    internal static partial class DbModelConverter
+    internal static partial class DbModelConvert
     {
         /// <summary>
         /// 得到一个将 数据库行 转为Model 的 delegate
@@ -113,7 +112,7 @@ namespace HB.FullStack.Database.Mapper
                     {
                         //======全局Converter
 
-                        IDbValueConverter? globalTypeConverter = DbValueConvertFactory.GetGlobalDbValueConverter(trueType, engineType);
+                        IDbValueConverter? globalTypeConverter = DbValueConvert.GetGlobalDbValueConverter(trueType, engineType);
 
                         if (globalTypeConverter != null)
                         {
@@ -365,7 +364,7 @@ namespace HB.FullStack.Database.Mapper
 
                     //查看全局TypeConvert
 
-                    IDbValueConverter? globalConverter = DbValueConvertFactory.GetGlobalDbValueConverter(trueType, engineType);
+                    IDbValueConverter? globalConverter = DbValueConvert.GetGlobalDbValueConverter(trueType, engineType);
 
                     if (globalConverter != null)
                     {
@@ -575,7 +574,7 @@ namespace HB.FullStack.Database.Mapper
 
                     //查看全局TypeConvert
 
-                    IDbValueConverter? globalConverter = DbValueConvertFactory.GetGlobalDbValueConverter(trueType, engineType);
+                    IDbValueConverter? globalConverter = DbValueConvert.GetGlobalDbValueConverter(trueType, engineType);
 
                     if (globalConverter != null)
                     {
@@ -684,7 +683,7 @@ namespace HB.FullStack.Database.Mapper
             .Select(p => p.GetGetMethod()).First()!;
 
         private static readonly MethodInfo _getPropertyTypeConverterMethod2 = typeof(IDbModelDefFactory).GetMethod(nameof(IDbModelDefFactory.GetPropertyTypeConverter))!;
-        private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(DbValueConvertFactory).GetMethod(nameof(DbValueConvertFactory.GetGlobalDbValueConverter), new Type[] { typeof(Type), typeof(int) })!;
+        private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(DbValueConvert).GetMethod(nameof(DbValueConvert.GetGlobalDbValueConverter), new Type[] { typeof(Type), typeof(int) })!;
         private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(IDbValueConverter).GetMethod(nameof(IDbValueConverter.DbValueToTypeValue))!;
         private static readonly MethodInfo _getTypeConverterTypeValueToDbValueMethod = typeof(IDbValueConverter).GetMethod(nameof(IDbValueConverter.TypeValueToDbValue))!;
     }

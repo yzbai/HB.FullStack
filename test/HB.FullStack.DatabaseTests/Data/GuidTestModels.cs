@@ -1,17 +1,16 @@
 ﻿using System;
 
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Tests.Mocker
 {
-    public class User : TimestampGuidDBModel
+    public class User : TimestampGuidDbModel
     {
         public string Name { get; set; } = null!;
 
-
     }
 
-    public class UserProfile : TimestampGuidDBModel
+    public class UserProfile : TimestampGuidDbModel
     {
         [ForeignKey(typeof(User), true)]
         public Guid UserId { get; set; }

@@ -2,7 +2,7 @@
 using System.Reflection;
 
 using HB.FullStack.Common.Models;
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 
 namespace HB.FullStack.Database.DbModels
 {

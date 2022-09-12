@@ -3,7 +3,7 @@
 using System;
 using System.Data;
 
-namespace HB.FullStack.Database.Converter
+namespace HB.FullStack.Database.Convert
 {
     internal class SqliteGuidTypeConverter : IDbValueConverter
     {

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
 
@@ -13,11 +10,16 @@ namespace HB.FullStack.Common.ApiClient
     {
         #region RequestQuery
 
-        public static string? BuildQueryString(this ApiRequest request)
+        public static string? BuildQueryString(this object? obj)
         {
-            Func<object, List<string>> func = GetCachedConvertRequestToQueriesFunc(request.GetType());
+            if (obj == null)
+            {
+                return null;
+            }
 
-            List<string> queries = func(request);
+            Func<object, List<string>> func = GetCachedConvertRequestToQueriesFunc(obj.GetType());
+
+            List<string> queries = func(obj);
 
             return queries.ToJoinedString("&");
         }
@@ -44,11 +46,16 @@ namespace HB.FullStack.Common.ApiClient
 
         #region RequestBody
 
-        public static object? GetRequestBody(this ApiRequest request)
+        public static object? GetRequestBody(this object? obj)
         {
-            Func<object, object?> func = GetCachedPropertyGetFunc(request.GetType());
+            if (obj == null)
+            {
+                return null;
+            }
 
-            return func(request);
+            Func<object, object?> func = GetCachedPropertyGetFunc(obj.GetType());
+
+            return func(obj);
         }
 
         private static readonly Dictionary<Type, Func<object, object?>> _requestBodyGetDict = new Dictionary<Type, Func<object, object?>>();

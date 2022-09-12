@@ -8,6 +8,10 @@ namespace HB.FullStack.CommonTests.ApiClient
 {
     public class PreferenceProviderStub : IPreferenceProvider
     {
+        public PreferenceProviderStub()
+        {
+        }
+
         public Guid? UserId { get; set; }
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }

@@ -10,9 +10,9 @@ using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
-namespace HB.FullStack.Database.Converter
+namespace HB.FullStack.Database.Convert
 {
-    internal static class DbValueConvertFactory
+    internal static class DbValueConvert
     {
         private class DbTypeMapping
         {
@@ -71,7 +71,7 @@ namespace HB.FullStack.Database.Converter
             [typeof(byte[])] = new DbTypeMapping { DbTypeStatement = "BLOB", DbType = DbType.Binary }
         };
 
-        static DbValueConvertFactory()
+        static DbValueConvert()
         {
             #region MySQL
 
@@ -153,7 +153,7 @@ namespace HB.FullStack.Database.Converter
                 }
                 else if (trueType != dbValueType)
                 {
-                    typeValue = Convert.ChangeType(dbValue, trueType, GlobalSettings.Culture);
+                    typeValue = System.Convert.ChangeType(dbValue, trueType, GlobalSettings.Culture);
                 }
                 else
                 {

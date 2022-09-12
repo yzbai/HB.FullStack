@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -33,7 +34,7 @@ namespace HB.FullStack.CommonTests.ApiClient
                 refreshToken: Guid.NewGuid().ToString());
 
             TestHttpServer httpServer = StartHttpServer(
-                new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", ApiMethod.Get, (request, response, parameters) =>
+                new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", HttpMethod.Get, (request, response, parameters) =>
                 {
                     using StreamReader streamReader = new StreamReader(request.InputStream);
                     string requestJson = streamReader.ReadToEnd();

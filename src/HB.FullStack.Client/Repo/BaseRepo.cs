@@ -12,7 +12,7 @@ using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 //using Xamarin.Essentials;
 //using Xamarin.Forms;
 using Microsoft;
@@ -21,7 +21,7 @@ using Microsoft.VisualStudio.Threading;
 
 namespace HB.FullStack.Client
 {
-    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DBModel, new();
+    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DbModel, new();
 
     public abstract class BaseRepo
     {
@@ -82,10 +82,10 @@ namespace HB.FullStack.Client
         }
     }
 
-    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DBModel//, new() where TRes : ApiResource
+    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DbModel//, new() where TRes : ApiResource
     {
         private readonly ILogger _logger;
-        private readonly DBModelDef _modelDef = null!;
+        private readonly DbModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
 

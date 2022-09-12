@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 
 using HB.FullStack.Common.Convert.Converters;
 
@@ -16,7 +12,8 @@ namespace HB.FullStack.Common.Convert
         {
             [typeof(string)] = new StringStringConverter(),
             [typeof(int)] = new IntStringConverter(),
-            [typeof(Guid)] = new GuidStringConverter()
+            [typeof(Guid)] = new GuidStringConverter(),
+            [typeof(DateTimeOffset)] = new DateTimeOffsetConverter()
         };
 
         public static string? ConvertToString(object? value, Type valueType, StringConvertPurpose purpose)

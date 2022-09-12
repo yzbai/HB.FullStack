@@ -1,14 +1,12 @@
 ﻿
-
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.Linq;
 
-namespace HB.FullStack.Database.Converter
+namespace HB.FullStack.Database.Convert
 {
-    public class LongIdListTypeConverter : IDbValueConverter
+    public class GuidListTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.String;
 
@@ -20,20 +18,20 @@ namespace HB.FullStack.Database.Converter
 
             if (str.IsNotNullOrEmpty())
             {
-                return str.Split(',').Select(i => Convert.ToInt64(i, CultureInfo.InvariantCulture)).ToList();
+                return str.Split(',').Select(i => new Guid(i)).ToList();
             }
 
-            return new List<long>();
+            return new List<Guid>();
         }
 
         public object TypeValueToDbValue(object typeValue, Type propertyType)
         {
-            if (typeValue is IEnumerable<long> ids)
+            if (typeValue is IEnumerable<Guid> guids)
             {
-                return ids.ToJoinedString(",");
+                return guids.ToJoinedString(",");
             }
 
-            throw DatabaseExceptions.TypeConverterError("使用LongIdListTypeConverter的，必须可赋值为IEnumerable<long>", propertyType.FullName);
+            throw DatabaseExceptions.TypeConverterError("使用LongIdListTypeConverter的，必须可赋值为IEnumerable<Guid>", propertyType.FullName);
         }
     }
 }

@@ -10,9 +10,8 @@ using System.Threading.Tasks;
 using ClassLibrary1;
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DBModels;
-using HB.FullStack.Database.Mapper;
+using HB.FullStack.Database.Convert;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
@@ -84,7 +83,6 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
 
-
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
@@ -126,7 +124,6 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             //update book2
             book2!.Name = "Update book2";
-
 
             try
             {
@@ -559,10 +556,10 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 List<BookModel_Client> list3 = new List<BookModel_Client>();
 
                 int len = reader0.FieldCount;
-                DBModelPropertyDef[] propertyDefs = new DBModelPropertyDef[len];
+                DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DBModelDef definition = Db.ModelDefFactory.GetDef<BookModel_Client>()!;
+                DbModelDef definition = Db.ModelDefFactory.GetDef<BookModel_Client>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -570,7 +567,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDBModelDefFactory, IDataReader, object> mapper1 = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
+                Func<IDbModelDefFactory, IDataReader, object> mapper1 = DbModelConvert.CreateDataReaderRowToModelDelegate(definition, reader0, 0, definition.FieldCount, false, Database.Engine.EngineType.SQLite);
 
                 //Warning: 如果用Dapper，小心DateTimeOffset的存储，会丢失offset，然后转回来时候，会加上当地时间的offset
                 TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
@@ -601,9 +598,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DBModelPropertyDef property = propertyDefs[i];
+                        DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.SQLite);
+                        object? value = DbValueConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.SQLite);
 
                         if (value != null)
                         {

@@ -1,11 +1,11 @@
 ﻿using System;
 
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.CacheTests
 {
     [CacheModel]
-    public class BookModel : TimestampFlackIdDBModel
+    public class BookModel : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -15,7 +15,7 @@ namespace HB.FullStack.CacheTests
     }
 
     [CacheModel]
-    public class Guid_BookModel : TimestampGuidDBModel
+    public class Guid_BookModel : TimestampGuidDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -25,7 +25,7 @@ namespace HB.FullStack.CacheTests
     }
 
     [CacheModel]
-    public class Book : TimestampFlackIdDBModel
+    public class Book : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         [CacheModelAltKey]
@@ -43,7 +43,7 @@ namespace HB.FullStack.CacheTests
     }
 
     [CacheModel]
-    public class BookModel_Client : TimestampFlackIdDBModel
+    public class BookModel_Client : TimestampFlackIdDbModel
     {
         [DBModelProperty(NeedIndex = true)]
         public string Name { get; set; } = default!;
@@ -53,7 +53,7 @@ namespace HB.FullStack.CacheTests
     }
 
     [CacheModel]
-    public class Book_Client : TimestampFlackIdDBModel
+    public class Book_Client : TimestampFlackIdDbModel
     {
         [CacheModelAltKey]
         [DBModelProperty]

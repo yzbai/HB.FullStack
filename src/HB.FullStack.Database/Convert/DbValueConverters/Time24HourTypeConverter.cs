@@ -3,7 +3,7 @@ using System.Data;
 
 using HB.FullStack.Common;
 
-namespace HB.FullStack.Database.Converter
+namespace HB.FullStack.Database.Convert
 {
     public class Time24HourTypeConverter : IDbValueConverter
     {

@@ -1,10 +1,6 @@
-﻿using HB.FullStack.Database.DatabaseModels;
+﻿using System;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client
 {
@@ -18,7 +14,7 @@ namespace HB.FullStack.Client
     /// <summary>
     /// 使用自增保证顺序
     /// </summary>
-    public class OfflineHistory : TimestampAutoIncrementIdDBModel
+    public class OfflineHistory : TimestampAutoIncrementIdDbModel
     {
         public string ModelId { get; set; } = null!;
 

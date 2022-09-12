@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.Convert;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public class PublisherModel3 : TimestampFlackIdDBModel
+    public class PublisherModel3 : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public int Integer { get; set; } = 999;
@@ -25,7 +25,7 @@ namespace HB.FullStack.DatabaseTests
         public string Name3 { get; set; } = "xxxx";
     }
 
-    public class Guid_PublisherModel3 : TimestampGuidDBModel
+    public class Guid_PublisherModel3 : TimestampGuidDbModel
     {
         [DBModelProperty]
         public int Integer { get; set; } = 999;
@@ -43,7 +43,7 @@ namespace HB.FullStack.DatabaseTests
         public string Name3 { get; set; } = "xxxx";
     }
 
-    public class PublisherModel2 : TimestampFlackIdDBModel
+    public class PublisherModel2 : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public int Integer { get; set; } = 999;
@@ -82,7 +82,7 @@ namespace HB.FullStack.DatabaseTests
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
 
-    public class Guid_PublisherModel2 : TimestampGuidDBModel
+    public class Guid_PublisherModel2 : TimestampGuidDbModel
     {
         [DBModelProperty]
         public int Integer { get; set; } = 999;
@@ -121,7 +121,7 @@ namespace HB.FullStack.DatabaseTests
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
 
-    public class PublisherModel : TimestampFlackIdDBModel
+    public class PublisherModel : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -163,7 +163,7 @@ namespace HB.FullStack.DatabaseTests
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 
-    public class Guid_PublisherModel : TimestampGuidDBModel
+    public class Guid_PublisherModel : TimestampGuidDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -219,7 +219,7 @@ namespace HB.FullStack.DatabaseTests
         public string Mobile { get; set; } = default!;
     }
 
-    public class PublisherModel3_Client : TimestampFlackIdDBModel
+    public class PublisherModel3_Client : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public int Integer { get; set; } = 999;
@@ -237,7 +237,7 @@ namespace HB.FullStack.DatabaseTests
         public string Name3 { get; set; } = "xxxx";
     }
 
-    public class PublisherModel2_Client : TimestampFlackIdDBModel
+    public class PublisherModel2_Client : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public int Integer { get; set; } = 999;
@@ -276,7 +276,7 @@ namespace HB.FullStack.DatabaseTests
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
 
-    public class PublisherModel_Client : TimestampFlackIdDBModel
+    public class PublisherModel_Client : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -318,7 +318,7 @@ namespace HB.FullStack.DatabaseTests
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 
-    public class Guid_PublisherModel_Client : TimestampGuidDBModel
+    public class Guid_PublisherModel_Client : TimestampGuidDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;

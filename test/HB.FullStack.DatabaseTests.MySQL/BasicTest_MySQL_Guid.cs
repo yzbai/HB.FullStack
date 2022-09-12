@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 using ClassLibrary1;
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.Convert;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
@@ -86,7 +85,6 @@ namespace HB.FullStack.DatabaseTests
             toUpdate.Add((nameof(Guid_BookModel.Name), book.Name, "TTTTTXXXXTTTTT"));
 
             await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
-
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -679,10 +677,10 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
                 List<Guid_BookModel> list3 = new List<Guid_BookModel>();
 
                 int len = reader.FieldCount;
-                DBModelPropertyDef[] propertyDefs = new DBModelPropertyDef[len];
+                DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DBModelDef definition = Db.ModelDefFactory.GetDef<Guid_BookModel>()!;
+                DbModelDef definition = Db.ModelDefFactory.GetDef<Guid_BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -690,7 +688,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDBModelDefFactory, IDataReader, object> fullStack_mapper = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader, 0, definition.FieldCount, false, EngineType.MySQL);
+                Func<IDbModelDefFactory, IDataReader, object> fullStack_mapper = DbModelConvert.CreateDataReaderRowToModelDelegate(definition, reader, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Guid_BookModel), reader);
 
@@ -700,9 +698,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DBModelPropertyDef property = propertyDefs[i];
+                        DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(r[i], property, EngineType.MySQL);
+                        object? value = DbValueConvert.DbValueToTypeValue(r[i], property, EngineType.MySQL);
 
                         if (value != null)
                         {
@@ -756,9 +754,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
             Guid_PublisherModel publisherModel = Mocker.Guid_MockOnePublisherModel();
             //publisherModel.Version = 0;
 
-            var emit_results = publisherModel.ModelToParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
+            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
 
-            var reflect_results = publisherModel.ModelToParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, 1);
+            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results, reflect_results, EngineType.MySQL);
 
@@ -766,9 +764,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
 
             Guid_PublisherModel2 publisherModel2 = new Guid_PublisherModel2();
 
-            IList<KeyValuePair<string, object>>? emit_results2 = publisherModel2.ModelToParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
+            IList<KeyValuePair<string, object>>? emit_results2 = publisherModel2.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
 
-            var reflect_results2 = publisherModel2.ModelToParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, 1);
+            var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results2, reflect_results2, EngineType.MySQL);
 
@@ -776,9 +774,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
 
             Guid_PublisherModel3 publisherModel3 = new Guid_PublisherModel3();
 
-            var emit_results3 = publisherModel3.ModelToParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
+            var emit_results3 = publisherModel3.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
 
-            var reflect_results3 = publisherModel3.ModelToParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, 1);
+            var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results3, reflect_results3, EngineType.MySQL);
         }
@@ -795,7 +793,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ModelToParameters(def!, EngineType.MySQL, Db.ModelDefFactory);
+                _ = model.ToDbParameters(def!, EngineType.MySQL, Db.ModelDefFactory);
             }
             stopwatch.Stop();
 
@@ -804,7 +802,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ModelToParametersUsingReflection(def!, EngineType.MySQL);
+                _ = model.ToDbParametersUsingReflection(def!, EngineType.MySQL);
             }
             stopwatch.Stop();
 
@@ -821,9 +819,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
             {
                 Assert.IsTrue(dict.ContainsKey(kv.Key));
 
-                Assert.IsTrue(TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
+                Assert.IsTrue(DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
 
-                    TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
+                    DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
             }
         }
 

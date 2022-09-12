@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database.DbModels

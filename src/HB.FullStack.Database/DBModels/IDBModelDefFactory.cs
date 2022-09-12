@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 
 namespace HB.FullStack.Database.DbModels
 {

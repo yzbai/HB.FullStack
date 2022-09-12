@@ -1,28 +1,25 @@
 ﻿using System;
 
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.DatabaseTests
 {
 
-    public class A : TimestampFlackIdDBModel
-    {
-
-
-        [DBModelProperty]
-        public string Name { get; set; } = default!;
-    }
-
-
-    public class B : TimestampFlackIdDBModel
+    public class A : TimestampFlackIdDbModel
     {
 
         [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
+    public class B : TimestampFlackIdDbModel
+    {
 
-    public class AB : TimestampFlackIdDBModel
+        [DBModelProperty]
+        public string Name { get; set; } = default!;
+    }
+
+    public class AB : TimestampFlackIdDbModel
     {
 
         [DBModelProperty]
@@ -32,8 +29,7 @@ namespace HB.FullStack.DatabaseTests
         public long BId { get; set; } = default!;
     }
 
-
-    public class C : TimestampFlackIdDBModel
+    public class C : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -42,23 +38,21 @@ namespace HB.FullStack.DatabaseTests
         public long AId { get; set; } = default!;
     }
 
-    public class A_Client : TimestampFlackIdDBModel
+    public class A_Client : TimestampFlackIdDbModel
     {
 
         [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
-
-    public class B_Client : TimestampFlackIdDBModel
+    public class B_Client : TimestampFlackIdDbModel
     {
 
         [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
-
-    public class AB_Client : TimestampFlackIdDBModel
+    public class AB_Client : TimestampFlackIdDbModel
     {
 
         [DBModelProperty]
@@ -68,8 +62,7 @@ namespace HB.FullStack.DatabaseTests
         public long BId { get; set; } = default!;
     }
 
-
-    public class C_Client : TimestampFlackIdDBModel
+    public class C_Client : TimestampFlackIdDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -78,24 +71,21 @@ namespace HB.FullStack.DatabaseTests
         public long AId { get; set; } = default!;
     }
 
-    public class Guid_A : TimestampGuidDBModel
-    {
-
-
-        [DBModelProperty]
-        public string Name { get; set; } = default!;
-    }
-
-
-    public class Guid_B : TimestampGuidDBModel
+    public class Guid_A : TimestampGuidDbModel
     {
 
         [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
+    public class Guid_B : TimestampGuidDbModel
+    {
 
-    public class Guid_AB : TimestampGuidDBModel
+        [DBModelProperty]
+        public string Name { get; set; } = default!;
+    }
+
+    public class Guid_AB : TimestampGuidDbModel
     {
 
         public Guid Guid_AId { get; set; }
@@ -103,8 +93,7 @@ namespace HB.FullStack.DatabaseTests
         public Guid Guid_BId { get; set; }
     }
 
-
-    public class Guid_C : TimestampGuidDBModel
+    public class Guid_C : TimestampGuidDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;
@@ -113,23 +102,21 @@ namespace HB.FullStack.DatabaseTests
         public Guid Guid_AId { get; set; }
     }
 
-    public class Guid_A_Client : TimestampGuidDBModel
+    public class Guid_A_Client : TimestampGuidDbModel
     {
 
         [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
-
-    public class Guid_B_Client : TimestampGuidDBModel
+    public class Guid_B_Client : TimestampGuidDbModel
     {
 
         [DBModelProperty]
         public string Name { get; set; } = default!;
     }
 
-
-    public class Guid_AB_Client : TimestampGuidDBModel
+    public class Guid_AB_Client : TimestampGuidDbModel
     {
 
         [DBModelProperty]
@@ -139,8 +126,7 @@ namespace HB.FullStack.DatabaseTests
         public Guid Guid_BId { get; set; } = default!;
     }
 
-
-    public class Guid_C_Client : TimestampGuidDBModel
+    public class Guid_C_Client : TimestampGuidDbModel
     {
         [DBModelProperty]
         public string Name { get; set; } = default!;

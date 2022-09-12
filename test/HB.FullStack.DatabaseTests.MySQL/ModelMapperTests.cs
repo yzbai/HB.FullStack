@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Mapper;
 using HB.FullStack.DatabaseTests.Data;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,11 +21,9 @@ namespace HB.FullStack.DatabaseTests
         {
             PublisherModel publisherModel = Mocker.MockOnePublisherModel();
 
+            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, Db.ModelDefFactory, 1);
 
-
-            var emit_results = publisherModel.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, Db.ModelDefFactory, 1);
-
-            var reflect_results = publisherModel.ModelToParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, 1);
+            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, 1);
 
             AssertEqual(emit_results, reflect_results, engineType);
 
@@ -34,10 +31,9 @@ namespace HB.FullStack.DatabaseTests
 
             PublisherModel2 publisherModel2 = new PublisherModel2();
 
+            var emit_results2 = publisherModel2.ToDbParameters(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, Db.ModelDefFactory, 1);
 
-            var emit_results2 = publisherModel2.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, Db.ModelDefFactory, 1);
-
-            var reflect_results2 = publisherModel2.ModelToParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, 1);
+            var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, 1);
 
             AssertEqual(emit_results2, reflect_results2, engineType);
 
@@ -45,10 +41,9 @@ namespace HB.FullStack.DatabaseTests
 
             PublisherModel3 publisherModel3 = new PublisherModel3();
 
+            var emit_results3 = publisherModel3.ToDbParameters(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, Db.ModelDefFactory, 1);
 
-            var emit_results3 = publisherModel3.ModelToParameters(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, Db.ModelDefFactory, 1);
-
-            var reflect_results3 = publisherModel3.ModelToParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, 1);
+            var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, 1);
 
             AssertEqual(emit_results3, reflect_results3, engineType);
         }
@@ -63,9 +58,9 @@ namespace HB.FullStack.DatabaseTests
             {
                 Assert.IsTrue(dict.ContainsKey(kv.Key));
 
-                Assert.IsTrue(TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
+                Assert.IsTrue(DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
 
-                    TypeConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
+                    DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
             }
         }
 
@@ -76,8 +71,6 @@ namespace HB.FullStack.DatabaseTests
         {
             var models = Mocker.GetPublishers(10000);
 
-
-
             var def = Db.ModelDefFactory.GetDef<PublisherModel>();
 
             Stopwatch stopwatch = new Stopwatch();
@@ -85,7 +78,7 @@ namespace HB.FullStack.DatabaseTests
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ModelToParameters(def!, engineType, Db.ModelDefFactory);
+                _ = model.ToDbParameters(def!, engineType, Db.ModelDefFactory);
             }
             stopwatch.Stop();
 
@@ -94,7 +87,7 @@ namespace HB.FullStack.DatabaseTests
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ModelToParametersUsingReflection(def!, engineType);
+                _ = model.ToDbParametersUsingReflection(def!, engineType);
             }
             stopwatch.Stop();
 

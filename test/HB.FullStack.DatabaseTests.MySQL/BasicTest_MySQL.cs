@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 using ClassLibrary1;
 
 using HB.FullStack.Database;
-using HB.FullStack.Database.Converter;
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.Convert;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Mapper;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.DatabaseTests.Data;
 
@@ -403,10 +402,10 @@ namespace HB.FullStack.DatabaseTests
                 List<BookModel> list3 = new List<BookModel>();
 
                 int len = reader0.FieldCount;
-                DBModelPropertyDef[] propertyDefs = new DBModelPropertyDef[len];
+                DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DBModelDef definition = Db.ModelDefFactory.GetDef<BookModel>()!;
+                DbModelDef definition = Db.ModelDefFactory.GetDef<BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -414,7 +413,7 @@ namespace HB.FullStack.DatabaseTests
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDBModelDefFactory, IDataReader, object> mapper1 = ModelMapperDelegateCreator.CreateToModelDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
+                Func<IDbModelDefFactory, IDataReader, object> mapper1 = DbModelConvert.CreateDataReaderRowToModelDelegate(definition, reader0, 0, definition.FieldCount, false, EngineType.MySQL);
 
                 //Warning: �����Dapper��С��DateTimeOffset�Ĵ洢���ᶪʧoffset��Ȼ��ת����ʱ�򣬻���ϵ���ʱ���offset
                 Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookModel), reader0);
@@ -444,9 +443,9 @@ namespace HB.FullStack.DatabaseTests
 
                     for (int i = 0; i < len; ++i)
                     {
-                        DBModelPropertyDef property = propertyDefs[i];
+                        DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = TypeConvert.DbValueToTypeValue(reader0[i], property, EngineType.MySQL);
+                        object? value = DbValueConvert.DbValueToTypeValue(reader0[i], property, EngineType.MySQL);
 
                         if (value != null)
                         {

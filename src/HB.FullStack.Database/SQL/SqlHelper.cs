@@ -1,7 +1,7 @@
 ﻿
 
 using HB.FullStack.Common;
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.DbModels;
 
@@ -339,7 +339,7 @@ namespace HB.FullStack.Database.SQL
 
         public static bool IsDbFieldNeedLength(DbModelPropertyDef propertyDef, EngineType engineType)
         {
-            DbType dbType = DbValueConvertFactory.TypeToDbType(propertyDef, engineType);
+            DbType dbType = DbValueConvert.TypeToDbType(propertyDef, engineType);
 
             return dbType == DbType.String
                 || dbType == DbType.StringFixedLength
@@ -473,7 +473,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
-                string dbTypeStatement = DbValueConvertFactory.TypeToDbTypeStatement(propertyDef, EngineType.SQLite);
+                string dbTypeStatement = DbValueConvert.TypeToDbTypeStatement(propertyDef, EngineType.SQLite);
 
                 string nullable = propertyDef.IsNullable ? "" : " NOT NULL ";
 
@@ -518,7 +518,7 @@ namespace HB.FullStack.Database.SQL
                     primaryKeyPropertyDef = propertyDef;
                 }
 
-                string dbTypeStatement = DbValueConvertFactory.TypeToDbTypeStatement(propertyDef, EngineType.MySQL);
+                string dbTypeStatement = DbValueConvert.TypeToDbTypeStatement(propertyDef, EngineType.MySQL);
 
                 int length = 0;
 

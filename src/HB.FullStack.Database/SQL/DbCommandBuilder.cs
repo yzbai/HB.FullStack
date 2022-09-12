@@ -8,7 +8,7 @@ using System.Text;
 
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Mapper;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.SQL;
 
 using Microsoft;
@@ -183,12 +183,12 @@ namespace HB.FullStack.Database
         {
             return new EngineCommand(
                 GetCachedSql(engineType, SqlType.AddModel, new DbModelDef[] { modelDef }),
-                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
+                model.ToDbParameters(modelDef, engineType, _modelDefFactory));
         }
 
         public EngineCommand CreateUpdateCommand<T>(EngineType engineType, DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new()
         {
-            var paramters = model.ModelToParameters(modelDef, engineType, _modelDefFactory);
+            var paramters = model.ToDbParameters(modelDef, engineType, _modelDefFactory);
 
             if (modelDef.IsTimestampDBModel)
             {
@@ -219,7 +219,7 @@ namespace HB.FullStack.Database
                 propertyValues.Add(lastUser);
             }
 
-            IList<KeyValuePair<string, object>> parameters = DbModelConverter.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues);
+            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues);
 
             if (modelDef.IsTimestampDBModel)
             {
@@ -237,7 +237,7 @@ namespace HB.FullStack.Database
         {
             string sql = GetCachedSql(engineType, SqlType.UpdateFieldsUsingOldNewCompare, new DbModelDef[] { modelDef }, propertyNames);
 
-            var oldParameters = DbModelConverter.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
+            var oldParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
 
             propertyNames.Add(nameof(TimestampLongIdDbModel.Id));
             newPropertyValues.Add(id);
@@ -251,7 +251,7 @@ namespace HB.FullStack.Database
                 newPropertyValues.Add(lastUser);
             }
 
-            var newParameters = DbModelConverter.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, newPropertyValues, $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, newPropertyValues, $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(oldParameters);
             parameters.AddRange(newParameters);
@@ -293,7 +293,7 @@ namespace HB.FullStack.Database
             {
                 string addCommandText = SqlHelper.CreateAddModelSql(modelDef, engineType, false, number);
 
-                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
+                parameters.AddRange(model.ToDbParameters(modelDef, engineType, _modelDefFactory, number));
 
                 innerBuilder.Append(addCommandText);
 
@@ -354,7 +354,7 @@ namespace HB.FullStack.Database
             {
                 string updateCommandText = SqlHelper.CreateUpdateModelSql(modelDef, number);
 
-                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
+                parameters.AddRange(model.ToDbParameters(modelDef, engineType, _modelDefFactory, number));
 
                 //这里要添加 一些参数值，参考update
                 if (modelDef.IsTimestampDBModel)
@@ -450,7 +450,7 @@ namespace HB.FullStack.Database
         {
             return new EngineCommand(
                 GetCachedSql(engineType, SqlType.AddOrUpdateModel, new DbModelDef[] { modelDef }, null, returnModel),
-                model.ModelToParameters(modelDef, engineType, _modelDefFactory));
+                model.ToDbParameters(modelDef, engineType, _modelDefFactory));
         }
 
         /// <summary>
@@ -470,7 +470,7 @@ namespace HB.FullStack.Database
             {
                 string addOrUpdateCommandText = SqlHelper.CreateAddOrUpdateSql(modelDef, engineType, false, number);
 
-                parameters.AddRange(model.ModelToParameters(modelDef, engineType, _modelDefFactory, number));
+                parameters.AddRange(model.ToDbParameters(modelDef, engineType, _modelDefFactory, number));
 
                 innerBuilder.Append(addOrUpdateCommandText);
 

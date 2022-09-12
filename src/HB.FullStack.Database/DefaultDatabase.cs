@@ -11,7 +11,7 @@ using HB.FullStack.Common;
 using HB.FullStack.Common.Extensions;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Mapper;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.SQL;
 
 using Microsoft.Extensions.Logging;
@@ -294,7 +294,7 @@ namespace HB.FullStack.Database
 
             object? result = await _databaseEngine.ExecuteCommandScalarAsync(transaction, databaseName, command, true).ConfigureAwait(false);
 
-            return Convert.ToBoolean(result, GlobalSettings.Culture);
+            return System.Convert.ToBoolean(result, GlobalSettings.Culture);
         }
 
         internal async Task<SystemInfo?> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
@@ -384,7 +384,7 @@ namespace HB.FullStack.Database
 
                 using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
 
-                return reader.ToModels<TSelect>(_databaseEngine.EngineType, ModelDefFactory, selectDef);
+                return reader.ToDbModels<TSelect>(_databaseEngine.EngineType, ModelDefFactory, selectDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -409,7 +409,7 @@ namespace HB.FullStack.Database
                 EngineCommand command = DbCommandBuilder.CreateRetrieveCommand(EngineType, modelDef, fromCondition, whereCondition);
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToModels<T>(_databaseEngine.EngineType, ModelDefFactory, modelDef);
+                return reader.ToDbModels<T>(_databaseEngine.EngineType, ModelDefFactory, modelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -433,7 +433,7 @@ namespace HB.FullStack.Database
             {
                 EngineCommand command = DbCommandBuilder.CreateCountCommand(EngineType, fromCondition, whereCondition);
                 object? countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, modelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return Convert.ToInt32(countObj, GlobalSettings.Culture);
+                return System.Convert.ToInt32(countObj, GlobalSettings.Culture);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -598,7 +598,7 @@ namespace HB.FullStack.Database
             {
                 var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(EngineType, fromCondition, whereCondition, sourceModelDef, targetModelDef);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceModelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToModels<TSource, TTarget>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef);
+                return reader.ToDbModels<TSource, TTarget>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -673,7 +673,7 @@ namespace HB.FullStack.Database
             {
                 var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(EngineType, fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceModelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToModels<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
+                return reader.ToDbModels<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -739,7 +739,7 @@ namespace HB.FullStack.Database
 
                 if (modelDef.IsIdAutoIncrement)
                 {
-                    ((ILongId)item).Id = Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                    ((ILongId)item).Id = System.Convert.ToInt64(rt, CultureInfo.InvariantCulture);
                 }
             }
             catch (DatabaseException ex)
@@ -1169,7 +1169,7 @@ namespace HB.FullStack.Database
 
                     foreach (var item in items)
                     {
-                        ((ILongId)item).Id = Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
+                        ((ILongId)item).Id = System.Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
                     }
                 }
                 else if (modelDef.IsIdGuid)

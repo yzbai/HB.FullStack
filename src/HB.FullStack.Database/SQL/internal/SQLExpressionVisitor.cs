@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database.SQL
@@ -139,7 +139,7 @@ namespace HB.FullStack.Database.SQL
                     object result = Expression.Lambda(b).Compile().DynamicInvoke()!;
 
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(result, null, context.EngineType);
+                    object paramValue = DbValueConvert.TypeValueToDbValue(result, null, context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -172,7 +172,7 @@ namespace HB.FullStack.Database.SQL
                     object result = Expression.Lambda(b).Compile().DynamicInvoke()!;
 
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(result, null, context.EngineType);
+                    object paramValue = DbValueConvert.TypeValueToDbValue(result, null, context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -181,7 +181,7 @@ namespace HB.FullStack.Database.SQL
                 else if (left as PartialSqlString == null)
                 {
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(left, null, context.EngineType);
+                    object paramValue = DbValueConvert.TypeValueToDbValue(left, null, context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -190,7 +190,7 @@ namespace HB.FullStack.Database.SQL
                 else if (right as PartialSqlString == null)
                 {
                     string paramPlaceholder = context.GetNextParamPlaceholder();
-                    object paramValue = DbValueConvertFactory.TypeValueToDbValue(right, GetPropertyDef(b.Left as MemberExpression), context.EngineType);
+                    object paramValue = DbValueConvert.TypeValueToDbValue(right, GetPropertyDef(b.Left as MemberExpression), context.EngineType);
 
                     context.AddParameter(paramPlaceholder, paramValue);
 
@@ -448,7 +448,7 @@ namespace HB.FullStack.Database.SQL
             static void AddParameter(SQLExpressionVisitorContenxt context, StringBuilder sIn, DbModelPropertyDef? propertyDef, object e)
             {
                 string paramPlaceHoder = context.GetNextParamPlaceholder();
-                object paramValue = propertyDef == null ? e : DbValueConvertFactory.TypeValueToDbValue(e, propertyDef, context.EngineType);
+                object paramValue = propertyDef == null ? e : DbValueConvert.TypeValueToDbValue(e, propertyDef, context.EngineType);
 
                 context.AddParameter(paramPlaceHoder, paramValue);
 
@@ -476,7 +476,7 @@ namespace HB.FullStack.Database.SQL
 
                     //IEnumerable inArgs = (IEnumerable)getter();
 
-                    bool returnByOrder = Convert.ToBoolean(args[0], CultureInfo.InvariantCulture);
+                    bool returnByOrder = System.Convert.ToBoolean(args[0], CultureInfo.InvariantCulture);
                     IEnumerable inArgs = (IEnumerable)args[1];
 
                     List<string> sIn = new List<string>();
@@ -551,7 +551,7 @@ namespace HB.FullStack.Database.SQL
             static void AddParameter(SQLExpressionVisitorContenxt context, List<string> sIn, DbModelPropertyDef? propertyDef, object originValue)
             {
                 string paramPlaceholder = context.GetNextParamPlaceholder();
-                object paramValue = propertyDef == null ? originValue : DbValueConvertFactory.TypeValueToDbValue(originValue, propertyDef, context.EngineType);
+                object paramValue = propertyDef == null ? originValue : DbValueConvert.TypeValueToDbValue(originValue, propertyDef, context.EngineType);
 
                 context.AddParameter(paramPlaceholder, paramValue);
 
@@ -579,7 +579,7 @@ namespace HB.FullStack.Database.SQL
                 string paramPlaceholder = context.GetNextParamPlaceholder();
                 object paramValue = propertyDef == null ?
                     args0[0] :
-                    DbValueConvertFactory.TypeValueToDbValue(args0[0], propertyDef, context.EngineType);
+                    DbValueConvert.TypeValueToDbValue(args0[0], propertyDef, context.EngineType);
 
                 context.AddParameter(paramPlaceholder, paramValue);
 

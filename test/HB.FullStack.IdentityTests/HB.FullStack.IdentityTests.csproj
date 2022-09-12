@@ -17,8 +17,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HB.FullStack.Identity\HB.FullStack.Identity.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -1,6 +1,6 @@
-﻿using HB.FullStack.Database.DatabaseModels;
+﻿using System;
 
-using System;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Maui.File
 {
@@ -9,7 +9,7 @@ namespace HB.FullStack.Client.Maui.File
       needLogined: true,
       allowOfflineRead: false,
       allowOfflineWrite: false)]
-    public class StsToken : TimestampGuidDBModel
+    public class StsToken : TimestampGuidDbModel
     {
         public Guid UserId { get; set; }
 

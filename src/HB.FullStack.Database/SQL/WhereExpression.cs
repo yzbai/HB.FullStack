@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.DbModels;
 
@@ -166,7 +166,7 @@ namespace HB.FullStack.Database.SQL
                             foreach (object value in sqlInValues.Values)
                             {
                                 string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
-                                object paramValue = DbValueConvertFactory.TypeValueToDbValue(value, null, engineType);
+                                object paramValue = DbValueConvert.TypeValueToDbValue(value, null, engineType);
 
                                 _expressionContext.AddParameter(paramPlaceholder, paramValue);
 
@@ -182,7 +182,7 @@ namespace HB.FullStack.Database.SQL
                     else
                     {
                         string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
-                        object paramValue = DbValueConvertFactory.TypeValueToDbValue(sqlParam, null, engineType);
+                        object paramValue = DbValueConvert.TypeValueToDbValue(sqlParam, null, engineType);
 
                         _expressionContext.AddParameter(paramPlaceholder, paramValue);
                         escapedParams.Add(paramPlaceholder);

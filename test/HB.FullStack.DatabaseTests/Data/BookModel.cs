@@ -1,9 +1,9 @@
-﻿using HB.FullStack.Database.DBModels;
+﻿using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.DatabaseTests.Data
 {
 
-    public class BookModel : TimestampFlackIdDBModel
+    public class BookModel : TimestampFlackIdDbModel
     {
 
         [DBModelProperty]
@@ -13,8 +13,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public double Price { get; set; } = default!;
     }
 
-
-    public class Guid_BookModel : TimestampGuidDBModel
+    public class Guid_BookModel : TimestampGuidDbModel
     {
 
         [DBModelProperty]
@@ -24,8 +23,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public double Price { get; set; } = default!;
     }
 
-
-    public class Book : TimestampFlackIdDBModel
+    public class Book : TimestampFlackIdDbModel
     {
         [DBModelProperty]
 
@@ -42,8 +40,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public double Price { get; set; }
     }
 
-
-    public class BookModel_Client : TimestampFlackIdDBModel
+    public class BookModel_Client : TimestampFlackIdDbModel
     {
 
         [DBModelProperty(NeedIndex = true)]
@@ -53,8 +50,7 @@ namespace HB.FullStack.DatabaseTests.Data
         public double Price { get; set; } = default!;
     }
 
-
-    public class Book_Client : TimestampFlackIdDBModel
+    public class Book_Client : TimestampFlackIdDbModel
     {
 
         [DBModelProperty]

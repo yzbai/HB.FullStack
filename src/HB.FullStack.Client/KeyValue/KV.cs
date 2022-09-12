@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-using HB.FullStack.Database.DatabaseModels;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.KeyValue
 {
-    public class KV : TimelessGuidDBModel
+    public class KV : TimelessGuidDbModel
     {
         public string Key { get; set; } = null!;
 

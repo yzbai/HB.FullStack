@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using HB.FullStack.Database.DBModels;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database.Tests
 {
-    public class CExtModel : TimelessFlackIdDBModel
+    public class CExtModel : TimelessFlackIdDbModel
     {
         public string? Name { get; set; }
     }
