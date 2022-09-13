@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UserTokenResGetBySms : ApiRequest
+    public class UserTokenResGetBySmsRequest : ApiRequest
     {
         [RequestQuery]
         [Mobile(CanBeNull = false)]
@@ -29,7 +29,7 @@ namespace HB.FullStack.Common.Api
         [Required]
         public DeviceInfos DeviceInfos { get; set; } = null!;
 
-        public UserTokenResGetBySms(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
+        public UserTokenResGetBySmsRequest(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
             : base(nameof(UserTokenRes), ApiMethod.Get, ApiRequestAuth2.NONE, "BySms")
         {
             Mobile = mobile;

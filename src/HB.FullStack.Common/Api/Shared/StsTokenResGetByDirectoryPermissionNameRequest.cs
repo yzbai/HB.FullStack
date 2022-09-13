@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Common.Api
 {
-    public class StsTokenResGetByDirectoryPermissionName : ApiRequest //GetRequest<StsTokenRes>
+    public class StsTokenResGetByDirectoryPermissionNameRequest : ApiRequest //GetRequest<StsTokenRes>
     {
         [Required]
         [RequestQuery]
@@ -14,7 +14,7 @@ namespace HB.FullStack.Common.Api
         [RequestQuery]
         public bool ReadOnly { get; set; }
 
-        public StsTokenResGetByDirectoryPermissionName(string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly)
+        public StsTokenResGetByDirectoryPermissionNameRequest(string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly)
             : base(nameof(StsTokenRes), ApiMethod.Get, null, "ByDirectoryPermissionName")
         {
             DirectoryPermissionName = directoryPermissionName;

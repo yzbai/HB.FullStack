@@ -67,7 +67,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (tokenProvider.RefreshToken.IsNotNullOrEmpty())
                 {
-                    UserTokenResGetByRefresh refreshRequest = new UserTokenResGetByRefresh(
+                    UserTokenResGetByRefreshRequest refreshRequest = new UserTokenResGetByRefreshRequest(
                         tokenProvider.UserId!.Value,
                         tokenProvider.AccessToken,
                         tokenProvider.RefreshToken,
