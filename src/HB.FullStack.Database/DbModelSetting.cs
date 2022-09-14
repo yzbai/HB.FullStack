@@ -1,10 +1,9 @@
 ﻿
-
 using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Database
 {
-    public class DatabaseModelSetting
+    public class DbModelSetting
     {
         [DisallowNull, NotNull]
         public string ModelTypeFullName { get; set; } = null!;

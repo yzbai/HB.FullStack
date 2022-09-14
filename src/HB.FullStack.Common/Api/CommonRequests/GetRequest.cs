@@ -27,11 +27,11 @@ namespace HB.FullStack.Common.Api
         [RequestQuery]
         public IList<string> ResIncludes { get; } = new List<string>();
 
-        /// <summary>
-        /// 只支持PropertyName=PropertyStringValue这种Equal形式。其他形式请自行定义GetByCondition Request
-        /// </summary>
         [RequestQuery]
-        public IList<PropertyFilter> PropertyFilters { get; } = new List<PropertyFilter>();
+        public IList<string> WherePropertyNames { get; set; } = new List<string>();
+
+        [RequestQuery]
+        public IList<string?> WherePropertyValues { get; set; } = new List<string?>();
 
         public GetRequest(string resName) : base(resName, ApiMethod.Get, null, null) { }
     }

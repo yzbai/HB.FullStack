@@ -30,7 +30,7 @@ namespace HB.FullStack.Database
     /// </summary>
     public sealed partial class DefaultDatabase : IDatabase
     {
-        private readonly DatabaseCommonSettings _databaseSettings;
+        private readonly DbCommonSettings _databaseSettings;
         private readonly IDatabaseEngine _databaseEngine;
         private readonly ITransaction _transaction;
         private readonly ILogger _logger;

@@ -20,14 +20,14 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimelessLongIdDbModel : TimelessDbModel, ILongId
     {
-        [DBModelProperty(0)]
+        [DbModelProperty(0)]
         public abstract long Id { get; set; }
     }
 
     public abstract class TimelessAutoIncrementIdDbModel : TimelessLongIdDbModel, IAutoIncrementId
     {
         [AutoIncrementPrimaryKey]
-        [DBModelProperty(0)]
+        [DbModelProperty(0)]
         [CacheModelKey]
         public override long Id { get; set; } = -1;
     }
@@ -35,7 +35,7 @@ namespace HB.FullStack.Database.DbModels
     public abstract class TimelessFlackIdDbModel : TimelessLongIdDbModel
     {
         [PrimaryKey]
-        [DBModelProperty(0)]
+        [DbModelProperty(0)]
         [CacheModelKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
@@ -43,7 +43,7 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimelessGuidDbModel : TimelessDbModel, IGuidId
     {
-        [DBModelProperty(0)]
+        [DbModelProperty(0)]
         [NoEmptyGuid]
         [PrimaryKey]
         [CacheModelKey]

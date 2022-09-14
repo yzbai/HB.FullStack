@@ -16,7 +16,7 @@ namespace HB.FullStack.Database.Engine
     {
         #region 管理功能
 
-        DatabaseCommonSettings DatabaseSettings { get; }
+        DbCommonSettings DatabaseSettings { get; }
 
         EngineType EngineType { get; }
 

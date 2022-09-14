@@ -16,8 +16,18 @@ namespace HB.FullStack.Common.Convert
             [typeof(DateTimeOffset)] = new DateTimeOffsetConverter()
         };
 
-        public static string? ConvertToString(object? value, Type valueType, StringConvertPurpose purpose)
+        public static string? ConvertToString(object? value, Type? valueType, StringConvertPurpose purpose)
         {
+            if (value == null && valueType == null)
+            {
+                return null;
+            }
+
+            if (valueType == null)
+            {
+                valueType = value!.GetType();
+            }
+
             if (!_stringConverters.TryGetValue(valueType, out IStringConverter? stringConverter))
             {
                 throw new NotImplementedException($"不支持这种Type的ConvertToString. Type:{valueType.FullName}");

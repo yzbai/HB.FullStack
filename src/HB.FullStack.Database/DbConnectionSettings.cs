@@ -4,12 +4,11 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
-
 using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Database
 {
-    public class DatabaseConnectionSettings
+    public class DbConnectionSettings
     {
         [DisallowNull, NotNull]
         public string DatabaseName { get; set; } = null!;

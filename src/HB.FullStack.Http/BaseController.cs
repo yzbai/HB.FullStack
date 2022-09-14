@@ -22,7 +22,14 @@ namespace HB.FullStack.WebApi
         /// 通用Get
         /// </summary>
         [HttpGet]
-        public virtual IActionResult Get(string[]? ids, int? page, int? perPage, string? orderBys, string[]? resIncludes, PropertyFilter[]? propertyFilters)
+        public virtual IActionResult Get(
+            [FromQuery] string[]? ids,
+            [FromQuery] int? page,
+            [FromQuery] int? perPage,
+            [FromQuery] string? orderBys,
+            [FromQuery] string[]? resIncludes,
+            [FromQuery] string[]? wherePropertyNames,
+            [FromQuery] string?[]? wherePropertyValues)
         {
             //settings: allowId? allowIds? allow page? maxPerPage? allowIncludes? includesWhat? allowPropertyFilter?
 

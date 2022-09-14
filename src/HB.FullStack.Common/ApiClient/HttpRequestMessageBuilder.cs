@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
@@ -21,21 +22,21 @@ namespace HB.FullStack.Common.ApiClient
             ResEndpoint = resEndpoint;
             Request = request;
 
-            EnsureApiRequestAuth(resEndpoint);
+            EnsureApiRequestAuth();
         }
 
-        private void EnsureApiRequestAuth(ResEndpoint resEndpoint)
+        private void EnsureApiRequestAuth()
         {
             if (Request.Auth == null)
             {
                 Request.Auth = Request.ApiMethod switch
                 {
-                    ApiMethod.Get => resEndpoint.DefaultReadAuth,
-                    ApiMethod.Add => resEndpoint.DefaultWriteAuth,
-                    ApiMethod.Update => resEndpoint.DefaultWriteAuth,
-                    ApiMethod.Delete => resEndpoint.DefaultWriteAuth,
-                    ApiMethod.UpdateFields => resEndpoint.DefaultWriteAuth,
-                    ApiMethod.UpdateRelation => resEndpoint.DefaultWriteAuth,
+                    ApiMethod.Get => ResEndpoint.DefaultReadAuth,
+                    ApiMethod.Add
+                        or ApiMethod.Update
+                        or ApiMethod.Delete
+                        or ApiMethod.UpdateFields
+                        or ApiMethod.UpdateRelation => ResEndpoint.DefaultWriteAuth,
                     ApiMethod.None => throw new NotImplementedException(),
                     _ => throw new NotImplementedException(),
                 };

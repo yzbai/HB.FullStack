@@ -11,7 +11,7 @@ using HB.FullStack.Database.DbModels;
 namespace HB.FullStack.Database.DbModels
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class JsonModelPropertyAttribute : DBModelPropertyAttribute
+    public sealed class JsonModelPropertyAttribute : DbModelPropertyAttribute
     {
         public JsonModelPropertyAttribute([CallerLineNumber] int propertyOrder = 0) : base(propertyOrder)
         {

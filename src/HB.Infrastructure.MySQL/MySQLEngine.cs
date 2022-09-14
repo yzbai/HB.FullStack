@@ -25,7 +25,7 @@ namespace HB.Infrastructure.MySQL
 
         private readonly Dictionary<string, string> _connectionStringDict = new Dictionary<string, string>();
 
-        public DatabaseCommonSettings DatabaseSettings => _options.CommonSettings;
+        public DbCommonSettings DatabaseSettings => _options.CommonSettings;
 
         public EngineType EngineType => EngineType.MySQL;
 
@@ -58,7 +58,7 @@ namespace HB.Infrastructure.MySQL
 
         private void SetConnectionStrings()
         {
-            foreach (DatabaseConnectionSettings connection in _options.Connections)
+            foreach (DbConnectionSettings connection in _options.Connections)
             {
                 if (FirstDefaultDatabaseName.IsNullOrEmpty())
                 {

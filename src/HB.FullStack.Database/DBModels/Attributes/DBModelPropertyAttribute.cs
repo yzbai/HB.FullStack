@@ -1,5 +1,4 @@
 ﻿
-
 using System;
 using System.Runtime.CompilerServices;
 
@@ -10,7 +9,7 @@ namespace HB.FullStack.Database.DbModels
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1813:Avoid unsealed attributes", Justification = "<Pending>")]
-    public class DBModelPropertyAttribute : Attribute
+    public class DbModelPropertyAttribute : Attribute
     {
         public int PropertyOrder { get; internal set; }
 
@@ -35,7 +34,7 @@ namespace HB.FullStack.Database.DbModels
 
         public Type? Converter { get; set; }
 
-        public DBModelPropertyAttribute([CallerLineNumber] int propertyOrder = 0)
+        public DbModelPropertyAttribute([CallerLineNumber] int propertyOrder = 0)
         {
             PropertyOrder = propertyOrder;
         }

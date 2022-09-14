@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 
 using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Common.Convert;
 
 namespace HB.FullStack.Common.Api
 {
@@ -44,13 +45,13 @@ namespace HB.FullStack.Common.Api
             return request;
         }
 
-        public static GetRequest FilterBy<T>(this GetRequest request, Expression<Func<T, bool>> filterExp)
+        public static GetRequest Where<T>(this GetRequest request, Expression<Func<T, bool>> filterExp)
         {
             //TODO: 实现这个
             throw new NotImplementedException();
         }
 
-        public static GetRequest FilterBy(this GetRequest request, string propertyName, object? propertyValue)
+        public static GetRequest Where(this GetRequest request, string propertyName, object? propertyValue)
         {
             //TODO: 考虑提高性能
             //是否建立统一的ApiResourceDefFactory?
@@ -62,11 +63,10 @@ namespace HB.FullStack.Common.Api
             //    throw ApiExceptions.ApiResourceError("不存在这样的属性", null, new { ResName = request.ResName, PropertyName = propertyName });
             //}
 
-            request.PropertyFilters.Add(new PropertyFilter
-            {
-                PropertyName = propertyName,
-                PropertyStringValue = propertyValue?.ToString()
-            });
+            string? propertyValueString = ConvertCenter.ConvertToString(propertyValue, null, StringConvertPurpose.HTTP_QUERY);
+
+            request.WherePropertyNames.Add(propertyName);
+            request.WherePropertyValues.Add(propertyValueString);
 
             return request;
         }

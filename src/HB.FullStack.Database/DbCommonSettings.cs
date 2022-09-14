@@ -1,10 +1,9 @@
 ﻿
-
 using System.Collections.Generic;
 
 namespace HB.FullStack.Database
 {
-    public class DatabaseCommonSettings
+    public class DbCommonSettings
     {
         /// <summary>
         /// 初始数据库从1开始
@@ -20,7 +19,7 @@ namespace HB.FullStack.Database
         /// </summary>
         public IList<string> Assemblies { get; set; } = new List<string>();
 
-        public IList<DatabaseModelSetting> ModelSettings { get; set; } = new List<DatabaseModelSetting>();
+        public IList<DbModelSetting> DbModelSettings { get; set; } = new List<DbModelSetting>();
 
         public int MaxBatchNumber { get; set; } = 500;
 

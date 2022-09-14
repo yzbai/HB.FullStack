@@ -34,6 +34,13 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string? Condition { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="resName"></param>
+        /// <param name="apiMethod"></param>
+        /// <param name="auth">null - use default auth defined in ApiClientOptions</param>
+        /// <param name="condition"></param>
         protected ApiRequest(string resName, ApiMethod apiMethod, ApiRequestAuth2? auth, string? condition)
         {
             ResName = resName;

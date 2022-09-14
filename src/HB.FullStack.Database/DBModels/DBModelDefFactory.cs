@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.DbModels
 
         public DbModelDefFactory(IDatabaseEngine databaseEngine)
         {
-            DatabaseCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
+            DbCommonSettings databaseSettings = databaseEngine.DatabaseSettings;
 
             IEnumerable<Type> allModelTypes;
 
@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.DbModels
                 allModelTypes = ReflectionUtil.GetAllTypeByCondition(databaseSettings.Assemblies, modelTypeCondition);
             }
 
-            IDictionary<string, DatabaseModelSetting> modelSettingDict = ConstructeSettingDict(databaseSettings, databaseEngine, allModelTypes);
+            IDictionary<string, DbModelSetting> modelSettingDict = ConstructeSettingDict(databaseSettings, databaseEngine, allModelTypes);
 
             ConstructModelDefs(allModelTypes, databaseEngine.EngineType, modelSettingDict);
 
@@ -42,7 +42,7 @@ namespace HB.FullStack.Database.DbModels
             }
         }
 
-        private void ConstructModelDefs(IEnumerable<Type> allModelTypes, EngineType engineType, IDictionary<string, DatabaseModelSetting> modelSettingDict)
+        private void ConstructModelDefs(IEnumerable<Type> allModelTypes, EngineType engineType, IDictionary<string, DbModelSetting> modelSettingDict)
         {
             foreach (var t in allModelTypes)
             {
@@ -50,19 +50,19 @@ namespace HB.FullStack.Database.DbModels
             }
         }
 
-        private static IDictionary<string, DatabaseModelSetting> ConstructeSettingDict(DatabaseCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allModelTypes)
+        private static IDictionary<string, DbModelSetting> ConstructeSettingDict(DbCommonSettings databaseSettings, IDatabaseEngine databaseEngine, IEnumerable<Type> allModelTypes)
         {
-            IDictionary<string, DatabaseModelSetting> fileConfiguredDict = databaseSettings.ModelSettings.ToDictionary(t => t.ModelTypeFullName);
+            IDictionary<string, DbModelSetting> fileConfiguredDict = databaseSettings.DbModelSettings.ToDictionary(t => t.ModelTypeFullName);
 
-            IDictionary<string, DatabaseModelSetting> resusltModelSchemaDict = new Dictionary<string, DatabaseModelSetting>();
+            IDictionary<string, DbModelSetting> resusltModelSchemaDict = new Dictionary<string, DbModelSetting>();
 
             foreach (Type type in allModelTypes)
             {
                 DatabaseAttribute? attribute = type.GetCustomAttribute<DatabaseAttribute>();
 
-                fileConfiguredDict.TryGetValue(type.FullName!, out DatabaseModelSetting? fileConfigured);
+                fileConfiguredDict.TryGetValue(type.FullName!, out DbModelSetting? fileConfigured);
 
-                DatabaseModelSetting modelSchema = new DatabaseModelSetting
+                DbModelSetting modelSchema = new DbModelSetting
                 {
                     ModelTypeFullName = type.FullName!
                 };
@@ -155,11 +155,11 @@ namespace HB.FullStack.Database.DbModels
             return null;
         }
 
-        private static DbModelDef CreateModelDef(Type modelType, EngineType engineType, IDictionary<string, DatabaseModelSetting> modelSettingDict)
+        private static DbModelDef CreateModelDef(Type modelType, EngineType engineType, IDictionary<string, DbModelSetting> modelSettingDict)
         {
             //GlobalSettings.Logger.LogInformation($"{modelType} : {modelType.GetHashCode()}");
 
-            if (!modelSettingDict!.TryGetValue(modelType.FullName!, out DatabaseModelSetting? dbSchema))
+            if (!modelSettingDict!.TryGetValue(modelType.FullName!, out DbModelSetting? dbSchema))
             {
                 throw DatabaseExceptions.ModelError(type: modelType.FullName, "", cause: "不是Model，或者没有DatabaseModelAttribute.");
             }
@@ -185,7 +185,7 @@ namespace HB.FullStack.Database.DbModels
 
             foreach (PropertyInfo info in orderedProperties)
             {
-                DBModelPropertyAttribute? modelPropertyAttribute = info.GetCustomAttribute<DBModelPropertyAttribute>(true);
+                DbModelPropertyAttribute? modelPropertyAttribute = info.GetCustomAttribute<DbModelPropertyAttribute>(true);
 
                 if (modelPropertyAttribute == null)
                 {
@@ -197,7 +197,7 @@ namespace HB.FullStack.Database.DbModels
                     }
                     else
                     {
-                        modelPropertyAttribute = new DBModelPropertyAttribute();
+                        modelPropertyAttribute = new DbModelPropertyAttribute();
                     }
 
                     if (info.Name == nameof(TimestampDbModel.LastUser))
@@ -222,7 +222,7 @@ namespace HB.FullStack.Database.DbModels
             return modelDef;
         }
 
-        private static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DBModelPropertyAttribute propertyAttribute, EngineType engineType)
+        private static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbModelPropertyAttribute propertyAttribute, EngineType engineType)
         {
             DbModelPropertyDef propertyDef = new DbModelPropertyDef
             {
