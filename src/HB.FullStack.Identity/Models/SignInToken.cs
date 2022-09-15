@@ -12,7 +12,7 @@ namespace HB.FullStack.Identity.Models
         public Guid UserId { get; set; }
 
         [Required]
-        [DBModelProperty(NotNull = true, NeedIndex = true)]
+        [DbModelProperty(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
         public DateTimeOffset? ExpireAt { get; set; }
@@ -24,13 +24,13 @@ namespace HB.FullStack.Identity.Models
         #region Device
 
         [Required]
-        [DBModelProperty(NotNull = true, NeedIndex = true)]
+        [DbModelProperty(NotNull = true, NeedIndex = true)]
         public string DeviceId { get; set; } = default!;
 
-        [DBModelProperty(NotNull = true)]
+        [DbModelProperty(NotNull = true)]
         public string DeviceVersion { get; set; } = default!;
 
-        [DBModelProperty(NotNull = true)]
+        [DbModelProperty(NotNull = true)]
         public string DeviceIp { get; set; } = default!;
 
         #endregion

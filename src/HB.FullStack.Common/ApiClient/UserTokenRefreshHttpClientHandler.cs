@@ -11,13 +11,13 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class UserTokenAutoRefreshHttpClientHandler : HttpClientHandler
+    public class UserTokenRefreshHttpClientHandler : HttpClientHandler
     {
         private readonly IApiClient _apiClient;
         private readonly IPreferenceProvider _tokenProvider;
         private readonly ApiClientOptions _options;
 
-        public UserTokenAutoRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
+        public UserTokenRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
         {
             _apiClient = apiClient;
             _tokenProvider = tokenProvider;

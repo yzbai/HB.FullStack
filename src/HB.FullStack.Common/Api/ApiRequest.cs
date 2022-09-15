@@ -1,6 +1,7 @@
 ﻿global using OnlyForJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -29,10 +30,16 @@ namespace HB.FullStack.Common.Api
         /// 如果没有指定，那么会使用ResBinding中指定的Auth
         /// </summary>
         [JsonIgnore]
-        public ApiRequestAuth2? Auth { get; set; }
+        public ApiRequestAuth? Auth { get; set; }
 
         [JsonIgnore]
         public string? Condition { get; set; }
+
+        /// <summary>
+        /// 之后会加到HttpRequestMessageBuilder中去
+        /// </summary>
+        [JsonIgnore]
+        public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// 
@@ -41,7 +48,7 @@ namespace HB.FullStack.Common.Api
         /// <param name="apiMethod"></param>
         /// <param name="auth">null - use default auth defined in ApiClientOptions</param>
         /// <param name="condition"></param>
-        protected ApiRequest(string resName, ApiMethod apiMethod, ApiRequestAuth2? auth, string? condition)
+        protected ApiRequest(string resName, ApiMethod apiMethod, ApiRequestAuth? auth, string? condition)
         {
             ResName = resName;
             ApiMethod = apiMethod;

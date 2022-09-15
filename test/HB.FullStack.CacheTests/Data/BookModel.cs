@@ -7,48 +7,48 @@ namespace HB.FullStack.CacheTests
     [CacheModel]
     public class BookModel : TimestampFlackIdDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; } = default!;
     }
 
     [CacheModel]
     public class Guid_BookModel : TimestampGuidDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; } = default!;
     }
 
     [CacheModel]
     public class Book : TimestampFlackIdDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
         [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         [CacheModelAltKey]
         public long BookID { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string? Publisher { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; }
     }
 
     [CacheModel]
     public class BookModel_Client : TimestampFlackIdDbModel
     {
-        [DBModelProperty(NeedIndex = true)]
+        [DbModelProperty(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; } = default!;
     }
 
@@ -56,17 +56,17 @@ namespace HB.FullStack.CacheTests
     public class Book_Client : TimestampFlackIdDbModel
     {
         [CacheModelAltKey]
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = null!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         [CacheModelAltKey]
         public long BookID { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string? Publisher { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; }
     }
 }

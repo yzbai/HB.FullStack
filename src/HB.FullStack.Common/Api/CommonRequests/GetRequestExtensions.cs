@@ -71,7 +71,7 @@ namespace HB.FullStack.Common.Api
             return request;
         }
 
-        public static GetRequest Auth(this GetRequest request, ApiRequestAuth2 auth)
+        public static GetRequest Auth(this GetRequest request, ApiRequestAuth auth)
         {
             request.Auth = auth;
             return request;

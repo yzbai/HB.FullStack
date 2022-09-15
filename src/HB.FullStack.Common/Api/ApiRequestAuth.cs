@@ -2,11 +2,11 @@
 
 namespace HB.FullStack.Common.Api
 {
-    public class ApiRequestAuth2 : IEquatable<ApiRequestAuth2>
+    public class ApiRequestAuth : IEquatable<ApiRequestAuth>
     {
-        public static ApiRequestAuth2 JWT = new ApiRequestAuth2 { AuthType = ApiAuthType.Jwt };
-        public static ApiRequestAuth2 NONE = new ApiRequestAuth2 { AuthType = ApiAuthType.None };
-        public static ApiRequestAuth2 APIKEY(string apiKeyName) => new ApiRequestAuth2 { AuthType = ApiAuthType.ApiKey, ApiKeyName = apiKeyName };
+        public static ApiRequestAuth JWT = new ApiRequestAuth { AuthType = ApiAuthType.Jwt };
+        public static ApiRequestAuth NONE = new ApiRequestAuth { AuthType = ApiAuthType.None };
+        public static ApiRequestAuth APIKEY(string apiKeyName) => new ApiRequestAuth { AuthType = ApiAuthType.ApiKey, ApiKeyName = apiKeyName };
 
         public ApiAuthType AuthType { get; private set; }
 
@@ -14,7 +14,7 @@ namespace HB.FullStack.Common.Api
 
         public override bool Equals(object? obj)
         {
-            if (obj is ApiRequestAuth2 other)
+            if (obj is ApiRequestAuth other)
             {
                 return other.AuthType == AuthType && other.ApiKeyName == ApiKeyName;
             }
@@ -27,7 +27,7 @@ namespace HB.FullStack.Common.Api
             return HashCode.Combine(AuthType, ApiKeyName);
         }
 
-        public static bool operator ==(ApiRequestAuth2? left, ApiRequestAuth2? right)
+        public static bool operator ==(ApiRequestAuth? left, ApiRequestAuth? right)
         {
             if (left is null && right is null)
             {
@@ -42,12 +42,12 @@ namespace HB.FullStack.Common.Api
             return left.Equals(right);
         }
 
-        public static bool operator !=(ApiRequestAuth2? left, ApiRequestAuth2? right)
+        public static bool operator !=(ApiRequestAuth? left, ApiRequestAuth? right)
         {
             return !(left == right);
         }
 
-        public bool Equals(ApiRequestAuth2? other)
+        public bool Equals(ApiRequestAuth? other)
         {
             if (other is null)
             {

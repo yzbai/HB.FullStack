@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.ApiClient
     /// <summary>
     /// 保持单例复用
     /// </summary>
-    public class DefaultApiClient : IApiClient
+    public partial class DefaultApiClient : IApiClient
     {
         private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
 
@@ -56,20 +56,28 @@ namespace HB.FullStack.Common.ApiClient
 
             void RangeEndpoints()
             {
+                AddResEndpointFromAssemblyToResEndpoints();
+
                 foreach (var siteSetting in _options.SiteSettings)
                 {
                     foreach (var endpoint in siteSetting.Endpoints)
                     {
-                        if (!_resEndpoints.TryAdd(endpoint.ResName, endpoint))
-                        {
-                            throw ApiExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
-                        }
-
                         endpoint.SiteSetting = siteSetting;
+
+                        _resEndpoints[endpoint.ResName] = endpoint;
+
+                        //if (!_resEndpoints.TryAdd(endpoint.ResName, endpoint))
+                        //{
+                        //    throw ApiExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
+                        //}
+
+                        //endpoint.SiteSetting = siteSetting;
                     }
                 }
             }
         }
+
+        partial void AddResEndpointFromAssemblyToResEndpoints();
 
         public event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting
         {
@@ -117,7 +125,7 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                ApplyTokenInfo(requestBuilder);
+                ConfigureRequestBuilder(requestBuilder);
 
                 //NOTICE: 这里没有必要用using. https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0#httpclient-and-lifetime-management-1
 
@@ -141,7 +149,7 @@ namespace HB.FullStack.Common.ApiClient
             }
             catch (ErrorCode2Exception ex)
             {
-                if (requestBuilder.Request.Auth == ApiRequestAuth2.JWT && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await this.RefreshUserTokenAsync().ConfigureAwait(false);
 
@@ -150,7 +158,7 @@ namespace HB.FullStack.Common.ApiClient
                         return await GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
                     }
                 }
-                else if (requestBuilder.Request.Auth == ApiRequestAuth2.JWT && ex.ErrorCode == ApiErrorCodes.AuthorizationNoTokenInStore)
+                else if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ApiErrorCodes.AuthorizationNoTokenInStore)
                 {
                     //TODO: 重新登陆， 客户端应该针对Authroization开头的ErrorCode进行相应处理
                 }
@@ -165,12 +173,12 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private void ApplyTokenInfo(HttpRequestMessageBuilder requestBuilder)
+        private void ConfigureRequestBuilder(HttpRequestMessageBuilder requestBuilder)
         {
             requestBuilder.SetDeviceId(UserTokenProvider.DeviceId);
             requestBuilder.SetDeviceVersion(UserTokenProvider.DeviceVersion);
 
-            ApiRequestAuth2 auth = requestBuilder.Request.Auth!;
+            ApiRequestAuth auth = requestBuilder.Request.Auth!;
 
             //Auto
             switch (auth.AuthType)

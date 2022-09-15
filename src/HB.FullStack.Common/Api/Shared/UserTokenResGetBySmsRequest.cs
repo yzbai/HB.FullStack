@@ -30,7 +30,7 @@ namespace HB.FullStack.Common.Api
         public DeviceInfos DeviceInfos { get; set; } = null!;
 
         public UserTokenResGetBySmsRequest(string mobile, string smsCode, string signToWhere, string deviceId, string deviceVersion, DeviceInfos deviceInfos)
-            : base(nameof(UserTokenRes), ApiMethod.Get, ApiRequestAuth2.NONE, "BySms")
+            : base(nameof(UserTokenRes), ApiMethod.Get, ApiRequestAuth.NONE, "BySms")
         {
             Mobile = mobile;
             SmsCode = smsCode;

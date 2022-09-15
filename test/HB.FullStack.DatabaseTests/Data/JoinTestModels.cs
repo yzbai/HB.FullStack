@@ -8,80 +8,80 @@ namespace HB.FullStack.DatabaseTests
     public class A : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
     public class B : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
     public class AB : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public long AId { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public long BId { get; set; } = default!;
     }
 
     public class C : TimestampFlackIdDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public long AId { get; set; } = default!;
     }
 
     public class A_Client : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
     public class B_Client : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
     public class AB_Client : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public long AId { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public long BId { get; set; } = default!;
     }
 
     public class C_Client : TimestampFlackIdDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public long AId { get; set; } = default!;
     }
 
     public class Guid_A : TimestampGuidDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
     public class Guid_B : TimestampGuidDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
@@ -95,43 +95,43 @@ namespace HB.FullStack.DatabaseTests
 
     public class Guid_C : TimestampGuidDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public Guid Guid_AId { get; set; }
     }
 
     public class Guid_A_Client : TimestampGuidDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
     public class Guid_B_Client : TimestampGuidDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
     }
 
     public class Guid_AB_Client : TimestampGuidDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public Guid Guid_AId { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public Guid Guid_BId { get; set; } = default!;
     }
 
     public class Guid_C_Client : TimestampGuidDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public Guid Guid_AId { get; set; } = default!;
     }
 }

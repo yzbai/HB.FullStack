@@ -16,7 +16,9 @@ namespace HB.FullStack.Common.Test
         readonly HttpListener _listener;
         readonly IList<TestRequestHandler> _requestHandlers;
         readonly object _requestHandlersLock = new();
+#pragma warning disable CA2213 // Will dispose in Dispose method
         readonly CancellationTokenSource _cts = new();
+#pragma warning restore CA2213 // Disposable fields should be disposed
 
         public int Port { get; }
 

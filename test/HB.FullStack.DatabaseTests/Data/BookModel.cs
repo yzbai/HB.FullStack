@@ -6,64 +6,64 @@ namespace HB.FullStack.DatabaseTests.Data
     public class BookModel : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; } = default!;
     }
 
     public class Guid_BookModel : TimestampGuidDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; } = default!;
     }
 
     public class Book : TimestampFlackIdDbModel
     {
-        [DBModelProperty]
+        [DbModelProperty]
 
         public string Name { get; set; } = null!;
 
-        [DBModelProperty]
+        [DbModelProperty]
 
         public long BookID { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string? Publisher { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; }
     }
 
     public class BookModel_Client : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty(NeedIndex = true)]
+        [DbModelProperty(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; } = default!;
     }
 
     public class Book_Client : TimestampFlackIdDbModel
     {
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string Name { get; set; } = null!;
 
-        [DBModelProperty]
+        [DbModelProperty]
 
         public long BookID { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public string? Publisher { get; set; }
 
-        [DBModelProperty]
+        [DbModelProperty]
         public double Price { get; set; }
     }
 }

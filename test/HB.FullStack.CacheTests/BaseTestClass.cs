@@ -67,7 +67,7 @@ namespace HB.FullStack.CacheTests
                 {
                     options.CommonSettings.Version = 1;
 
-                    var connSettings = new DatabaseConnectionSettings
+                    var connSettings = new DbConnectionSettings
                     {
                         DatabaseName = dbName,
                         IsMaster = true
