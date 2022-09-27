@@ -1,14 +1,14 @@
-﻿using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Client.File;
-using HB.FullStack.Client.Maui.File;
-
-using Microsoft.Extensions.Configuration;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using HB.FullStack.Client.ClientModels;
+using HB.FullStack.Client.File;
+using HB.FullStack.Client.Maui.File;
+
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -33,8 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 ExpiryTime = TimeSpan.MaxValue,
                 AllowOfflineRead = false,
-                AllowOfflineWrite = false,
-                NeedLogined = true
+                AllowOfflineWrite = false
             });
 
             return services;

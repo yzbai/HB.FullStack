@@ -28,7 +28,7 @@ namespace HB.FullStack.Client.Maui.File
         private readonly DbSimpleLocker _dbLocker;
         private readonly StsTokenRepo _aliyunStsTokenRepo;
         private readonly FileManagerOptions _options;
-        private Dictionary<string, DirectoryDescription> _directories;
+        private readonly Dictionary<string, DirectoryDescription> _directories;
         private readonly ObjectPool<IOss> _ossPool;
 
         public FileManager(ILogger<FileManager> logger, IOptions<FileManagerOptions> options, IPreferenceProvider preferenceProvider, DbSimpleLocker dbLocker, StsTokenRepo aliyunStsTokenRepo)
@@ -76,7 +76,7 @@ namespace HB.FullStack.Client.Maui.File
 
         private DirectoryDescription GetDirectoryDescription(Directory2 directory)
         {
-            if(_directories.TryGetValue(directory.DirectoryName, out DirectoryDescription? directoryDescription))
+            if (_directories.TryGetValue(directory.DirectoryName, out DirectoryDescription? directoryDescription))
             {
                 return directoryDescription;
             }
@@ -121,13 +121,11 @@ namespace HB.FullStack.Client.Maui.File
 
             if (!localFullPath.Equals(sourceLocalFullPath, StringComparison.OrdinalIgnoreCase))
             {
-                using (Stream stream = System.IO.File.Open(sourceLocalFullPath, FileMode.Open))
-                {
-                    _ = await SaveFileToLocalAsync(stream, localFullPath);
-                }
+                using Stream stream = System.IO.File.Open(sourceLocalFullPath, FileMode.Open);
+                _ = await SaveFileToLocalAsync(stream, localFullPath);
             }
 
-            DirectoryDescription description = GetDirectoryDescription(directory); 
+            DirectoryDescription description = GetDirectoryDescription(directory);
 
             //upload到远程
             //TODO: 检查file extension，以确保符合destDirectory要求，Avatar 允许图片类型
@@ -181,7 +179,7 @@ namespace HB.FullStack.Client.Maui.File
             //刚请求过,且存在就返回
             if (!remoteForced && !await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, localFileExpiryTime))
             {
-                GlobalSettings.Logger.LogDebug("前不久请求过文件 {osskey}", ossKey);
+                GlobalSettings.Logger.LogDebug("前不久请求过文件 {Osskey}", ossKey);
 
                 //TODO: 思考，这里有一种，第一个线程已经取锁成功，去下载图片，还没下完，第二个进来一看，以为已经取好了，结果没有
                 string fullPath = GetLocalFullPath(directory, fileName);
@@ -212,7 +210,7 @@ namespace HB.FullStack.Client.Maui.File
                 //覆盖本地
                 string localFullPath = await SaveFileToLocalAsync(ossObject.Content, directory, fileName);
 
-                GlobalSettings.Logger.LogDebug("远程文件获取成功，已经保存到本地 {osskey}", ossKey);
+                GlobalSettings.Logger.LogDebug("远程文件获取成功，已经保存到本地 {Osskey}", ossKey);
 
                 return localFullPath;
             }
@@ -254,7 +252,6 @@ namespace HB.FullStack.Client.Maui.File
             }
         }
 
-
         /// <summary>
         /// 返回Null表示失败
         /// </summary>
@@ -288,7 +285,7 @@ namespace HB.FullStack.Client.Maui.File
 
             string directoryPath = description.GetPath(directory.PlaceHolderValue);
 
-            if(Path.DirectorySeparatorChar == '\\')
+            if (Path.DirectorySeparatorChar == '\\')
             {
                 directoryPath = directoryPath.Replace('\\', '/');
             }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\..\common.props" />
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
@@ -65,33 +65,34 @@
 	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
 		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-        <!--<PackageReference Include="HB.Infrastructure.Aliyun" Version="2.0.3-alpha1655515401" />-->
+		<ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false"  />
+		<!--<PackageReference Include="HB.Infrastructure.Aliyun" Version="2.0.3-alpha1655515401" />-->
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Compile Update="Controls\Chip.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
+		<DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	  <Compile Update="Controls\Cropper\CropperPage.xaml.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
+		<DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	  <Compile Update="Controls\TimeEditor.xaml.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
+		<DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	  <Compile Update="TCaptcha\TCaptchaPopup.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
+		<DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <MauiXaml Update="Controls\Cropper\CropperPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
+		<Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\Popups\ExceptionPopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
+		<Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\TimeEditor.xaml">
-	    <Generator>MSBuild:Compile</Generator>
+		<Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
 

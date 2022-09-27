@@ -29,7 +29,7 @@ namespace HB.FullStack.Common.ApiClient
 
                 if (captcha.IsNullOrEmpty())
                 {
-                    throw Exceptions.TCaptchaErrorReturn(captcha, request);
+                    throw Exceptions.CaptchaErrorReturn(captcha, request);
                 }
 
                 request.Headers.Add(ApiHeaderNames.Captcha, captcha);

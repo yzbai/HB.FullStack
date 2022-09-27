@@ -1,24 +1,19 @@
-﻿using HB.FullStack.Client.Maui.Base;
+﻿using System;
+using System.Collections.Generic;
+
+using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.Controls;
-using HB.FullStack.Client.Maui.Controls.Cropper;
 using HB.FullStack.Client.Maui.Controls.Popups;
 using HB.FullStack.Client.Maui.File;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Database;
 using HB.Infrastructure.SQLite;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Hosting;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 
 namespace Microsoft.Maui.Hosting
 {

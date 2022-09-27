@@ -1,29 +1,37 @@
 ﻿using System;
 
+using HB.FullStack.Client.ClientModels;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Maui.File
 {
     [ClientModel(
       expirySeconds: int.MaxValue, //由StsToken.ExpirationAt业务逻辑决定
-      needLogined: true,
       allowOfflineRead: false,
       allowOfflineWrite: false)]
-    public class StsToken : TimestampGuidDbModel
+    public partial class StsToken : ClientDbModel
     {
-        public Guid UserId { get; set; }
+        [TrackProperty]
+        private Guid _userId;
 
-        public string SecurityToken { get; set; } = null!;
+        [TrackProperty]
+        private string _securityToken = null!;
 
-        public string AccessKeyId { get; set; } = null!;
+        [TrackProperty]
+        private string _accessKeyId = null!;
 
-        public string AccessKeySecret { get; set; } = null!;
+        [TrackProperty]
+        private string _accessKeySecret = null!;
 
-        public DateTimeOffset ExpirationAt { get; set; }
+        [TrackProperty]
+        private DateTimeOffset _expirationAt;
 
-        public string DirectoryPermissionName { get; set; } = null!;
+        [TrackProperty]
+        private string _directoryPermissionName = null!;
 
-        public bool ReadOnly { get; set; }
+        [TrackProperty]
+        private bool _readOnly;
     }
 
     public static class StsTokenExtensions
