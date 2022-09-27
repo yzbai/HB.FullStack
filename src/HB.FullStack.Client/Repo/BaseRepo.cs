@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
@@ -12,6 +13,7 @@ using HB.FullStack.Client.Offline;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 
@@ -120,11 +122,15 @@ namespace HB.FullStack.Client
         }
 
         /// <summary>
-        /// 完成Resource到Model的转换
+        /// 本质：Resource到Model的转换
         /// </summary>
         protected abstract Task<IEnumerable<TModel>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request);
 
         protected abstract Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
+
+        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
+
+        protected abstract Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
         #region 查询 - 发生在Syncing之后
 
@@ -318,36 +324,23 @@ namespace HB.FullStack.Client
             }
         }
 
-        public async Task UpdateAsync(TModel model, TransactionContext transactionContext)
-        {
-            IList<ClientModels.ChangedProperty> changedProperties = model.GetChangedProperties();
-
-            UpdateRequest
-        }
-
         public async Task UpdateAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
-            //找出更改的地方，然后update-fields
-
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
             EnsureNotSyncing();
 
             if (StatusManager.IsInternet())
             {
-                //TODO: 这里的ApiRequestAuth从哪里获得?
-                UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(model), ApiRequestAuth.JWT, null);
+                await UpdateToRemoteAsync(ApiClient, models).ConfigureAwait(false);
 
-                //如果Version不对，会返回NotFount ErrorCode
-                await ApiClient.SendAsync(updateRequest).ConfigureAwait(false);
-
-                await Database.UpdateAsync(model, "", transactionContext).ConfigureAwait(false);
+                await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
             }
             else if (ClientModelDef.AllowOfflineWrite)
             {
                 await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Update, transactionContext).ConfigureAwait(false);
 
-                await Database.UpdateAsync
+                await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
@@ -355,7 +348,29 @@ namespace HB.FullStack.Client
             }
         }
 
+        public async Task DeleteAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
+        {
+            ThrowIf.NullOrEmpty(models, nameof(models));
+            ThrowIf.NotValid(models, nameof(models));
+            EnsureNotSyncing();
 
+            if (StatusManager.IsInternet())
+            {
+                await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
+
+                await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
+            }
+            else if (ClientModelDef.AllowOfflineWrite)
+            {
+                await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Delete, transactionContext).ConfigureAwait(false);
+
+                await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
+            }
+            else
+            {
+                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+            }
+        }
 
         #endregion
     }
