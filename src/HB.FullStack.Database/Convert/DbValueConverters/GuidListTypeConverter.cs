@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 
@@ -18,10 +19,10 @@ namespace HB.FullStack.Database.Convert
 
             if (str.IsNotNullOrEmpty())
             {
-                return str.Split(',').Select(i => new Guid(i)).ToList();
+                return new ObservableCollection<Guid>(str.Split(',').Select(i => new Guid(i)).ToList());
             }
 
-            return new List<Guid>();
+            return new ObservableCollection<Guid>();
         }
 
         public object TypeValueToDbValue(object typeValue, Type propertyType)

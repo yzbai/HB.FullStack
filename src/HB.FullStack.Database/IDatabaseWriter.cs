@@ -18,7 +18,9 @@ namespace HB.FullStack.Database
         Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         /// <summary>
-        /// Update Entire Model. Using timestamp method optimistic locking if a TimestampDbModel
+        /// Update Entire Model. 
+        /// Using timestamp method optimistic locking if a TimestampDbModel.
+        /// Otherwise, maybe have data conflict.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>

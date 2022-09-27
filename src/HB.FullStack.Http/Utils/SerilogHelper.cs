@@ -99,7 +99,7 @@ namespace HB.FullStack.WebApi
 
             if (EnvironmentUtil.IsDevelopment())
             {
-                loggerConfiguration.WriteTo.Console(outputTemplate: LogOutputTemplate);
+                loggerConfiguration.WriteTo.Console(outputTemplate: LogOutputTemplate, formatProvider: null);
             }
 
             return loggerConfiguration;

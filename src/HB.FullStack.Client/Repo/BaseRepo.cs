@@ -8,25 +8,25 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.Network;
+using HB.FullStack.Client.Offline;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
-//using Xamarin.Essentials;
-//using Xamarin.Forms;
+
 using Microsoft;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 
 namespace HB.FullStack.Client
 {
-    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DbModel, new();
+    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DbModel;
 
     public abstract class BaseRepo
     {
         protected IPreferenceProvider PreferenceProvider { get; }
-        protected ConnectivityManager ConnectivityManager { get; }
+        protected StatusManager StatusManager { get; }
 
         protected IApiClient ApiClient { get; }
 
@@ -38,21 +38,21 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected bool IsInternetConnected(bool throwIfNot = true)
-        {
-            bool isInternetConnected = ConnectivityManager.IsInternet();
+        //protected bool IsInternetConnected(bool throwIfNot = true)
+        //{
+        //    bool isInternetConnected = StatusManager.IsInternet();
 
-            if (throwIfNot && !isInternetConnected)
-            {
-                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
-            }
+        //    if (throwIfNot && !isInternetConnected)
+        //    {
+        //        throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+        //    }
 
-            return isInternetConnected;
-        }
+        //    return isInternetConnected;
+        //}
 
         protected void EnsureInternetConnected()
         {
-            if (!ConnectivityManager.IsInternet())
+            if (!StatusManager.IsInternet())
             {
                 throw ClientExceptions.NoInternet("没有联网");
             }
@@ -60,7 +60,7 @@ namespace HB.FullStack.Client
 
         protected void EnsureNotSyncing()
         {
-            if (ConnectivityManager.NeedSyncAfterReconnected)
+            if (StatusManager.NeedSyncAfterReconnected)
             {
                 throw ClientExceptions.OperationInvalidCauseofSyncingAfterReconnected();
             }
@@ -74,17 +74,18 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, ConnectivityManager connectivityManager)
+        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, StatusManager connectivityManager)
         {
             ApiClient = apiClient;
             PreferenceProvider = userPreferenceProvider;
-            ConnectivityManager = connectivityManager;
+            StatusManager = connectivityManager;
         }
     }
 
-    public abstract class BaseRepo<TModel/*, TRes*/> : BaseRepo where TModel : DbModel//, new() where TRes : ApiResource
+    public abstract class BaseRepo<TModel> : BaseRepo where TModel : ClientDbModel, new()
     {
         private readonly ILogger _logger;
+        private readonly IHistoryManager _historyManager;
         private readonly DbModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
@@ -95,22 +96,16 @@ namespace HB.FullStack.Client
             ILogger logger,
             IDatabase database,
             IApiClient apiClient,
+            IHistoryManager historyManager,
             IPreferenceProvider userPreferenceProvider,
-            ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
+            StatusManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
             _logger = logger;
             _modelDef = database.ModelDefFactory.GetDef<TModel>()!;
 
+            ClientModelDef = ClientModelDefFactory.Get<TModel>() ?? CreateDefaultClientModelDef();
             Database = database;
-
-            ClientModelDef? clientModelDef = ClientModelDefFactory.Get<TModel>();
-
-            if (clientModelDef == null)
-            {
-                clientModelDef = CreateDefaultClientModelDef();
-            }
-
-            ClientModelDef = clientModelDef;
+            _historyManager = historyManager;
 
             //NOTICE: Move this to options?
             static ClientModelDef CreateDefaultClientModelDef()
@@ -118,18 +113,20 @@ namespace HB.FullStack.Client
                 return new ClientModelDef
                 {
                     ExpiryTime = TimeSpan.FromSeconds(ClientModelAttribute.DefaultExpirySeconds),
-                    NeedLogined = true,
                     AllowOfflineRead = true,
                     AllowOfflineWrite = false
                 };
             }
         }
 
-        //protected abstract TModel ToModel(TRes res);
+        /// <summary>
+        /// 完成Resource到Model的转换
+        /// </summary>
+        protected abstract Task<IEnumerable<TModel>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request);
 
-        //protected abstract TRes ToResource(TModel model);
+        protected abstract Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
-        #region 查询
+        #region 查询 - 发生在Syncing之后
 
         protected async Task<IEnumerable<TModel>> GetAsync(
             Expression<Func<TModel, bool>> localWhere,
@@ -140,22 +137,12 @@ namespace HB.FullStack.Client
         {
             EnsureNotSyncing();
 
-            //TODO: await Syncing();
-
-            //TODO: 是否应该由ClientModel来决定需要login？或者由业务决定
-            if (ClientModelDef.NeedLogined)
-            {
-                _logger.LogDebug("检查Logined, Type:{Type}", typeof(TModel).Name);
-
-                EnsureLogined();
-            }
-
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
             if (getMode == RepoGetMode.LocalForced)
             {
-                _logger.LogDebug("本地强制模式，返回, Type:{type}", typeof(TModel).Name);
+                _logger.LogDebug("本地强制模式，返回, Type:{Type}", typeof(TModel).Name);
                 return locals;
             }
 
@@ -175,11 +162,6 @@ namespace HB.FullStack.Client
             bool continueOnCapturedContext = false)
         {
             EnsureNotSyncing();
-
-            if (ClientModelDef.NeedLogined)
-            {
-                EnsureLogined();
-            }
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
@@ -221,11 +203,6 @@ namespace HB.FullStack.Client
         {
             EnsureNotSyncing();
 
-            if (ClientModelDef.NeedLogined)
-            {
-                EnsureLogined();
-            }
-
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
@@ -261,51 +238,42 @@ namespace HB.FullStack.Client
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!IsInternetConnected(!ClientModelDef.AllowOfflineRead))
+            if (!StatusManager.IsInternet())
             {
-                _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{Type}", typeof(TModel).Name);
+                if (ClientModelDef.AllowOfflineRead)
+                {
+                    _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{Type}", typeof(TModel).Name);
 
-                ConnectivityManager.OnOfflineDataReaded();
+                    StatusManager.OnOfflineDataReaded();
 
-                return localModels;
+                    return localModels;
+                }
+                else
+                {
+                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                }
             }
 
-            //获取远程
-            IEnumerable<TRes>? ress = await ApiClient.GetAsync<IEnumerable<TRes>>(remoteRequest).ConfigureAwait(false);
+            #region 远程读取，本地更新
 
-            IEnumerable<TModel> remotes = ress!.Select(r => ToModel(r)).ToList();
+            IEnumerable<TModel> remotes = await GetFromRemoteAsync(ApiClient, remoteRequest).ConfigureAwait(false);
 
             _logger.LogDebug("远程数据获取完毕, Type:{Type}", typeof(TModel).Name);
 
-            //TODO:
-            //检查同步. 比如：离线创建的数据，现在联线，本地数据反而是新的。
-            //多客户端：version相同，但lastuser不同。根据时间合并
-
-            //单设备在线
-            //单设备离线
-            //多设备在线
-            //多设备离线
-
-            //情况：
-            //1，（本地离线产生新数据）同一id数据，lastuser相同，local version 大于 remote version，使用本地更新远程
-            //2，（多客户端）同一id数据，local version 等于 remote version，lastuser不同，按lasttime判断使用谁，如果local lasttime更大，使用本地更新远程，否则远程覆盖本地
-            //3，同一id数据，local version 小于 remote version，覆盖本地
-
-            //Case
-            //1，第一个客户端，离线，疯狂update一条数据，将version变很大，然后第二个客户端在线，过了很久，update了同一条数据。现在第一个客户端在线，get这条数据
-
-            //TODO: 这里不管不顾，直接用远程覆盖，是否要比较一下localModels和remotes. Version的大小
-            //如果本地Version大
-            //如果本地Version小
             foreach (TModel model in remotes)
             {
-                //TODO: Reset一遍，覆盖本地？
+                //NOTICE:这里是在每次重新上线后的Syncing之后运行的
+                //所以，只要覆盖即可
+
+                //TODO: 批量执行
                 await Database.SetByIdAsync(model, transactionContext).ConfigureAwait(false);
             }
 
             _logger.LogDebug("重新添加远程数据到本地数据库, Type:{Type}", typeof(TModel).Name);
 
             return remotes;
+
+            #endregion
         }
 
         /// <summary>
@@ -313,55 +281,59 @@ namespace HB.FullStack.Client
         /// </summary>
         private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TModel> localModels)
         {
-            return localModels.Any() && localModels.All(t => TimeUtil.UtcNow - t.LastTime < ClientModelDef.ExpiryTime);
+            return localModels.Any() && localModels.All(t => TimeUtil.UtcNow - t.UpdatedTime < ClientModelDef.ExpiryTime);
         }
 
         #endregion
 
-        #region 更改
+        #region 更改 - 发生在Syncing之后
 
         public async Task AddAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
+            ThrowIf.NullOrEmpty(models, nameof(models));
+            ThrowIf.NotValid(models, nameof(models));
             EnsureNotSyncing();
 
-            ThrowIf.NotValid(models, nameof(models));
-
-            if (!models.Any())
+            //正常
+            if (StatusManager.IsInternet())
             {
-                return;
-            }
-
-            if (IsInternetConnected(!ClientModelDef.AllowOfflineWrite))
-            {
-                //TODO: 这里的ApiRequestAuth从哪里获得?
                 //Remote
-                AddRequest<TRes> addRequest = new AddRequest<TRes>(models.Select(k => ToResource(k)).ToList(), ApiRequestAuth.JWT, null);
+                await AddToRemoteAsync(ApiClient, models).ConfigureAwait(false);
 
-                await ApiClient.SendAsync(addRequest).ConfigureAwait(false);
+                //Local
+                await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
+            }
+            //离线写
+            else if (ClientModelDef.AllowOfflineWrite)
+            {
+                //Offline History
+                await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Add, transactionContext).ConfigureAwait(false);
 
                 //Local
                 await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
             }
             else
             {
-                throw new NotImplementedException();
-                //允许脱网下写操作
-
-                //Local
-                //await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
-
-                //Record History
-                //await Database.BatchAddAsync(GetOfflineHistories(models, DbOperation.Add), "", transactionContext).ConfigureAwait(false);
+                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
             }
         }
 
         public async Task UpdateAsync(TModel model, TransactionContext transactionContext)
         {
+            IList<ClientModels.ChangedProperty> changedProperties = model.GetChangedProperties();
+
+            UpdateRequest
+        }
+
+        public async Task UpdateAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
+        {
+            //找出更改的地方，然后update-fields
+
+            ThrowIf.NullOrEmpty(models, nameof(models));
+            ThrowIf.NotValid(models, nameof(models));
             EnsureNotSyncing();
 
-            ThrowIf.NotValid(model, nameof(model));
-
-            if (IsInternetConnected(!ClientModelDef.AllowOfflineWrite))
+            if (StatusManager.IsInternet())
             {
                 //TODO: 这里的ApiRequestAuth从哪里获得?
                 UpdateRequest<TRes> updateRequest = new UpdateRequest<TRes>(ToResource(model), ApiRequestAuth.JWT, null);
@@ -371,56 +343,19 @@ namespace HB.FullStack.Client
 
                 await Database.UpdateAsync(model, "", transactionContext).ConfigureAwait(false);
             }
-            else
+            else if (ClientModelDef.AllowOfflineWrite)
             {
-                //TODO: 允许脱网下写操作
-                throw new NotImplementedException();
-            }
-        }
+                await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Update, transactionContext).ConfigureAwait(false);
 
-        private List<OfflineHistory> GetOfflineHistories(IEnumerable<TModel> models, DbOperation dbOperation)
-        {
-            List<OfflineHistory> histories = new List<OfflineHistory>(models.Count());
-
-            if (_modelDef.IsIdLong)
-            {
-                foreach (TModel model in models)
-                {
-                    OfflineHistory history = new OfflineHistory
-                    {
-                        ModelId = (model as TimestampLongIdDBModel)!.Id.ToString(CultureInfo.InvariantCulture),
-                        ModelFullName = _modelDef.ModelFullName,
-                        Operation = dbOperation,
-                        OperationTime = model.LastTime,
-                        Handled = false
-                    };
-
-                    histories.Add(history);
-                }
-            }
-            else if (_modelDef.IsIdGuid)
-            {
-                foreach (TModel model in models)
-                {
-                    OfflineHistory history = new OfflineHistory
-                    {
-                        ModelId = (model as TimestampGuidDBModel)!.Id.ToString(),
-                        ModelFullName = _modelDef.ModelFullName,
-                        Operation = dbOperation,
-                        OperationTime = model.LastTime,
-                        Handled = false
-                    };
-
-                    histories.Add(history);
-                }
+                await Database.UpdateAsync
             }
             else
             {
-                throw ClientExceptions.UnSupportedModelType(_modelDef.ModelFullName);
+                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
             }
-
-            return histories;
         }
+
+
 
         #endregion
     }

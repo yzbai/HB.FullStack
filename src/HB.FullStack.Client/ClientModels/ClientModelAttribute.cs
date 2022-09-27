@@ -18,15 +18,15 @@ namespace System
 
         public bool AllowOfflineRead { get; } = true;
 
-        public bool NeedLogined { get; } = true;
+        //public bool NeedLogined { get; } = true;
 
-        public ClientModelAttribute() : this(DefaultExpirySeconds, true, true, false) { }
+        public ClientModelAttribute() : this(DefaultExpirySeconds, true, false) { }
 
-        public ClientModelAttribute(int expirySeconds, bool needLogined, bool allowOfflineRead, bool allowOfflineWrite)
+        public ClientModelAttribute(int expirySeconds, /*bool needLogined, */bool allowOfflineRead, bool allowOfflineWrite)
         {
             ExpirySeconds = expirySeconds;
 
-            NeedLogined = needLogined;
+            //NeedLogined = needLogined;
             AllowOfflineRead = allowOfflineRead;
             AllowOfflineWrite = allowOfflineWrite;
         }

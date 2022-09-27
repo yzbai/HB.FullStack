@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace HB.FullStack.Database.Convert
 {
+    /// <summary>
+    /// 将IEnumerable{long}转换为varchar
+    /// </summary>
     public class LongIdListTypeConverter : IDbValueConverter
     {
         public DbType DbType => DbType.String;

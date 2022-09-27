@@ -26,7 +26,7 @@ namespace HB.FullStack.Client.Maui.File
 
         private IDictionary<string, DirectoryPermission> _directoryPermissions = null!;
 
-        public StsTokenRepo(ILogger<StsTokenRepo> logger, IOptions<FileManagerOptions> fileManagerOptions, IDatabase database, IApiClient apiClient, IPreferenceProvider preferenceProvider, ConnectivityManager connectivityManager) : base(logger, database, apiClient, preferenceProvider, connectivityManager)
+        public StsTokenRepo(ILogger<StsTokenRepo> logger, IOptions<FileManagerOptions> fileManagerOptions, IDatabase database, IApiClient apiClient, IPreferenceProvider preferenceProvider, StatusManager connectivityManager) : base(logger, database, apiClient, preferenceProvider, connectivityManager)
         {
             _logger = logger;
             _fileManagerOptions = fileManagerOptions.Value;

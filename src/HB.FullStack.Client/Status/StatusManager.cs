@@ -1,14 +1,14 @@
-﻿using AsyncAwaitBestPractices;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 namespace HB.FullStack.Client.Network
 {
-    public abstract class ConnectivityManager : IDisposable
+    public abstract class StatusManager : IDisposable
     {
         private readonly WeakEventManager _weakEventManager = new WeakEventManager();
 
@@ -23,11 +23,11 @@ namespace HB.FullStack.Client.Network
             _weakEventManager.RaiseEvent(nameof(OfflineDataReaded));
         }
 
-        public ConnectivityStatus Status { get; protected set; }
+        public ClientStatus Status { get; protected set; }
 
         public bool IsInternet()
         {
-            return Status != ConnectivityStatus.Disconnected;
+            return Status != ClientStatus.Disconnected;
         }
 
         //TODO: 指示正在网络重连后的数据同步中，所以，其他的网络操作应该等一等
@@ -51,10 +51,8 @@ namespace HB.FullStack.Client.Network
             }
         }
 
-
-
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~ConnectivityManager()
+        // ~StatusManager()
         // {
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);

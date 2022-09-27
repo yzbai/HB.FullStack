@@ -22,7 +22,6 @@
         public static ErrorCode ApiUploadFailed { get; } = new ErrorCode(nameof(ApiUploadFailed), "");
         public static ErrorCode ServerUnKownError { get; } = new ErrorCode(nameof(ServerUnKownError), "");
         public static ErrorCode ClientError { get; } = new ErrorCode(nameof(ClientError), "");
-        public static ErrorCode NullReturn { get; } = new ErrorCode(nameof(NullReturn), "");
         public static ErrorCode Timeout { get; } = new ErrorCode(nameof(Timeout), "");
         public static ErrorCode RequestCanceled { get; } = new ErrorCode(nameof(RequestCanceled), "");
         public static ErrorCode AliyunStsTokenReturnNull { get; } = new ErrorCode(nameof(AliyunStsTokenReturnNull), "");
@@ -119,6 +118,11 @@
         internal static Exception ApiResourceError(string cause, Exception? innerEx, object? context)
         {
             return new ApiException(ApiErrorCodes.ApiResourceError, cause, innerEx, context);
+        }
+
+        public static Exception ServerNullReturn(string parameter)
+        {
+            return new ApiException(ApiErrorCodes.ServerNullReturn, "Server端返回NULL", null, new { Parameter = parameter });
         }
     }
 }

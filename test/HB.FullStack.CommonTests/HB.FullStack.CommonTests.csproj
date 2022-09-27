@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -21,10 +21,11 @@
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-		<PackageReference Include="WireMock.Net" Version="1.5.5" />
+		<PackageReference Include="WireMock.Net" Version="1.5.6" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\src\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\..\src\HB.FullStack.Common\HB.FullStack.Common.csproj" />
 		<ProjectReference Include="..\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj" />
 	</ItemGroup>

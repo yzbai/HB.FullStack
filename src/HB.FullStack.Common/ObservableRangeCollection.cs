@@ -11,7 +11,7 @@ namespace HB.FullStack.Common
     /// Represents a dynamic data collection that provides notifications when items get added, removed, or when the whole list is refreshed. 
     /// </summary> 
     /// <typeparam name="T"></typeparam> 
-    public class ObservableRangeCollection<T> : ObservableCollection<T>
+    public class ObservableRangeCollection<T> : ObservableCollection2<T>
     {
 
         /// <summary> 

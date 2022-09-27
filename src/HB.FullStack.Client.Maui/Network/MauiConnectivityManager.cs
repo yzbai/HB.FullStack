@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Client.Maui.Network
 {
-    public class MauiConnectivityManager : ConnectivityManager
+    public class MauiConnectivityManager : StatusManager
     {
         public MauiConnectivityManager()
         {
@@ -47,11 +47,11 @@ namespace HB.FullStack.Client.Maui.Network
         {
             if (access == NetworkAccess.Internet)
             {
-                Status = NeedSyncAfterReconnected ? ConnectivityStatus.ConnectedSyncing : ConnectivityStatus.ConnectedReady;
+                Status = NeedSyncAfterReconnected ? ClientStatus.ConnectedSyncing : ClientStatus.ConnectedReady;
             }
             else
             {
-                Status = ConnectivityStatus.Disconnected;
+                Status = ClientStatus.Disconnected;
             }
         }
     }

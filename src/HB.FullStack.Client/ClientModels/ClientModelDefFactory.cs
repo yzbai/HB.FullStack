@@ -1,12 +1,12 @@
-﻿using HB.FullStack.Common;
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+
+using HB.FullStack.Common;
 
 namespace HB.FullStack.Client.ClientModels
 {
@@ -34,7 +34,7 @@ namespace HB.FullStack.Client.ClientModels
             ClientModelDef newDef = new ClientModelDef
             {
                 ExpiryTime = TimeSpan.FromSeconds(localDataAttribute.ExpirySeconds),
-                NeedLogined = localDataAttribute.NeedLogined,
+                //NeedLogined = localDataAttribute.NeedLogined,
                 AllowOfflineRead = localDataAttribute.AllowOfflineRead,
                 AllowOfflineWrite = localDataAttribute.AllowOfflineWrite
             };
