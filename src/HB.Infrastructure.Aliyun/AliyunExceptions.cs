@@ -28,7 +28,7 @@ namespace HB.Infrastructure.Aliyun
             return exception;
         }
 
-        internal static Exception SmsCacheError(string cause, CacheException ex)
+        internal static Exception SmsCacheError(string cause, Exception ex)
         {
             SmsException exception = new SmsException(ErrorCodes.SmsCacheError, cause, ex);
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;

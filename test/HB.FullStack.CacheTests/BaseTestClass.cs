@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 using HB.FullStack.Database;
 
 using Microsoft.Data.Sqlite;

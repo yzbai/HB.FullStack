@@ -157,7 +157,7 @@ return array";
                 return loadedLuas2;
             }
 
-            throw Exceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
+            throw FullStack.KVStore.Exceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
         }
 
         public async Task<IEnumerable<Tuple<string?, long>>> ModelGetAsync(string storeName, string modelName, IEnumerable<string> modelKeys)
@@ -194,15 +194,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(type: modelName, innerException: ex);
+                throw FullStack.KVStore.Exceptions.Unkown(type: modelName, innerException: ex);
             }
         }
 
@@ -244,15 +244,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
             }
         }
 
@@ -286,7 +286,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
+                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -299,15 +299,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(modelName, storeName, modelKeys, ex);
+                throw FullStack.KVStore.Exceptions.Unkown(modelName, storeName, modelKeys, ex);
             }
         }
 
@@ -358,7 +358,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
+                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -371,15 +371,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
             }
         }
 
@@ -435,7 +435,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelTimestamps, errorCode: error);
+                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelTimestamps, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -448,15 +448,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
             }
         }
 
@@ -491,15 +491,15 @@ return array";
             }
             catch (RedisConnectionException ex)
             {
-                throw Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
             }
         }
 
@@ -518,7 +518,7 @@ return array";
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            throw Exceptions.NoSuchInstance(instanceName: instanceName);
+            throw FullStack.KVStore.Exceptions.NoSuchInstance(instanceName: instanceName);
         }
 
         private string ModelNameKey(string modelName)

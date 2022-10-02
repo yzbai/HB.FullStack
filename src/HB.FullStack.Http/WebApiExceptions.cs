@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace HB.FullStack.WebApi
+namespace System
 {
-    public static class WebApiExceptions
+    public static partial class WebApiExceptions
     {
         public static Exception DatabaseInitLockError(IEnumerable<string> databases)
         {
@@ -24,7 +24,7 @@ namespace HB.FullStack.WebApi
             return exception;
         }
 
-        internal static Exception UploadError(string cause, Exception? innerEx, object? context)
+        public static Exception UploadError(string cause, Exception? innerEx, object? context)
         {
             return new WebApiException(ErrorCodes.UploadError, cause, innerEx, context);
         }

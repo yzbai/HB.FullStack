@@ -1,4 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace System
 {
@@ -20,7 +24,7 @@ namespace System
             return new CommonException(ErrorCodes.CertNotFound, nameof(CertNotFound), null, new { Subject = subject, FullPath = fullPath });
         }
 
-        internal static Exception EnvironmentVariableError(object? value, string cause)
+        public static Exception EnvironmentVariableError(object? value, string cause)
         {
             return new CommonException(ErrorCodes.EnvironmentVariableError, cause, null, new { Value = value });
         }
@@ -34,5 +38,45 @@ namespace System
 
             return ex;
         }
+
+        #region
+
+        public static Exception ServerUnkownError(string responseString)
+        {
+            return new CommonException(ErrorCodes.ServerUnKownError, "Server返回了其他格式的错误表示，赶紧处理", null, new { Response = responseString });
+        }
+
+        public static Exception ApiClientInnerError(string cause, Exception? innerEx, object? context)
+        {
+            return new CommonException(ErrorCodes.ApiClientInnerError, cause, innerEx, context);
+        }
+
+        public static Exception ServerReturnError(ErrorCode errorCode)
+        {
+            return new CommonException(errorCode, "Server认为请求无法返回正确", null, null);
+        }
+
+        public static Exception ApiModelError(string cause, Exception? innerEx, object? context)
+        {
+            return new CommonException(ErrorCodes.ApiModelError, cause, innerEx, context);
+        }
+
+        public static Exception ApiAuthenticationError(string cause, Exception? innerEx, object? context)
+        {
+            return new CommonException(ErrorCodes.ApiAuthenticationError, cause, innerEx, context);
+        }
+
+        public static Exception ApiResourceError(string cause, Exception? innerEx, object? context)
+        {
+            return new CommonException(ErrorCodes.ApiResourceError, cause, innerEx, context);
+        }
+
+        public static Exception ServerNullReturn(string parameter)
+        {
+            return new CommonException(ErrorCodes.ServerNullReturn, "Server端返回NULL", null, new { Parameter = parameter });
+        }
+
+        #endregion
+
     }
 }

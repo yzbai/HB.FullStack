@@ -1,13 +1,13 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.Caching.Distributed;
 
 using StackExchange.Redis;
-
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.Cache
 {
@@ -94,7 +94,6 @@ if(data[2]~='-1') then
 end
 
 return data[3]";
-
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)

@@ -33,6 +33,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
 		<ProjectReference Include="..\HB.FullStack.Identity\HB.FullStack.Identity.csproj" />
 	</ItemGroup>
 

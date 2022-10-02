@@ -42,7 +42,7 @@ namespace System.Net.Http
                     string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 #endif
 
-                    throw ApiExceptions.ApiClientInnerError("Server返回成功，但Json解析不成功", null, new { Request = request, ResponseString = responseString });
+                    throw CommonExceptions.ApiClientInnerError("Server返回成功，但Json解析不成功", null, new { Request = request, ResponseString = responseString });
                 }
 
                 return response;
@@ -75,7 +75,7 @@ namespace System.Net.Http
             //https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.sendasync?view=netstandard-2.1
             catch (Exception ex)
             {
-                throw ApiExceptions.ApiClientInnerError("HttpClient.SendAsync出错", ex, new { ApiRequest = request, RequestUri = requestMessage.RequestUri });
+                throw CommonExceptions.ApiClientInnerError("HttpClient.SendAsync出错", ex, new { ApiRequest = request, RequestUri = requestMessage.RequestUri });
             }
         }
 
@@ -103,7 +103,7 @@ namespace System.Net.Http
                         {
                             if (authErrorCode != null)
                             {
-                                throw ApiExceptions.ServerReturnError(authErrorCode);
+                                throw CommonExceptions.ServerReturnError(authErrorCode);
                             }
                         }
                     }
@@ -119,12 +119,12 @@ namespace System.Net.Http
 
             if (success && errorCode != null)
             {
-                throw ApiExceptions.ServerReturnError(errorCode);
+                throw CommonExceptions.ServerReturnError(errorCode);
             }
             else
             {
                 string? responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw ApiExceptions.ServerUnkownError(responseString: responseString);
+                throw CommonExceptions.ServerUnkownError(responseString: responseString);
             }
         }
     }

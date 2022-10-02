@@ -40,7 +40,7 @@ namespace HB.FullStack.Common.ApiClient
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
                 {
                     //等待失败
-                    //BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，等待获取结果失败。"));
+                    //BaseApplication.ExceptionHandler(CommonExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，等待获取结果失败。"));
                     return false;
                 }
 
@@ -51,7 +51,7 @@ namespace HB.FullStack.Common.ApiClient
                         return lastRefreshResult;
                     }
 
-                    //BaseApplication.ExceptionHandler(ApiExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，但结果获取为空。"));
+                    //BaseApplication.ExceptionHandler(CommonExceptions.TokenRefreshError(cause: "AccessToken 有人刷新过，但结果获取为空。"));
                     return false;
                 }
                 finally

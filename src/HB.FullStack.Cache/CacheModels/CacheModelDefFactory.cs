@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace HB.FullStack.Common.Cache
+namespace HB.FullStack.Cache
 {
     public static class CacheModelDefFactory
     {

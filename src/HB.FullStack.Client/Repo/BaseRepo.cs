@@ -72,7 +72,7 @@ namespace HB.FullStack.Client
         {
             if (obj == null)
             {
-                throw ApiExceptions.ServerNullReturn(parameter: modelName);
+                throw CommonExceptions.ServerNullReturn(parameter: modelName);
             }
         }
 

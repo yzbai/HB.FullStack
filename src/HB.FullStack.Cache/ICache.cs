@@ -1,7 +1,5 @@
 ﻿
-
-
-namespace HB.FullStack.Common.Cache
+namespace HB.FullStack.Cache
 {
     public interface ICache : IModelCache2, ITimestampCache, ICollectionCache
     {

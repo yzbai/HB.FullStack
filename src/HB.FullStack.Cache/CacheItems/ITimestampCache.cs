@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
 
-namespace HB.FullStack.Common.Cache
+namespace HB.FullStack.Cache
 {
     /// <summary>
     /// string,int,generic 都可以存储空值

@@ -1,6 +1,6 @@
 ﻿using System;
 
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 using HB.Infrastructure.Redis.Cache;
 
 using Microsoft.Extensions.Configuration;

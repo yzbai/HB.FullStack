@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.WebApi
+namespace System
 {
     public class WebApiException : ErrorCodeException
     {

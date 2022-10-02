@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Common.Cache
+namespace HB.FullStack.Cache
 {
     public interface ICachedCollectionItem
     {

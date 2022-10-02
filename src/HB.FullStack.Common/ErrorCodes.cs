@@ -1,8 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-using Microsoft.Extensions.Logging;
-
-namespace System
+﻿namespace System
 {
     public static partial class ErrorCodes
     {
@@ -251,6 +247,8 @@ namespace System
 
         public static ErrorCode CaptchaErrorReturn { get; } = new ErrorCode(nameof(CaptchaErrorReturn), "Tecent的Captha服务返回不对，查看");
         public static ErrorCode UnSupportedResToModel { get; } = new ErrorCode(nameof(UnSupportedResToModel), "");
+
+
         #endregion
         #region
 

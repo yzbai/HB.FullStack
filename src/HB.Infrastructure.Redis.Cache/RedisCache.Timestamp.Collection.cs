@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-
-using StackExchange.Redis;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Caching.Distributed;
+
+using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Cache
 {

@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.Cache;
 using HB.FullStack.Common;
-using HB.FullStack.Common.Cache;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -534,7 +534,7 @@ end
         //    }
         //    catch (Exception ex)
         //    {
-        //        throw CacheExceptions.ForcedRemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, keyName, keyValues, ex);
+        //        throw CommonExceptions.ForcedRemoveModelsError(modelDef.CacheInstanceName, modelDef.Name, keyName, keyValues, ex);
         //    }
         //}
 

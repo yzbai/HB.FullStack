@@ -68,7 +68,7 @@ namespace HB.FullStack.Common.ApiClient
 
                         //if (!_resEndpoints.TryAdd(endpoint.ResName, endpoint))
                         //{
-                        //    throw ApiExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
+                        //    throw CommonExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
                         //}
 
                         //endpoint.SiteSetting = siteSetting;
@@ -111,12 +111,12 @@ namespace HB.FullStack.Common.ApiClient
         {
             if (!request.IsValid())
             {
-                throw ApiExceptions.ApiModelError("Request没有通过Validate", null, new { ValidateErrorMessage = request.GetValidateErrorMessage() });
+                throw CommonExceptions.ApiModelError("Request没有通过Validate", null, new { ValidateErrorMessage = request.GetValidateErrorMessage() });
             }
 
             if (!_resEndpoints.TryGetValue(request.ResName, out ResEndpoint? resEndpoint))
             {
-                throw ApiExceptions.ApiClientInnerError($"No ResBinding for {request.ResName}.", null, null);
+                throw CommonExceptions.ApiClientInnerError($"No ResBinding for {request.ResName}.", null, null);
             }
 
             HttpRequestMessageBuilder requestBuilder = new HttpRequestMessageBuilder(resEndpoint, request);
@@ -169,7 +169,7 @@ namespace HB.FullStack.Common.ApiClient
             }
             catch (Exception ex)
             {
-                throw ApiExceptions.ApiClientInnerError("ApiClient非ErrorCodeException", ex, new { Request = request });
+                throw CommonExceptions.ApiClientInnerError("ApiClient非ErrorCodeException", ex, new { Request = request });
             }
         }
 
@@ -193,7 +193,7 @@ namespace HB.FullStack.Common.ApiClient
                         }
                         else
                         {
-                            throw ApiExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.BuildUriString() });
+                            throw CommonExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.BuildUriString() });
                         }
 
                         break;
@@ -202,7 +202,7 @@ namespace HB.FullStack.Common.ApiClient
                 case ApiAuthType.Jwt:
                     if (UserTokenProvider.AccessToken.IsNullOrEmpty())
                     {
-                        throw ApiExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
+                        throw CommonExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
                     }
 
                     requestBuilder.SetJwt(UserTokenProvider.AccessToken);

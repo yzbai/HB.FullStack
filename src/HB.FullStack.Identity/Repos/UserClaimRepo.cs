@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;

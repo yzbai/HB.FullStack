@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
     <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
   </ItemGroup>
 

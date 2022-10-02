@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

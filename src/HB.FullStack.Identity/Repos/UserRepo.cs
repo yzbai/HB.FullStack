@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.SQL;

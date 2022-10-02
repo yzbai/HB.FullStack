@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Common.Cache
+namespace HB.FullStack.Cache
 {
     public static class CachedItemExtensions
     {

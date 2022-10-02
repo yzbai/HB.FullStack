@@ -1,7 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -9,26 +13,28 @@ namespace System
 {
     public static class CacheExceptions
     {
-        internal static Exception CachedItemTimestampNotSet(string resourceType, string cacheKey, object? cacheValue)
+        #region 
+
+        public static Exception CachedItemTimestampNotSet(string resourceType, string cacheKey, object? cacheValue)
         {
             return new CacheException(ErrorCodes.CachedItemTimestampNotSet, nameof(CachedItemTimestampNotSet), null, new { ResourceType = resourceType, CacheKey = cacheKey, CacheValue = cacheValue });
         }
 
-        internal static Exception CacheValueNotSet(string resourceType, string cacheKey)
+        public static Exception CacheValueNotSet(string resourceType, string cacheKey)
         {
             return new CacheException(ErrorCodes.CacheValueNotSet, nameof(CacheValueNotSet), null, new { ResourceType = resourceType, CacheKey = cacheKey });
         }
 
-        internal static Exception CacheKeyNotSet(string? resourceType)
+        public static Exception CacheKeyNotSet(string? resourceType)
         {
             return new CacheException(ErrorCodes.CacheKeyNotSet, nameof(CacheKeyNotSet), null, new { ResourceType = resourceType });
         }
 
-        internal static Exception CacheCollectionKeyNotSame(IEnumerable<ICachedCollectionItem> cachedCollectionItems)
+        public static Exception CacheCollectionKeyNotSame(IEnumerable<ICachedCollectionItem> cachedCollectionItems)
         {
             return new CacheException(ErrorCodes.CacheCollectionKeyNotSame, nameof(CacheCollectionKeyNotSame), null, new { CachedCollectionItems = cachedCollectionItems });
         }
-        public static CacheException CacheSlidingTimeBiggerThanMaxAlive(string type)
+        public static Exception CacheSlidingTimeBiggerThanMaxAlive(string type)
         {
             return new CacheException(ErrorCodes.SlidingTimeBiggerThanMaxAlive, nameof(CacheSlidingTimeBiggerThanMaxAlive), null, new { Type = type });
         }
@@ -113,5 +119,7 @@ namespace System
         {
             return new CacheException(ErrorCodes.RemoveMultipleError, nameof(RemoveMultipleError), ex, new { Keys = keys.ToJoinedString(",") });
         }
+
+        #endregion
     }
 }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Common.Cache
+namespace HB.FullStack.Cache
 {
     /// <summary>
     /// 这里的timestamp表明数据的LastTime，类似version
@@ -27,8 +27,6 @@ namespace HB.FullStack.Common.Cache
                 {
                     return null;
                 }
-
-
 
                 return System.Convert.ToInt32(value, GlobalSettings.Culture);
             }

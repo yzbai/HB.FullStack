@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Cache;
+using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

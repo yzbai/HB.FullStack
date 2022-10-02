@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using HB.FullStack.Cache;
 using HB.FullStack.Common;
-using HB.FullStack.Common.PropertyTrackable;
 
-namespace HB.FullStack.Common.Cache
+namespace HB.FullStack.Cache
 {
     public static class IModelCacheExtensions
     {

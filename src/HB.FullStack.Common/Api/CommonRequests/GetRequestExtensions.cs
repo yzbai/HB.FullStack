@@ -60,7 +60,7 @@ namespace HB.FullStack.Common.Api
 
             //if (resDef?.GetPropertyDef(propertyName) == null)
             //{
-            //    throw ApiExceptions.ApiResourceError("不存在这样的属性", null, new { ResName = request.ResName, PropertyName = propertyName });
+            //    throw CommonExceptions.ApiResourceError("不存在这样的属性", null, new { ResName = request.ResName, PropertyName = propertyName });
             //}
 
             string? propertyValueString = ConvertCenter.ConvertToString(propertyValue, null, StringConvertPurpose.HTTP_QUERY);
