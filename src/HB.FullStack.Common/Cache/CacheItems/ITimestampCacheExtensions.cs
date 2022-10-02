@@ -50,7 +50,7 @@ namespace HB.FullStack.Common.Cache
 
                 return await cache.SetAsync(key, bytes, timestamp, options, token).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not ErrorCode2Exception)
+            catch (Exception ex) when (ex is not ErrorCodeException)
             {
                 throw CacheExceptions.Unkown(key: key, value: value, nameof(SetStringAsync), innerException: ex);
             }
@@ -64,7 +64,7 @@ namespace HB.FullStack.Common.Cache
 
                 return SerializeUtil.Deserialize<string?>(bytes);
             }
-            catch (Exception ex) when (ex is not ErrorCode2Exception)
+            catch (Exception ex) when (ex is not ErrorCodeException)
             {
                 throw CacheExceptions.Unkown(key, null, nameof(GetStringAsync), ex);
             }
@@ -81,7 +81,7 @@ namespace HB.FullStack.Common.Cache
 
                 return await cache.SetAsync(key, bytes, timestamp, options, token).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not ErrorCode2Exception)
+            catch (Exception ex) when (ex is not ErrorCodeException)
             {
                 throw CacheExceptions.Unkown(key, value, nameof(SetAsync), ex);
             }
@@ -95,7 +95,7 @@ namespace HB.FullStack.Common.Cache
 
                 return SerializeUtil.Deserialize<T>(bytes);
             }
-            catch (Exception ex) when (ex is not ErrorCode2Exception)
+            catch (Exception ex) when (ex is not ErrorCodeException)
             {
                 throw CacheExceptions.Unkown(key, null, nameof(GetAsync), ex);
             }

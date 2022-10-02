@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class KVStoreException : ErrorCode2Exception
+    public class KVStoreException : ErrorCodeException
     {
 
 

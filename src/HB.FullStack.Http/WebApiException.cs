@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.WebApi
 {
-    public class WebApiException : ErrorCode2Exception
+    public class WebApiException : ErrorCodeException
     {
 
         [Obsolete("DoNotUse")]

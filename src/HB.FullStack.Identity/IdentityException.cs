@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class IdentityException : ErrorCode2Exception
+    public class IdentityException : ErrorCodeException
     {
 
         [Obsolete("DoNotUse")]

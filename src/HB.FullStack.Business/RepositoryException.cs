@@ -1,21 +1,19 @@
 ﻿namespace System
 {
-    public class RepositoryException : ErrorCode2Exception
+    public class RepositoryException : ErrorCodeException
     {
-
-
         [Obsolete("DoNotUse")]
         public RepositoryException()
         {
         }
 
         [Obsolete("DoNotUse")]
-        public RepositoryException(string message) : base(message)
+        public RepositoryException(string? cause) : base(cause)
         {
         }
 
         [Obsolete("DoNotUse")]
-        public RepositoryException(string message, Exception innerException) : base(message, innerException)
+        public RepositoryException(string? cause, Exception innerException) : base(cause, innerException)
         {
         }
 

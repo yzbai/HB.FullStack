@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class AliyunException : ErrorCode2Exception
+    public class AliyunException : ErrorCodeException
     {
 
 

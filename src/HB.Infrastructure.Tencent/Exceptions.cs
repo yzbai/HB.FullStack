@@ -2,16 +2,11 @@
 
 namespace HB.Infrastructure.Tencent
 {
-    internal static class TencentErrorCodes
-    {
-        public static ErrorCode CapthaError { get; set; } = new ErrorCode(nameof(CapthaError), "");
-    }
-
     internal static class Exceptions
     {
         internal static Exception CapthaError(string appId, string cause)
         {
-            TencentException exception = new TencentException(TencentErrorCodes.CapthaError, cause);
+            TencentException exception = new TencentException(ErrorCodes.CapthaError, cause);
 
             exception.Data["AppId"] = appId;
             exception.Data["Cause"] = cause;

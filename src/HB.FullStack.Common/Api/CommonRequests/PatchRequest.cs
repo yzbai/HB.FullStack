@@ -12,13 +12,13 @@ namespace HB.FullStack.Common.Api
         /// 将PropertyValue转换成字符串
         /// </summary>
         [RequestBody]
-        public IList<ChangedProperty> ChangedProperties { get; set; } = new List<ChangedProperty>();
+        public ChangedPack RequestData { get; set; } = new ChangedPack();
 
         public PatchRequest() : base(typeof(T).Name, ApiMethod.UpdateFields, null, null) { }
 
         public PatchRequest<T> AddProperty(string propertyName, object? oldValue, object? newValue)
         {
-            ChangedProperties.Add(new ChangedProperty(propertyName, oldValue, newValue));
+            RequestData.ChangedProperties.Add(new ChangedProperty(propertyName, oldValue, newValue));
 
             return this;
         }

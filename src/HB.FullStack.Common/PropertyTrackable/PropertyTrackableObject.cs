@@ -67,7 +67,7 @@ namespace HB.FullStack.Common.PropertyTrackable
                 throw new InvalidOperationException("ITrackPropertyChangedNoOldValueTracked");
             }
 
-            updatingProperty.NewValue = JsonSerializer.SerializeToElement(newValue);
+            updatingProperty.NewValue = SerializeUtil.ToJsonElement(newValue);
 
             _updatingProperties.Remove(key);
 

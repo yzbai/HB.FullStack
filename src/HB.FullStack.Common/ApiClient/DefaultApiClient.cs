@@ -147,9 +147,9 @@ namespace HB.FullStack.Common.ApiClient
 
                 return rt;
             }
-            catch (ErrorCode2Exception ex)
+            catch (ErrorCodeException ex)
             {
-                if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
                     bool refreshSuccessed = await this.RefreshUserTokenAsync().ConfigureAwait(false);
 
@@ -158,12 +158,12 @@ namespace HB.FullStack.Common.ApiClient
                         return await GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
                     }
                 }
-                else if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ApiErrorCodes.AuthorizationNoTokenInStore)
+                else if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AuthorizationNoTokenInStore)
                 {
                     //TODO: 重新登陆， 客户端应该针对Authroization开头的ErrorCode进行相应处理
                 }
 
-                //ApiErrorCodes.SmsCacheError
+                //ErrorCodes.SmsCacheError
 
                 throw;
             }

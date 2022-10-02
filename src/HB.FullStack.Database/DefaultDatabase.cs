@@ -9,9 +9,10 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Extensions;
+using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.SQL;
 
 using Microsoft.Extensions.Logging;
@@ -746,7 +747,7 @@ namespace HB.FullStack.Database
             {
                 //TODO:捕捉主键冲突而无法添加，即重复请求了
 
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
                 {
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
@@ -773,9 +774,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        /// <summary>
-        /// Version控制,反应Version变化
-        /// </summary>
         public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
@@ -820,7 +818,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
                 {
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
@@ -924,7 +922,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
                 {
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
@@ -1015,6 +1013,35 @@ namespace HB.FullStack.Database
             {
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
             }
+        }
+
+        public async Task UpdateFieldsAsync<T>(ChangedPack changedPropertyPack, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        {
+            if (changedPropertyPack == null || changedPropertyPack.Id == null || changedPropertyPack.ChangedProperties.IsNullOrEmpty())
+            {
+                throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack);
+            }
+
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+
+            List<(string propertyName, object? oldValue, object? newValue)> lst = new List<(string propertyName, object? oldValue, object? newValue)>();
+
+            foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
+            {
+                DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(cp.PropertyName);
+
+                if (propertyDef == null)
+                {
+                    throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack);
+                }
+
+                lst.Add((
+                    cp.PropertyName,
+                    SerializeUtil.FromJsonElement(propertyDef.Type, cp.OldValue),
+                    SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue)));
+            }
+
+            await UpdateFieldsAsync<T>(changedPropertyPack.Id, lst, lastUser, transContext).ConfigureAwait(false);
         }
 
         public async Task UpdateFieldsAsync<T>(object id, IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues, string lastUser, TransactionContext? transContext)
@@ -1191,7 +1218,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
                 {
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }
@@ -1307,7 +1334,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
                 {
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }
@@ -1380,7 +1407,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == DatabaseErrorCodes.ExecuterError)
+                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
                 {
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }

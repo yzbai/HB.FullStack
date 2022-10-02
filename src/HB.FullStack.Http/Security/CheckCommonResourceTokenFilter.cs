@@ -39,7 +39,7 @@ namespace HB.FullStack.WebApi.Filters
 
                         if (token.IsNullOrEmpty())
                         {
-                            OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                            OnError(context, ErrorCodes.CommonResourceTokenNeeded);
                             return;
                         }
 
@@ -47,14 +47,14 @@ namespace HB.FullStack.WebApi.Filters
 
                         if(!_commonResTokenService.TryCheckToken(crt,out string? _))
                         {
-                            OnError(context, ApiErrorCodes.CommonResourceTokenError);
+                            OnError(context, ErrorCodes.CommonResourceTokenError);
                             return;
                         }
                     }
                 }
                 else
                 {
-                    OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                    OnError(context, ErrorCodes.CommonResourceTokenNeeded);
                     return;
                 }
 
@@ -62,14 +62,14 @@ namespace HB.FullStack.WebApi.Filters
             }
             catch (CacheException ex)
             {
-                OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                OnError(context, ErrorCodes.CommonResourceTokenNeeded);
                 _logger.LogError(ex, "CommonResourceToken 验证失败");
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                OnError(context, ErrorCodes.CommonResourceTokenNeeded);
                 _logger.LogError(ex, "CommonResourceToken 验证失败");
             }
         }

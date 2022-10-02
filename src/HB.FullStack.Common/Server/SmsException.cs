@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class SmsException : ErrorCode2Exception
+    public class SmsException : ErrorCodeException
     {
 
 

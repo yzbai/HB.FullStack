@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class EventBusException : ErrorCode2Exception
+    public class EventBusException : ErrorCodeException
     {
 
         [Obsolete("DoNotUse")]

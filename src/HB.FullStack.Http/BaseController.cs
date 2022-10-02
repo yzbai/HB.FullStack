@@ -14,6 +14,11 @@ namespace HB.FullStack.WebApi
         {
             return BadRequest(errorCode);
         }
+
+        protected BadRequestObjectResult Error(ErrorCode errorCode, string description)
+        {
+            return BadRequest(new ErrorCode(errorCode.Code, description));
+        }
     }
 
     public class ModelController<TModel> : BaseController where TModel : IModel

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 
 using HB.FullStack.Common.Convert;
-using HB.FullStack.Common.Meta;
 
 namespace System
 {
@@ -24,6 +23,7 @@ namespace System
         public static readonly MethodInfo ConvertToStringMethod = typeof(ConvertCenter).GetMethod(nameof(ConvertCenter.ConvertToString), new Type[] { typeof(object), typeof(Type), typeof(StringConvertPurpose) })!;
 
         public static readonly ConstructorInfo StringListConstructorInfo = typeof(List<>).MakeGenericType(typeof(string)).GetConstructor(Array.Empty<Type>())!;
+
         public static readonly MethodInfo StringListAddMethod = typeof(List<>).MakeGenericType(typeof(string)).GetMethod("Add")!;
 
         public static readonly MethodInfo IEnumerableGetEnumeratorMethod = typeof(IEnumerable).GetMethod(nameof(IEnumerable.GetEnumerator))!;
@@ -38,5 +38,6 @@ namespace System
         public static readonly MethodInfo ObjectToStringMethod = typeof(object).GetMethod(nameof(object.ToString))!;
         public static readonly FieldInfo DbNullValueFiled = typeof(DBNull).GetField("Value")!;
 
+        public static readonly ConstructorInfo PropertyValueConstructorInfo = typeof(HB.FullStack.Common.Meta.PropertyValue).GetConstructor(new Type[] { typeof(string), typeof(object) })!;
     }
 }

@@ -40,7 +40,7 @@ namespace HB.FullStack.Identity
             };
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DbModel> sender, DBChangedEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args)
         {
             if (sender is IEnumerable<UserRole> userRoles)
             {
@@ -165,7 +165,7 @@ namespace HB.FullStack.Identity
 
             List<UserRole> userRoles = roles.Select(r => new UserRole(userId, r.Id)).ToList();
 
-            _ = await AddAsync(userRoles, lastUser, transactionContext).ConfigureAwait(false);
+            _ = await AddAsync<UserRole>(userRoles, lastUser, transactionContext).ConfigureAwait(false);
         }
 
         public async Task RemoveRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext transactionContext)
@@ -181,7 +181,7 @@ namespace HB.FullStack.Identity
                 return;
             }
 
-            await DeleteAsync(userRoles, lastUser, transactionContext).ConfigureAwait(false);
+            await DeleteAsync<UserRole>(userRoles, lastUser, transactionContext).ConfigureAwait(false);
         }
 
         #endregion

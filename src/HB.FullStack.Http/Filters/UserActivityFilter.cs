@@ -81,7 +81,7 @@ namespace HB.FullStack.WebApi.Filters
         {
             if (context != null)
             {
-                context.Result = new BadRequestObjectResult(ApiErrorCodes.UserActivityFilterError);
+                context.Result = new BadRequestObjectResult(ErrorCodes.UserActivityFilterError);
             }
         }
     }

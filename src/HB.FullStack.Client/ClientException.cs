@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class ClientException : ErrorCode2Exception
+    public class ClientException : ErrorCodeException
     {
         [Obsolete("DoNotUse")]
         public ClientException()

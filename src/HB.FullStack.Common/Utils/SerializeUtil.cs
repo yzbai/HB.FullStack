@@ -212,6 +212,21 @@ namespace System
             }
         }
 
+        public static object? FromJsonElement(Type type, JsonElement jsonElement)
+        {
+            return JsonSerializer.Deserialize(jsonElement, type, _jsonSerializerOptions);
+        }
+
+        public static JsonElement ToJsonElement(object? obj)
+        {
+            return JsonSerializer.SerializeToElement(obj, _jsonSerializerOptions);
+        }
+
+        public static T? To<T>(this JsonElement jsonElement)
+        {
+            return (T?)FromJsonElement(typeof(T), jsonElement);
+        }
+
         #endregion Json
 
         #region BinaryFormatter Serialize

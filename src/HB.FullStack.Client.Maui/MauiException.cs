@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class MauiException : ErrorCode2Exception
+    public class MauiException : ErrorCodeException
     {
         [Obsolete("DoNotUse")]
         public MauiException()

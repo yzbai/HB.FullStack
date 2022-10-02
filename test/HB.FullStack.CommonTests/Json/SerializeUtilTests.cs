@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
-namespace HB.FullStack.CommonTests
+namespace HB.FullStack.CommonTests.Json
 {
     [TestClass]
     public class SerializeUtilTests
@@ -13,26 +13,26 @@ namespace HB.FullStack.CommonTests
         [TestMethod]
         public void TryFromJsonWithCollectionCheckTest()
         {
-            string? nullStr = null;
+            string nullStr = null;
             string emptyStr = string.Empty;
             string emptyCollectionStr = "[]";
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out TestModel? model));
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out TestModel model));
             Assert.IsNull(model);
 
-            SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out IEnumerable<TestModel>? models);
+            SerializeUtil.TryFromJsonWithCollectionCheck(emptyCollectionStr, out IEnumerable<TestModel> models);
             Assert.IsTrue(models != null && !models.Any());
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out TestModel? model1));
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out TestModel model1));
             Assert.IsNull(model1);
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out IEnumerable<TestModel>? models1));
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(emptyStr, out IEnumerable<TestModel> models1));
             Assert.IsTrue(models1 != null && !models1.Any());
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out TestModel? model2));
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out TestModel model2));
             Assert.IsNull(model2);
 
-            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out IEnumerable<TestModel>? models2));
+            Assert.IsTrue(SerializeUtil.TryFromJsonWithCollectionCheck(nullStr, out IEnumerable<TestModel> models2));
             Assert.IsTrue(models2 != null && !models2.Any());
         }
 
@@ -51,7 +51,7 @@ namespace HB.FullStack.CommonTests
             string moreCollectionJson = SerializeUtil.ToJson(moreLst);
 
             //item - item
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out TestModel? model))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out TestModel model))
             {
                 Assert.AreEqual(SerializeUtil.ToJson(model), SerializeUtil.ToJson(testModel1));
             }
@@ -61,7 +61,7 @@ namespace HB.FullStack.CommonTests
             }
 
             //item - collection
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out IEnumerable<TestModel>? models))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(itemJson, out IEnumerable<TestModel> models))
             {
                 Assert.AreEqual(SerializeUtil.ToJson(models), SerializeUtil.ToJson(oneList));
             }
@@ -71,7 +71,7 @@ namespace HB.FullStack.CommonTests
             }
 
             //collection - collection
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out IEnumerable<TestModel>? models2))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out IEnumerable<TestModel> models2))
             {
                 Assert.AreEqual(SerializeUtil.ToJson(models2), SerializeUtil.ToJson(moreLst));
             }
@@ -81,7 +81,7 @@ namespace HB.FullStack.CommonTests
             }
 
             //oneCollection - item
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(oneCollectionJson, out TestModel? model1))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(oneCollectionJson, out TestModel model1))
             {
                 Assert.AreEqual(SerializeUtil.ToJson(model1), SerializeUtil.ToJson(testModel1));
             }
@@ -91,7 +91,7 @@ namespace HB.FullStack.CommonTests
             }
 
             //moreCollection - item
-            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out TestModel? _))
+            if (SerializeUtil.TryFromJsonWithCollectionCheck(moreCollectionJson, out TestModel _))
             {
                 Assert.Fail("moreCollection - item failed");
             }
@@ -123,9 +123,9 @@ namespace HB.FullStack.CommonTests
         {
             string json = "{\"Number\": \"123\", \"Price\": \"12.123456789\"}";
 
-            NumberTestCls? obj = SerializeUtil.FromJson<NumberTestCls>(json);
+            NumberTestCls obj = SerializeUtil.FromJson<NumberTestCls>(json);
 
-            NumberTestCls? newtonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<NumberTestCls>(json);
+            NumberTestCls newtonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<NumberTestCls>(json);
 
             Assert.IsTrue(obj!.Number == newtonObj?.Number && obj.Price == newtonObj.Price);
         }

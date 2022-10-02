@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class ApiException : ErrorCode2Exception
+    public class ApiException : ErrorCodeException
     {
         public ApiException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {

@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class LockException : ErrorCode2Exception
+    public class LockException : ErrorCodeException
     {
 
 

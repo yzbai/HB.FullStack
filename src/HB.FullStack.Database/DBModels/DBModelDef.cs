@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using HB.FullStack.Common.Models;
 
@@ -100,6 +101,13 @@ namespace HB.FullStack.Database.DbModels
         public bool ContainsProperty(string propertyName)
         {
             return PropertyDict.ContainsKey(propertyName);
+        }
+
+        private IList<DbModelPropertyDef>? _foreignKeyProperties;
+
+        public IList<DbModelPropertyDef> GetForeignKeyProperties()
+        {
+            return _foreignKeyProperties ??= PropertyDict.Values.Where(p => p.IsForeignKey).ToList();
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Cache;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Identity.Models;
@@ -16,11 +18,10 @@ namespace HB.FullStack.Identity
     public class UserClaimRepo : ModelRepository<UserClaim>
     {
 
-
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DbModel> sender, DBChangedEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args)
         {
             if (sender is IEnumerable<UserClaim> userClaims)
             {
@@ -31,6 +32,24 @@ namespace HB.FullStack.Identity
                 {
                     InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
                 }
+            }
+            else if (sender is IEnumerable<ChangedPack> cpps)
+            {
+                foreach (var cpp in cpps)
+                {
+                    if (cpp.AddtionalProperties.TryGetValue(nameof(UserClaim.UserId), out JsonElement value))
+                    {
+                        InvalidateCache(new CachedUserClaimsByUserId(value.To<Guid>()));
+                    }
+                    else
+                    {
+                        throw CommonExceptions.AddtionalPropertyNeeded(model: nameof(UserClaim), property: nameof(UserClaim.UserId));
+                    }
+                }
+            }
+            else
+            {
+                throw CommonExceptions.UnkownEventSender(sender);
             }
 
             return Task.CompletedTask;

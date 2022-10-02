@@ -53,9 +53,9 @@ namespace HB.FullStack.Common.ApiClient
             {
                 await HttpClientApiExtensions.ThrowIfNotSuccessedAsync(responseMessage, endpointSettings.Challenge).ConfigureAwait(false);
             }
-            catch (ErrorCode2Exception ex)
+            catch (ErrorCodeException ex)
             {
-                if (ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
                     await UserTokenRefresher.RefreshUserTokenAsync(_apiClient).ConfigureAwait(false);
 

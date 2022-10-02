@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class DatabaseException : ErrorCode2Exception
+    public class DatabaseException : ErrorCodeException
     {
         public DatabaseException(ErrorCode errorCode, string cause, Exception? innerException, object? context) : base(errorCode, cause, innerException, context)
         {

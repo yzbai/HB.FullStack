@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
@@ -22,23 +23,12 @@ namespace HB.FullStack.Database
         /// Using timestamp method optimistic locking if a TimestampDbModel.
         /// Otherwise, maybe have data conflict.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <param name="lastUser"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
         Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         /// <summary>
         /// Update Fields for TimestampDbModel. Using timestamp method optimistic locking.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="id"></param>
-        /// <param name="propertyNameValues"></param>
         /// <param name="timestamp">TimestampDbModel.Timestamp</param>
-        /// <param name="lastUser"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
         Task UpdateFieldsAsync<T>(
             object id,
             IList<(string propertyName, object? propertyValue)> propertyNameValues,
@@ -56,23 +46,16 @@ namespace HB.FullStack.Database
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new();
 
+        Task UpdateFieldsAsync<T>(ChangedPack changedPropertyPack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+
         /// <summary>
         /// Delete DbModel. Using timestamp method optimistic locking if a TimestampDbModel
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <param name="lastUser"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
         Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         /// <summary>
-        /// Delete TimelessDbModel
+        /// Delete TimelessDbModel without conflict check
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="whereExpr"></param>
-        /// <param name="transactionContext"></param>
-        /// <returns></returns>
         Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transactionContext = null) where T : TimelessDbModel, new();
 
         Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();

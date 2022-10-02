@@ -123,7 +123,7 @@ namespace HB.FullStack.Client
 
         /// <summary>
         /// 本质：Resource到Model的转换
-        /// 请根据request.ResName，提供Res到Model的转换
+        /// 请根据request.ResName，提供Res到Model的转换.
         /// </summary>
         protected abstract Task<IEnumerable<TModel>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request);
 

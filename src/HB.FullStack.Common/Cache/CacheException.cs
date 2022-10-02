@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class CacheException : ErrorCode2Exception
+    public class CacheException : ErrorCodeException
     {
         public CacheException(ErrorCode errorCode, string cause, Exception? innerException, object? context) : base(errorCode, cause, innerException, context)
         {

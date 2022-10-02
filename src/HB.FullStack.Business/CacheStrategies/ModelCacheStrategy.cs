@@ -7,7 +7,9 @@ using AsyncAwaitBestPractices;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Cache;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
+using HB.FullStack.Database.DbModels;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.Logging;
@@ -141,14 +143,21 @@ namespace HB.FullStack.Repository.CacheStrategies
 
         }
 
-        public static void InvalidateCache<T>(IEnumerable<T> models, ICache cache) //where TModel : ITimestampModel, new()
+        public static void InvalidateCache<T>(IEnumerable<T> models, ICache cache) where T : DbModel
         {
             cache.RemoveModelsAsync(models).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache<T>(T model, ICache cache)
+        public static void InvalidateCache<T>(T model, ICache cache) where T : DbModel
         {
             cache.RemoveModelAsync(model).SafeFireAndForget(OnException);
+        }
+
+        public static void InvalidateCache<T>(ChangedPack cpp, ICache cache)
+        {
+            ThrowIf.Null(cpp.Id, nameof(cpp.Id));
+
+            cache.RemoveModelByIdAsync<T>(cpp.Id).SafeFireAndForget(OnException);
         }
 
         private static void OnException(Exception ex)

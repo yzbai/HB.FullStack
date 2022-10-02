@@ -17,7 +17,6 @@ namespace HB.FullStack.Identity
         public UserActivityRepo(ILogger<UserActivityRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-
-        protected override Task InvalidateCacheItemsOnChanged(IEnumerable<DbModel> sender, DBChangedEventArgs args) => Task.CompletedTask;
+        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args) => Task.CompletedTask;
     }
 }

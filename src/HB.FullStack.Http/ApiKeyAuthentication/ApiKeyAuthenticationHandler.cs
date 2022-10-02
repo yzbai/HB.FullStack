@@ -60,7 +60,7 @@ namespace HB.FullStack.WebApi.ApiKeyAuthentication
             Response.StatusCode = 401;
             Response.ContentType = "application/problem+json";
 
-            return Response.WriteAsync(SerializeUtil.ToJson(ApiErrorCodes.NoAuthority));
+            return Response.WriteAsync(SerializeUtil.ToJson(ErrorCodes.NoAuthority));
         }
 
         protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
@@ -68,7 +68,7 @@ namespace HB.FullStack.WebApi.ApiKeyAuthentication
             Response.StatusCode = 403;
             Response.ContentType = "application/problem+json";
 
-            return Response.WriteAsync(SerializeUtil.ToJson(ApiErrorCodes.NoAuthority));
+            return Response.WriteAsync(SerializeUtil.ToJson(ErrorCodes.NoAuthority));
         }
     }
 }

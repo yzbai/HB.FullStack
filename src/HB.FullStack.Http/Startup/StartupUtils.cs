@@ -168,7 +168,7 @@ namespace System
                 {
                     apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
                     {
-                        ErrorCode errorCode = ApiErrorCodes.ModelValidationError.WithMessage(actionContext.ModelState.GetErrors());
+                        ErrorCode errorCode = ErrorCodes.ModelValidationError.WithMessage(actionContext.ModelState.GetErrors());
 
                         return new BadRequestObjectResult(errorCode)
                         {

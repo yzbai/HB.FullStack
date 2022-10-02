@@ -29,7 +29,7 @@ namespace HB.FullStack.WebApi
 
                 _logger.LogCritical("IExceptionHandlerPathFeature = null");
 
-                return new BadRequestObjectResult(WebApiErrorCodes.ServerInternalError);
+                return new BadRequestObjectResult(ErrorCodes.ServerInternalError);
             }
 
             string path = exceptionHandlerPathFeature.Path;
@@ -47,9 +47,9 @@ namespace HB.FullStack.WebApi
             //    content = await bodyStream.ReadToEndAsync().ConfigureAwait(false);
             //}
 
-            ErrorCode errorCode = WebApiErrorCodes.ServerInternalError;
+            ErrorCode errorCode = ErrorCodes.ServerInternalError;
 
-            if (exceptionHandlerPathFeature.Error is ErrorCode2Exception errorCodeException)
+            if (exceptionHandlerPathFeature.Error is ErrorCodeException errorCodeException)
             {
                 errorCode = errorCodeException.ErrorCode;
             }

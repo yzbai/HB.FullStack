@@ -16,5 +16,8 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TrackProperty]
         public InnerTestObject? _innerCls;
 
+        [TrackProperty]
+        [AddtionalProperty]
+        private string _forwordAttributeName = "This is a Addtional";
     }
 }

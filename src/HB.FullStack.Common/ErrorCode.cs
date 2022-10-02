@@ -2,6 +2,7 @@
 
 namespace System
 {
+    //TODO: 改用record
     public class ErrorCode : IEquatable<ErrorCode>
     {
         public static readonly ErrorCode Empty = new ErrorCode(nameof(Empty), "");

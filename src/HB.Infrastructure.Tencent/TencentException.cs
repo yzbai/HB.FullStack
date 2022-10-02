@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class TencentException : ErrorCode2Exception
+    public class TencentException : ErrorCodeException
     {
 
         [Obsolete("DoNotUse")]

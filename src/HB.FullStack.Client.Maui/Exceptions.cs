@@ -9,16 +9,6 @@ using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Client.Maui
 {
-    public static class ErrorCodes
-    {
-        public static ErrorCode AliyunStsTokenReturnNull { get; } = new ErrorCode(nameof(AliyunStsTokenReturnNull), "");
-        public static ErrorCode NoInternet { get; } = new ErrorCode(nameof(NoInternet), "");
-        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(nameof(AliyunOssPutObjectError), "");
-
-        public static ErrorCode CaptchaErrorReturn { get; } = new ErrorCode(nameof(CaptchaErrorReturn), "Tecent的Captha服务返回不对，查看");
-        public static ErrorCode UnSupportedResToModel { get; } = new ErrorCode(nameof(UnSupportedResToModel), "");
-    }
-
     public static class Exceptions
     {
         public static Exception AliyunStsTokenReturnNull()

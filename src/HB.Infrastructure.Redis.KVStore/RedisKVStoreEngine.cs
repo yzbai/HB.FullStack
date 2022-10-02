@@ -537,11 +537,11 @@ return array";
 
             ErrorCode error = result switch
             {
-                9 => KVStoreErrorCodes.KVStoreExistAlready,
-                7 => KVStoreErrorCodes.KVStoreTimestampNotMatched,
-                0 => KVStoreErrorCodes.KVStoreError,
+                9 => ErrorCodes.KVStoreExistAlready,
+                7 => ErrorCodes.KVStoreTimestampNotMatched,
+                0 => ErrorCodes.KVStoreError,
                 1 => ErrorCode.Empty,
-                _ => KVStoreErrorCodes.KVStoreError,
+                _ => ErrorCodes.KVStoreError,
             };
 
             return error;

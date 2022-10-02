@@ -59,9 +59,9 @@ namespace HB.FullStack.DatabaseTests
             }
             catch (DatabaseException ex)
             {
-                Assert.IsTrue(ex.ErrorCode == DatabaseErrorCodes.ConcurrencyConflict);
+                Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
-                if (ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
+                if (ex.ErrorCode != ErrorCodes.ConcurrencyConflict)
                 {
                     throw ex;
                 }
@@ -102,9 +102,9 @@ namespace HB.FullStack.DatabaseTests
             }
             catch (DatabaseException ex)
             {
-                Assert.IsTrue(ex.ErrorCode == DatabaseErrorCodes.ConcurrencyConflict);
+                Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
-                if (ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
+                if (ex.ErrorCode != ErrorCodes.ConcurrencyConflict)
                 {
                     throw ex;
                 }
@@ -133,9 +133,9 @@ namespace HB.FullStack.DatabaseTests
             }
             catch (DatabaseException ex)
             {
-                Assert.IsTrue(ex.ErrorCode == DatabaseErrorCodes.ConcurrencyConflict);
+                Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
-                if (ex.ErrorCode != DatabaseErrorCodes.ConcurrencyConflict)
+                if (ex.ErrorCode != ErrorCodes.ConcurrencyConflict)
                 {
                     throw;
                 }

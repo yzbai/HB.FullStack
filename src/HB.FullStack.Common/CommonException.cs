@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public class CommonException : ErrorCode2Exception
+    public class CommonException : ErrorCodeException
     {
         public CommonException(ErrorCode errorCode, string cause, Exception? innerException, object? context) : base(errorCode, cause, innerException, context)
         {

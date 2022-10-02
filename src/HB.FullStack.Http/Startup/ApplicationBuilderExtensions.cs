@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.Builder
                  {
                      context.Response.StatusCode = 400;
                      context.Response.ContentType = "application/json";
-                     await context.Response.WriteAsync(SerializeUtil.ToJson(ApiErrorCodes.HttpsRequired)).ConfigureAwait(false);
+                     await context.Response.WriteAsync(SerializeUtil.ToJson(ErrorCodes.HttpsRequired)).ConfigureAwait(false);
                  }
                  else
                  {

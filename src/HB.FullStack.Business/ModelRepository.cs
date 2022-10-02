@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Cache;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Lock.Memory;
@@ -51,74 +52,91 @@ namespace HB.FullStack.Repository
             RegisterModelChangedEvents(InvalidateCacheItemsOnChanged);
         }
 
-        public void RegisterModelChangedEvents(AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> OnModelsChanged)
+        public void RegisterModelChangedEvents(AsyncEventHandler<object, DBChangedEventArgs> OnModelsChanged)
         {
-            ModelsAdded += OnModelsChanged;
+            ModelAdded += OnModelsChanged;
 
-            ModelsUpdated += OnModelsChanged;
+            ModelUpdated += OnModelsChanged;
 
-            ModelsDeleted += OnModelsChanged;
+            ModelDeleted += OnModelsChanged;
         }
 
         /// <summary>
         /// //NOTICE: 为什么再基类中要abstract而不是virtual，就是强迫程序员思考这里需要释放的Cache有没有
         /// </summary>
-        protected abstract Task InvalidateCacheItemsOnChanged(IEnumerable<DbModel> sender, DBChangedEventArgs args);
+        protected abstract Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args);
 
         #region Events
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangingEventArgs> ModelUpdating
+        public event AsyncEventHandler<object, DBChangingEventArgs> ModelUpdating
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelsUpdated
+        public event AsyncEventHandler<object, DBChangedEventArgs> ModelUpdated
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelUpdateFailed
+        public event AsyncEventHandler<object, DBChangedEventArgs> ModelUpdateFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangingEventArgs> ModelAdding
+        public event AsyncEventHandler<object, DBChangingEventArgs> ModelAdding
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelsAdded
+        public event AsyncEventHandler<object, DBChangedEventArgs> ModelAdded
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelAddFailed
+        public event AsyncEventHandler<object, DBChangedEventArgs> ModelAddFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangingEventArgs> ModelDeleting
+        public event AsyncEventHandler<object, DBChangingEventArgs> ModelDeleting
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelsDeleted
+        public event AsyncEventHandler<object, DBChangedEventArgs> ModelDeleted
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<IEnumerable<DbModel>, DBChangedEventArgs> ModelDeleteFailed
+        public event AsyncEventHandler<object, DBChangedEventArgs> ModelDeleteFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
+        }
+
+        protected virtual Task OnModelUpdatingFieldsAsync(IEnumerable<ChangedPack> cpps)
+        {
+            //Events
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
+        }
+
+        protected virtual Task OnModelUpdatedFieldsAsync(IEnumerable<ChangedPack> cpps)
+        {
+            //Events
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
+        }
+
+        protected virtual Task OnModelUpdateFieldsFailedAsync(IEnumerable<ChangedPack> cpps)
+        {
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
         }
 
         protected virtual Task OnModelUpdatingAsync(IEnumerable<DbModel> models)
@@ -130,7 +148,7 @@ namespace HB.FullStack.Repository
         protected virtual Task OnModelUpdatedAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelsUpdated), models, new DBChangedEventArgs { ChangeType = DBChangeType.Update });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), models, new DBChangedEventArgs { ChangeType = DBChangeType.Update });
         }
 
         protected virtual Task OnModelUpdateFailedAsync(IEnumerable<DbModel> models)
@@ -148,7 +166,7 @@ namespace HB.FullStack.Repository
         protected virtual Task OnModelAddedAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelsAdded), models, new DBChangedEventArgs { ChangeType = DBChangeType.Add });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdded), models, new DBChangedEventArgs { ChangeType = DBChangeType.Add });
         }
 
         protected virtual Task OnModelAddFailedAsync(IEnumerable<DbModel> models)
@@ -165,7 +183,7 @@ namespace HB.FullStack.Repository
         protected virtual Task OnModelDeletedAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelsDeleted), models, new DBChangedEventArgs { ChangeType = DBChangeType.Delete });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleted), models, new DBChangedEventArgs { ChangeType = DBChangeType.Delete });
         }
 
         protected virtual Task OnModelDeleteFailedAsync(IEnumerable<DbModel> models)
@@ -195,6 +213,35 @@ namespace HB.FullStack.Repository
             ModelCacheStrategy.InvalidateCache(model, Cache);
 
             await OnModelUpdatedAsync(new T[] { model }).ConfigureAwait(false);
+        }
+
+        public async Task UpdateFields<T>(ChangedPack cp, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
+        {
+            //检查必要的AddtionalProperties
+            //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
+
+            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
+
+            if (!cp.AddtionalProperties.ContainsAllKey(modelDef.GetForeignKeyProperties().Select(p => p.Name).ToList()))
+            {
+                throw RepositoryExceptions.AddtionalPropertyNeeded(modelDef.ModelFullName);
+            }
+
+            await OnModelUpdatingFieldsAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+
+            try
+            {
+                await Database.UpdateFieldsAsync<T>(cp, lastUser, transactionContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await OnModelUpdateFieldsFailedAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+                throw;
+            }
+
+            ModelCacheStrategy.InvalidateCache<T>(cp, Cache);
+
+            await OnModelUpdatedFieldsAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
         }
 
         public async Task AddAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
@@ -413,6 +460,5 @@ namespace HB.FullStack.Repository
         }
 
         #endregion
-
     }
 }

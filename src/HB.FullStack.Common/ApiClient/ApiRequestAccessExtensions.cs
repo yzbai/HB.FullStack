@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Meta;
 
 namespace HB.FullStack.Common.ApiClient
 {
@@ -26,6 +27,7 @@ namespace HB.FullStack.Common.ApiClient
 
         private static readonly Dictionary<Type, Func<object, List<string>>> _convertRequestToQueriesDict = new Dictionary<Type, Func<object, List<string>>>();
 
+        //TODO: do we need a lock?
         private static Func<object, List<string>> GetCachedConvertRequestToQueriesFunc(Type type)
         {
             if (_convertRequestToQueriesDict.TryGetValue(type, out Func<object, List<string>>? cachedFunc))

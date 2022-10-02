@@ -35,7 +35,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (captcha.IsNullOrEmpty())
                 {
-                    OnError(context, ApiErrorCodes.CapthcaNotFound);
+                    OnError(context, ErrorCodes.CapthcaNotFound);
                     return;
                 }
 
@@ -45,7 +45,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (result == null || !result.IsSuccessed)
                 {
-                    OnError(context, ApiErrorCodes.CapthcaError);
+                    OnError(context, ErrorCodes.CapthcaError);
                     return;
                 }
 
@@ -53,7 +53,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
 
                 if (!verifyResult)
                 {
-                    OnError(context, ApiErrorCodes.CapthcaError);
+                    OnError(context, ErrorCodes.CapthcaError);
                     return;
                 }
 
@@ -63,7 +63,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                OnError(context, ApiErrorCodes.CapthcaError);
+                OnError(context, ErrorCodes.CapthcaError);
                 _logger.LogError(ex, "TCaptcha 验证执行失败");
             }
         }

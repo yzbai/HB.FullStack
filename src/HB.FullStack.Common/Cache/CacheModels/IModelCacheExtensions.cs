@@ -1,12 +1,13 @@
-﻿using HB.FullStack.Cache;
-using HB.FullStack.Common;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using HB.FullStack.Cache;
+using HB.FullStack.Common;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Common.Cache
 {
@@ -83,12 +84,10 @@ namespace HB.FullStack.Common.Cache
             await cache.RemoveModelsAsync<T>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
         }
 
-
         public static Task RemoveModelAsync<T>(this ICache cache, string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default)
         {
             return cache.RemoveModelsAsync<T>(dimensionKeyName, new object[] { dimensionKeyValue }, token);
         }
-
 
         public static async Task RemoveModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default)
         {
@@ -101,6 +100,23 @@ namespace HB.FullStack.Common.Cache
 
             string dimensionKeyName = modelDef.KeyProperty.Name;
             string dimensionKeyValue = modelDef.KeyProperty.GetValue(model)!.ToString()!;
+
+            await cache.RemoveModelAsync<TCacheModel>(dimensionKeyName, dimensionKeyValue, token).ConfigureAwait(false);
+        }
+
+        public static async Task RemoveModelByIdAsync<TCacheModel>(this ICache cache, object id, CancellationToken token = default)
+        {
+            ThrowIf.Null(id, nameof(id));
+
+            CacheModelDef? modelDef = CacheModelDefFactory.Get<TCacheModel>();
+
+            if (modelDef == null)
+            {
+                return;
+            }
+
+            string dimensionKeyName = modelDef.KeyProperty.Name;
+            string dimensionKeyValue = id!.ToString()!;
 
             await cache.RemoveModelAsync<TCacheModel>(dimensionKeyName, dimensionKeyValue, token).ConfigureAwait(false);
         }

@@ -19,7 +19,7 @@ namespace HB.FullStack.Common.ApiClient
                 return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None);
 
             }
-            catch (ApiException ex) when (ex.ErrorCode == ApiErrorCodes.CapthcaNotFound)
+            catch (ApiException ex) when (ex.ErrorCode == ErrorCodes.CapthcaNotFound)
             {
                 TCaptchaPopup popup = new TCaptchaPopup();
 

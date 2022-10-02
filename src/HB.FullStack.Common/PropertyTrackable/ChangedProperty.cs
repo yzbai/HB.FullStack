@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.PropertyTrackable
@@ -25,8 +26,8 @@ namespace HB.FullStack.Common.PropertyTrackable
             PropertyName = name;
             PropertyPropertyName = propertyPropertyName;
 
-            OldValue = JsonSerializer.SerializeToElement(oldValue);
-            NewValue = JsonSerializer.SerializeToElement(newValue);
+            OldValue = SerializeUtil.ToJsonElement(oldValue);
+            NewValue = SerializeUtil.ToJsonElement(newValue);
         }
     }
 }

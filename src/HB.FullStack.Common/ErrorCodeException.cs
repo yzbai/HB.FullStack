@@ -1,8 +1,8 @@
 ﻿namespace System
 {
-    public class ErrorCode2Exception : Exception
+    public class ErrorCodeException : Exception
     {
-        public ErrorCode2Exception(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(cause, innerException)
+        public ErrorCodeException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(cause, innerException)
         {
             ErrorCode = errorCode;
 
@@ -37,17 +37,17 @@
         }
 
         [Obsolete("不要用")]
-        public ErrorCode2Exception()
+        public ErrorCodeException()
         {
         }
 
         [Obsolete("不要用")]
-        public ErrorCode2Exception(string? cause) : base(cause)
+        public ErrorCodeException(string? cause) : base(cause)
         {
         }
 
         [Obsolete("不要用")]
-        public ErrorCode2Exception(string? cause, Exception innerException) : base(cause, innerException)
+        public ErrorCodeException(string? cause, Exception innerException) : base(cause, innerException)
         {
         }
     }
