@@ -248,10 +248,14 @@
         public static ErrorCode CaptchaErrorReturn { get; } = new ErrorCode(nameof(CaptchaErrorReturn), "Tecent的Captha服务返回不对，查看");
         public static ErrorCode UnSupportedResToModel { get; } = new ErrorCode(nameof(UnSupportedResToModel), "");
 
-
         #endregion
         #region
+        public static ErrorCode UpdateWithEmptyResource { get; } = new ErrorCode(nameof(UpdateWithEmptyResource), "");
+        public static ErrorCode OnlyUpdateYours { get; } = new ErrorCode(nameof(OnlyUpdateYours), "");
+        public static ErrorCode AlreadyHasUserProfile { get; } = new ErrorCode(nameof(AlreadyHasUserProfile), "");
+        public static ErrorCode ApiRequestNameConditionMatchError { get; } = new ErrorCode(nameof(ApiRequestNameConditionMatchError), "");
 
+        public static ErrorCode CppShouldContainAddtionalProperty { get; } = new ErrorCode(nameof(CppShouldContainAddtionalProperty), "");
         #endregion
     }
 }
