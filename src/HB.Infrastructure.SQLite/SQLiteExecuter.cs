@@ -15,13 +15,13 @@ namespace HB.Infrastructure.SQLite
     internal static class SQLiteExecuter
     {
         #region Command Reader
-        
+
         public static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandReaderAsync(sqliteTransaction.Connection!, false, dbCommand).ConfigureAwait(false);
         }
-       
+
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, SqliteCommand dbCommand)
         {
             //这里无法用Using，因为reader要用
@@ -65,12 +65,7 @@ namespace HB.Infrastructure.SQLite
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                if (ex is SqliteException sEx)
-                {
-                    throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
-                }
-
-                throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, "UnKown", null, null, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
@@ -105,12 +100,7 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                if (ex is SqliteException sEx)
-                {
-                    throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
-                }
-
-                throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, "UnKown", null, null, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
@@ -130,7 +120,7 @@ namespace HB.Infrastructure.SQLite
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandNonQueryAsync(sqliteTransaction.Connection!, dbCommand).ConfigureAwait(false);
         }
-        
+
         private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, SqliteCommand command)
         {
             try
@@ -146,15 +136,25 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                if (ex is SqliteException sEx)
-                {
-                    throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
-                }
-
-                throw DatabaseExceptions.SQLiteExecuterError(command.CommandText, "UnKown", null, null, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
         #endregion Comand NonQuery
+
+        private static Exception ConvertToDbException(SqliteCommand command, Exception ex)
+        {
+            if (ex is SqliteException sEx)
+            {
+                if (sEx.SqliteExtendedErrorCode == 1555)
+                {
+                    return DatabaseExceptions.DuplicateKeyError(command.CommandText, ex);
+                }
+
+                return DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
+            }
+
+            return DatabaseExceptions.SQLiteUnKownExecuterError(command.CommandText, ex);
+        }
     }
 }

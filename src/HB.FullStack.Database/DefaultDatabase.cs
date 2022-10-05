@@ -730,9 +730,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                //TODO:捕捉主键冲突而无法添加，即重复请求了
-
-                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
+                if (transContext != null || ex.ComeFromEngine)
                 {
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
@@ -803,7 +801,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
+                if (transContext != null || ex.ComeFromEngine)
                 {
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
@@ -907,7 +905,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
+                if (transContext != null || ex.ComeFromEngine)
                 {
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
@@ -1203,7 +1201,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
+                if (transContext != null || ex.ComeFromEngine)
                 {
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }
@@ -1314,12 +1312,12 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count())
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "BatchUpdate");
                 }
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
+                if (transContext != null || ex.ComeFromEngine)
                 {
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }
@@ -1392,7 +1390,7 @@ namespace HB.FullStack.Database
             }
             catch (DatabaseException ex)
             {
-                if (transContext != null || ex.ErrorCode == ErrorCodes.ExecuterError)
+                if (transContext != null || ex.ComeFromEngine)
                 {
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }

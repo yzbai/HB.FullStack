@@ -1,12 +1,12 @@
-﻿using HB.FullStack.Database;
-
-using MySqlConnector;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+
+using HB.FullStack.Database;
+
+using MySqlConnector;
 
 namespace HB.Infrastructure.MySQL
 {
@@ -70,12 +70,7 @@ namespace HB.Infrastructure.MySQL
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                if (ex is MySqlException mEx)
-                {
-                    throw DatabaseExceptions.MySQLExecuterError(command.CommandText, mEx.ErrorCode.ToString(), mEx.SqlState, ex);
-                }
-
-                throw DatabaseExceptions.MySQLExecuterError(command.CommandText, "UnKown", null,ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
@@ -112,12 +107,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                if (ex is MySqlException mEx)
-                {
-                    throw DatabaseExceptions.MySQLExecuterError(commandText: command.CommandText, cause: mEx.ErrorCode.ToString(), sqlState:mEx.SqlState, innerException: ex);
-                }
-
-                throw DatabaseExceptions.MySQLExecuterError(command.CommandText, "UnKown",null, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
@@ -155,15 +145,25 @@ namespace HB.Infrastructure.MySQL
             }
             catch (Exception ex)
             {
-                if (ex is MySqlException mEx)
-                {
-                    throw DatabaseExceptions.MySQLExecuterError(command.CommandText, mEx.ErrorCode.ToString(), mEx.SqlState, ex);
-                }
-
-                throw DatabaseExceptions.MySQLExecuterError(command.CommandText, "UnKown", null, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
         #endregion Comand NonQuery
+
+        private static Exception ConvertToDbException(MySqlCommand command, Exception ex)
+        {
+            if (ex is MySqlException mEx)
+            {
+
+                return mEx.ErrorCode switch
+                {
+                    MySqlErrorCode.DuplicateKeyEntry => DatabaseExceptions.DuplicateKeyError(command.CommandText, ex),
+                    _ => DatabaseExceptions.MySQLExecuterError(command.CommandText, mEx.ErrorCode.ToString(), mEx.SqlState, ex)
+                };
+            }
+
+            return DatabaseExceptions.MySQLUnKownExecuterError(command.CommandText, ex);
+        }
     }
 }

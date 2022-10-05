@@ -121,6 +121,7 @@ namespace HB.FullStack.Client
             }
         }
 
+        #region Res 与 Model关系
         /// <summary>
         /// 本质：Resource到Model的转换
         /// 请根据request.ResName，提供Res到Model的转换.
@@ -132,6 +133,8 @@ namespace HB.FullStack.Client
         protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
         protected abstract Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
+
+        #endregion
 
         #region 查询 - 发生在Syncing之后
 
@@ -301,27 +304,36 @@ namespace HB.FullStack.Client
             ThrowIf.NotValid(models, nameof(models));
             EnsureNotSyncing();
 
-            //正常
-            if (StatusManager.IsInternet())
+            try
             {
-                //Remote
-                await AddToRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                //正常
+                if (StatusManager.IsInternet())
+                {
+                    //Remote
+                    //TODO: 罗列处理可能的异常：1， 存在重复；
+                    await AddToRemoteAsync(ApiClient, models).ConfigureAwait(false);
 
-                //Local
-                await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
-            }
-            //离线写
-            else if (ClientModelDef.AllowOfflineWrite)
-            {
-                //Offline History
-                await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Add, transactionContext).ConfigureAwait(false);
+                    //Local
+                    await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
+                }
+                //离线写
+                else if (ClientModelDef.AllowOfflineWrite)
+                {
+                    //Offline History
+                    await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Add, transactionContext).ConfigureAwait(false);
 
-                //Local
-                await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
+                    //Local
+                    await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                }
             }
-            else
+            catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
             {
-                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                //TODO: 测试这个
+
             }
         }
 
@@ -331,21 +343,28 @@ namespace HB.FullStack.Client
             ThrowIf.NotValid(models, nameof(models));
             EnsureNotSyncing();
 
-            if (StatusManager.IsInternet())
+            try
             {
-                await UpdateToRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                if (StatusManager.IsInternet())
+                {
+                    await UpdateToRemoteAsync(ApiClient, models).ConfigureAwait(false);
 
-                await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
-            }
-            else if (ClientModelDef.AllowOfflineWrite)
-            {
-                await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Update, transactionContext).ConfigureAwait(false);
+                    await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
+                }
+                else if (ClientModelDef.AllowOfflineWrite)
+                {
+                    await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Update, transactionContext).ConfigureAwait(false);
 
-                await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                }
             }
-            else
+            catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {
-                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                //TODO:处理冲突, 是不是需要区分来自于网络还是本地Batch
             }
         }
 
@@ -355,21 +374,28 @@ namespace HB.FullStack.Client
             ThrowIf.NotValid(models, nameof(models));
             EnsureNotSyncing();
 
-            if (StatusManager.IsInternet())
+            try
             {
-                await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                if (StatusManager.IsInternet())
+                {
+                    await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
 
-                await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
-            }
-            else if (ClientModelDef.AllowOfflineWrite)
-            {
-                await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Delete, transactionContext).ConfigureAwait(false);
+                    await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
+                }
+                else if (ClientModelDef.AllowOfflineWrite)
+                {
+                    await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Delete, transactionContext).ConfigureAwait(false);
 
-                await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                }
             }
-            else
+            catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {
-                throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                //TODO:处理冲突, 是不是需要区分来自于网络还是本地Batch
             }
         }
 

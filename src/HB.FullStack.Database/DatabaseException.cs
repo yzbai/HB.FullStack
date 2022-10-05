@@ -20,5 +20,7 @@
         public DatabaseException(string message, Exception innerException) : base(message, innerException)
         {
         }
+
+        public bool ComeFromEngine { get; set; }
     }
 }

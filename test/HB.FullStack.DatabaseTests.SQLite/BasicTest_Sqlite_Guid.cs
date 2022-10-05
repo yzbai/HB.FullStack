@@ -23,6 +23,56 @@ namespace HB.FullStack.DatabaseTests.SQLite
     [TestClass]
     public class BasicTest_Sqlite_Guid : BaseTestClass
     {
+
+        [TestMethod]
+        public async Task Test_Add_Key_Conflict_ErrorAsync()
+        {
+            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            try
+            {
+                await Db.AddAsync(book, "tester", null);
+            }
+            catch (DatabaseException e)
+            {
+                Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
+            }
+
+            PublisherModel publisherModel = Mocker.MockOnePublisherModel();
+
+            await Db.AddAsync(publisherModel, "", null);
+
+            try
+            {
+                await Db.AddAsync(publisherModel, "", null);
+            }
+            catch (DatabaseException e)
+            {
+                Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
+            }
+
+        }
+
+        [TestMethod]
+        public async Task Test_BatchAdd_Key_Conflict_ErrorAsync()
+        {
+            var books = Mocker.Guid_GetBooks(2);
+
+            await Db.BatchAddAsync(books, "tester", null);
+
+            try
+            {
+                await Db.BatchAddAsync(books, "tester", null);
+            }
+            catch (DatabaseException e)
+            {
+                Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
+            }
+
+        }
+
         [TestMethod]
         public async Task Test_1_Batch_Add_PublisherModelAsync()
         {

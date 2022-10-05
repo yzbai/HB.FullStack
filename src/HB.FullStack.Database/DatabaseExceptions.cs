@@ -28,23 +28,45 @@ namespace HB.FullStack.Database
 
         internal static Exception MySQLExecuterError(string? commandText, string? cause, string? sqlState, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(ErrorCodes.ExecuterError, nameof(MySQLExecuterError), innerException, null);
+            DatabaseException exception = new DatabaseException(ErrorCodes.DbEngineExecuterError, nameof(MySQLExecuterError), innerException, null);
 
             exception.Data["Cause"] = cause;
             exception.Data["CommandText"] = commandText;
             exception.Data["SqlState"] = sqlState;
+            exception.ComeFromEngine = true;
+
+            return exception;
+        }
+
+        internal static Exception MySQLUnKownExecuterError(string? commandText, Exception? innerException = null)
+        {
+            DatabaseException exception = new DatabaseException(ErrorCodes.DbEngineUnKownExecuterError, nameof(MySQLUnKownExecuterError), innerException, null);
+
+            exception.Data["CommandText"] = commandText;
+            exception.ComeFromEngine = true;
 
             return exception;
         }
 
         internal static Exception SQLiteExecuterError(string? commandText, string? cause, int? errorCode, int? extendedErrorCode, Exception? innerException = null)
         {
-            DatabaseException exception = new DatabaseException(ErrorCodes.ExecuterError, nameof(SQLiteExecuterError), innerException, null);
+            DatabaseException exception = new DatabaseException(ErrorCodes.DbEngineExecuterError, nameof(SQLiteExecuterError), innerException, null);
 
             exception.Data["CommandText"] = commandText;
             exception.Data["Cause"] = cause;
             exception.Data["ErrorCode"] = errorCode;
             exception.Data["ExtendedErrorCode"] = extendedErrorCode;
+            exception.ComeFromEngine = true;
+
+            return exception;
+        }
+
+        internal static Exception SQLiteUnKownExecuterError(string? commandText, Exception? innerException = null)
+        {
+            DatabaseException exception = new DatabaseException(ErrorCodes.DbEngineUnKownExecuterError, nameof(SQLiteUnKownExecuterError), innerException, null);
+
+            exception.Data["CommandText"] = commandText;
+            exception.ComeFromEngine = true;
 
             return exception;
         }
@@ -332,6 +354,13 @@ namespace HB.FullStack.Database
         internal static Exception ChangedPropertyPackError(string cause, ChangedPack? changedPropertyPack)
         {
             return new DatabaseException(ErrorCodes.ChangedPackError, cause, null, changedPropertyPack);
+        }
+
+        internal static Exception DuplicateKeyError(string commandText, Exception? innerException)
+        {
+            DatabaseException ex = new DatabaseException(ErrorCodes.DuplicateKeyEntry, "DuplicateKeyError", innerException, new { CommandText = commandText });
+            ex.ComeFromEngine = true;
+            return ex;
         }
     }
 }

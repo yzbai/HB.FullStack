@@ -26,6 +26,56 @@ namespace HB.FullStack.DatabaseTests
     [TestClass]
     public class BasicTest_MySQL_Guid : BaseTestClass
     {
+
+        [TestMethod]
+        public async Task Test_Add_Key_Conflict_ErrorAsync()
+        {
+            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+
+            await Db.AddAsync(book, "tester", null);
+
+            try
+            {
+                await Db.AddAsync(book, "tester", null);
+            }
+            catch (DatabaseException e)
+            {
+                Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
+            }
+
+            PublisherModel publisherModel = Mocker.MockOnePublisherModel();
+
+            await Db.AddAsync(publisherModel, "", null);
+
+            try
+            {
+                await Db.AddAsync(publisherModel, "", null);
+            }
+            catch (DatabaseException e)
+            {
+                Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
+            }
+
+        }
+
+        [TestMethod]
+        public async Task Test_BatchAdd_Key_Conflict_ErrorAsync()
+        {
+            var books = Mocker.Guid_GetBooks(2);
+
+            await Db.BatchAddAsync(books, "tester", null);
+
+            try
+            {
+                await Db.BatchAddAsync(books, "tester", null);
+            }
+            catch (DatabaseException e)
+            {
+                Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
+            }
+
+        }
+
         [TestMethod]
         public async Task Test_Update_Fields_By_Compare_Version()
         {

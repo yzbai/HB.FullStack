@@ -161,7 +161,12 @@
         public static ErrorCode CachedItemTimestampNotSet { get; } = new ErrorCode(nameof(CachedItemTimestampNotSet), "");
         #endregion
         #region
-        public static ErrorCode ExecuterError { get; } = new ErrorCode(nameof(ExecuterError), "");
+
+        public static ErrorCode DuplicateKeyEntry { get; } = new ErrorCode(nameof(DuplicateKeyEntry), "");
+
+        public static ErrorCode DbEngineExecuterError { get; } = new ErrorCode(nameof(DbEngineExecuterError), "");
+        public static ErrorCode DbEngineUnKownExecuterError { get; } = new ErrorCode(nameof(DbEngineUnKownExecuterError), "");
+
         public static ErrorCode UseDateTimeOffsetOnly { get; } = new ErrorCode(nameof(UseDateTimeOffsetOnly), "");
         public static ErrorCode ModelError { get; } = new ErrorCode(nameof(ModelError), "");
         public static ErrorCode MapperError { get; } = new ErrorCode(nameof(MapperError), "");
@@ -256,6 +261,7 @@
         public static ErrorCode ApiRequestNameConditionMatchError { get; } = new ErrorCode(nameof(ApiRequestNameConditionMatchError), "");
 
         public static ErrorCode CppShouldContainAddtionalProperty { get; } = new ErrorCode(nameof(CppShouldContainAddtionalProperty), "");
+
         #endregion
     }
 }
