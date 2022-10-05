@@ -4,10 +4,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<LangVersion>Latest</LangVersion>
-		<Nullable>enable</Nullable>
+	
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<ImplicitUsings>disable</ImplicitUsings>
+		
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<IncludeBuildOutput>false</IncludeBuildOutput>
 		

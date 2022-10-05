@@ -2,13 +2,8 @@
 	<Import Project="..\..\common.props" />
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
-		<ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-		<LangVersion>Latest</LangVersion>
-		<Nullable>enable</Nullable>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<WarningsAsErrors />
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<!--<ProduceReferenceAssembly>true</ProduceReferenceAssembly>-->
+		
 	</PropertyGroup>
 
 	<ItemGroup>
