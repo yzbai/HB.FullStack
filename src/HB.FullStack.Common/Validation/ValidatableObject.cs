@@ -64,10 +64,7 @@ namespace HB.FullStack.Common
             {
                 _validateResults = new List<ValidationResult>();
 
-                if (_validationContext == null)
-                {
-                    _validationContext = new ValidationContext(this);
-                }
+                _validationContext ??= new ValidationContext(this);
 
                 if (!string.IsNullOrEmpty(propertyName))
                 {

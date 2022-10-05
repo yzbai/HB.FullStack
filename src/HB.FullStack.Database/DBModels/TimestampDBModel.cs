@@ -20,8 +20,8 @@ namespace HB.FullStack.Database.DbModels
         /// Version存在UserA将Version为1大老数据更改两次得到Version3，UserB将Version为2的数据更改一次变成Version3，都是version3，但经过路径不同，但系统认为相同。
         /// 就把Timestamp看作Version就行
         /// </summary>
-        [Range(638000651894004864, long.MaxValue)]
-        public long Timestamp { get; set; } = -1;
+        //[Range(638000651894004864, long.MaxValue)]
+        public long Timestamp { get; set; } = TimeUtil.UtcNowTicks;
 
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }

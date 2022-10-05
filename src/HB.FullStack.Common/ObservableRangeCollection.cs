@@ -58,7 +58,7 @@ namespace HB.FullStack.Common
                 return;
             }
 
-            var changedItems = collection is List<T> ? (List<T>)collection : new List<T>(collection);
+            var changedItems = collection is List<T> list ? list : new List<T>(collection);
 
             RaiseChangeNotificationEvents(
                 action: NotifyCollectionChangedAction.Add,

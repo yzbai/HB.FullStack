@@ -40,7 +40,7 @@ namespace HB.FullStack.Common.Test
 
             var regex = new Regex(@"{(.*?)}");
 
-            foreach (Match match in regex.Matches(regexString))
+            foreach (Match match in regex.Matches(regexString).Cast<Match>())
             {
                 regexString = regexString.Replace(match.Value, @"(.*?)");
                 _urlParameterNames.Add(match.Groups[1].Value);

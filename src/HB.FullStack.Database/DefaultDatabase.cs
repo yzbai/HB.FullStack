@@ -368,10 +368,7 @@ namespace HB.FullStack.Database
             where TFrom : DbModel, new()
             where TWhere : DbModel, new()
         {
-            if (whereCondition == null)
-            {
-                whereCondition = Where<TWhere>();
-            }
+            whereCondition ??= Where<TWhere>();
 
             DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>()!;
             DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>()!;
@@ -396,10 +393,7 @@ namespace HB.FullStack.Database
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DbModel, new()
         {
-            if (whereCondition == null)
-            {
-                whereCondition = Where<T>();
-            }
+            whereCondition ??= Where<T>();
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
@@ -421,10 +415,7 @@ namespace HB.FullStack.Database
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DbModel, new()
         {
-            if (whereCondition == null)
-            {
-                whereCondition = Where<T>();
-            }
+            whereCondition ??= Where<T>();
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
@@ -561,10 +552,7 @@ namespace HB.FullStack.Database
             where TSource : DbModel, new()
             where TTarget : DbModel, new()
         {
-            if (whereCondition == null)
-            {
-                whereCondition = Where<TSource>();
-            }
+            whereCondition ??= Where<TSource>();
 
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
             DbModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>()!;
@@ -635,10 +623,7 @@ namespace HB.FullStack.Database
             where TTarget1 : DbModel, new()
             where TTarget2 : DbModel, new()
         {
-            if (whereCondition == null)
-            {
-                whereCondition = Where<TSource>();
-            }
+            whereCondition ??= Where<TSource>();
 
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
             DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>()!;
@@ -1447,7 +1432,7 @@ namespace HB.FullStack.Database
 
                 _ = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName, command).ConfigureAwait(false);
             }
-            catch (Exception ex) when (!(ex is DatabaseException))
+            catch (Exception ex) when (ex is not DatabaseException)
             {
                 string detail = $"Items:{SerializeUtil.ToJson(items)}";
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, detail, ex);

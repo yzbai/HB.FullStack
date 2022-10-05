@@ -6,9 +6,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.SQL;
 
 using Microsoft;
@@ -157,10 +157,7 @@ namespace HB.FullStack.Database
             string sql = selectText;
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
 
-            if (fromCondition == null)
-            {
-                fromCondition = new FromExpression<TFrom>(engineType, _modelDefFactory, _expressionVisitor);
-            }
+            fromCondition ??= new FromExpression<TFrom>(engineType, _modelDefFactory, _expressionVisitor);
 
             sql += fromCondition.ToStatement();
             parameters.AddRange(fromCondition.GetParameters());
