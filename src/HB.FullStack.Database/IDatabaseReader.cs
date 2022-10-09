@@ -28,7 +28,6 @@ namespace HB.FullStack.Database
 
         Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext) where T : DbModel, new();
 
-
         Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page = null, int? perPage = null, string? orderBy = null) where T : DbModel, new();
         Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page = null, int? perPage = null, string? orderBy = null) where T : DbModel, new();
         Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : DbModel, new();
@@ -52,14 +51,11 @@ namespace HB.FullStack.Database
 
         Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext) where T : DbModel, IGuidId, new();
 
-
         Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : DbModel, new();
-
 
         Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DbModel, new()
             where TTarget : DbModel, new();
-
 
         Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
             where TSource : DbModel, new()

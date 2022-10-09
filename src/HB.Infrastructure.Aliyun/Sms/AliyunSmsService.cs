@@ -142,7 +142,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             return _cache.SetStringAsync(
                         GetCachedKey(mobile),
                         cachedSmsCode,
-                        TimeUtil.UtcNowTicks,
+                        TimeUtil.Timestamp,
                         new DistributedCacheEntryOptions()
                         {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)

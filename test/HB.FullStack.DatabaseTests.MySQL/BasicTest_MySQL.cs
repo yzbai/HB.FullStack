@@ -445,7 +445,7 @@ namespace HB.FullStack.DatabaseTests
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbValueConvert.DbValueToTypeValue(reader0[i], property, EngineType.MySQL);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, EngineType.MySQL);
 
                         if (value != null)
                         {

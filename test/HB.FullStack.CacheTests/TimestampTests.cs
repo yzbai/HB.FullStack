@@ -35,7 +35,7 @@ namespace HB.FullStack.CacheTests
 
             string key = "BooksBy" + SecurityUtil.CreateUniqueToken();
 
-            await Cache.SetAsync(key, books, TimeUtil.UtcNowTicks, entryOptions).ConfigureAwait(false);
+            await Cache.SetAsync(key, books, TimeUtil.Timestamp, entryOptions).ConfigureAwait(false);
             List<Book>? cached2 = await Cache.GetAsync<List<Book>>(key).ConfigureAwait(false);
 
             Assert.IsTrue(cached2 != null);
@@ -67,7 +67,7 @@ namespace HB.FullStack.CacheTests
             //book.Code = "abc";
             //book.BookID = 222;
 
-            await Cache.SetAsync(nameof(Book) + book.Id.ToString(), book, TimeUtil.UtcNowTicks, entryOptions).ConfigureAwait(false);
+            await Cache.SetAsync(nameof(Book) + book.Id.ToString(), book, TimeUtil.Timestamp, entryOptions).ConfigureAwait(false);
 
             Assert.IsTrue(database.KeyExists(ApplicationName + nameof(Book) + book.Id.ToString()));
 
@@ -105,9 +105,9 @@ namespace HB.FullStack.CacheTests
 
             await AddToDatabaeAsync(new Book[] { book }).ConfigureAwait(false);
 
-            long utcNowTicks = TimeUtil.UtcNowTicks;
-            long utcNowTicks2 = TimeUtil.UtcNowTicks;
-            long utcNowTicks3 = TimeUtil.UtcNowTicks;
+            long utcNowTicks = TimeUtil.Timestamp;
+            long utcNowTicks2 = TimeUtil.Timestamp;
+            long utcNowTicks3 = TimeUtil.Timestamp;
 
             utcNowTicks2 -= 10000;
             utcNowTicks3 += 10000;

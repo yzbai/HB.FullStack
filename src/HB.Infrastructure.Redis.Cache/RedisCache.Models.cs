@@ -348,7 +348,7 @@ end
             Logger.LogInformation($"RedisCache初始化完成");
         }
 
-        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : ITimestampModel, new()
+        public async Task<(IList<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : ITimestampModel, new()
         {
             ThrowIf.Null(keyValues, nameof(keyValues));
 
@@ -680,7 +680,7 @@ end
             }
         }
 
-        private static (IEnumerable<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : ITimestampModel, new()
+        private static (IList<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : ITimestampModel, new()
         {
             if (result.IsNull)
             {

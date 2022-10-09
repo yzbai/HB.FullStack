@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.DbModels
         /// 就把Timestamp看作Version就行
         /// </summary>
         //[Range(638000651894004864, long.MaxValue)]
-        public long Timestamp { get; set; } = TimeUtil.UtcNowTicks;
+        public long Timestamp { get; set; } = TimeUtil.Timestamp;
 
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }

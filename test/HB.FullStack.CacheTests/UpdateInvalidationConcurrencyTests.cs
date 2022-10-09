@@ -82,7 +82,7 @@ namespace HB.FullStack.CacheTests
             //模拟数据库读取
             await Task.Delay(random.Next(1000, 2000)).ConfigureAwait(false);
 
-            long utcNowTicks = TimeUtil.UtcNowTicks;
+            long utcNowTicks = TimeUtil.Timestamp;
 
             Console.WriteLine($"任务{taskId}, 数据库读取完成在 at {utcNowTicks}");
 

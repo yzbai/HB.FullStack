@@ -350,7 +350,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            long timestamp = TimeUtil.UtcNowTicks;
+            long timestamp = TimeUtil.Timestamp;
 
             foreach (var item in items)
             {
@@ -390,24 +390,14 @@ namespace HB.FullStack.Database
             }
         }
 
-        private void TruncateLastUser(ref string lastUser, object modelId)
+        private void TruncateLastUser(ref string lastUser)
         {
             if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
-                _logger.LogWarning("LastUser 截断. {LastUser}, {Id}", lastUser, modelId);
+                _logger.LogWarning("LastUser 截断. {LastUser}", lastUser);
 
                 lastUser = lastUser[..DefaultLengthConventions.MAX_LAST_USER_LENGTH];
             }
         }
-
-        private void TruncateLastUser(ref string lastUser, IEnumerable<object> ids)
-        {
-            foreach (var id in ids)
-            {
-                TruncateLastUser(ref lastUser, id);
-            }
-        }
-
-
     }
 }

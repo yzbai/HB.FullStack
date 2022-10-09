@@ -128,13 +128,13 @@ namespace HB.FullStack.Repository
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
         }
 
-        protected virtual Task OnModelUpdatedFieldsAsync(IEnumerable<ChangedPack> cpps)
+        protected virtual Task OnModelUpdatedPropertiesAsync(IEnumerable<ChangedPack> cpps)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
         }
 
-        protected virtual Task OnModelUpdateFieldsFailedAsync(IEnumerable<ChangedPack> cpps)
+        protected virtual Task OnModelUpdatePropertiesFailedAsync(IEnumerable<ChangedPack> cpps)
         {
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
         }
@@ -193,56 +193,7 @@ namespace HB.FullStack.Repository
 
         #endregion
 
-        #region Database Write Wrapper
-
-        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
-        {
-            await OnModelUpdatingAsync(new T[] { model }).ConfigureAwait(false);
-
-            try
-            {
-                await Database.UpdateAsync<T>(model, lastUser, transContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await OnModelUpdateFailedAsync(new T[] { model }).ConfigureAwait(false);
-                throw;
-            }
-
-            //Cache
-            ModelCacheStrategy.InvalidateCache(model, Cache);
-
-            await OnModelUpdatedAsync(new T[] { model }).ConfigureAwait(false);
-        }
-
-        public async Task UpdateFields<T>(ChangedPack cp, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
-        {
-            //检查必要的AddtionalProperties
-            //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
-
-            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
-
-            if (!cp.AddtionalProperties.ContainsAllKey(modelDef.GetForeignKeyProperties().Select(p => p.Name).ToList()))
-            {
-                throw RepositoryExceptions.AddtionalPropertyNeeded(modelDef.ModelFullName);
-            }
-
-            await OnModelUpdatingFieldsAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
-
-            try
-            {
-                await Database.UpdateFieldsAsync<T>(cp, lastUser, transactionContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await OnModelUpdateFieldsFailedAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
-                throw;
-            }
-
-            ModelCacheStrategy.InvalidateCache<T>(cp, Cache);
-
-            await OnModelUpdatedFieldsAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
-        }
+        #region Add
 
         public async Task AddAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
@@ -259,26 +210,6 @@ namespace HB.FullStack.Repository
             }
 
             await OnModelAddedAsync(new T[] { model }).ConfigureAwait(false);
-        }
-
-        public async Task DeleteAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
-        {
-            await OnModelDeletingAsync(new T[] { model }).ConfigureAwait(false);
-
-            try
-            {
-                await Database.DeleteAsync(model, lastUser, transContext).ConfigureAwait(false);
-            }
-            catch
-            {
-                await OnModelDeleteFailedAsync(new T[] { model }).ConfigureAwait(false);
-                throw;
-            }
-
-            //Cache
-            ModelCacheStrategy.InvalidateCache(model, Cache);
-
-            await OnModelDeletedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<object>> AddAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DbModel, new()
@@ -303,13 +234,37 @@ namespace HB.FullStack.Repository
             return results;
         }
 
+        #endregion
+
+        #region Update
+
+        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        {
+            await OnModelUpdatingAsync(new T[] { model }).ConfigureAwait(false);
+
+            try
+            {
+                await Database.UpdateAsync<T>(model, lastUser, transContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await OnModelUpdateFailedAsync(new T[] { model }).ConfigureAwait(false);
+                throw;
+            }
+
+            //Cache
+            ModelCacheStrategy.InvalidateCache(model, Cache);
+
+            await OnModelUpdatedAsync(new T[] { model }).ConfigureAwait(false);
+        }
+
         public async Task UpdateAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             await OnModelUpdatingAsync(models).ConfigureAwait(false);
 
             try
             {
-                await Database.BatchUpdateAsync(models, lastUser, transContext).ConfigureAwait(false);
+                await Database.BatchUpdateAsync<T>(models, lastUser, transContext).ConfigureAwait(false);
             }
             catch
             {
@@ -321,6 +276,90 @@ namespace HB.FullStack.Repository
             ModelCacheStrategy.InvalidateCache(models, Cache);
 
             await OnModelUpdatedAsync(models).ConfigureAwait(false);
+        }
+
+        public async Task UpdateProperties<T>(ChangedPack cp, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
+        {
+            //检查必要的AddtionalProperties
+            //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
+
+            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
+
+            ThrowIfAddtionalPropertiesLack(new ChangedPack[] { cp }, modelDef);
+
+            await OnModelUpdatingFieldsAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+
+            try
+            {
+                await Database.UpdatePropertiesAsync<T>(cp, lastUser, transactionContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await OnModelUpdatePropertiesFailedAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+                throw;
+            }
+
+            ModelCacheStrategy.InvalidateCache<T>(new ChangedPack[] { cp }, Cache);
+
+            await OnModelUpdatedPropertiesAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+        }
+
+        public async Task UpdateProperties<T>(IEnumerable<ChangedPack> cps, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
+        {
+            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
+
+            ThrowIfAddtionalPropertiesLack(cps, modelDef);
+
+            await OnModelUpdatingFieldsAsync(cps).ConfigureAwait(false);
+
+            try
+            {
+                await Database.BatchUpdatePropertiesAsync<T>(cps, lastUser, transactionContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await OnModelUpdatePropertiesFailedAsync(cps).ConfigureAwait(false);
+                throw;
+            }
+
+            ModelCacheStrategy.InvalidateCache<T>(cps, Cache);
+
+            await OnModelUpdatedPropertiesAsync(cps).ConfigureAwait(false);
+        }
+
+        private static void ThrowIfAddtionalPropertiesLack(IEnumerable<ChangedPack> cps, DbModelDef modelDef)
+        {
+            foreach (var cp in cps)
+            {
+                if (!cp.AddtionalProperties.ContainsAllKey(modelDef.GetForeignKeyProperties().Select(p => p.Name).ToList()))
+                {
+                    throw RepositoryExceptions.AddtionalPropertyNeeded(modelDef.ModelFullName);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Delete
+
+        public async Task DeleteAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        {
+            await OnModelDeletingAsync(new T[] { model }).ConfigureAwait(false);
+
+            try
+            {
+                await Database.DeleteAsync(model, lastUser, transContext).ConfigureAwait(false);
+            }
+            catch
+            {
+                await OnModelDeleteFailedAsync(new T[] { model }).ConfigureAwait(false);
+                throw;
+            }
+
+            //Cache
+            ModelCacheStrategy.InvalidateCache(model, Cache);
+
+            await OnModelDeletedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
         public async Task DeleteAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DbModel, new()
@@ -343,27 +382,6 @@ namespace HB.FullStack.Repository
 
             await OnModelDeletedAsync(models).ConfigureAwait(false);
         }
-
-        //public Task<IEnumerable<TModel>> GetByForeignKeyAsync(
-        //    Expression<Func<TModel, object>> foreignKeyExp,
-        //    object foreignKeyValue,
-        //    TransactionContext? transactionContext,
-        //    int? page,
-        //    int? perPage,
-        //    string? orderBy)
-        //{
-        //    return Database.RetrieveByForeignKeyAsync(foreignKeyExp, foreignKeyValue, transactionContext, page, perPage, orderBy);
-        //}
-
-        //public Task<IEnumerable<T>> GetAsync<T>(int? page, int? perPage, string? orderBy) where T : DbModel
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public Task<T> GetById<T>(object id) where T : DbModel
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         #endregion
 
@@ -460,5 +478,26 @@ namespace HB.FullStack.Repository
         }
 
         #endregion
+
+        //public Task<IEnumerable<TModel>> GetByForeignKeyAsync(
+        //    Expression<Func<TModel, object>> foreignKeyExp,
+        //    object foreignKeyValue,
+        //    TransactionContext? transactionContext,
+        //    int? page,
+        //    int? perPage,
+        //    string? orderBy)
+        //{
+        //    return Database.RetrieveByForeignKeyAsync(foreignKeyExp, foreignKeyValue, transactionContext, page, perPage, orderBy);
+        //}
+
+        //public Task<IEnumerable<T>> GetAsync<T>(int? page, int? perPage, string? orderBy) where T : DbModel
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //public Task<T> GetById<T>(object id) where T : DbModel
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

@@ -38,7 +38,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             toUpdate.Add((nameof(Guid_BookModel.Price), 123456.789));
             toUpdate.Add((nameof(Guid_BookModel.Name), "TTTTTXXXXTTTTT"));
 
-            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -52,7 +52,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //应该抛出冲突异常
             try
             {
-                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DatabaseException ex)
             {
@@ -81,7 +81,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             toUpdate.Add((nameof(Guid_BookModel.Price), book.Price, 123456.789));
             toUpdate.Add((nameof(Guid_BookModel.Name), book.Name, "TTTTTXXXXTTTTT"));
 
-            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -95,7 +95,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //应该抛出冲突异常
             try
             {
-                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DatabaseException ex)
             {
@@ -600,7 +600,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbValueConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.SQLite);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.EngineType.SQLite);
 
                         if (value != null)
                         {
@@ -661,7 +661,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             conn.Open();
 
             long id = new Random().NextInt64(long.MaxValue);
-            long timestamp = TimeUtil.UtcNowTicks;
+            long timestamp = TimeUtil.Timestamp;
 
             string insertCommandText = $"insert into tb_publishermodel(`Name`, `Id`, `Timestamp`) values('FSFSF', '{id}', {timestamp})";
 

@@ -58,9 +58,9 @@ namespace HB.FullStack.DatabaseTests
             {
                 Assert.IsTrue(dict.ContainsKey(kv.Key));
 
-                Assert.IsTrue(DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
+                Assert.IsTrue(DbPropertyConvert.DoNotUseUnSafePropertyValueToDbFieldValueStatement(dict[kv.Key].Value, false, engineType) ==
 
-                    DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
+                    DbPropertyConvert.DoNotUseUnSafePropertyValueToDbFieldValueStatement(kv.Value, false, engineType));
             }
         }
 

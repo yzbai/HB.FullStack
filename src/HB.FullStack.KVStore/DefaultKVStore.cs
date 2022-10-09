@@ -109,7 +109,7 @@ namespace HB.FullStack.KVStore
 
             try
             {
-                long newTimestamp = TimeUtil.UtcNowTicks;
+                long newTimestamp = TimeUtil.Timestamp;
 
                 foreach (var t in items)
                 {
@@ -154,7 +154,7 @@ namespace HB.FullStack.KVStore
             try
             {
                 IEnumerable<long> originalTimestamps = items.Select(t => t.Timestamp).ToArray();
-                long newTimestamp = TimeUtil.UtcNowTicks;
+                long newTimestamp = TimeUtil.Timestamp;
 
                 foreach (var t in items)
                 {

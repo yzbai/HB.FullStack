@@ -105,7 +105,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             await Db.AddAsync(book, "tester", null);
 
-            long timestamp = TimeUtil.UtcNowTicks;
+            long timestamp = TimeUtil.Timestamp;
             string sql = $@"
 update tb_guid_bookmodel set LastUser='TTTgdTTTEEST' where Id = '{book.Id}' and Deleted = 0 and Timestamp={timestamp};
 select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
@@ -520,7 +520,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbValueConvert.DbValueToTypeValue(reader0[i], property, Database.Engine.EngineType.SQLite);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.EngineType.SQLite);
 
                         if (value != null)
                         {

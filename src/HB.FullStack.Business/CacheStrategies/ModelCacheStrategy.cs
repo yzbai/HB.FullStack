@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using HB.FullStack.Common;
 using HB.FullStack.Cache;
+using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
@@ -153,11 +154,11 @@ namespace HB.FullStack.Repository.CacheStrategies
             cache.RemoveModelAsync(model).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache<T>(ChangedPack cpp, ICache cache)
+        public static void InvalidateCache<T>(IEnumerable<ChangedPack> cps, ICache cache)
         {
-            ThrowIf.Null(cpp.Id, nameof(cpp.Id));
+            ThrowIf.NotValid<ChangedPack>(cps, nameof(cps));
 
-            cache.RemoveModelByIdAsync<T>(cpp.Id).SafeFireAndForget(OnException);
+            cache.RemoveModelByIdsAsync<T>(cps.Select(cp => cp.Id!).ToList()).SafeFireAndForget(OnException);
         }
 
         private static void OnException(Exception ex)

@@ -18,11 +18,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
             var lst = Mocker.GetCExtModels(1);
             CExtModel model = lst[0];
 
-            await Db.SetByIdAsync(model, null);
+            await Db.AddOrUpdateByIdAsync(model, null);
 
             //Assert.AreEqual(model.Version, 0);
 
-            await Db.SetByIdAsync(model, null);
+            await Db.AddOrUpdateByIdAsync(model, null);
 
             //Assert.AreEqual(model.Version, 1);
         }
@@ -51,7 +51,8 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 throw;
             }
 
-            await Db.DeleteAsync<CExtModel>(e => SqlStatement.In(e.Id, false, lst.Select(e => (object)e.Id).ToArray())).ConfigureAwait(false);
+            await Db.DeleteAsync<CExtModel>(
+                e => SqlStatement.In(e.Id, false, lst.Select(e => (object)e.Id).ToArray()), "").ConfigureAwait(false);
 
             long count = await Db.CountAsync<CExtModel>(e => SqlStatement.In(e.Id, true, lst.Select(e => (object)e.Id).ToArray()), null).ConfigureAwait(false);
 

@@ -126,13 +126,13 @@ namespace HB.FullStack.DatabaseTests
         [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [DbModelProperty]
@@ -168,13 +168,13 @@ namespace HB.FullStack.DatabaseTests
         [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [DbModelProperty]
@@ -281,13 +281,13 @@ namespace HB.FullStack.DatabaseTests
         [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [DbModelProperty]
@@ -323,13 +323,13 @@ namespace HB.FullStack.DatabaseTests
         [DbModelProperty]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonTypeConverter))]
+        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
         [DbModelProperty]

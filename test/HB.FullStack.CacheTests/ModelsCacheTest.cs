@@ -188,7 +188,7 @@ namespace HB.FullStack.CacheTests
 
 			Assert.IsTrue(oks1.All(b => !b));
 
-			typeof(Book).GetProperty("Timestamp")!.SetValue(books[0], TimeUtil.UtcNowTicks);
+			typeof(Book).GetProperty("Timestamp")!.SetValue(books[0], TimeUtil.Timestamp);
 
 			IEnumerable<bool> oks2 = await Cache.SetModelsAsync(books).ConfigureAwait(false);
 

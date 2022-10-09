@@ -20,7 +20,7 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, item);
+            TruncateLastUser(ref lastUser);
 
             long oldTimestamp = -1;
             string oldLastUser = "";
@@ -33,7 +33,7 @@ namespace HB.FullStack.Database
                     oldTimestamp = timestampDBModel.Timestamp;
                     oldLastUser = timestampDBModel.LastUser;
 
-                    timestampDBModel.Timestamp = TimeUtil.UtcNowTicks;
+                    timestampDBModel.Timestamp = TimeUtil.Timestamp;
                     timestampDBModel.LastUser = lastUser;
                 }
 
@@ -92,158 +92,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task UpdatePropertiesAsync<T>(
-            object id,
-            IList<(string propertyName, object? propertyValue)> propertyNameValues,
-            long timestamp,
-            string lastUser,
-            TransactionContext? transContext) where T : TimestampDbModel, new()
-        {
-            if (propertyNameValues.Count <= 0)
-            {
-                return;
-            }
-
-            if (id is long longId && longId <= 0)
-            {
-                throw DatabaseExceptions.LongIdShouldBePositive(longId);
-            }
-
-            if (id is Guid guid && guid.IsEmpty())
-            {
-                throw DatabaseExceptions.GuidShouldNotEmpty();
-            }
-
-            if (timestamp <= 0)
-            {
-                throw DatabaseExceptions.TimestampShouldBePositive(timestamp);
-            }
-
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
-
-            ThrowIfNotWriteable(modelDef);
-
-            TruncateLastUser(ref lastUser, id);
-
-            try
-            {
-                EngineCommand command = DbCommandBuilder.CreateUpdateFieldsUsingTimestampCompareCommand(
-                    engineType: EngineType,
-                    modelDef: modelDef,
-                    id: id,
-                    oldTimestamp: timestamp,
-                    newTimestamp: TimeUtil.UtcNowTicks,
-                    lastUser: lastUser,
-                    propertyNames: propertyNameValues.Select(t => t.propertyName).ToList(),
-                    propertyValues: propertyNameValues.Select(t => t.propertyValue).ToList());
-
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
-
-                if (rows == 1)
-                {
-                    return;
-                }
-                else if (rows == 0)
-                {
-                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Timestamp版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
-                }
-                else
-                {
-                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
-                }
-            }
-            catch (Exception ex) when (ex is not DatabaseException)
-            {
-                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
-            }
-        }
-
-        public async Task UpdatePropertiesAsync<T>(ChangedPack changedPropertyPack, string lastUser, TransactionContext? transContext) where T : DbModel, new()
-        {
-            if (changedPropertyPack == null || changedPropertyPack.Id == null || changedPropertyPack.ChangedProperties.IsNullOrEmpty())
-            {
-                throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack);
-            }
-
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
-
-            List<(string propertyName, object? oldValue, object? newValue)> lst = new List<(string propertyName, object? oldValue, object? newValue)>();
-
-            foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
-            {
-                DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(cp.PropertyName);
-
-                if (propertyDef == null)
-                {
-                    throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack);
-                }
-
-                lst.Add((
-                    cp.PropertyName,
-                    SerializeUtil.FromJsonElement(propertyDef.Type, cp.OldValue),
-                    SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue)));
-            }
-
-            await UpdatePropertiesAsync<T>(changedPropertyPack.Id, lst, lastUser, transContext).ConfigureAwait(false);
-        }
-
-        public async Task UpdatePropertiesAsync<T>(object id, IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues, string lastUser, TransactionContext? transContext)
-            where T : DbModel, new()
-        {
-            if (propertyNameOldNewValues.Count <= 0)
-            {
-                throw new ArgumentException("数量为空", nameof(propertyNameOldNewValues));
-            }
-
-            if (id is long longId && longId <= 0)
-            {
-                throw DatabaseExceptions.LongIdShouldBePositive(longId);
-            }
-
-            if (id is Guid guid && guid.IsEmpty())
-            {
-                throw DatabaseExceptions.GuidShouldNotEmpty();
-            }
-
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
-
-            ThrowIfNotWriteable(modelDef);
-
-            TruncateLastUser(ref lastUser, id);
-
-            try
-            {
-                EngineCommand command = DbCommandBuilder.CreateUpdatePropertiesUsingOldNewCompareCommand(
-                    EngineType,
-                    modelDef,
-                    id,
-                    TimeUtil.UtcNowTicks,
-                    lastUser,
-                    propertyNameOldNewValues.Select(t => t.propertyName).ToList(),
-                    propertyNameOldNewValues.Select(t => t.oldValue).ToList(),
-                    propertyNameOldNewValues.Select(t => t.newValue).ToList());
-
-                int matchedRows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
-
-                if (matchedRows == 1)
-                {
-                    return;
-                }
-                else if (matchedRows == 0)
-                {
-                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
-                }
-                else
-                {
-                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
-                }
-            }
-            catch (Exception ex) when (ex is not DatabaseException)
-            {
-                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", ex);
-            }
-        }
-
         /// <summary>
         /// 批量更改，反应Version变化
         /// </summary>
@@ -265,7 +113,7 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, items);
+            TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();
             List<string?> oldLastUsers = new List<string?>();
@@ -320,19 +168,350 @@ namespace HB.FullStack.Database
             }
         }
 
-        public Task BatchUpdatePropertiesAsync<T>(IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long timestamp)> modelChanges, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new()
+        public async Task UpdatePropertiesAsync<T>(
+            object id,
+            IList<(string propertyName, object? propertyValue)> propertyNameValues,
+            long timestamp,
+            string lastUser,
+            TransactionContext? transContext) where T : TimestampDbModel, new()
         {
-            throw new NotImplementedException();
+            if (propertyNameValues.Count <= 0)
+            {
+                return;
+            }
+
+            if (id is long longId && longId <= 0)
+            {
+                throw DatabaseExceptions.LongIdShouldBePositive(longId);
+            }
+
+            if (id is Guid guid && guid.IsEmpty())
+            {
+                throw DatabaseExceptions.GuidShouldNotEmpty();
+            }
+
+            if (timestamp <= 0)
+            {
+                throw DatabaseExceptions.TimestampShouldBePositive(timestamp);
+            }
+
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+
+            ThrowIfNotWriteable(modelDef);
+
+            TruncateLastUser(ref lastUser);
+
+            try
+            {
+                EngineCommand command = DbCommandBuilder.CreateUpdatePropertiesCommand(
+                    engineType: EngineType,
+                    modelDef: modelDef,
+                    id: id,
+                    propertyNames: propertyNameValues.Select(t => t.propertyName).ToList(),
+                    propertyValues: propertyNameValues.Select(t => t.propertyValue).ToList(),
+                    oldTimestamp: timestamp,
+                    newTimestamp: TimeUtil.Timestamp,
+                    lastUser: lastUser);
+
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
+
+                if (rows == 1)
+                {
+                    return;
+                }
+                else if (rows == 0)
+                {
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Timestamp版本的乐观锁，出现冲突。id:{id}, lastUser:{lastUser}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", "");
+                }
+                else
+                {
+                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}");
+                }
+            }
+            catch (Exception ex) when (ex is not DatabaseException)
+            {
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, timestamp:{timestamp}, propertyValues:{SerializeUtil.ToJson(propertyNameValues)}", ex);
+            }
         }
 
-        public Task BatchUpdatePropertiesAsync<T>(IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> modelChanges, string lastUser, TransactionContext? transactionContext = null) where T : DbModel, new()
+        public async Task UpdatePropertiesAsync<T>(
+            object id,
+            IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues,
+            string lastUser,
+            TransactionContext? transContext)
+            where T : DbModel, new()
         {
-            throw new NotImplementedException();
+            if (propertyNameOldNewValues.Count <= 0)
+            {
+                throw new ArgumentException("数量为空", nameof(propertyNameOldNewValues));
+            }
+
+            if (id is long longId && longId <= 0)
+            {
+                throw DatabaseExceptions.LongIdShouldBePositive(longId);
+            }
+
+            if (id is Guid guid && guid.IsEmpty())
+            {
+                throw DatabaseExceptions.GuidShouldNotEmpty();
+            }
+
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+
+            ThrowIfNotWriteable(modelDef);
+
+            TruncateLastUser(ref lastUser);
+
+            try
+            {
+                EngineCommand command = DbCommandBuilder.CreateUpdatePropertiesUsingOldNewCompareCommand(
+                    EngineType,
+                    modelDef,
+                    id,
+                    propertyNameOldNewValues.Select(t => t.propertyName).ToList(),
+                    propertyNameOldNewValues.Select(t => t.oldValue).ToList(),
+                    propertyNameOldNewValues.Select(t => t.newValue).ToList(),
+                    TimeUtil.Timestamp,
+                    lastUser);
+
+                int matchedRows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
+
+                if (matchedRows == 1)
+                {
+                    return;
+                }
+                else if (matchedRows == 0)
+                {
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用新旧值对比的乐观锁出现冲突。id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", "");
+                }
+                else
+                {
+                    throw DatabaseExceptions.FoundTooMuch(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}");
+                }
+            }
+            catch (Exception ex) when (ex is not DatabaseException)
+            {
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", ex);
+            }
+        }
+        public async Task UpdatePropertiesAsync<T>(ChangedPack changedPropertyPack, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        {
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+
+            List<(string propertyName, object? oldValue, object? newValue)> lst = ConvertChangedPackToList(changedPropertyPack, modelDef);
+
+            await UpdatePropertiesAsync<T>(changedPropertyPack.Id!, lst, lastUser, transContext).ConfigureAwait(false);
         }
 
-        public Task BatchUpdatePropertiesAsync<T>(IList<ChangedPack> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task BatchUpdatePropertiesAsync<T>(
+            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long timestamp)> modelChanges,
+            string lastUser,
+            TransactionContext? transactionContext) where T : TimestampDbModel, new()
         {
-            throw new NotImplementedException();
+            if (modelChanges.Count == 0)
+            {
+                return;
+            }
+
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+
+            ThrowIfNotWriteable(modelDef);
+
+            TruncateLastUser(ref lastUser);
+
+            var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)>(modelChanges.Count);
+            long newTimestamp = TimeUtil.Timestamp;
+
+            foreach ((object id, IList<string> propertyNames, IList<object?> propertyValues, long timestamp) in modelChanges)
+            {
+                if (id is long longId)
+                {
+                    if (longId <= 0) throw DatabaseExceptions.LongIdShouldBePositive(longId);
+                }
+                else if (id is Guid guid)
+                {
+                    if (guid.IsEmpty()) throw DatabaseExceptions.GuidShouldNotEmpty();
+                }
+
+                if (timestamp < 638008780206018439)
+                {
+                    throw DatabaseExceptions.TimestampShouldBePositive(timestamp);
+                }
+
+                updateChanges.Add((id, propertyNames, propertyValues, timestamp, newTimestamp));
+            }
+
+            try
+            {
+                var command = DbCommandBuilder.CreateBatchUpdatePropertiesCommand(EngineType, modelDef, updateChanges, lastUser, transactionContext == null);
+
+                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
+                    transactionContext?.Transaction,
+                    modelDef.DatabaseName!,
+                    command,
+                    true).ConfigureAwait(false);
+
+                int count = 0;
+
+                while (reader.Read())
+                {
+                    int matched = reader.GetInt32(0);
+
+                    if (matched != 1)
+                    {
+                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), "BatchUpdatePropertiesAsync");
+                    }
+
+                    count++;
+                }
+
+                if (count != updateChanges.Count)
+                {
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), "BatchUpdatePropertiesAsync");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), ex);
+            }
+        }
+
+        public async Task BatchUpdatePropertiesAsync<T>(
+            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> modelChanges,
+            string lastUser,
+            TransactionContext? transactionContext = null) where T : DbModel, new()
+        {
+            if (modelChanges.Count == 0)
+            {
+                return;
+            }
+
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+
+            ThrowIfNotWriteable(modelDef);
+
+            TruncateLastUser(ref lastUser);
+
+            var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)>(modelChanges.Count);
+
+            foreach (var (id, propertyNames, oldPropertyValues, newPropertyValues) in modelChanges)
+            {
+                if (id is long longId)
+                {
+                    if (longId <= 0) throw DatabaseExceptions.LongIdShouldBePositive(longId);
+                }
+                else if (id is Guid guid)
+                {
+                    if (guid.IsEmpty()) throw DatabaseExceptions.GuidShouldNotEmpty();
+                }
+
+                updateChanges.Add((id, propertyNames, oldPropertyValues, newPropertyValues));
+            }
+
+            try
+            {
+                var command = DbCommandBuilder.CreateBatchUpdatePropertiesUsingOldNewCompareCommand(EngineType, modelDef, updateChanges, TimeUtil.Timestamp, lastUser, transactionContext == null);
+
+                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
+                    transactionContext?.Transaction,
+                    modelDef.DatabaseName!,
+                    command,
+                    true).ConfigureAwait(false);
+
+                int count = 0;
+
+                while (reader.Read())
+                {
+                    int matched = reader.GetInt32(0);
+
+                    if (matched != 1)
+                    {
+                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), "BatchUpdatePropertiesAsync");
+                    }
+
+                    count++;
+                }
+
+                if (count != updateChanges.Count)
+                {
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), "BatchUpdatePropertiesAsync");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), ex);
+            }
+        }
+
+        public Task BatchUpdatePropertiesAsync<T>(IEnumerable<ChangedPack> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        {
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+
+            var lst = ConvertChangedPackToList(changedPacks, modelDef);
+
+            return BatchUpdatePropertiesAsync<T>(lst, lastUser, transContext);
+        }
+
+        private static List<(string propertyName, object? oldValue, object? newValue)> ConvertChangedPackToList(ChangedPack changedPropertyPack, DbModelDef modelDef)
+        {
+            if (changedPropertyPack == null || changedPropertyPack.Id == null || changedPropertyPack.ChangedProperties.IsNullOrEmpty())
+            {
+                throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack);
+            }
+
+            List<(string propertyName, object? oldValue, object? newValue)> lst = new List<(string propertyName, object? oldValue, object? newValue)>();
+
+            foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
+            {
+                DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(cp.PropertyName);
+
+                if (propertyDef == null)
+                {
+                    throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack);
+                }
+
+                lst.Add((
+                    cp.PropertyName,
+                    SerializeUtil.FromJsonElement(propertyDef.Type, cp.OldValue),
+                    SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue)));
+            }
+
+            return lst;
+        }
+
+        private static IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> ConvertChangedPackToList(IEnumerable<ChangedPack> changedPropertyPacks, DbModelDef modelDef)
+        {
+            var lst = new List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)>(changedPropertyPacks.Count());
+
+            foreach (var changedPropertyPack in changedPropertyPacks)
+            {
+                if (changedPropertyPack == null || changedPropertyPack.Id == null || changedPropertyPack.ChangedProperties.IsNullOrEmpty())
+                {
+                    throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack);
+                }
+
+                List<string> propertyNames = new List<string>();
+                List<object?> oldPropertyValues = new List<object?>();
+                List<object?> newPropertyValues = new List<object?>();
+
+                foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
+                {
+                    DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(cp.PropertyName);
+
+                    if (propertyDef == null)
+                    {
+                        throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack);
+                    }
+
+                    propertyNames.Add(cp.PropertyName);
+                    oldPropertyValues.Add(SerializeUtil.FromJsonElement(propertyDef.Type, cp.OldValue));
+                    newPropertyValues.Add(SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue));
+                }
+
+                lst.Add((changedPropertyPack.Id!, propertyNames, oldPropertyValues, newPropertyValues));
+            }
+
+            return lst;
         }
     }
 }

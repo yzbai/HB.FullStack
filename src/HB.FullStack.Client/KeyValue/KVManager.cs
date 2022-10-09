@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Database;
 
-
 namespace HB.FullStack.Client.KeyValue
 {
     /// <summary>
@@ -22,7 +21,7 @@ namespace HB.FullStack.Client.KeyValue
 
         public async Task SetAsync<T>(string key, T? value, TimeSpan? aliveTime, TransactionContext? transactionContext)
         {
-            await _database.DeleteAsync<KV>(kv => kv.Key == key, transactionContext).ConfigureAwait(false);
+            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext, true).ConfigureAwait(false);
 
             KV kv = new KV { Key = key, Value = SerializeUtil.ToJson(value), ExpiredAt = aliveTime.HasValue ? TimeUtil.UtcNow + aliveTime.Value : DateTimeOffset.MaxValue };
 
@@ -43,7 +42,7 @@ namespace HB.FullStack.Client.KeyValue
 
         public async Task DeleteAsync(string key, TransactionContext? transactionContext)
         {
-            await _database.DeleteAsync<KV>(kv => kv.Key == key, transactionContext).ConfigureAwait(false);
+            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext, true).ConfigureAwait(false);
         }
     }
 }

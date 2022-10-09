@@ -60,7 +60,7 @@ namespace HB.FullStack.Identity
             return GetUsingCacheAsideAsync(new CachedUserClaimsByUserId(userId), dbReader =>
             {
                 return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
-            })!;
+            });
         }
     }
 }

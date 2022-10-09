@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace HB.FullStack.Common.PropertyTrackable
 {
-    public class ChangedPack
+    public class ChangedPack : ValidatableObject
     {
         /// <summary>
         /// ModelId

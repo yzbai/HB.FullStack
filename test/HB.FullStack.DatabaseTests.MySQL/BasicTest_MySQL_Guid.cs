@@ -91,7 +91,7 @@ namespace HB.FullStack.DatabaseTests
             toUpdate.Add((nameof(Guid_BookModel.Price), 123456.789));
             toUpdate.Add((nameof(Guid_BookModel.Name), "TTTTTXXXXTTTTT"));
 
-            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -105,7 +105,7 @@ namespace HB.FullStack.DatabaseTests
             //应该抛出冲突异常
             try
             {
-                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DatabaseException ex)
             {
@@ -134,7 +134,7 @@ namespace HB.FullStack.DatabaseTests
             toUpdate.Add((nameof(Guid_BookModel.Price), book.Price, 123456.789));
             toUpdate.Add((nameof(Guid_BookModel.Name), book.Name, "TTTTTXXXXTTTTT"));
 
-            await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -148,7 +148,7 @@ namespace HB.FullStack.DatabaseTests
             //应该抛出冲突异常
             try
             {
-                await Db.UpdateFieldsAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DatabaseException ex)
             {
@@ -234,7 +234,7 @@ namespace HB.FullStack.DatabaseTests
 
             await Db.AddAsync(book, "tester", null);
 
-            long timestamp = TimeUtil.UtcNowTicks;
+            long timestamp = TimeUtil.Timestamp;
 
             string sql = @$"
 update tb_guid_bookmodel set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0 and Timestamp={timestamp};
@@ -750,7 +750,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbValueConvert.DbValueToTypeValue(r[i], property, EngineType.MySQL);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(r[i], property, EngineType.MySQL);
 
                         if (value != null)
                         {
@@ -869,9 +869,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
             {
                 Assert.IsTrue(dict.ContainsKey(kv.Key));
 
-                Assert.IsTrue(DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(dict[kv.Key].Value, false, engineType) ==
+                Assert.IsTrue(DbPropertyConvert.DoNotUseUnSafePropertyValueToDbFieldValueStatement(dict[kv.Key].Value, false, engineType) ==
 
-                    DbValueConvert.DoNotUseUnSafeTypeValueToDbValueStatement(kv.Value, false, engineType));
+                    DbPropertyConvert.DoNotUseUnSafePropertyValueToDbFieldValueStatement(kv.Value, false, engineType));
             }
         }
 

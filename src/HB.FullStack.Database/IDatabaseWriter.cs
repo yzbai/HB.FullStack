@@ -32,6 +32,7 @@ namespace HB.FullStack.Database
         /// Otherwise, maybe have data conflict.
         /// </summary>
         Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+
         Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         #endregion
@@ -72,7 +73,7 @@ namespace HB.FullStack.Database
         Task UpdatePropertiesAsync<T>(ChangedPack changedPropertyPack, string lastUser, TransactionContext? transContext)
             where T : DbModel, new();
 
-        Task BatchUpdatePropertiesAsync<T>(IList<ChangedPack> changedPacks, string lastUser, TransactionContext? transContext)
+        Task BatchUpdatePropertiesAsync<T>(IEnumerable<ChangedPack> changedPacks, string lastUser, TransactionContext? transContext)
             where T : DbModel, new();
 
         #endregion
@@ -88,7 +89,7 @@ namespace HB.FullStack.Database
         Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext, bool trulyDelete = false)
             where T : TimestampDbModel, new();
 
-        Task DeleteAsync<T>(object id, string lastUser, TransactionContext? transContext, bool trulyDelete = false)
+        Task DeleteAsync<T>(object id, TransactionContext? transContext, string lastUser, bool trulyDelete = false)
             where T : TimelessDbModel, new();
 
         /// <summary>
@@ -97,9 +98,9 @@ namespace HB.FullStack.Database
         Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext? transactionContext = null, bool trulyDelete = false)
             where T : TimelessDbModel, new();
 
-        Task BatchDeleteAsync<T>(IList<T> items, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : DbModel, new();
+        Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : DbModel, new();
 
-        Task BatchDeleteAsync<T>(IList<object> ids, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : TimelessDbModel, new();
+        Task BatchDeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool trulyDelete = false) where T : TimelessDbModel, new();
 
         Task BatchDeleteAsync<T>(IList<object> ids,
             IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : TimestampDbModel, new();

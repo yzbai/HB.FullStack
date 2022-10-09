@@ -23,7 +23,7 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, item);
+            TruncateLastUser(ref lastUser);
 
             long oldTimestamp = -1;
             string oldLastUser = "";
@@ -36,7 +36,7 @@ namespace HB.FullStack.Database
                     oldTimestamp = serverModel.Timestamp;
                     oldLastUser = serverModel.LastUser;
 
-                    serverModel.Timestamp = TimeUtil.UtcNowTicks;
+                    serverModel.Timestamp = TimeUtil.Timestamp;
                     serverModel.LastUser = lastUser;
                 }
 
@@ -99,7 +99,7 @@ namespace HB.FullStack.Database
 
             ThrowIfNotWriteable(modelDef);
 
-            TruncateLastUser(ref lastUser, items);
+            TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();
             List<string?> oldLastUsers = new List<string?>();
