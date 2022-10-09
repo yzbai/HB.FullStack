@@ -47,7 +47,7 @@ namespace HB.FullStack.Database.DbModels
 
         public int? DbMaxLength { get; set; }
 
-        public IDbValueConverter? TypeConverter { get; set; }
+        public IDbPropertyConverter? TypeConverter { get; set; }
 
         public object? GetValueFrom(object model)
         {

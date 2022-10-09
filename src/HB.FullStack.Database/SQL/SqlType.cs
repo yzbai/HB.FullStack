@@ -1,17 +1,20 @@
 ﻿
-
 namespace HB.FullStack.Database.SQL
 {
     internal enum SqlType
     {
-        AddModel,
-        UpdateModel,
-        UpdateFieldsUsingTimestampCompare,
-        UpdateFieldsUsingOldNewCompare,
-        DeleteModel,
         SelectModel,
-        Delete,
-        AddOrUpdateModel
 
+        AddModel,
+
+        UpdateModel,
+        UpdateProperties,
+        UpdatePropertiesUsingOldNewCompare,
+        UpdateDeletedFields,
+
+        Delete,
+        DeleteByProperties,
+
+        AddOrUpdateModel
     }
 }

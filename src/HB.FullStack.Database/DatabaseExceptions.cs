@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using HB.FullStack.Common.PropertyTrackable;
@@ -18,12 +19,24 @@ namespace HB.FullStack.Database
     {
         internal static Exception TimestampShouldBePositive(long timestamp)
         {
-            DatabaseException exception = new DatabaseException(ErrorCodes.ModelTimestampError, nameof(TimestampShouldBePositive), null, null);
+            DatabaseException exception = new DatabaseException(ErrorCodes.TimestampError, nameof(TimestampShouldBePositive), null, null);
 
             exception.Data["WrongTimestamp"] = timestamp;
             exception.Data["Cause"] = "Timestamp Should Be Positive";
 
             return exception;
+        }
+
+        internal static Exception TimestampNotExists(EngineType engineType, DbModelDef modelDef, IList<string> propertyNames, [CallerMemberName] string? caller = null)
+        {
+            DatabaseException ex = new DatabaseException(ErrorCodes.TimestampError, nameof(TimestampNotExists), null, null);
+
+            ex.Data["EngineType"] = engineType.ToString();
+            ex.Data["Model"] = modelDef.ModelFullName;
+            ex.Data["PropertyNames"] = propertyNames.ToJoinedString(",");
+            ex.Data["Caller"] = caller;
+
+            return ex;
         }
 
         internal static Exception MySQLExecuterError(string? commandText, string? cause, string? sqlState, Exception? innerException = null)
@@ -122,7 +135,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception FoundTooMuch(string? type, string item)
+        internal static Exception FoundTooMuch(string? type, string? item)
         {
             DatabaseException exception = new DatabaseException(ErrorCodes.FoundTooMuch, nameof(FoundTooMuch), null, null);
 
@@ -152,7 +165,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception UnKown(string type, string item, Exception? innerException = null)
+        internal static Exception UnKown(string type, string? item, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(ErrorCodes.UnKown, nameof(UnKown), innerException, null);
 
@@ -162,7 +175,7 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception ConcurrencyConflict(string type, string item, string? cause)
+        internal static Exception ConcurrencyConflict(string type, string? item, string? cause)
         {
             DatabaseException exception = new DatabaseException(ErrorCodes.ConcurrencyConflict, nameof(ConcurrencyConflict), null, null);
 
@@ -223,7 +236,7 @@ namespace HB.FullStack.Database
 
         internal static Exception ModelVersionError(string type, long timestamp, string cause)
         {
-            DatabaseException exception = new DatabaseException(ErrorCodes.ModelTimestampError, cause, null, null);
+            DatabaseException exception = new DatabaseException(ErrorCodes.TimestampError, cause, null, null);
 
             exception.Data["Type"] = type;
             exception.Data["Cause"] = "Version Error. - " + cause;
@@ -362,5 +375,6 @@ namespace HB.FullStack.Database
             ex.ComeFromEngine = true;
             return ex;
         }
+
     }
 }

@@ -13,6 +13,6 @@ namespace HB.FullStack.Database.DbModels
 
         IEnumerable<DbModelDef> GetAllDefsByDatabase(string databaseName);
 
-        IDbValueConverter? GetPropertyTypeConverter(Type modelType, string propertyName);
+        IDbPropertyConverter? GetPropertyTypeConverter(Type modelType, string propertyName);
     }
 }

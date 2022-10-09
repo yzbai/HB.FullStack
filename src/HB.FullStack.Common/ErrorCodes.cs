@@ -192,7 +192,7 @@
 
         public static ErrorCode ModelHasNotSupportedPropertyType { get; } = new ErrorCode(nameof(ModelHasNotSupportedPropertyType), "");
 
-        public static ErrorCode ModelTimestampError { get; } = new ErrorCode(nameof(ModelTimestampError), "");
+        public static ErrorCode TimestampError { get; } = new ErrorCode(nameof(TimestampError), "");
         public static ErrorCode NotInitializedYet { get; } = new ErrorCode(nameof(NotInitializedYet), "");
         public static ErrorCode UpdateVersionError { get; } = new ErrorCode(nameof(UpdateVersionError), "");
         #endregion

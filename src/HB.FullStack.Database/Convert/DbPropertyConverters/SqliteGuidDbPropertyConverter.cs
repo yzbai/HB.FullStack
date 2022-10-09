@@ -1,22 +1,21 @@
 ﻿
-
 using System;
 using System.Data;
 
 namespace HB.FullStack.Database.Convert
 {
-    internal class SqliteGuidTypeConverter : IDbValueConverter
+    internal class SqliteGuidDbPropertyConverter : IDbPropertyConverter
     {
         public DbType DbType => DbType.String;
 
         public string DbTypeStatement => "CHAR(36)";
 
-        public object DbValueToTypeValue(object dbValue, Type propertyType)
+        public object DbFieldValueToPropertyValue(object dbValue, Type propertyType)
         {
             return new Guid((string)dbValue);
         }
 
-        public object TypeValueToDbValue(object typeValue, Type propertyType)
+        public object PropertyValueToDbFieldValue(object typeValue, Type propertyType)
         {
             return ((Guid)typeValue).ToString();
         }

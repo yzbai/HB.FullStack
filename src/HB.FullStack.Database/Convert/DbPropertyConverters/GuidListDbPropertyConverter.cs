@@ -7,13 +7,13 @@ using System.Linq;
 
 namespace HB.FullStack.Database.Convert
 {
-    public class GuidListTypeConverter : IDbValueConverter
+    public class GuidListDbPropertyConverter : IDbPropertyConverter
     {
         public DbType DbType => DbType.String;
 
         public string DbTypeStatement => "VARCHAR";
 
-        public object DbValueToTypeValue(object dbValue, Type propertyType)
+        public object DbFieldValueToPropertyValue(object dbValue, Type propertyType)
         {
             string? str = dbValue.ToString();
 
@@ -25,7 +25,7 @@ namespace HB.FullStack.Database.Convert
             return new ObservableCollection<Guid>();
         }
 
-        public object TypeValueToDbValue(object typeValue, Type propertyType)
+        public object PropertyValueToDbFieldValue(object typeValue, Type propertyType)
         {
             if (typeValue is IEnumerable<Guid> guids)
             {

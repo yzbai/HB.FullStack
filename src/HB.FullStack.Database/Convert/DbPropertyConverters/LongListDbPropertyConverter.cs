@@ -9,13 +9,13 @@ namespace HB.FullStack.Database.Convert
     /// <summary>
     /// 将IEnumerable{long}转换为varchar
     /// </summary>
-    public class LongIdListTypeConverter : IDbValueConverter
+    public class LongListDbPropertyConverter : IDbPropertyConverter
     {
         public DbType DbType => DbType.String;
 
         public string DbTypeStatement => "VARCHAR";
 
-        public object DbValueToTypeValue(object dbValue, Type propertyType)
+        public object DbFieldValueToPropertyValue(object dbValue, Type propertyType)
         {
             string? str = dbValue.ToString();
 
@@ -27,7 +27,7 @@ namespace HB.FullStack.Database.Convert
             return new List<long>();
         }
 
-        public object TypeValueToDbValue(object typeValue, Type propertyType)
+        public object PropertyValueToDbFieldValue(object typeValue, Type propertyType)
         {
             if (typeValue is IEnumerable<long> ids)
             {

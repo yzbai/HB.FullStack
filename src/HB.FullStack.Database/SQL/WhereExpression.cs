@@ -134,7 +134,7 @@ namespace HB.FullStack.Database.SQL
         }
 
         /// <summary>
-        /// ֻ֧�ֲ���DbValueConverter(ȫ�ֻ�����������)���ֶ�
+        /// ֻ֧�ֲ���DbPropertyConverter(ȫ�ֻ�����������)���ֶ�
         /// </summary>
         /// <param name="sqlText"></param>
         /// <param name="sqlParams"></param>
@@ -166,7 +166,7 @@ namespace HB.FullStack.Database.SQL
                             foreach (object value in sqlInValues.Values)
                             {
                                 string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
-                                object paramValue = DbValueConvert.TypeValueToDbValue(value, null, engineType);
+                                object paramValue = DbPropertyConvert.PropertyValueToDbFieldValue(value, null, engineType);
 
                                 _expressionContext.AddParameter(paramPlaceholder, paramValue);
 
@@ -182,7 +182,7 @@ namespace HB.FullStack.Database.SQL
                     else
                     {
                         string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
-                        object paramValue = DbValueConvert.TypeValueToDbValue(sqlParam, null, engineType);
+                        object paramValue = DbPropertyConvert.PropertyValueToDbFieldValue(sqlParam, null, engineType);
 
                         _expressionContext.AddParameter(paramPlaceholder, paramValue);
                         escapedParams.Add(paramPlaceholder);

@@ -17,7 +17,7 @@ using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.Convert
 {
-    internal static partial class DbModelConvert
+    public static partial class DbModelConvert
     {
         /// <summary>
         /// 得到一个将 数据库行 转为Model 的 delegate
@@ -104,7 +104,7 @@ namespace HB.FullStack.Database.Convert
                         il.Emit(OpCodes.Ldstr, propertyDef.Name);//stack is now [target][target][IDbModelDefFactory][ModelType][PropertyName]
 
                         //TODO: 不能直接把propertyDef.TypeConverter变量加进来吗?
-                        il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);// stack is now [target][target][DbValueConverter]
+                        il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);// stack is now [target][target][DbPropertyConverter]
 
                         hasGlobalConverter = true;
                     }
@@ -112,7 +112,7 @@ namespace HB.FullStack.Database.Convert
                     {
                         //======全局Converter
 
-                        IDbValueConverter? globalTypeConverter = DbValueConvert.GetGlobalDbValueConverter(trueType, engineType);
+                        IDbPropertyConverter? globalTypeConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, engineType);
 
                         if (globalTypeConverter != null)
                         {
@@ -121,7 +121,7 @@ namespace HB.FullStack.Database.Convert
                             EmitUtil.EmitInt32(il, (int)engineType);
 
                             //TODO: 不能直接把globalTypeConverter变量加进来吗?
-                            il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);//stack is now [target][target][DbValueConverter]
+                            il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);//stack is now [target][target][DbPropertyConverter]
 
                             hasGlobalConverter = true;
                         }
@@ -142,9 +142,9 @@ namespace HB.FullStack.Database.Convert
 
                     if (propertyDef.TypeConverter != null) //专用Converter
                     {
-                        // stack is now [target][target][DbValueConverter][value-as-object]
+                        // stack is now [target][target][DbPropertyConverter][value-as-object]
                         il.Emit(OpCodes.Ldtoken, propertyDef.Type);
-                        il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null); //stack is now [target][target][DbValueConverter][value-as-object][propertyType]
+                        il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null); //stack is now [target][target][DbPropertyConverter][value-as-object][propertyType]
                         il.EmitCall(OpCodes.Callvirt, _getTypeConverterDbValueToTypeValueMethod, null);
                         il.Emit(OpCodes.Unbox_Any, propertyDef.Type);// stack is now [target][target][TypeValue]
                     }
@@ -154,9 +154,9 @@ namespace HB.FullStack.Database.Convert
                         {
                             //全局Converter
 
-                            // stack is now [target][target][DbValueConverter][value-as-object]
+                            // stack is now [target][target][DbPropertyConverter][value-as-object]
                             il.Emit(OpCodes.Ldtoken, trueType);
-                            il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);//stack is now [target][target][DbValueConverter][value-as-object][trueType]
+                            il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);//stack is now [target][target][DbPropertyConverter][value-as-object][trueType]
                             il.EmitCall(OpCodes.Callvirt, _getTypeConverterDbValueToTypeValueMethod, null);
                             il.Emit(OpCodes.Unbox_Any, trueType);// stack is now [target][target][TypeValue]
                         }
@@ -364,7 +364,7 @@ namespace HB.FullStack.Database.Convert
 
                     //查看全局TypeConvert
 
-                    IDbValueConverter? globalConverter = DbValueConvert.GetGlobalDbValueConverter(trueType, engineType);
+                    IDbPropertyConverter? globalConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, engineType);
 
                     if (globalConverter != null)
                     {
@@ -565,7 +565,7 @@ namespace HB.FullStack.Database.Convert
                     //emiter.Call(DBModelConverterEmit._getTypeFromHandleMethod);
                     //[rtArray][key][typeconveter][property_value_obj][property_type]
                     il.EmitCall(OpCodes.Callvirt, _getTypeConverterTypeValueToDbValueMethod, null);
-                    //emiter.CallVirtual(typeof(IDbValueConverter).GetMethod(nameof(IDbValueConverter.TypeValueToDbValue)));
+                    //emiter.CallVirtual(typeof(IDbPropertyConverter).GetMethod(nameof(IDbPropertyConverter.PropertyValueToDbFieldValue)));
                     //[rtArray][key][db_value]
                 }
                 else
@@ -574,7 +574,7 @@ namespace HB.FullStack.Database.Convert
 
                     //查看全局TypeConvert
 
-                    IDbValueConverter? globalConverter = DbValueConvert.GetGlobalDbValueConverter(trueType, engineType);
+                    IDbPropertyConverter? globalConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, engineType);
 
                     if (globalConverter != null)
                     {
@@ -604,7 +604,7 @@ namespace HB.FullStack.Database.Convert
                         //emiter.LoadLocal(tmpTrueTypeLocal);
                         //[rtArray][key][typeconverter][property_value_obj][true_type]
                         il.EmitCall(OpCodes.Callvirt, _getTypeConverterTypeValueToDbValueMethod, null);
-                        //emiter.CallVirtual(typeof(IDbValueConverter).GetMethod(nameof(IDbValueConverter.TypeValueToDbValue)));
+                        //emiter.CallVirtual(typeof(IDbPropertyConverter).GetMethod(nameof(IDbPropertyConverter.PropertyValueToDbFieldValue)));
                         //[rtArray][key][db_value]
                     }
                     else
@@ -683,8 +683,8 @@ namespace HB.FullStack.Database.Convert
             .Select(p => p.GetGetMethod()).First()!;
 
         private static readonly MethodInfo _getPropertyTypeConverterMethod2 = typeof(IDbModelDefFactory).GetMethod(nameof(IDbModelDefFactory.GetPropertyTypeConverter))!;
-        private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(DbValueConvert).GetMethod(nameof(DbValueConvert.GetGlobalDbValueConverter), new Type[] { typeof(Type), typeof(int) })!;
-        private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(IDbValueConverter).GetMethod(nameof(IDbValueConverter.DbValueToTypeValue))!;
-        private static readonly MethodInfo _getTypeConverterTypeValueToDbValueMethod = typeof(IDbValueConverter).GetMethod(nameof(IDbValueConverter.TypeValueToDbValue))!;
+        private static readonly MethodInfo _getGlobalTypeConverterMethod = typeof(DbPropertyConvert).GetMethod(nameof(DbPropertyConvert.GetGlobalDbPropertyConverter), new Type[] { typeof(Type), typeof(int) })!;
+        private static readonly MethodInfo _getTypeConverterDbValueToTypeValueMethod = typeof(IDbPropertyConverter).GetMethod(nameof(IDbPropertyConverter.DbFieldValueToPropertyValue))!;
+        private static readonly MethodInfo _getTypeConverterTypeValueToDbValueMethod = typeof(IDbPropertyConverter).GetMethod(nameof(IDbPropertyConverter.PropertyValueToDbFieldValue))!;
     }
 }

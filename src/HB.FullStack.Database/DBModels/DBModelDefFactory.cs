@@ -249,7 +249,7 @@ namespace HB.FullStack.Database.DbModels
 
             if (propertyAttribute.Converter != null)
             {
-                propertyDef.TypeConverter = (IDbValueConverter)Activator.CreateInstance(propertyAttribute.Converter)!;
+                propertyDef.TypeConverter = (IDbPropertyConverter)Activator.CreateInstance(propertyAttribute.Converter)!;
             }
 
             //判断是否是主键
@@ -286,7 +286,7 @@ namespace HB.FullStack.Database.DbModels
             return _defDict.Values.Where(def => databaseName.Equals(def.DatabaseName, GlobalSettings.ComparisonIgnoreCase));
         }
 
-        public IDbValueConverter? GetPropertyTypeConverter(Type modelType, string propertyName)
+        public IDbPropertyConverter? GetPropertyTypeConverter(Type modelType, string propertyName)
         {
             return GetDef(modelType)?.GetPropertyDef(propertyName)!.TypeConverter;
         }

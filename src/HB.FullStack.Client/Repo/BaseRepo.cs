@@ -87,7 +87,7 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo<TModel> : BaseRepo where TModel : ClientDbModel, new()
     {
         private readonly ILogger _logger;
-        private readonly IHistoryManager _historyManager;
+        private readonly IOfflineChangeManager _historyManager;
         private readonly DbModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
@@ -98,7 +98,7 @@ namespace HB.FullStack.Client
             ILogger logger,
             IDatabase database,
             IApiClient apiClient,
-            IHistoryManager historyManager,
+            IOfflineChangeManager historyManager,
             IPreferenceProvider userPreferenceProvider,
             StatusManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
@@ -276,7 +276,7 @@ namespace HB.FullStack.Client
                 //所以，只要覆盖即可
 
                 //TODO: 批量执行
-                await Database.SetByIdAsync(model, transactionContext).ConfigureAwait(false);
+                await Database.AddOrUpdateByIdAsync(model, transactionContext).ConfigureAwait(false);
             }
 
             _logger.LogDebug("重新添加远程数据到本地数据库, Type:{Type}", typeof(TModel).Name);
@@ -320,7 +320,7 @@ namespace HB.FullStack.Client
                 else if (ClientModelDef.AllowOfflineWrite)
                 {
                     //Offline History
-                    await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Add, transactionContext).ConfigureAwait(false);
+                    await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Add, transactionContext).ConfigureAwait(false);
 
                     //Local
                     await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
@@ -333,6 +333,7 @@ namespace HB.FullStack.Client
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
             {
                 //TODO: 测试这个
+                //有可能是网络抖动，或者重复请求，所以，忽略就好
 
             }
         }
@@ -353,7 +354,7 @@ namespace HB.FullStack.Client
                 }
                 else if (ClientModelDef.AllowOfflineWrite)
                 {
-                    await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Update, transactionContext).ConfigureAwait(false);
+                    await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Update, transactionContext).ConfigureAwait(false);
 
                     await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
                 }
@@ -384,7 +385,7 @@ namespace HB.FullStack.Client
                 }
                 else if (ClientModelDef.AllowOfflineWrite)
                 {
-                    await _historyManager.RecordOfflineHistryAsync(models, HistoryType.Delete, transactionContext).ConfigureAwait(false);
+                    await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Delete, transactionContext).ConfigureAwait(false);
 
                     await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
                 }

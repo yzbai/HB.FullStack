@@ -14,7 +14,7 @@ namespace HB.FullStack.Database.Convert
     /// <summary>
     /// 整体转换，某一个值得转换参看DbValueConverter
     /// </summary>
-    internal static partial class DbModelConvert
+    public static partial class DbModelConvert
     {
         #region IDataReader Row To Model
 
@@ -122,7 +122,7 @@ namespace HB.FullStack.Database.Convert
             {
                 parameters.Add(new KeyValuePair<string, object>(
                     $"{propertyDef.DbParameterizedName!}_{number}",
-                    DbValueConvert.TypeValueToDbValue(propertyDef.GetValueFrom(model), propertyDef, engineType)));
+                    DbPropertyConvert.PropertyValueToDbFieldValue(propertyDef.GetValueFrom(model), propertyDef, engineType)));
             }
 
             return parameters;
@@ -177,7 +177,7 @@ namespace HB.FullStack.Database.Convert
 
                 parameters.Add(new KeyValuePair<string, object>(
                     $"{propertyDef.DbParameterizedName}_{parameterNameSuffix}",
-                    DbValueConvert.TypeValueToDbValue(kv.Value, propertyDef, engineType)));
+                    DbPropertyConvert.PropertyValueToDbFieldValue(kv.Value, propertyDef, engineType)));
             }
 
             return parameters;

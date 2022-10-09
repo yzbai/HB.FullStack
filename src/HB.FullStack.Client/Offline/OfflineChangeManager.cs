@@ -10,26 +10,28 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Offline
 {
-    public class HistoryManager : IHistoryManager
+    public class OfflineChangeManager : IOfflineChangeManager
     {
         private readonly IDatabase _database;
         private readonly IDbModelDefFactory _dbModelDefFactory;
 
-        public HistoryManager(IDatabase database, IDbModelDefFactory dbModelDefFactory)
+        public OfflineChangeManager(IDatabase database, IDbModelDefFactory dbModelDefFactory)
         {
             _database = database;
             _dbModelDefFactory = dbModelDefFactory;
         }
 
-        public async Task RecordOfflineHistryAsync<TModel>(IEnumerable<TModel> models, HistoryType historyType, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public async Task RecordOfflineChangesAsync<TModel>(IEnumerable<TModel> models, OfflineChangeType historyType, TransactionContext transactionContext) where TModel : ClientDbModel, new()
         {
+            //TODO: 反复对同一个Guid进行修改，需要合并
+
             DbModelDef modelDef = _dbModelDefFactory.GetDef<TModel>()!;
 
-            List<OfflineHistory> offlineHistories = new List<OfflineHistory>();
+            List<OfflineChange> offlineHistories = new List<OfflineChange>();
 
             foreach (TModel model in models)
             {
-                OfflineHistory history = new OfflineHistory
+                OfflineChangePack history = new OfflineChangePack
                 {
                     ModelId = model.Id,
                     ModelFullName = modelDef.ModelFullName,

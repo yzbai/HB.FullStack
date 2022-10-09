@@ -1,6 +1,6 @@
 ﻿namespace HB.FullStack.Client.Offline
 {
-    public enum HistoryType
+    public enum OfflineChangeType
     {
         Add,
         Update,

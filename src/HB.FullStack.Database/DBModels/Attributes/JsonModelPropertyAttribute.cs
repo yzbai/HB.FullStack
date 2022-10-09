@@ -15,7 +15,7 @@ namespace HB.FullStack.Database.DbModels
     {
         public JsonModelPropertyAttribute([CallerLineNumber] int propertyOrder = 0) : base(propertyOrder)
         {
-            Converter = typeof(JsonTypeConverter);
+            Converter = typeof(JsonDbPropertyConverter);
         }
     }
 }
