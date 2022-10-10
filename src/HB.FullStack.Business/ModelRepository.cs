@@ -125,18 +125,18 @@ namespace HB.FullStack.Repository
         protected virtual Task OnModelUpdatingFieldsAsync(IEnumerable<ChangedPack> cpps)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
         protected virtual Task OnModelUpdatedPropertiesAsync(IEnumerable<ChangedPack> cpps)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
         protected virtual Task OnModelUpdatePropertiesFailedAsync(IEnumerable<ChangedPack> cpps)
         {
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateFields });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
         protected virtual Task OnModelUpdatingAsync(IEnumerable<DbModel> models)

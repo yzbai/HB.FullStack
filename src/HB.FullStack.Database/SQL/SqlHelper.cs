@@ -193,7 +193,7 @@ namespace HB.FullStack.Database.SQL
                 where.Append(Invariant($" AND {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
             }
 
-            return $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where}";
+            return $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
         }
 
         /// <summary>
@@ -206,13 +206,13 @@ namespace HB.FullStack.Database.SQL
             DbModelPropertyDef lastUserProperty = modelDef.GetPropertyDef(nameof(DbModel.LastUser))!;
 
             StringBuilder args = new StringBuilder();
-            args.Append(Invariant($",{lastUserProperty.DbReservedName}={DbParameterName_LastUser}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
+            args.Append(Invariant($"{lastUserProperty.DbReservedName}={DbParameterName_LastUser}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
 
             if (modelDef.IsTimestampDBModel)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(TimestampDbModel.Timestamp))!;
 
-                args.Append(Invariant($" {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
+                args.Append(Invariant($", {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
             }
 
             StringBuilder where = new StringBuilder();
@@ -229,7 +229,11 @@ namespace HB.FullStack.Database.SQL
                     throw DatabaseExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
                 }
 
-                args.Append(Invariant($",{propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
+                if (propertyName != nameof(TimestampDbModel.Timestamp))
+                {
+                    args.Append(Invariant($",{propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
+                }
+
                 where.Append(Invariant($" AND  {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{OLD_PROPERTY_VALUE_SUFFIX}_{number}"));
             }
 
@@ -303,7 +307,7 @@ namespace HB.FullStack.Database.SQL
 
             where.RemoveLast(3);// "AND".Length
 
-            return $"delete from {modelDef.DbTableReservedName} where {where}";
+            return $"delete from {modelDef.DbTableReservedName} where {where};";
         }
 
         /// <summary>

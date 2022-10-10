@@ -35,7 +35,7 @@ namespace HB.FullStack.Common.ApiClient
                     ApiMethod.Add
                         or ApiMethod.Update
                         or ApiMethod.Delete
-                        or ApiMethod.UpdateFields
+                        or ApiMethod.UpdateProperties
                         or ApiMethod.UpdateRelation => ResEndpoint.DefaultWriteAuth,
                     ApiMethod.None => throw new NotImplementedException(),
                     _ => throw new NotImplementedException(),

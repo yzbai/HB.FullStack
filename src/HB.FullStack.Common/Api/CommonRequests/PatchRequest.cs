@@ -14,7 +14,7 @@ namespace HB.FullStack.Common.Api
         [RequestBody]
         public ChangedPack RequestData { get; set; } = new ChangedPack();
 
-        public PatchRequest() : base(typeof(T).Name, ApiMethod.UpdateFields, null, null) { }
+        public PatchRequest() : base(typeof(T).Name, ApiMethod.UpdateProperties, null, null) { }
 
         public PatchRequest<T> AddProperty(string propertyName, object? oldValue, object? newValue)
         {

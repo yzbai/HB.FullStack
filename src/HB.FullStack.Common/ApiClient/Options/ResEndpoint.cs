@@ -32,7 +32,7 @@ namespace HB.FullStack.Common.ApiClient
         public ApiRequestAuth DefaultReadAuth { get; set; } = null!;
 
         /// <summary>
-        /// 默认的Put,UpdateFields,Add,Delete权限
+        /// 默认的Put,UpdateProperties,Add,Delete权限
         /// 默认权限是指没有指定Condition下的权限.
         /// 可以在ApiRequest中覆盖
         /// </summary>

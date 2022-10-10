@@ -43,15 +43,17 @@ namespace HB.FullStack.Database
         /// Update Fields for TimestampDbModel. Using timestamp method optimistic locking.
         /// </summary>
         /// <param name="timestamp">TimestampDbModel.Timestamp</param>
+        /// <param name="newTimestamp">为null时，由系统指定</param>
         Task UpdatePropertiesAsync<T>(
             object id,
             IList<(string propertyName, object? propertyValue)> propertyNameValues,
             long timestamp,
             string lastUser,
-            TransactionContext? transContext) where T : TimestampDbModel, new();
+            TransactionContext? transContext,
+            long? newTimestamp = null) where T : TimestampDbModel, new();
 
         Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long timestamp)> modelChanges,
+            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long oldTimestamp, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext) where T : TimestampDbModel, new();
 
@@ -63,18 +65,23 @@ namespace HB.FullStack.Database
             object id,
             IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues,
             string lastUser,
-            TransactionContext? transContext) where T : DbModel, new();
+            TransactionContext? transContext,
+            long? newTimestamp = null) where T : DbModel, new();
 
         Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> modelChanges,
+            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext = null) where T : DbModel, new();
 
-        Task UpdatePropertiesAsync<T>(ChangedPack changedPropertyPack, string lastUser, TransactionContext? transContext)
-            where T : DbModel, new();
+        Task UpdatePropertiesAsync<T>(
+            ChangedPack changedPropertyPack,
+            string lastUser,
+            TransactionContext? transContext) where T : DbModel, new();
 
-        Task BatchUpdatePropertiesAsync<T>(IEnumerable<ChangedPack> changedPacks, string lastUser, TransactionContext? transContext)
-            where T : DbModel, new();
+        Task BatchUpdatePropertiesAsync<T>(
+            IEnumerable<ChangedPack> changedPacks,
+            string lastUser,
+            TransactionContext? transContext) where T : DbModel, new();
 
         #endregion
 
@@ -105,10 +112,14 @@ namespace HB.FullStack.Database
         Task BatchDeleteAsync<T>(IList<object> ids,
             IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : TimestampDbModel, new();
 
-        #endregion  
+        #endregion
+
+        #region AddOrUpdate
 
         Task AddOrUpdateByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDbModel, new();
 
         Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDbModel, new();
+
+        #endregion
     }
 }

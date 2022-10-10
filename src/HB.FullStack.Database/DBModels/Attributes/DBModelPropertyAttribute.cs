@@ -7,7 +7,7 @@ namespace HB.FullStack.Database.DbModels
     /// <summary>
     /// 对TableDomain中的属性的数据库表字段描述
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1813:Avoid unsealed attributes", Justification = "<Pending>")]
     public class DbModelPropertyAttribute : Attribute
     {

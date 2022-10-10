@@ -41,11 +41,6 @@ namespace HB.FullStack.Database
         EngineCommand CreateTableCreateCommand(EngineType engineType, DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength);
         EngineCommand CreateUpdateCommand<T>(EngineType engineType, DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new();
 
-        ///// <summary>
-        ///// Version版本的乐观锁
-        ///// </summary>
-        //EngineCommand CreateUpdateFieldsUsingTimestampCompareCommand(EngineType engineType, DbModelDef modelDef, object id, long oldTimestamp, long newTimestamp, string lastUser, IList<string> propertyNames, IList<object?> propertyValues);
-
         EngineCommand CreateUpdatePropertiesCommand(
             EngineType engineType,
             DbModelDef modelDef,
@@ -79,8 +74,7 @@ namespace HB.FullStack.Database
         EngineCommand CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
             EngineType engineType,
             DbModelDef modelDef,
-            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> modelChanges,
-            long newTimestamp,
+            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long newTimestamp)> modelChanges,
             string lastUser,
             bool needTrans);
 

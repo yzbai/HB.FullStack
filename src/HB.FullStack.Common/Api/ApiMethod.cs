@@ -22,14 +22,14 @@ namespace HB.FullStack.Common.Api
         Add = 2,
         Update = 3,
         Delete = 4,
-        UpdateFields = 5,
+        UpdateProperties = 5,
         UpdateRelation = 6
     }
 
     public static class ApiMethodExtensions
     {
-        //NOTICE: UpdateFields not defined in .net standard 2.0
-        //private static readonly HttpMethod _patch = new HttpMethod("UpdateFields");
+        //NOTICE: UpdateProperties not defined in .net standard 2.0
+        //private static readonly HttpMethod _patch = new HttpMethod("UpdateProperties");
 
         public static HttpMethod ToHttpMethod(this ApiMethod apiMethodName)
         {
@@ -40,7 +40,7 @@ namespace HB.FullStack.Common.Api
                 ApiMethod.Add => HttpMethod.Post,
                 ApiMethod.Update => HttpMethod.Put,
                 ApiMethod.Delete => HttpMethod.Delete,
-                ApiMethod.UpdateFields => HttpMethod.Patch,
+                ApiMethod.UpdateProperties => HttpMethod.Patch,
                 ApiMethod.UpdateRelation => HttpMethod.Patch,
                 _ => throw new System.NotImplementedException(),
             };
@@ -55,7 +55,7 @@ namespace HB.FullStack.Common.Api
                 ApiMethod.Add => "Post",
                 ApiMethod.Update => "Put",
                 ApiMethod.Delete => "Delete",
-                ApiMethod.UpdateFields => "Patch",
+                ApiMethod.UpdateProperties => "Patch",
                 _ => throw new System.NotImplementedException(),
             };
         }

@@ -31,7 +31,7 @@ namespace HB.FullStack.Identity
 
             //TODO: 解决方案3：删除某个前缀的所有key
 
-            if (args.ChangeType == DBChangeType.Update || args.ChangeType == DBChangeType.Delete || args.ChangeType == DBChangeType.UpdateFields)
+            if (args.ChangeType == DBChangeType.Update || args.ChangeType == DBChangeType.Delete || args.ChangeType == DBChangeType.UpdateProperties)
             {
                 if (sender is IEnumerable<Role> roles)
                 {

@@ -4,7 +4,7 @@
     {
         Add,
         Update,
-        UpdateFields,
+        UpdateProperties,
         Delete
     }
 }

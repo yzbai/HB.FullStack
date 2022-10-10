@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Database.DbModels
 {
@@ -18,8 +19,24 @@ namespace HB.FullStack.Database.DbModels
         /// Version存在UserA将Version为1大老数据更改两次得到Version3，UserB将Version为2的数据更改一次变成Version3，都是version3，但经过路径不同，但系统认为相同。
         /// 就把Timestamp看作Version就行
         /// </summary>
-        //[Range(638000651894004864, long.MaxValue)]
-        public long Timestamp { get; set; } = TimeUtil.Timestamp;
+        /// 
+
+        private long _timestamp = TimeUtil.Timestamp;
+
+        [Range(638000651894004864, long.MaxValue)]
+        public long Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                if (this is IPropertyTrackableObject trackableObject)
+                {
+                    trackableObject.Track(nameof(Timestamp), _timestamp, value);
+                }
+
+                _timestamp = value;
+            }
+        }
 
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
     }

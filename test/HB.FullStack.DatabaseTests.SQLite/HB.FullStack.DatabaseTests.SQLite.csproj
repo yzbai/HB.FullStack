@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	  <ProjectReference Include="..\..\src\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj" />
     <ProjectReference Include="..\HB.FullStack.DatabaseTests\HB.FullStack.DatabaseTests.csproj" />
   </ItemGroup>

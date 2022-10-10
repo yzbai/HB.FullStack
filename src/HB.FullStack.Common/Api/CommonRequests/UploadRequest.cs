@@ -22,7 +22,7 @@ namespace HB.FullStack.Common.Api
         [JsonIgnore]
         public string FileName { get; set; } = null!;
 
-        public UploadRequest(byte[] file, string fileName, ApiRequestAuth auth, string? condition) : base(typeof(T).Name, ApiMethod.UpdateFields, auth, condition)
+        public UploadRequest(byte[] file, string fileName, ApiRequestAuth auth, string? condition) : base(typeof(T).Name, ApiMethod.UpdateProperties, auth, condition)
         {
             _file = file;
             FileName = fileName;

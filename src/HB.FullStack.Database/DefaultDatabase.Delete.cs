@@ -152,9 +152,9 @@ namespace HB.FullStack.Database
 
             ThrowIf.NotValid(items, nameof(items));
 
-            IList<object> ids = items is IList<ILongId> longIds ? longIds.Select<ILongId, object>(i => i.Id).ToList() : ((IList<IGuidId>)items).Select<IGuidId, object>(i => i.Id).ToList();
+            IList<object> ids = items is IEnumerable<ILongId> longIds ? longIds.Select<ILongId, object>(i => i.Id).ToList() : ((IEnumerable<IGuidId>)items).Select<IGuidId, object>(i => i.Id).ToList();
 
-            if (items is IList<TimestampDbModel> tModels)
+            if (items is IEnumerable<TimestampDbModel> tModels)
             {
                 IList<long?> oldTimestamps = tModels.Select<TimestampDbModel, long?>(i => i.Timestamp).ToList();
                 IList<long?> newTimestamps = Enumerable.Repeat<long?>(TimeUtil.Timestamp, ids.Count).ToList();

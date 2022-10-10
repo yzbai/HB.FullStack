@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 using HB.FullStack.Common.PropertyTrackable;
@@ -364,9 +365,14 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception ChangedPropertyPackError(string cause, ChangedPack? changedPropertyPack)
+        internal static Exception ChangedPropertyPackError(string cause, ChangedPack? changedPropertyPack, string? modelFullName)
         {
-            return new DatabaseException(ErrorCodes.ChangedPackError, cause, null, changedPropertyPack);
+            DatabaseException ex = new DatabaseException(ErrorCodes.ChangedPackError, cause, null, null);
+
+            ex.Data["ModelFullName"] = modelFullName;
+            ex.Data["PropertyNames"] = changedPropertyPack?.ChangedProperties.Select(c => c.PropertyName).ToJoinedString(",");
+
+            return ex;
         }
 
         internal static Exception DuplicateKeyError(string commandText, Exception? innerException)

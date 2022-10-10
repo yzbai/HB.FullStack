@@ -39,7 +39,20 @@ public sealed partial class TrackPropertyGenerator : IIncrementalGenerator
         // Gather info for all annotated fields
         IncrementalValuesProvider<(HierarchyInfo Hierarchy, Result<TrackPropertyInfo?> Info)> propertyInfoWithErrors =
             context.SyntaxProvider.CreateSyntaxProvider(
-                static (node, _) => node is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax or RecordDeclarationSyntax, AttributeLists.Count: > 0 } } },
+                static (node, _) =>
+                {
+                    return node is VariableDeclaratorSyntax
+                    {
+                        Parent: VariableDeclarationSyntax
+                        {
+                            Parent: FieldDeclarationSyntax
+                            {
+                                Parent: ClassDeclarationSyntax or RecordDeclarationSyntax,
+                                AttributeLists.Count: > 0
+                            }
+                        }
+                    };
+                },
                 static (context, token) =>
                 {
                     if (!context.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(LanguageVersion.CSharp8))

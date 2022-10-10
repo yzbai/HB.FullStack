@@ -325,9 +325,7 @@ namespace HB.FullStack.Database
         #endregion
 
         #region 更改 - UpdateProperties
-        /// <summary>
-        /// 针对ServerDatabaseModel
-        /// </summary>
+
         public EngineCommand CreateUpdatePropertiesCommand(
             EngineType engineType,
             DbModelDef modelDef,
@@ -338,24 +336,27 @@ namespace HB.FullStack.Database
             long? newTimestamp,
             string lastUser)
         {
-            propertyNames.Add(nameof(TimestampLongIdDbModel.Id));
-            propertyValues.Add(id);
+            IList<string> curPropertyNames = new List<string>(propertyNames);
+            IList<object?> curPropertyValues = new List<object?>(propertyValues);
 
-            propertyNames.Add(nameof(DbModel.LastUser));
-            propertyValues.Add(lastUser);
+            curPropertyNames.Add(nameof(TimestampLongIdDbModel.Id));
+            curPropertyValues.Add(id);
+
+            curPropertyNames.Add(nameof(DbModel.LastUser));
+            curPropertyValues.Add(lastUser);
 
             if (modelDef.IsTimestampDBModel && !(oldTimestamp.HasValue && newTimestamp.HasValue))
             {
-                throw DatabaseExceptions.TimestampNotExists(engineType: engineType, modelDef: modelDef, propertyNames: propertyNames);
+                throw DatabaseExceptions.TimestampNotExists(engineType: engineType, modelDef: modelDef, propertyNames: curPropertyNames);
             }
 
             if (newTimestamp.HasValue)
             {
-                propertyNames.Add(nameof(TimestampDbModel.Timestamp));
-                propertyValues.Add(newTimestamp.Value);
+                curPropertyNames.Add(nameof(TimestampDbModel.Timestamp));
+                curPropertyValues.Add(newTimestamp.Value);
             }
 
-            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues);
+            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, curPropertyNames, curPropertyValues);
 
             if (oldTimestamp.HasValue)
             {
@@ -365,7 +366,7 @@ namespace HB.FullStack.Database
             }
 
             return new EngineCommand(
-                GetCachedSql(engineType, SqlType.UpdateProperties, new DbModelDef[] { modelDef }, propertyNames),
+                GetCachedSql(engineType, SqlType.UpdateProperties, new DbModelDef[] { modelDef }, curPropertyNames),
                 parameters);
         }
 
@@ -389,28 +390,31 @@ namespace HB.FullStack.Database
             {
                 #region Parameters
 
-                propertyNames.Add(nameof(TimestampLongIdDbModel.Id));
-                propertyValues.Add(id);
-                propertyNames.Add(nameof(DbModel.LastUser));
-                propertyValues.Add(lastUser);
+                IList<string> curPropertyNames = new List<string>(propertyNames);
+                IList<object?> curPropertyValues = new List<object?>(propertyValues);
+
+                curPropertyNames.Add(nameof(TimestampLongIdDbModel.Id));
+                curPropertyValues.Add(id);
+                curPropertyNames.Add(nameof(DbModel.LastUser));
+                curPropertyValues.Add(lastUser);
 
                 if (modelDef.IsTimestampDBModel && !(oldTimestamp.HasValue && newTimestamp.HasValue))
                 {
-                    throw DatabaseExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
+                    throw DatabaseExceptions.TimestampNotExists(engineType, modelDef, curPropertyNames);
                 }
 
                 if (newTimestamp.HasValue)
                 {
-                    propertyNames.Add(nameof(TimestampDbModel.Timestamp));
-                    propertyValues.Add(newTimestamp.Value);
+                    curPropertyNames.Add(nameof(TimestampDbModel.Timestamp));
+                    curPropertyValues.Add(newTimestamp.Value);
                 }
 
                 IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
                     engineType,
                     _modelDefFactory,
-                    propertyNames,
-                    propertyValues,
+                    curPropertyNames,
+                    curPropertyValues,
                     number.ToString());
 
                 if (oldTimestamp.HasValue)
@@ -424,14 +428,13 @@ namespace HB.FullStack.Database
 
                 #endregion
 
-                string updatePropertiesSql = SqlHelper.CreateUpdatePropertiesSql(modelDef, propertyNames, number);
+                string updatePropertiesSql = SqlHelper.CreateUpdatePropertiesSql(modelDef, curPropertyNames, number);
 
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{updatePropertiesSql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
 #elif NETSTANDARD2_1
                 innerBuilder.Append($"{updatePropertiesSql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
 #endif
-
                 number++;
             }
 
@@ -459,26 +462,30 @@ namespace HB.FullStack.Database
             long newTimestamp,
             string lastUser)
         {
-            string sql = GetCachedSql(engineType, SqlType.UpdatePropertiesUsingOldNewCompare, new DbModelDef[] { modelDef }, propertyNames);
+            List<string> curPropertyNames = new List<string>(propertyNames);
+            List<object?> curNewPropertyValues = new List<object?>(newPropertyValues);
 
-            var oldParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, oldPropertyValues, $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
+            var oldParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, curPropertyNames, oldPropertyValues, $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
 
-            propertyNames.Add(nameof(TimestampLongIdDbModel.Id));
-            newPropertyValues.Add(id);
+            curPropertyNames.Add(nameof(TimestampLongIdDbModel.Id));
+            curNewPropertyValues.Add(id);
 
-            propertyNames.Add(nameof(TimestampDbModel.LastUser));
-            newPropertyValues.Add(lastUser);
+            curPropertyNames.Add(nameof(TimestampDbModel.LastUser));
+            curNewPropertyValues.Add(lastUser);
 
             if (modelDef.IsTimestampDBModel)
             {
-                propertyNames.Add(nameof(TimestampDbModel.Timestamp));
-                newPropertyValues.Add(newTimestamp);
+                curPropertyNames.Add(nameof(TimestampDbModel.Timestamp));
+                curNewPropertyValues.Add(newTimestamp);
             }
 
-            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, newPropertyValues, $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, curPropertyNames, curNewPropertyValues, $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(oldParameters);
             parameters.AddRange(newParameters);
+
+            //使用propertyNames而不是curPropertyNames
+            string sql = GetCachedSql(engineType, SqlType.UpdatePropertiesUsingOldNewCompare, new DbModelDef[] { modelDef }, propertyNames);
 
             return new EngineCommand(sql, parameters);
         }
@@ -486,8 +493,7 @@ namespace HB.FullStack.Database
         public EngineCommand CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
             EngineType engineType,
             DbModelDef modelDef,
-            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> modelChanges,
-            long newTimestamp,
+            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long newTimestamp)> modelChanges,
             string lastUser,
             bool needTrans)
         {
@@ -498,39 +504,47 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            foreach (var (id, propertyNames, oldPropertyValues, newPropertyValues) in modelChanges)
+            foreach (var (id, propertyNames, oldPropertyValues, newPropertyValues, newTimestamp) in modelChanges)
             {
-
-                string sql = SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDef, propertyNames, number);
+                List<string> curPropertyNames = new List<string>(propertyNames);
+                List<object?> curNewPropertyValues = new List<object?>(newPropertyValues);
 
                 #region Parameters
 
-                var oldParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory,
-                    propertyNames,
+                var oldParameters = DbModelConvert.PropertyValuesToParameters(
+                    modelDef,
+                    engineType,
+                    _modelDefFactory,
+                    curPropertyNames,
                     oldPropertyValues,
                     $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}");
 
-                propertyNames.Add(nameof(TimestampLongIdDbModel.Id));
-                newPropertyValues.Add(id);
+                totalParameters.AddRange(oldParameters);
 
-                propertyNames.Add(nameof(DbModel.LastUser));
-                newPropertyValues.Add(lastUser);
+                curPropertyNames.Add(nameof(TimestampLongIdDbModel.Id));
+                curNewPropertyValues.Add(id);
+                curPropertyNames.Add(nameof(DbModel.LastUser));
+                curNewPropertyValues.Add(lastUser);
 
                 if (modelDef.IsTimestampDBModel)
                 {
-                    propertyNames.Add(nameof(TimestampDbModel.Timestamp));
-                    newPropertyValues.Add(newTimestamp);
+                    curPropertyNames.Add(nameof(TimestampDbModel.Timestamp));
+                    curNewPropertyValues.Add(newTimestamp);
                 }
 
-                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory,
-                    propertyNames,
-                    newPropertyValues,
+                var newParameters = DbModelConvert.PropertyValuesToParameters(
+                    modelDef,
+                    engineType,
+                    _modelDefFactory,
+                    curPropertyNames,
+                    curNewPropertyValues,
                     $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_{number}");
 
-                totalParameters.AddRange(oldParameters);
                 totalParameters.AddRange(newParameters);
 
                 #endregion
+
+                string sql = SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDef, propertyNames, number);
 
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
@@ -633,8 +647,8 @@ namespace HB.FullStack.Database
                     engineType,
                     modelDef,
                     id,
-                    new string[] { nameof(DbModel.Deleted) },
-                    new object?[] { true },
+                    new List<string> { nameof(DbModel.Deleted) },
+                    new List<object?> { true },
                     oldTimestamp,
                     newTimestamp,
                     lastUser);
@@ -705,8 +719,8 @@ namespace HB.FullStack.Database
 
             if (!trulyDeleted)
             {
-                var propertyNames = new string[] { nameof(DbModel.Deleted) };
-                var propertyValues = new object[] { true };
+                var propertyNames = new List<string> { nameof(DbModel.Deleted) };
+                var propertyValues = new List<object?> { true };
                 var modelChanges = new List<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)>();
 
                 for (int i = 0; i < count; ++i)
@@ -738,7 +752,7 @@ namespace HB.FullStack.Database
                     propertyValues.Add(oldTimestamps[i]!.Value);
                 }
 
-                IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues);
+                IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, engineType, _modelDefFactory, propertyNames, propertyValues, number.ToString());
 
                 totalParameters.AddRange(parameters);
 

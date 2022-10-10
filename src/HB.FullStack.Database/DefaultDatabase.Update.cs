@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Extensions;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
+    //TODO: 添加对newTimestamp的检查
     partial class DefaultDatabase
     {
         public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
@@ -173,7 +176,8 @@ namespace HB.FullStack.Database
             IList<(string propertyName, object? propertyValue)> propertyNameValues,
             long timestamp,
             string lastUser,
-            TransactionContext? transContext) where T : TimestampDbModel, new()
+            TransactionContext? transContext,
+            long? newTimestamp = null) where T : TimestampDbModel, new()
         {
             if (propertyNameValues.Count <= 0)
             {
@@ -210,7 +214,7 @@ namespace HB.FullStack.Database
                     propertyNames: propertyNameValues.Select(t => t.propertyName).ToList(),
                     propertyValues: propertyNameValues.Select(t => t.propertyValue).ToList(),
                     oldTimestamp: timestamp,
-                    newTimestamp: TimeUtil.Timestamp,
+                    newTimestamp: newTimestamp ?? TimeUtil.Timestamp,
                     lastUser: lastUser);
 
                 long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
@@ -238,8 +242,8 @@ namespace HB.FullStack.Database
             object id,
             IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues,
             string lastUser,
-            TransactionContext? transContext)
-            where T : DbModel, new()
+            TransactionContext? transContext,
+            long? newTimestamp = null) where T : DbModel, new()
         {
             if (propertyNameOldNewValues.Count <= 0)
             {
@@ -271,7 +275,7 @@ namespace HB.FullStack.Database
                     propertyNameOldNewValues.Select(t => t.propertyName).ToList(),
                     propertyNameOldNewValues.Select(t => t.oldValue).ToList(),
                     propertyNameOldNewValues.Select(t => t.newValue).ToList(),
-                    TimeUtil.Timestamp,
+                    newTimestamp ?? TimeUtil.Timestamp,
                     lastUser);
 
                 int matchedRows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
@@ -294,17 +298,22 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, $"id:{id}, lastUser:{lastUser}, propertyOldNewValues:{SerializeUtil.ToJson(propertyNameOldNewValues)}", ex);
             }
         }
-        public async Task UpdatePropertiesAsync<T>(ChangedPack changedPropertyPack, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+
+        public async Task UpdatePropertiesAsync<T>(
+            ChangedPack changedPack,
+            string lastUser,
+            TransactionContext? transContext) where T : DbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            List<(string propertyName, object? oldValue, object? newValue)> lst = ConvertChangedPackToList(changedPropertyPack, modelDef);
+            //这里不包含Timestamp改动
+            List<(string propertyName, object? oldValue, object? newValue)> lst = ConvertChangedPackToList(changedPack, modelDef, out long? newTimestamp);
 
-            await UpdatePropertiesAsync<T>(changedPropertyPack.Id!, lst, lastUser, transContext).ConfigureAwait(false);
+            await UpdatePropertiesAsync<T>(changedPack.Id!, lst, lastUser, transContext, newTimestamp).ConfigureAwait(false);
         }
 
         public async Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long timestamp)> modelChanges,
+            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext) where T : TimestampDbModel, new()
         {
@@ -319,31 +328,30 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser);
 
-            var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)>(modelChanges.Count);
-            long newTimestamp = TimeUtil.Timestamp;
+            //var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)>(modelChanges.Count);
 
-            foreach ((object id, IList<string> propertyNames, IList<object?> propertyValues, long timestamp) in modelChanges)
-            {
-                if (id is long longId)
-                {
-                    if (longId <= 0) throw DatabaseExceptions.LongIdShouldBePositive(longId);
-                }
-                else if (id is Guid guid)
-                {
-                    if (guid.IsEmpty()) throw DatabaseExceptions.GuidShouldNotEmpty();
-                }
+            //foreach ((object id, IList<string> propertyNames, IList<object?> propertyValues, long oldTimestamp, long? newTimestamp) in modelChanges)
+            //{
+            //    if (id is long longId)
+            //    {
+            //        if (longId <= 0) throw DatabaseExceptions.LongIdShouldBePositive(longId);
+            //    }
+            //    else if (id is Guid guid)
+            //    {
+            //        if (guid.IsEmpty()) throw DatabaseExceptions.GuidShouldNotEmpty();
+            //    }
 
-                if (timestamp < 638008780206018439)
-                {
-                    throw DatabaseExceptions.TimestampShouldBePositive(timestamp);
-                }
+            //    if (oldTimestamp < 638008780206018439)
+            //    {
+            //        throw DatabaseExceptions.TimestampShouldBePositive(oldTimestamp);
+            //    }
 
-                updateChanges.Add((id, propertyNames, propertyValues, timestamp, newTimestamp));
-            }
+            //    updateChanges.Add((id, propertyNames, propertyValues, oldTimestamp, newTimestamp));
+            //}
 
             try
             {
-                var command = DbCommandBuilder.CreateBatchUpdatePropertiesCommand(EngineType, modelDef, updateChanges, lastUser, transactionContext == null);
+                var command = DbCommandBuilder.CreateBatchUpdatePropertiesCommand(EngineType, modelDef, modelChanges, lastUser, transactionContext == null);
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transactionContext?.Transaction,
@@ -359,25 +367,25 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), "BatchUpdatePropertiesAsync");
+                        throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(modelChanges), "BatchUpdatePropertiesAsync");
                     }
 
                     count++;
                 }
 
-                if (count != updateChanges.Count)
+                if (count != modelChanges.Count)
                 {
-                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), "BatchUpdatePropertiesAsync");
+                    throw DatabaseExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(modelChanges), "BatchUpdatePropertiesAsync");
                 }
             }
             catch (Exception ex)
             {
-                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(updateChanges), ex);
+                throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(modelChanges), ex);
             }
         }
 
         public async Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> modelChanges,
+            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext = null) where T : DbModel, new()
         {
@@ -392,9 +400,11 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser);
 
-            var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)>(modelChanges.Count);
+            var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long newTimestamp)>(modelChanges.Count);
 
-            foreach (var (id, propertyNames, oldPropertyValues, newPropertyValues) in modelChanges)
+            long defaultTimestamp = TimeUtil.Timestamp;
+
+            foreach (var (id, propertyNames, oldPropertyValues, newPropertyValues, newTimestamp) in modelChanges)
             {
                 if (id is long longId)
                 {
@@ -405,12 +415,17 @@ namespace HB.FullStack.Database
                     if (guid.IsEmpty()) throw DatabaseExceptions.GuidShouldNotEmpty();
                 }
 
-                updateChanges.Add((id, propertyNames, oldPropertyValues, newPropertyValues));
+                updateChanges.Add((id, propertyNames, oldPropertyValues, newPropertyValues, newTimestamp ?? defaultTimestamp));
             }
 
             try
             {
-                var command = DbCommandBuilder.CreateBatchUpdatePropertiesUsingOldNewCompareCommand(EngineType, modelDef, updateChanges, TimeUtil.Timestamp, lastUser, transactionContext == null);
+                var command = DbCommandBuilder.CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
+                    EngineType,
+                    modelDef,
+                    updateChanges,
+                    lastUser,
+                    transactionContext == null);
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transactionContext?.Transaction,
@@ -452,14 +467,16 @@ namespace HB.FullStack.Database
             return BatchUpdatePropertiesAsync<T>(lst, lastUser, transContext);
         }
 
-        private static List<(string propertyName, object? oldValue, object? newValue)> ConvertChangedPackToList(ChangedPack changedPropertyPack, DbModelDef modelDef)
+        private static List<(string propertyName, object? oldValue, object? newValue)> ConvertChangedPackToList(ChangedPack changedPropertyPack, DbModelDef modelDef, out long? newTimestamp)
         {
             if (changedPropertyPack == null || changedPropertyPack.Id == null || changedPropertyPack.ChangedProperties.IsNullOrEmpty())
             {
-                throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack);
+                throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack, modelDef.ModelFullName);
             }
 
             List<(string propertyName, object? oldValue, object? newValue)> lst = new List<(string propertyName, object? oldValue, object? newValue)>();
+
+            newTimestamp = null;
 
             foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
             {
@@ -467,7 +484,13 @@ namespace HB.FullStack.Database
 
                 if (propertyDef == null)
                 {
-                    throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack);
+                    throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack, modelDef.ModelFullName);
+                }
+
+                if (cp.PropertyName == nameof(ITimestampModel.Timestamp))
+                {
+                    newTimestamp = (long?)SerializeUtil.FromJsonElement(typeof(long), cp.NewValue);
+                    continue;
                 }
 
                 lst.Add((
@@ -476,23 +499,30 @@ namespace HB.FullStack.Database
                     SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue)));
             }
 
+            //if (modelDef.IsTimestampDBModel && newTimestamp == null)
+            //{
+            //    throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties缺少Timestamp", changedPropertyPack, modelDef.ModelFullName);
+            //}
+
             return lst;
         }
 
-        private static IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)> ConvertChangedPackToList(IEnumerable<ChangedPack> changedPropertyPacks, DbModelDef modelDef)
+        private static IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long? newTimestamp)> ConvertChangedPackToList(IEnumerable<ChangedPack> changedPropertyPacks, DbModelDef modelDef)
         {
-            var lst = new List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues)>(changedPropertyPacks.Count());
+            var lst = new List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long? newTimestamp)>(changedPropertyPacks.Count());
 
             foreach (var changedPropertyPack in changedPropertyPacks)
             {
                 if (changedPropertyPack == null || changedPropertyPack.Id == null || changedPropertyPack.ChangedProperties.IsNullOrEmpty())
                 {
-                    throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack);
+                    throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties为空或者Id为null", changedPropertyPack, modelDef.ModelFullName);
                 }
 
                 List<string> propertyNames = new List<string>();
                 List<object?> oldPropertyValues = new List<object?>();
                 List<object?> newPropertyValues = new List<object?>();
+
+                long? curNewTimestamp = null;
 
                 foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
                 {
@@ -500,7 +530,13 @@ namespace HB.FullStack.Database
 
                     if (propertyDef == null)
                     {
-                        throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack);
+                        throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack, modelDef.ModelFullName);
+                    }
+
+                    if (cp.PropertyName == nameof(ITimestampModel.Timestamp))
+                    {
+                        curNewTimestamp = (long?)SerializeUtil.FromJsonElement(typeof(long), cp.NewValue);
+                        continue;
                     }
 
                     propertyNames.Add(cp.PropertyName);
@@ -508,7 +544,12 @@ namespace HB.FullStack.Database
                     newPropertyValues.Add(SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue));
                 }
 
-                lst.Add((changedPropertyPack.Id!, propertyNames, oldPropertyValues, newPropertyValues));
+                //if (modelDef.IsTimestampDBModel && curNewTimestamp == null)
+                //{
+                //    throw DatabaseExceptions.ChangedPropertyPackError("ChangedProperties缺少Timestamp", changedPropertyPack, modelDef.ModelFullName);
+                //}
+
+                lst.Add((changedPropertyPack.Id!, propertyNames, oldPropertyValues, newPropertyValues, curNewTimestamp));
             }
 
             return lst;
