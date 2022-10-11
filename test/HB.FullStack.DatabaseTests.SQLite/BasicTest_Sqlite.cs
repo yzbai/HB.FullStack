@@ -66,48 +66,6 @@ namespace HB.FullStack.DatabaseTests.SQLite
         }
 
         [TestMethod]
-        public async Task Test_Update_Fields_By_Compare_OldNewValues()
-        {
-            //Add
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
-
-            await Db.AddAsync(book, "tester", null);
-
-            //update-fields
-
-            List<(string, object?, object?)> toUpdate = new List<(string, object?, object?)>();
-
-            toUpdate.Add((nameof(Guid_BookModel.Price), book.Price, 123456.789));
-            toUpdate.Add((nameof(Guid_BookModel.Name), book.Name, "TTTTTXXXXTTTTT"));
-
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
-
-            Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
-
-            Assert.IsNotNull(updatedBook);
-
-            Assert.IsTrue(updatedBook.Timestamp >= book.Timestamp);
-            Assert.IsTrue(updatedBook.Price == 123456.789);
-            Assert.IsTrue(updatedBook.Name == "TTTTTXXXXTTTTT");
-            Assert.IsTrue(updatedBook.LastUser == "UPDATE_FIELDS_VERSION");
-
-            //应该抛出冲突异常
-            try
-            {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
-            }
-            catch (DatabaseException ex)
-            {
-                Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
-
-                if (ex.ErrorCode != ErrorCodes.ConcurrencyConflict)
-                {
-                    throw ex;
-                }
-            }
-        }
-
-        [TestMethod]
         public async Task Test_Version_Error()
         {
             Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
@@ -517,15 +475,14 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             TransactionContext? trans = await Trans.BeginTransactionAsync<BookModel_Client>().ConfigureAwait(false);
 
-            IEnumerable<BookModel_Client> re = await Db.RetrieveAsync<BookModel_Client>(b => b.Deleted, trans).ConfigureAwait(false);
-
-            await Db.AddAsync(Mocker.GetBooks_Client(1)[0], "", trans).ConfigureAwait(false);
-
             try
             {
-                //await Db.AddAsync<BookModel>(books[0], "", trans);
+                IEnumerable<BookModel_Client> re = await Db.RetrieveAsync<BookModel_Client>(b => b.Deleted, trans).ConfigureAwait(false);
+
+                await Db.AddAsync(Mocker.GetBooks_Client(1)[0], "", trans).ConfigureAwait(false);
 
                 await Db.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
             catch

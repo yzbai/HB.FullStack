@@ -126,15 +126,26 @@ namespace HB.FullStack.DatabaseTests.SQLite
         {
             var models = Mocker.MockTimelessList(3);
 
-            await Db.BatchAddAsync(models, "", null);
+            var trans = await Trans.BeginTransactionAsync<DeleteTimestampModel>();
 
-            var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
+            try
+            {
+                await Db.BatchAddAsync(models, "", trans);
 
-            await Db.BatchDeleteAsync<DeleteTimelessModel>(ids, null, "", trulyDelete);
+                var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
 
-            var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), null);
+                await Db.BatchDeleteAsync<DeleteTimelessModel>(ids, trans, "", trulyDelete);
 
-            Assert.IsTrue(rts.IsNullOrEmpty());
+                var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), trans);
+
+                await trans.CommitAsync().ConfigureAwait(false);
+
+                Assert.IsTrue(rts.IsNullOrEmpty());
+            }
+            catch
+            {
+                await trans.RollbackAsync();
+            }
         }
 
         [TestMethod]
@@ -142,19 +153,29 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [DataRow(false)]
         public async Task Test_Batch_Delete_Timestamp(bool trulyDelete)
         {
-            var models = Mocker.MockTimestampList(3);
+            var trans = await Trans.BeginTransactionAsync<DeleteTimestampModel>();
 
-            await Db.BatchAddAsync(models, "", null);
+            try
+            {
+                var models = Mocker.MockTimestampList(3);
 
-            var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
+                await Db.BatchAddAsync(models, "", trans);
 
-            List<long?> timestamps = models.Select<DeleteTimestampModel, long?>(m => m.Timestamp).ToList();
+                var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
 
-            await Db.BatchDeleteAsync<DeleteTimestampModel>(ids, timestamps, "", null, trulyDelete);
+                List<long?> timestamps = models.Select<DeleteTimestampModel, long?>(m => m.Timestamp).ToList();
 
-            var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), null);
+                await Db.BatchDeleteAsync<DeleteTimestampModel>(ids, timestamps, "", trans, trulyDelete);
 
-            Assert.IsTrue(rts.IsNullOrEmpty());
+                var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), trans);
+
+                await trans.CommitAsync();
+                Assert.IsTrue(rts.IsNullOrEmpty());
+            }
+            catch
+            {
+                await trans.RollbackAsync();
+            }
         }
 
         [TestMethod]
@@ -162,17 +183,26 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [DataRow(false)]
         public async Task Test_Batch_Delete_TimestampModel(bool trulyDelete)
         {
-            var models = Mocker.MockTimestampList(3);
+            var trans = await Trans.BeginTransactionAsync<DeleteTimestampModel>();
+            try
+            {
+                var models = Mocker.MockTimestampList(3);
 
-            await Db.BatchAddAsync(models, "", null);
+                await Db.BatchAddAsync(models, "", trans);
 
-            var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
+                var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
 
-            await Db.BatchDeleteAsync<DeleteTimestampModel>(models, "", null, trulyDelete);
+                await Db.BatchDeleteAsync<DeleteTimestampModel>(models, "", trans, trulyDelete);
 
-            var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), null);
+                var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), trans);
 
-            Assert.IsTrue(rts.IsNullOrEmpty());
+                await trans.CommitAsync();
+                Assert.IsTrue(rts.IsNullOrEmpty());
+            }
+            catch
+            {
+                await trans.RollbackAsync();
+            }
         }
 
         [TestMethod]
@@ -180,17 +210,28 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [DataRow(false)]
         public async Task Test_Batch_Delete_TimelessModel(bool trulyDelete)
         {
-            var models = Mocker.MockTimelessList(3);
+            var trans = await Trans.BeginTransactionAsync<DeleteTimelessModel>();
 
-            await Db.BatchAddAsync(models, "", null);
+            try
+            {
+                var models = Mocker.MockTimelessList(3);
 
-            var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
+                await Db.BatchAddAsync(models, "", trans);
 
-            await Db.BatchDeleteAsync<DeleteTimelessModel>(models, "", null, trulyDelete);
+                var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
 
-            var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), null);
+                await Db.BatchDeleteAsync<DeleteTimelessModel>(models, "", trans, trulyDelete);
 
-            Assert.IsTrue(rts.IsNullOrEmpty());
+                var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), trans);
+
+                await trans.CommitAsync();
+
+                Assert.IsTrue(rts.IsNullOrEmpty());
+            }
+            catch
+            {
+                await trans.RollbackAsync();
+            }
         }
     }
 }

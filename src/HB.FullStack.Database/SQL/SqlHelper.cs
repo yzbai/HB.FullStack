@@ -420,12 +420,15 @@ namespace HB.FullStack.Database.SQL
             };
         }
 
+        //TODO: sqlite，如果在Batch语句里加上Begin，那么会引起SQLite Error 1: 'cannot start a transaction within a transaction'.
+        //为什么？
         public static string Transaction_Begin(EngineType engineType)
         {
             return engineType switch
             {
                 EngineType.MySQL => "Begin;",
-                EngineType.SQLite => "Begin;",
+                //EngineType.SQLite => "Begin;",
+                EngineType.SQLite => "",
                 _ => throw new NotImplementedException(),
             };
         }
@@ -435,7 +438,8 @@ namespace HB.FullStack.Database.SQL
             return engineType switch
             {
                 EngineType.MySQL => "Commit;",
-                EngineType.SQLite => "Commit;",
+                //EngineType.SQLite => "Commit;",
+                EngineType.SQLite => "",
                 _ => throw new NotImplementedException(),
             };
         }
@@ -445,7 +449,8 @@ namespace HB.FullStack.Database.SQL
             return engineType switch
             {
                 EngineType.MySQL => "Rollback;",
-                EngineType.SQLite => "Rollback;",
+                //EngineType.SQLite => "Rollback;",
+                EngineType.SQLite => "",
                 _ => throw new NotImplementedException(),
             };
         }

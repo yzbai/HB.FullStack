@@ -149,23 +149,26 @@ namespace HB.Infrastructure.SQLite
 
         #region 事务
 
-        //private SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
+        //TODO: 解决问题
+        //SQLite Error 1: 'cannot start a transaction within a transaction'.
+        //SQLite Error 5: 'database is locked'.
+        private SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
 
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
-            //await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+            await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
             SqliteConnection conn = new SqliteConnection(GetConnectionString(dbName, true));
 
             await conn.OpenAsync().ConfigureAwait(false);
 
-            return conn.BeginTransaction(isolationLevel ?? IsolationLevel.Serializable);
+            return conn.BeginTransaction(isolationLevel ?? IsolationLevel.Unspecified);
         }
 
         public async Task CommitAsync(IDbTransaction transaction)
         {
-            //_semaphoreSlim.Release();
+            _semaphoreSlim.Release();
 
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
@@ -183,7 +186,7 @@ namespace HB.Infrastructure.SQLite
 
         public async Task RollbackAsync(IDbTransaction transaction)
         {
-            //_semaphoreSlim.Release();
+            _semaphoreSlim.Release();
 
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
@@ -199,6 +202,6 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        #endregion 事务
+        #endregion
     }
 }
