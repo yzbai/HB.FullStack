@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
@@ -148,10 +149,15 @@ namespace HB.Infrastructure.SQLite
 
         #region 事务
 
+        //private SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
+
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
+            //await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+
             SqliteConnection conn = new SqliteConnection(GetConnectionString(dbName, true));
+
             await conn.OpenAsync().ConfigureAwait(false);
 
             return conn.BeginTransaction(isolationLevel ?? IsolationLevel.Serializable);
@@ -159,6 +165,8 @@ namespace HB.Infrastructure.SQLite
 
         public async Task CommitAsync(IDbTransaction transaction)
         {
+            //_semaphoreSlim.Release();
+
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
             SqliteConnection connection = sqliteTransaction.Connection!;
@@ -175,6 +183,8 @@ namespace HB.Infrastructure.SQLite
 
         public async Task RollbackAsync(IDbTransaction transaction)
         {
+            //_semaphoreSlim.Release();
+
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
             SqliteConnection connection = sqliteTransaction.Connection!;

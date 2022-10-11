@@ -63,7 +63,6 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     throw ex;
                 }
             }
-
         }
 
         [TestMethod]
