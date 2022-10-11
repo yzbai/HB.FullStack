@@ -313,7 +313,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)> modelChanges,
+            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long oldTimestamp, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext) where T : TimestampDbModel, new()
         {
@@ -328,30 +328,35 @@ namespace HB.FullStack.Database
 
             TruncateLastUser(ref lastUser);
 
-            //var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)>(modelChanges.Count);
+            var updateChanges = new List<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)>(modelChanges.Count);
 
-            //foreach ((object id, IList<string> propertyNames, IList<object?> propertyValues, long oldTimestamp, long? newTimestamp) in modelChanges)
-            //{
-            //    if (id is long longId)
-            //    {
-            //        if (longId <= 0) throw DatabaseExceptions.LongIdShouldBePositive(longId);
-            //    }
-            //    else if (id is Guid guid)
-            //    {
-            //        if (guid.IsEmpty()) throw DatabaseExceptions.GuidShouldNotEmpty();
-            //    }
+            foreach ((object id, IList<string> propertyNames, IList<object?> propertyValues, long oldTimestamp, long? newTimestamp) in modelChanges)
+            {
+                if (id is long longId)
+                {
+                    if (longId <= 0) throw DatabaseExceptions.LongIdShouldBePositive(longId);
+                }
+                else if (id is Guid guid)
+                {
+                    if (guid.IsEmpty()) throw DatabaseExceptions.GuidShouldNotEmpty();
+                }
 
-            //    if (oldTimestamp < 638008780206018439)
-            //    {
-            //        throw DatabaseExceptions.TimestampShouldBePositive(oldTimestamp);
-            //    }
+                if (oldTimestamp < 638008780206018439 || newTimestamp < 638008780206018439)
+                {
+                    throw DatabaseExceptions.TimestampShouldBePositive(oldTimestamp);
+                }
 
-            //    updateChanges.Add((id, propertyNames, propertyValues, oldTimestamp, newTimestamp));
-            //}
+                updateChanges.Add((id, propertyNames, propertyValues, oldTimestamp, newTimestamp));
+            }
 
             try
             {
-                var command = DbCommandBuilder.CreateBatchUpdatePropertiesCommand(EngineType, modelDef, modelChanges, lastUser, transactionContext == null);
+                var command = DbCommandBuilder.CreateBatchUpdatePropertiesCommand(
+                    EngineType,
+                    modelDef,
+                    updateChanges,
+                    lastUser,
+                    transactionContext == null);
 
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transactionContext?.Transaction,

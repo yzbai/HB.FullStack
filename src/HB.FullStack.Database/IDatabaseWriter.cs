@@ -72,12 +72,17 @@ namespace HB.FullStack.Database
             IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext = null) where T : DbModel, new();
-
+        /// <summary>
+        /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
+        /// </summary>
         Task UpdatePropertiesAsync<T>(
             ChangedPack changedPropertyPack,
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new();
 
+        /// <summary>
+        /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
+        /// </summary>
         Task BatchUpdatePropertiesAsync<T>(
             IEnumerable<ChangedPack> changedPacks,
             string lastUser,

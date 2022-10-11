@@ -208,6 +208,7 @@ namespace HB.FullStack.Database.SQL
             StringBuilder args = new StringBuilder();
             args.Append(Invariant($"{lastUserProperty.DbReservedName}={DbParameterName_LastUser}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
 
+            //如果是TimestampDBModel，强迫加上Timestamp字段
             if (modelDef.IsTimestampDBModel)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(TimestampDbModel.Timestamp))!;
@@ -229,6 +230,7 @@ namespace HB.FullStack.Database.SQL
                     throw DatabaseExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
                 }
 
+                //这里就不加了
                 if (propertyName != nameof(TimestampDbModel.Timestamp))
                 {
                     args.Append(Invariant($",{propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
@@ -237,7 +239,7 @@ namespace HB.FullStack.Database.SQL
                 where.Append(Invariant($" AND  {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{OLD_PROPERTY_VALUE_SUFFIX}_{number}"));
             }
 
-            //TODO: 还是要查验一下found_rows的并发
+            //TODO: 还是要查验一下found_rows的并发？
             string sql = $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
 
             if (modelDef.IsTimestampDBModel)
