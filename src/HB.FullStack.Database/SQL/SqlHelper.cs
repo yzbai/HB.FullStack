@@ -468,7 +468,7 @@ namespace HB.FullStack.Database.SQL
             return engineType switch
             {
                 EngineType.MySQL => " row_count() ",
-                EngineType.SQLite => throw new NotImplementedException(),
+                EngineType.SQLite => " changes() ",
                 _ => throw new NotImplementedException(),
             };
         }

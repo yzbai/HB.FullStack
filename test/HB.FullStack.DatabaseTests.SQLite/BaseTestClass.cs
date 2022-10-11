@@ -75,6 +75,7 @@ namespace HB.FullStack.DatabaseTests
                 .AddSQLite(options =>
                 {
                     options.CommonSettings.Version = 1;
+                    options.CommonSettings.DefaultTrulyDelete = true;
 
                     var connSettings = new DbConnectionSettings
                     {

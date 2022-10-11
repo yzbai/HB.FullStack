@@ -24,5 +24,10 @@ namespace HB.FullStack.Database
         public int MaxBatchNumber { get; set; } = 500;
 
         public bool AddDropStatementWhenCreateTable { get; set; }
+
+        /// <summary>
+        /// 默认的是否真正删除
+        /// </summary>
+        public bool DefaultTrulyDelete { get; set; } = false;
     }
 }

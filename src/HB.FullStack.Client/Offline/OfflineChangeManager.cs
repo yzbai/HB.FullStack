@@ -21,7 +21,10 @@ namespace HB.FullStack.Client.Offline
             _dbModelDefFactory = dbModelDefFactory;
         }
 
-        public async Task RecordOfflineChangesAsync<TModel>(IEnumerable<TModel> models, OfflineChangeType historyType, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public async Task RecordOfflineChangesAsync<TModel>(
+            IEnumerable<TModel> models,
+            OfflineChangeType historyType,
+            TransactionContext transactionContext) where TModel : ClientDbModel, new()
         {
             //TODO: 反复对同一个Guid进行修改，需要合并
 

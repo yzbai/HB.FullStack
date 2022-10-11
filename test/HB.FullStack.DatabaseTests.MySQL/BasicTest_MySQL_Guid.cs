@@ -21,7 +21,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MySqlConnector;
 
-namespace HB.FullStack.DatabaseTests
+namespace HB.FullStack.DatabaseTests.MySQL
 {
     [TestClass]
     public class BasicTest_MySQL_Guid : BaseTestClass

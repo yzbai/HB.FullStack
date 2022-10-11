@@ -24,4 +24,19 @@ namespace HB.FullStack.Client.Offline
         public ChangedPack? ChangedPack { get; set; }
 
     }
+
+    public enum OfflineChangeType
+    {
+        Add,
+        Update,
+        Delete,
+    }
+
+    public enum OfflineChangeStatus
+    {
+        Pending,
+        Success,
+        Failed
+    }
+
 }

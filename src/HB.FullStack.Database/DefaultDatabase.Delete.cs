@@ -13,8 +13,15 @@ namespace HB.FullStack.Database
 {
     partial class DefaultDatabase
     {
-        private async Task DeleteCoreAsync<T>(object id, long? oldTimestamp, long? newTimestamp, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : DbModel, new()
+        private async Task DeleteCoreAsync<T>(
+            object id,
+            long? oldTimestamp,
+            long? newTimestamp,
+            string lastUser,
+            TransactionContext? transContext,
+            bool? trulyDelete = null) where T : DbModel, new()
         {
+
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
@@ -23,9 +30,19 @@ namespace HB.FullStack.Database
 
             try
             {
-                var command = DbCommandBuilder.CreateDeleteCommand(EngineType, modelDef, id, lastUser, trulyDelete, oldTimestamp, newTimestamp);
+                var command = DbCommandBuilder.CreateDeleteCommand(
+                    EngineType,
+                    modelDef,
+                    id,
+                    lastUser,
+                    trulyDelete ?? _databaseSettings.DefaultTrulyDelete,
+                    oldTimestamp,
+                    newTimestamp);
 
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
+                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(
+                    transContext?.Transaction,
+                    modelDef.DatabaseName!,
+                    command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -46,17 +63,17 @@ namespace HB.FullStack.Database
             }
         }
 
-        public Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : TimestampDbModel, new()
+        public Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : TimestampDbModel, new()
         {
             return DeleteCoreAsync<T>(id, timestamp, TimeUtil.Timestamp, lastUser, transContext, trulyDelete);
         }
 
-        public Task DeleteAsync<T>(object id, TransactionContext? transContext, string lastUser, bool trulyDelete = false) where T : TimelessDbModel, new()
+        public Task DeleteAsync<T>(object id, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
             return DeleteCoreAsync<T>(id, null, null, lastUser, transContext, trulyDelete);
         }
 
-        public Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : DbModel, new()
+        public Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new()
         {
             object id = item is ILongId longIdItem ? longIdItem.Id : ((IGuidId)item).Id;
 
@@ -71,8 +88,13 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task BatchDeleteCoreAsync<T>(IList<object> ids, IList<long?> oldTimestamps, IList<long?> newTimestamps, string lastUser, TransactionContext? transContext,
-            bool trulyDelete = false) where T : DbModel, new()
+        private async Task BatchDeleteCoreAsync<T>(
+            IList<object> ids,
+            IList<long?> oldTimestamps,
+            IList<long?> newTimestamps,
+            string lastUser,
+            TransactionContext? transContext,
+            bool? trulyDeleted = null) where T : DbModel, new()
         {
             if (!ids.Any())
             {
@@ -92,7 +114,16 @@ namespace HB.FullStack.Database
 
             try
             {
-                var command = DbCommandBuilder.CreateBatchDeleteCommand(EngineType, modelDef, ids, oldTimestamps, newTimestamps, lastUser, trulyDelete, transContext == null);
+                var command = DbCommandBuilder.CreateBatchDeleteCommand(
+                    EngineType,
+                    modelDef,
+                    ids,
+                    oldTimestamps,
+                    newTimestamps,
+                    lastUser,
+                    trulyDeleted ?? _databaseSettings.DefaultTrulyDelete,
+                    transContext == null);
+
                 using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
                     transContext?.Transaction,
                     modelDef.DatabaseName!,
@@ -123,7 +154,7 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(ids), ex);
             }
         }
-        public Task BatchDeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool trulyDelete = false) where T : TimelessDbModel, new()
+        public Task BatchDeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
             long?[] oldTimestamps = new long?[ids.Count];
             long?[] newTimestamps = new long?[ids.Count];
@@ -131,14 +162,14 @@ namespace HB.FullStack.Database
             return BatchDeleteCoreAsync<T>(ids, oldTimestamps, newTimestamps, lastUser, transContext, trulyDelete);
         }
 
-        public Task BatchDeleteAsync<T>(IList<object> ids, IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : TimestampDbModel, new()
+        public Task BatchDeleteAsync<T>(IList<object> ids, IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : TimestampDbModel, new()
         {
             IList<long?> newTimestamps = Enumerable.Repeat<long?>(TimeUtil.Timestamp, ids.Count).ToList();
 
             return BatchDeleteCoreAsync<T>(ids, timestamps, newTimestamps, lastUser, transContext, trulyDelete);
         }
 
-        public Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool trulyDelete = false) where T : DbModel, new()
+        public Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new()
         {
             if (!items.Any())
             {
@@ -152,7 +183,9 @@ namespace HB.FullStack.Database
 
             ThrowIf.NotValid(items, nameof(items));
 
-            IList<object> ids = items is IEnumerable<ILongId> longIds ? longIds.Select<ILongId, object>(i => i.Id).ToList() : ((IEnumerable<IGuidId>)items).Select<IGuidId, object>(i => i.Id).ToList();
+            IList<object> ids = items is IEnumerable<ILongId> longIds
+                ? longIds.Select<ILongId, object>(i => i.Id).ToList()
+                : ((IEnumerable<IGuidId>)items).Select<IGuidId, object>(i => i.Id).ToList();
 
             if (items is IEnumerable<TimestampDbModel> tModels)
             {
@@ -170,7 +203,11 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext? transactionContext = null, bool trulyDelete = false) where T : TimelessDbModel, new()
+        public async Task DeleteAsync<T>(
+            Expression<Func<T, bool>> whereExpr,
+            string lastUser,
+            TransactionContext? transactionContext = null,
+            bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
@@ -183,9 +220,17 @@ namespace HB.FullStack.Database
             {
                 WhereExpression<T> where = Where(whereExpr).And(t => !t.Deleted);
 
-                var command = DbCommandBuilder.CreateDeleteCommand(EngineType, modelDef, where, lastUser, trulyDelete);
+                var command = DbCommandBuilder.CreateDeleteCommand(
+                    EngineType,
+                    modelDef,
+                    where,
+                    lastUser,
+                    trulyDelete ?? _databaseSettings.DefaultTrulyDelete);
 
-                await _databaseEngine.ExecuteCommandNonQueryAsync(transactionContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
+                await _databaseEngine.ExecuteCommandNonQueryAsync(
+                    transactionContext?.Transaction,
+                    modelDef.DatabaseName!,
+                    command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
