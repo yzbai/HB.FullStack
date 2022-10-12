@@ -29,8 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		common.props = common.props
+		global_back.json = global_back.json
 		publish_to_nuget.ps1 = publish_to_nuget.ps1
-		global.json = global.json
 		README.md = README.md
 	EndProjectSection
 EndProject

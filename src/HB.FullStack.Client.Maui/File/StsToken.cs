@@ -2,14 +2,13 @@
 
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common.PropertyTrackable;
-using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Maui.File
 {
     [ClientModel(
       expirySeconds: int.MaxValue, //由StsToken.ExpirationAt业务逻辑决定
       allowOfflineRead: false,
-      allowOfflineWrite: false)]
+      allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
     public partial class StsToken : ClientDbModel
     {
         [TrackProperty]

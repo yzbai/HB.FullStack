@@ -9,5 +9,7 @@ namespace HB.FullStack.Client.Offline
     public interface IOfflineChangeManager
     {
         Task RecordOfflineChangesAsync<TModel>(IEnumerable<TModel> models, OfflineChangeType offlineChangeType, TransactionContext transactionContext) where TModel : ClientDbModel, new();
+
+        Task ReSyncAsync();
     }
 }

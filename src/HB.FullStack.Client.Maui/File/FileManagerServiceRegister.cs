@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.File;
@@ -33,7 +29,9 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 ExpiryTime = TimeSpan.MaxValue,
                 AllowOfflineRead = false,
-                AllowOfflineWrite = false
+                AllowOfflineAdd = false,
+                AllowOfflineDelete = false,
+                AllowOfflineUpdate = false
             });
 
             return services;

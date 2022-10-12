@@ -11,6 +11,8 @@ namespace HB.FullStack.Client.ClientModels
         public TimeSpan ExpiryTime { get; set; }
 
         public bool AllowOfflineRead { get; set; }
-        public bool AllowOfflineWrite { get; set; }
+        public bool AllowOfflineAdd { get; set; }
+        public bool AllowOfflineUpdate { get; set; }
+        public bool AllowOfflineDelete { get; set; }
     }
 }

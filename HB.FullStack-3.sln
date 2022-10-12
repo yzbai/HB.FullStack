@@ -29,8 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		common.props = common.props
+		global_back.json = global_back.json
 		publish_to_nuget.ps1 = publish_to_nuget.ps1
-		global.json = global.json
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -92,7 +92,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Database.Sourc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Cache", "src\HB.FullStack.Cache\HB.FullStack.Cache.csproj", "{0BA7A46A-FC52-4E69-89CF-7D2F7695A778}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.Maui", "src\HB.FullStack.Client.Maui\HB.FullStack.Client.Maui.csproj", "{4D657D7B-3FBA-4DD1-8D1A-05EC1588EAFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.Maui", "src\HB.FullStack.Client.Maui\HB.FullStack.Client.Maui.csproj", "{4C995AA6-BD1B-4404-BA0F-2D88AA8B8414}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -236,10 +236,10 @@ Global
 		{0BA7A46A-FC52-4E69-89CF-7D2F7695A778}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BA7A46A-FC52-4E69-89CF-7D2F7695A778}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BA7A46A-FC52-4E69-89CF-7D2F7695A778}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D657D7B-3FBA-4DD1-8D1A-05EC1588EAFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D657D7B-3FBA-4DD1-8D1A-05EC1588EAFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D657D7B-3FBA-4DD1-8D1A-05EC1588EAFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D657D7B-3FBA-4DD1-8D1A-05EC1588EAFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C995AA6-BD1B-4404-BA0F-2D88AA8B8414}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C995AA6-BD1B-4404-BA0F-2D88AA8B8414}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C995AA6-BD1B-4404-BA0F-2D88AA8B8414}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C995AA6-BD1B-4404-BA0F-2D88AA8B8414}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -280,7 +280,7 @@ Global
 		{F76F26AC-8403-4584-AB8D-7300B9BE8415} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
 		{FE57071F-645C-42DC-B6AC-B1A28F5A8D99} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
 		{0BA7A46A-FC52-4E69-89CF-7D2F7695A778} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
-		{4D657D7B-3FBA-4DD1-8D1A-05EC1588EAFF} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
+		{4C995AA6-BD1B-4404-BA0F-2D88AA8B8414} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

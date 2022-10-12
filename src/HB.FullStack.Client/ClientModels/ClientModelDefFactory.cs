@@ -36,7 +36,9 @@ namespace HB.FullStack.Client.ClientModels
                 ExpiryTime = TimeSpan.FromSeconds(localDataAttribute.ExpirySeconds),
                 //NeedLogined = localDataAttribute.NeedLogined,
                 AllowOfflineRead = localDataAttribute.AllowOfflineRead,
-                AllowOfflineWrite = localDataAttribute.AllowOfflineWrite
+                AllowOfflineAdd = localDataAttribute.AllowOfflineAdd,
+                AllowOfflineDelete = localDataAttribute.AllowOfflineDelete,
+                AllowOfflineUpdate = localDataAttribute.AllowOfflineUpdate
             };
 
             if (_clientModelDefs.TryAdd(type, newDef))

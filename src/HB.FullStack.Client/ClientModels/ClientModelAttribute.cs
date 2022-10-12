@@ -14,21 +14,25 @@ namespace System
         /// </summary>
         public int ExpirySeconds { get; }
 
-        public bool AllowOfflineWrite { get; }
+        public bool AllowOfflineAdd { get; }
+        public bool AllowOfflineUpdate { get; }
+        public bool AllowOfflineDelete { get; }
 
         public bool AllowOfflineRead { get; } = true;
 
         //public bool NeedLogined { get; } = true;
 
-        public ClientModelAttribute() : this(DefaultExpirySeconds, true, false) { }
+        public ClientModelAttribute() : this(DefaultExpirySeconds, true, false, false, false) { }
 
-        public ClientModelAttribute(int expirySeconds, /*bool needLogined, */bool allowOfflineRead, bool allowOfflineWrite)
+        public ClientModelAttribute(int expirySeconds, bool allowOfflineRead, bool allowOfflineAdd, bool allowOfflineUpdate, bool allowOfflineDelete)
         {
             ExpirySeconds = expirySeconds;
 
             //NeedLogined = needLogined;
             AllowOfflineRead = allowOfflineRead;
-            AllowOfflineWrite = allowOfflineWrite;
+            AllowOfflineUpdate = allowOfflineUpdate;
+            AllowOfflineDelete = allowOfflineDelete;
+            AllowOfflineAdd = allowOfflineAdd;
         }
     }
 }

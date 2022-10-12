@@ -10,7 +10,7 @@ namespace HB.FullStack.Client.Offline
     /// <summary>
     /// 使用自增保证顺序
     /// </summary>
-    public class OfflineChange : ClientDbModel
+    public class OfflineChange : TimelessAutoIncrementIdDbModel
     {
         public OfflineChangeType Type { get; set; }
 
@@ -20,23 +20,28 @@ namespace HB.FullStack.Client.Offline
 
         public string ModelFullName { get; set; } = null!;
 
+        //public string? BusinessCatalog { get; set; }
+
         [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public ChangedPack? ChangedPack { get; set; }
 
+        public string? DeletedObjectJson { get; set; }
+
+        public long LastTime { get; set; } = TimeUtil.Timestamp;
     }
 
     public enum OfflineChangeType
     {
-        Add,
-        Update,
-        Delete,
+        Add = 0, //根据ModelId 和 ModelFullName去数据库取
+        Update = 1,//ChangedPack
+        Delete = 2,//根据DeletedObjectJson
     }
 
     public enum OfflineChangeStatus
     {
-        Pending,
-        Success,
-        Failed
+        Pending = 0,
+        Success = 1,
+        Failed = 2
     }
 
 }

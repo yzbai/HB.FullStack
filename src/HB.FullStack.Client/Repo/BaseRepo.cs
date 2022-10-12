@@ -116,7 +116,9 @@ namespace HB.FullStack.Client
                 {
                     ExpiryTime = TimeSpan.FromSeconds(ClientModelAttribute.DefaultExpirySeconds),
                     AllowOfflineRead = true,
-                    AllowOfflineWrite = false
+                    AllowOfflineAdd = false,
+                    AllowOfflineUpdate = false,
+                    AllowOfflineDelete = false
                 };
             }
         }
@@ -317,7 +319,7 @@ namespace HB.FullStack.Client
                     await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
                 }
                 //离线写
-                else if (ClientModelDef.AllowOfflineWrite)
+                else if (ClientModelDef.AllowOfflineAdd)
                 {
                     //Offline History
                     await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Add, transactionContext).ConfigureAwait(false);
@@ -352,7 +354,7 @@ namespace HB.FullStack.Client
 
                     await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
                 }
-                else if (ClientModelDef.AllowOfflineWrite)
+                else if (ClientModelDef.AllowOfflineUpdate)
                 {
                     await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Update, transactionContext).ConfigureAwait(false);
 
@@ -383,7 +385,7 @@ namespace HB.FullStack.Client
 
                     await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
                 }
-                else if (ClientModelDef.AllowOfflineWrite)
+                else if (ClientModelDef.AllowOfflineDelete)
                 {
                     await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Delete, transactionContext).ConfigureAwait(false);
 
