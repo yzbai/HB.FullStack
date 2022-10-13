@@ -1,12 +1,14 @@
 ﻿
 using System;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace HB.FullStack.Common.Figures
 {
     /// <summary>
     /// 用于绘制Figure的参数,只与UI有关。比如钟表，只与钟表样貌有关，与几点几分无关。
     /// </summary>
-    public abstract class FigureDrawInfo : IEquatable<FigureDrawInfo>
+    public abstract class FigureDrawInfo : ObservableObject, IEquatable<FigureDrawInfo>
     {
         public bool Equals(FigureDrawInfo? other)
         {

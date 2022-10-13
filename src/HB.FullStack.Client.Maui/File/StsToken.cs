@@ -7,8 +7,7 @@ namespace HB.FullStack.Client.Maui.File
 {
     [ClientModel(
       expirySeconds: int.MaxValue, //由StsToken.ExpirationAt业务逻辑决定
-      allowOfflineRead: false,
-      allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
+      allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
     public partial class StsToken : ClientDbModel
     {
         [TrackProperty]

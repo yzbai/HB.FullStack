@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
@@ -13,7 +11,6 @@ using HB.FullStack.Client.Offline;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
-using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 
@@ -115,7 +112,7 @@ namespace HB.FullStack.Client
                 return new ClientModelDef
                 {
                     ExpiryTime = TimeSpan.FromSeconds(ClientModelAttribute.DefaultExpirySeconds),
-                    AllowOfflineRead = true,
+                    AllowOfflineRead = false,
                     AllowOfflineAdd = false,
                     AllowOfflineUpdate = false,
                     AllowOfflineDelete = false
@@ -293,7 +290,7 @@ namespace HB.FullStack.Client
         /// </summary>
         private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TModel> localModels)
         {
-            return localModels.Any() && localModels.All(t => TimeUtil.UtcNow - t.UpdatedTime < ClientModelDef.ExpiryTime);
+            return localModels.Any() && localModels.All(t => TimeUtil.UtcNow - t.LastTime < ClientModelDef.ExpiryTime);
         }
 
         #endregion

@@ -7,7 +7,7 @@ namespace HB.FullStack.Database.DbModels
     /// <summary>
     /// 标识字段为外键
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class ForeignKeyAttribute : Attribute
     {
         /// <summary>

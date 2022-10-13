@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace System
+﻿namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ClientModelAttribute : Attribute
@@ -18,11 +16,11 @@ namespace System
         public bool AllowOfflineUpdate { get; }
         public bool AllowOfflineDelete { get; }
 
-        public bool AllowOfflineRead { get; } = true;
+        public bool AllowOfflineRead { get; } = false;
 
         //public bool NeedLogined { get; } = true;
 
-        public ClientModelAttribute() : this(DefaultExpirySeconds, true, false, false, false) { }
+        public ClientModelAttribute() : this(DefaultExpirySeconds, false, false, false, false) { }
 
         public ClientModelAttribute(int expirySeconds, bool allowOfflineRead, bool allowOfflineAdd, bool allowOfflineUpdate, bool allowOfflineDelete)
         {
