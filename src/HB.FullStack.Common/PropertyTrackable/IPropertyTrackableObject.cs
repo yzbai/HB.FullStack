@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using HB.FullStack.Common.Meta;
@@ -14,7 +13,7 @@ namespace HB.FullStack.Common.PropertyTrackable
 
         void Clear();
 
-        IList<ChangedProperty> GetChangedProperties(bool mergeMultipleChanged = true);
+        IList<ChangedProperty2> GetChangedProperties(bool mergeMultipleChanged = true);
 
         void Track<T>(string propertyName, T oldValue, T newValue);
 
@@ -25,15 +24,15 @@ namespace HB.FullStack.Common.PropertyTrackable
 
     public static class IPropertyTrackableObjectExtensions
     {
-        public static ChangedPack GetChangedPack(this IPropertyTrackableObject model, object id)
+        public static ChangedPack2 GetChangedPack(this IPropertyTrackableObject model, object id)
         {
             PropertyValue[] addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(model);
 
-            ChangedPack changedPack = new ChangedPack
+            ChangedPack2 changedPack = new ChangedPack2
             {
                 Id = id,
                 ChangedProperties = model.GetChangedProperties(),
-                AddtionalProperties = addtionalProperties.ToDictionary(pv => pv.PropertyName, pv => SerializeUtil.ToJsonElement(pv.Value))
+                AddtionalProperties = addtionalProperties.ToDictionary(pv => pv.PropertyName, pv => pv.Value)
             };
 
             return changedPack;

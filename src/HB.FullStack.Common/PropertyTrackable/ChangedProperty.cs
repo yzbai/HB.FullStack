@@ -1,10 +1,8 @@
-﻿using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace HB.FullStack.Common.PropertyTrackable
 {
-    public class ChangedProperty
+    public class ChangedProperty2
     {
         /// <summary>
         /// 改变的属性名
@@ -16,18 +14,18 @@ namespace HB.FullStack.Common.PropertyTrackable
         /// </summary>
         public string? PropertyPropertyName { get; set; }
 
-        public JsonElement OldValue { get; set; }
+        public object? OldValue { get; set; }
 
-        public JsonElement NewValue { get; set; }
+        public object? NewValue { get; set; }
 
         [JsonConstructor]
-        public ChangedProperty(string name, object? oldValue, object? newValue, string? propertyPropertyName = null)
+        public ChangedProperty2(string name, object? oldValue, object? newValue, string? propertyPropertyName = null)
         {
             PropertyName = name;
             PropertyPropertyName = propertyPropertyName;
 
-            OldValue = SerializeUtil.ToJsonElement(oldValue);
-            NewValue = SerializeUtil.ToJsonElement(newValue);
+            OldValue = oldValue;
+            NewValue = newValue;
         }
     }
 }

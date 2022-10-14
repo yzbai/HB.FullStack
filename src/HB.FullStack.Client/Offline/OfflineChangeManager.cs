@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
+using HB.FullStack.Common.Api;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 
@@ -42,7 +43,7 @@ namespace HB.FullStack.Client.Offline
 
                 if (offlineChangeType == OfflineChangeType.Update)
                 {
-                    offlineChange.ChangedPack = model.GetChangedPack();
+                    offlineChange.ChangedPackDto = model.GetChangedPack().ToDto();
                 }
                 else if (offlineChangeType == OfflineChangeType.Delete)
                 {

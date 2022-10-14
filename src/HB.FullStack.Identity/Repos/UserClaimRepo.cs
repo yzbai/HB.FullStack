@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DbModels;
 using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
@@ -33,13 +31,13 @@ namespace HB.FullStack.Identity
                     InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
                 }
             }
-            else if (sender is IEnumerable<ChangedPack> cpps)
+            else if (sender is IEnumerable<ChangedPack2> cpps)
             {
                 foreach (var cpp in cpps)
                 {
-                    if (cpp.AddtionalProperties.TryGetValue(nameof(UserClaim.UserId), out JsonElement value))
+                    if (cpp.AddtionalProperties.TryGetValue(nameof(UserClaim.UserId), out object? value))
                     {
-                        InvalidateCache(new CachedUserClaimsByUserId(value.To<Guid>()));
+                        InvalidateCache(new CachedUserClaimsByUserId((Guid)value!));
                     }
                     else
                     {

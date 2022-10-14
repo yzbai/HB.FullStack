@@ -5,7 +5,8 @@ using System.Text.Json;
 
 namespace HB.FullStack.Common.PropertyTrackable
 {
-    public class ChangedPack : ValidatableObject
+
+    public class ChangedPack2 : ValidatableObject
     {
         /// <summary>
         /// ModelId
@@ -13,16 +14,16 @@ namespace HB.FullStack.Common.PropertyTrackable
         [Required]
         public object? Id { get; set; }
 
-        public IList<ChangedProperty> ChangedProperties { get; set; } = new List<ChangedProperty>();
+        public IList<ChangedProperty2> ChangedProperties { get; set; } = new List<ChangedProperty2>();
 
         /// <summary>
         /// 要求所有的ForeignKey 都放在这里
         /// </summary>
-        public IDictionary<string, JsonElement> AddtionalProperties { get; set; } = new Dictionary<string, JsonElement>();
+        public IDictionary<string, object?> AddtionalProperties { get; set; } = new Dictionary<string, object?>();
 
         public void AddAddtionalProperty(string propertyName, object? propertyValue)
         {
-            AddtionalProperties[propertyName] = SerializeUtil.ToJsonElement(propertyValue);
+            AddtionalProperties[propertyName] = propertyValue;
         }
     }
 }

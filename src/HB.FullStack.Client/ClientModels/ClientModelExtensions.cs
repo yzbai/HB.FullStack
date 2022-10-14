@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 using HB.FullStack.Common.Meta;
 using HB.FullStack.Common.PropertyTrackable;
@@ -11,15 +7,15 @@ namespace HB.FullStack.Client.ClientModels
 {
     public static class ClientModelExtensions
     {
-        public static ChangedPack GetChangedPack(this ClientDbModel model)
+        public static ChangedPack2 GetChangedPack(this ClientDbModel model)
         {
             PropertyValue[] addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(model);
 
-            ChangedPack changedPack = new ChangedPack
+            ChangedPack2 changedPack = new ChangedPack2
             {
                 Id = model.Id,
                 ChangedProperties = model.GetChangedProperties(),
-                AddtionalProperties = addtionalProperties.ToDictionary(pv => pv.PropertyName, pv => SerializeUtil.ToJsonElement(pv.Value))
+                AddtionalProperties = addtionalProperties.ToDictionary(pv => pv.PropertyName, pv => pv.Value)
             };
 
             return changedPack;

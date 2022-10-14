@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using HB.FullStack.Cache;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
-using HB.FullStack.Database.DbModels;
 using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
@@ -39,7 +38,7 @@ namespace HB.FullStack.Identity
 
                     await InvalidCachedRolesByUserId(roleIdList).ConfigureAwait(false);
                 }
-                else if (sender is IEnumerable<ChangedPack> cpps)
+                else if (sender is IEnumerable<ChangedPack2> cpps)
                 {
                     IEnumerable<Guid> roleIdList = cpps.Select(cpp => (Guid)cpp.Id!);
 

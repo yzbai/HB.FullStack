@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -145,7 +143,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             var models = Mocker.MockTimestampList(3);
             await Db.BatchAddAsync(models, "", null);
 
-            var changes = new List<(object id, IList<string> propertyNames, IList<object?> propertyValues, long oldTimestamp, long? newTimestamp)>();
+            var changes = new List<(object id, IList<(string, object?)> properties, long oldTimestamp, long? newTimestamp)>();
 
             foreach (var model in models)
             {
@@ -157,8 +155,12 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                 changes.Add((
                     model.Id,
-                    new List<string> { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },
-                    new List<object?> { model.Name, model.Age, model.InnerModel },
+                    new List<(string, object?)>
+                    {
+                        (nameof(model.Name),model.Name),
+                        (nameof(model.Age), model.Age),
+                        (nameof(model.InnerModel) , model.InnerModel)
+                    },
                     model.Timestamp,
                     newTimestamp));
 
@@ -247,7 +249,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 var models = Mocker.MockTimestampList(3);
                 await Db.BatchAddAsync(models, "", trans);
 
-                var changes = new List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValue, long? newTimestamp)>();
+                var changes = new List<(object id, IList<(string, object?, object?)> properties, long? newTimestamp)>();
 
                 foreach (var model in models)
                 {
@@ -258,9 +260,12 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                     changes.Add((
                         model.Id,
-                        new List<string> { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },
-                        new List<object?> { model.Name, model.Age, model.InnerModel },
-                        new List<object?> { newName, newAge, newInnerModel },
+                        new List<(string, object?, object?)>
+                        {
+                            (nameof(model.Name), model.Name, newName),
+                            (nameof(model.Age), model.Age, newAge),
+                            (nameof(model.InnerModel) , model.InnerModel, newInnerModel)
+                        },
                         newTimestamp));
 
                     model.Name = newName;

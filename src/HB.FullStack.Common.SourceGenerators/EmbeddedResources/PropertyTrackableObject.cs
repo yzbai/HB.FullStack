@@ -58,7 +58,7 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
             throw new global::System.InvalidOperationException("ITrackPropertyChangedNoOldValueTracked");
         }
 
-        updatingProperty.NewValue = global::System.Text.Json.JsonSerializer.SerializeToElement(newValue);
+        updatingProperty.NewValue = newValue;
 
         _updatingProperties.Remove(key);
 

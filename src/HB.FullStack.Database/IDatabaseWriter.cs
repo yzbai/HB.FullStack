@@ -53,7 +53,7 @@ namespace HB.FullStack.Database
             long? newTimestamp = null) where T : TimestampDbModel, new();
 
         Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long oldTimestamp, long? newTimestamp)> modelChanges,
+            IList<(object id, IList<(string propertyName, object? propertyValue)> properties, long oldTimestamp, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext) where T : TimestampDbModel, new();
 
@@ -69,14 +69,14 @@ namespace HB.FullStack.Database
             long? newTimestamp = null) where T : DbModel, new();
 
         Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long? newTimestamp)> modelChanges,
+            IList<(object id, IList<(string propertyNames, object? oldPropertyValues, object? newPropertyValues)> properties, long? newTimestamp)> modelChanges,
             string lastUser,
             TransactionContext? transactionContext = null) where T : DbModel, new();
         /// <summary>
         /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
         /// </summary>
         Task UpdatePropertiesAsync<T>(
-            ChangedPack changedPropertyPack,
+            ChangedPack2 changedPropertyPack,
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new();
 
@@ -84,7 +84,7 @@ namespace HB.FullStack.Database
         /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
         /// </summary>
         Task BatchUpdatePropertiesAsync<T>(
-            IEnumerable<ChangedPack> changedPacks,
+            IEnumerable<ChangedPack2> changedPacks,
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new();
 

@@ -11,6 +11,7 @@ using HB.FullStack.Client.Offline;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 
@@ -129,13 +130,13 @@ namespace HB.FullStack.Client
 
         protected abstract Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
-        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
+        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IList<ChangedPack> changedPacks);
 
         protected abstract Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
         #endregion
 
-        #region 查询 - 发生在Syncing之后
+        #region 获取 - 发生在Syncing之后 - 从服务器上获取整体后，更新整体
 
         protected async Task<IEnumerable<TModel>> GetAsync(
             Expression<Func<TModel, bool>> localWhere,
@@ -158,9 +159,6 @@ namespace HB.FullStack.Client
             return await SyncGetAsync(locals, remoteRequest, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// 先返回本地初始值，再更新为服务器值
-        /// </summary>
         protected async Task<ObservableTask<IEnumerable<TModel>>> GetObservableTaskAsync(
             Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
@@ -297,6 +295,9 @@ namespace HB.FullStack.Client
 
         #region 更改 - 发生在Syncing之后
 
+        /// <summary>
+        /// 操作Model整体
+        /// </summary>
         public async Task AddAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
@@ -319,7 +320,7 @@ namespace HB.FullStack.Client
                 else if (ClientModelDef.AllowOfflineAdd)
                 {
                     //Offline History
-                    await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Add, transactionContext).ConfigureAwait(false);
+                    await _historyManager.RecordOfflineAddAsync(models, transactionContext).ConfigureAwait(false);
 
                     //Local
                     await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
@@ -337,23 +338,28 @@ namespace HB.FullStack.Client
             }
         }
 
+        /// <summary>
+        /// 操作Model部分
+        /// </summary>
         public async Task UpdateAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
             EnsureNotSyncing();
 
+            List<ChangedPack> changedPacks = models.Select(m => m.GetChangedPack()).ToList();
+
             try
             {
                 if (StatusManager.IsInternet())
                 {
-                    await UpdateToRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                    await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
 
-                    await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await Database.BatchUpdatePropertiesAsync<TModel>(changedPacks, "", transactionContext).ConfigureAwait(false);
                 }
                 else if (ClientModelDef.AllowOfflineUpdate)
                 {
-                    await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Update, transactionContext).ConfigureAwait(false);
+                    await _historyManager.RecordOfflineUpdateAsync<TModel>(changedPacks, transactionContext).ConfigureAwait(false);
 
                     await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
                 }
