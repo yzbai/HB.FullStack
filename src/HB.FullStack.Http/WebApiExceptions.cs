@@ -1,5 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using HB.FullStack.Common.Api;
 
 namespace System
 {
@@ -27,6 +29,16 @@ namespace System
         public static Exception UploadError(string cause, Exception? innerEx, object? context)
         {
             return new WebApiException(ErrorCodes.UploadError, cause, innerEx, context);
+        }
+
+        public static Exception ChangedPropertyPackError(string cause, ChangedPackDto? changedPropertyPack, string? modelFullName)
+        {
+            DatabaseException ex = new DatabaseException(ErrorCodes.ChangedPackError, cause, null, null);
+
+            ex.Data["ModelFullName"] = modelFullName;
+            ex.Data["PropertyNames"] = changedPropertyPack?.ChangedProperties.Select(c => c.PropertyName).ToJoinedString(",");
+
+            return ex;
         }
     }
 }

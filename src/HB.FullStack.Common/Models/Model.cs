@@ -1,6 +1,4 @@
-﻿
-using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("HB.FullStack.Database")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]

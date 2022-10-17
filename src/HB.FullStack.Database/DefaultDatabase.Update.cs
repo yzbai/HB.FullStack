@@ -484,13 +484,6 @@ namespace HB.FullStack.Database
 
             foreach (ChangedProperty2 cp in changedPropertyPack.ChangedProperties)
             {
-                DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(cp.PropertyName);
-
-                if (propertyDef == null)
-                {
-                    throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack, modelDef.ModelFullName);
-                }
-
                 if (cp.PropertyName == nameof(ITimestampModel.Timestamp))
                 {
                     newTimestamp = (long?)cp.NewValue;
@@ -521,13 +514,6 @@ namespace HB.FullStack.Database
 
                 foreach (ChangedProperty2 cp in changedPropertyPack.ChangedProperties)
                 {
-                    DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(cp.PropertyName);
-
-                    if (propertyDef == null)
-                    {
-                        throw DatabaseExceptions.ChangedPropertyPackError("包含不属于当前DbModel的属性", changedPropertyPack, modelDef.ModelFullName);
-                    }
-
                     if (cp.PropertyName == nameof(ITimestampModel.Timestamp))
                     {
                         curNewTimestamp = (long?)cp.NewValue;
