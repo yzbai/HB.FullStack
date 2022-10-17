@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Models;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 
@@ -12,22 +14,25 @@ namespace HB.FullStack.Client.Offline
     public class OfflineChangeManager : IOfflineChangeManager
     {
         private readonly IDatabase _database;
-        private readonly IDbModelDefFactory _dbModelDefFactory;
+        private readonly IModelDefFactory _modelDefFactory;
 
-        public OfflineChangeManager(IDatabase database, IDbModelDefFactory dbModelDefFactory)
+        public OfflineChangeManager(IDatabase database, IModelDefFactory modelDefFactory)
         {
             _database = database;
-            _dbModelDefFactory = dbModelDefFactory;
+            _modelDefFactory = modelDefFactory;
         }
 
-        public async Task RecordOfflineChangesAsync<TModel>(
-            IEnumerable<TModel> models,
-            OfflineChangeType offlineChangeType,
-            TransactionContext transactionContext) where TModel : ClientDbModel, new()
-        {
-            //TODO: 反复对同一个Guid进行修改，需要合并
+        public Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+            => RecordOfflineAddOrDeleteAsync(models, OfflineChangeType.Add, transactionContext);
 
-            DbModelDef modelDef = _dbModelDefFactory.GetDef<TModel>()!;
+        public Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+            => RecordOfflineAddOrDeleteAsync(models, OfflineChangeType.Delete, transactionContext);
+
+        private async Task RecordOfflineAddOrDeleteAsync<TModel>(IEnumerable<TModel> models, OfflineChangeType offlineChangeType, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        {
+            DbModelDef? modelDef = _modelDefFactory.GetDef<TModel>(ModelKind.Db) as DbModelDef;
+
+            ThrowIf.Null(modelDef, nameof(modelDef));
 
             List<OfflineChange> offlineHistories = new List<OfflineChange>();
 
@@ -41,14 +46,31 @@ namespace HB.FullStack.Client.Offline
                     ModelFullName = modelDef.ModelFullName
                 };
 
-                if (offlineChangeType == OfflineChangeType.Update)
+                offlineHistories.Add(offlineChange);
+            }
+
+            await _database.BatchAddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
+        }
+
+        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<ChangedPack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        {
+            DbModelDef? modelDef = _modelDefFactory.GetDef<TModel>(ModelKind.Db) as DbModelDef;
+
+            ThrowIf.Null(modelDef, nameof(modelDef));
+
+            List<OfflineChange> offlineHistories = new List<OfflineChange>();
+
+            foreach (var changedPack in cps)
+            {
+                OfflineChange offlineChange = new OfflineChange
                 {
-                    offlineChange.ChangedPackDto = model.GetChangedPack().ToDto();
-                }
-                else if (offlineChangeType == OfflineChangeType.Delete)
-                {
-                    offlineChange.DeletedObjectJson = SerializeUtil.ToJson(model);
-                }
+                    Type = OfflineChangeType.UpdateProperties,
+                    Status = OfflineChangeStatus.Pending,
+                    ModelId = (Guid)changedPack.Id!,
+                    ModelFullName = modelDef.ModelFullName,
+                    ChangedPackDto = changedPack.ToDto()
+                };
+
 
                 offlineHistories.Add(offlineChange);
             }
@@ -58,6 +80,9 @@ namespace HB.FullStack.Client.Offline
 
         public async Task ReSyncAsync()
         {
+
+            //TODO: 反复对同一个Guid进行修改，需要合并
+
             var changes = await _database.RetrieveAllAsync<OfflineChange>(null, orderBy: nameof(OfflineChange.Id));
 
             throw new NotImplementedException();

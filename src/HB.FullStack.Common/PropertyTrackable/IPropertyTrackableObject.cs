@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.PropertyTrackable
 
         void Clear();
 
-        IList<ChangedProperty2> GetChangedProperties(bool mergeMultipleChanged = true);
+        IList<ChangedProperty> GetChangedProperties(bool mergeMultipleChanged = true);
 
         void Track<T>(string propertyName, T oldValue, T newValue);
 
@@ -24,11 +24,11 @@ namespace HB.FullStack.Common.PropertyTrackable
 
     public static class IPropertyTrackableObjectExtensions
     {
-        public static ChangedPack2 GetChangedPack(this IPropertyTrackableObject model, object id)
+        public static ChangedPack GetChangedPack(this IPropertyTrackableObject model, object id)
         {
             PropertyValue[] addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(model);
 
-            ChangedPack2 changedPack = new ChangedPack2
+            ChangedPack changedPack = new ChangedPack
             {
                 Id = id,
                 ChangedProperties = model.GetChangedProperties(),

@@ -365,7 +365,7 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception ChangedPropertyPackError(string cause, ChangedPack2? changedPropertyPack, string? modelFullName)
+        internal static Exception ChangedPropertyPackError(string cause, ChangedPack? changedPropertyPack, string? modelFullName)
         {
             DatabaseException ex = new DatabaseException(ErrorCodes.ChangedPackError, cause, null, null);
 

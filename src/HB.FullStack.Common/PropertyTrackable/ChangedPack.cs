@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 
 namespace HB.FullStack.Common.PropertyTrackable
 {
 
-    public class ChangedPack2 : ValidatableObject
+    public class ChangedPack : ValidatableObject
     {
         /// <summary>
         /// ModelId
@@ -14,7 +12,7 @@ namespace HB.FullStack.Common.PropertyTrackable
         [Required]
         public object? Id { get; set; }
 
-        public IList<ChangedProperty2> ChangedProperties { get; set; } = new List<ChangedProperty2>();
+        public IList<ChangedProperty> ChangedProperties { get; set; } = new List<ChangedProperty>();
 
         /// <summary>
         /// 要求所有的ForeignKey 都放在这里

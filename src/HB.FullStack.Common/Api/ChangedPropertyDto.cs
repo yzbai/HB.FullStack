@@ -34,7 +34,7 @@ namespace HB.FullStack.Common.Api
 
     public static class ChangedPropertyExtension
     {
-        public static ChangedPropertyDto ToDto(this ChangedProperty2 changedProperty)
+        public static ChangedPropertyDto ToDto(this ChangedProperty changedProperty)
         {
             return new ChangedPropertyDto(changedProperty.PropertyName, changedProperty.OldValue, changedProperty.NewValue, changedProperty.PropertyPropertyName);
         }

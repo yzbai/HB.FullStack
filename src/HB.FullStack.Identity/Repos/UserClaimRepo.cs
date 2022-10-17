@@ -31,7 +31,7 @@ namespace HB.FullStack.Identity
                     InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
                 }
             }
-            else if (sender is IEnumerable<ChangedPack2> cpps)
+            else if (sender is IEnumerable<ChangedPack> cpps)
             {
                 foreach (var cpp in cpps)
                 {

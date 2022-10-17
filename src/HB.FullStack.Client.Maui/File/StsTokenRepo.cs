@@ -9,6 +9,7 @@ using HB.FullStack.Client.Offline;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Files;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.Logging;
@@ -67,7 +68,7 @@ namespace HB.FullStack.Client.Maui.File
             throw new NotImplementedException();
         }
 
-        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<StsToken> models)
+        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IList<ChangedPack> changedPacks)
         {
             throw new NotImplementedException();
         }

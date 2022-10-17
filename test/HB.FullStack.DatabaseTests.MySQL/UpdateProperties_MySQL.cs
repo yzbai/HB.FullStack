@@ -284,7 +284,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             model.Age = 999;
             model.InnerModel.InnerName = "ChangedName_InnerName";
 
-            ChangedPack2 cp = model.GetChangedPack(model.Id);
+            ChangedPack cp = model.GetChangedPack(model.Id);
 
             await Db.UpdatePropertiesAsync<UPTimelessModel>(cp, "", null);
 
@@ -306,7 +306,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             model.InnerModel.InnerName = "ChangedName_InnerName";
             model.Timestamp = TimeUtil.Timestamp;
 
-            ChangedPack2 cp = model.GetChangedPack(model.Id);
+            ChangedPack cp = model.GetChangedPack(model.Id);
 
             await Db.UpdatePropertiesAsync<UPTimestampModel>(cp, "", null);
 
@@ -321,7 +321,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var models = Mocker.MockTimelessList(3);
             await Db.BatchAddAsync(models, "", null);
 
-            var cps = new List<ChangedPack2>();
+            var cps = new List<ChangedPack>();
 
             foreach (var model in models)
             {
@@ -347,7 +347,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var models = Mocker.MockTimestampList(3);
             await Db.BatchAddAsync(models, "", null);
 
-            var cps = new List<ChangedPack2>();
+            var cps = new List<ChangedPack>();
 
             foreach (var model in models)
             {

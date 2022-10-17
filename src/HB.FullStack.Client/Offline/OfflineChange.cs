@@ -24,7 +24,7 @@ namespace HB.FullStack.Client.Offline
         [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
         public ChangedPackDto? ChangedPackDto { get; set; }
 
-        public string? DeletedObjectJson { get; set; }
+        //public string? DeletedObjectJson { get; set; }
 
         public long LastTime { get; set; } = TimeUtil.Timestamp;
     }

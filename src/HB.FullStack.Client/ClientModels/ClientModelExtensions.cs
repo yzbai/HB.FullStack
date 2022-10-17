@@ -7,11 +7,11 @@ namespace HB.FullStack.Client.ClientModels
 {
     public static class ClientModelExtensions
     {
-        public static ChangedPack2 GetChangedPack(this ClientDbModel model)
+        public static ChangedPack GetChangedPack(this ClientDbModel model)
         {
             PropertyValue[] addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(model);
 
-            ChangedPack2 changedPack = new ChangedPack2
+            ChangedPack changedPack = new ChangedPack
             {
                 Id = model.Id,
                 ChangedProperties = model.GetChangedProperties(),

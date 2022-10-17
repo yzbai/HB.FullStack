@@ -301,7 +301,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task UpdatePropertiesAsync<T>(
-            ChangedPack2 changedPack,
+            ChangedPack changedPack,
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new()
         {
@@ -452,7 +452,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public Task BatchUpdatePropertiesAsync<T>(IEnumerable<ChangedPack2> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public Task BatchUpdatePropertiesAsync<T>(IEnumerable<ChangedPack> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             if (changedPacks.IsNullOrEmpty())
             {
@@ -471,7 +471,7 @@ namespace HB.FullStack.Database
             return BatchUpdatePropertiesAsync<T>(lst, lastUser, transContext);
         }
 
-        private static List<(string propertyName, object? oldValue, object? newValue)> ConvertChangedPackToList(ChangedPack2 changedPropertyPack, DbModelDef modelDef, out long? newTimestamp)
+        private static List<(string propertyName, object? oldValue, object? newValue)> ConvertChangedPackToList(ChangedPack changedPropertyPack, DbModelDef modelDef, out long? newTimestamp)
         {
             if (changedPropertyPack == null || changedPropertyPack.Id == null || changedPropertyPack.ChangedProperties.IsNullOrEmpty())
             {
@@ -482,7 +482,7 @@ namespace HB.FullStack.Database
 
             newTimestamp = null;
 
-            foreach (ChangedProperty2 cp in changedPropertyPack.ChangedProperties)
+            foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
             {
                 if (cp.PropertyName == nameof(ITimestampModel.Timestamp))
                 {
@@ -497,7 +497,7 @@ namespace HB.FullStack.Database
         }
 
         private static IList<(object id, IList<(string propertyName, object? oldPropertyValue, object? newPropertyValue)> properties, long? newTimestamp)> ConvertChangedPackToList(
-            IEnumerable<ChangedPack2> changedPropertyPacks, DbModelDef modelDef)
+            IEnumerable<ChangedPack> changedPropertyPacks, DbModelDef modelDef)
         {
             var lst = new List<(object id, IList<(string propertyName, object? oldPropertyValue, object? newPropertyValue)> properties, long? newTimestamp)>(changedPropertyPacks.Count());
 
@@ -512,7 +512,7 @@ namespace HB.FullStack.Database
 
                 long? curNewTimestamp = null;
 
-                foreach (ChangedProperty2 cp in changedPropertyPack.ChangedProperties)
+                foreach (ChangedProperty cp in changedPropertyPack.ChangedProperties)
                 {
                     if (cp.PropertyName == nameof(ITimestampModel.Timestamp))
                     {

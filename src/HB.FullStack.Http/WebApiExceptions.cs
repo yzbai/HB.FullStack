@@ -40,5 +40,12 @@ namespace System
 
             return ex;
         }
+
+        internal static Exception ShouldSetGlobalWebApplicationAccessorAtBegining()
+        {
+            WebApiException ex = new WebApiException(ErrorCodes.InnerError, nameof(ShouldSetGlobalWebApplicationAccessorAtBegining), null, null);
+
+            return ex;
+        }
     }
 }

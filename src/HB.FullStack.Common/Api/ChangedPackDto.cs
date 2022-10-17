@@ -31,7 +31,7 @@ namespace HB.FullStack.Common.Api
 
     public static class ChangedPackExtension
     {
-        public static ChangedPackDto ToDto(this ChangedPack2 changedPack)
+        public static ChangedPackDto ToDto(this ChangedPack changedPack)
         {
             return new ChangedPackDto
             {

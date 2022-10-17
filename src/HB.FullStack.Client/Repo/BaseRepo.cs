@@ -30,6 +30,8 @@ namespace HB.FullStack.Client
 
         protected IApiClient ApiClient { get; }
 
+        protected string LastUser => PreferenceProvider.UserId?.ToString() ?? "NotLogined";
+
         protected void EnsureLogined()
         {
             if (!PreferenceProvider.IsLogined())
@@ -85,7 +87,7 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo<TModel> : BaseRepo where TModel : ClientDbModel, new()
     {
         private readonly ILogger _logger;
-        private readonly IOfflineChangeManager _historyManager;
+        private readonly IOfflineChangeManager _offlineChangeManager;
         private readonly DbModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
@@ -96,16 +98,16 @@ namespace HB.FullStack.Client
             ILogger logger,
             IDatabase database,
             IApiClient apiClient,
-            IOfflineChangeManager historyManager,
+            IOfflineChangeManager offlineChangeManager,
             IPreferenceProvider userPreferenceProvider,
-            StatusManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
+            StatusManager statusManager) : base(apiClient, userPreferenceProvider, statusManager)
         {
             _logger = logger;
             _modelDef = database.ModelDefFactory.GetDef<TModel>()!;
 
             ClientModelDef = ClientModelDefFactory.Get<TModel>() ?? CreateDefaultClientModelDef();
             Database = database;
-            _historyManager = historyManager;
+            _offlineChangeManager = offlineChangeManager;
 
             //NOTICE: Move this to options?
             static ClientModelDef CreateDefaultClientModelDef()
@@ -273,7 +275,7 @@ namespace HB.FullStack.Client
                 //所以，只要覆盖即可
 
                 //TODO: 批量执行
-                await Database.AddOrUpdateByIdAsync(model, transactionContext).ConfigureAwait(false);
+                await Database.AddOrUpdateByIdAsync(model, LastUser, transactionContext).ConfigureAwait(false);
             }
 
             _logger.LogDebug("重新添加远程数据到本地数据库, Type:{Type}", typeof(TModel).Name);
@@ -314,16 +316,16 @@ namespace HB.FullStack.Client
                     await AddToRemoteAsync(ApiClient, models).ConfigureAwait(false);
 
                     //Local
-                    await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
                 }
                 //离线写
                 else if (ClientModelDef.AllowOfflineAdd)
                 {
                     //Offline History
-                    await _historyManager.RecordOfflineAddAsync(models, transactionContext).ConfigureAwait(false);
+                    await _offlineChangeManager.RecordOfflineAddAsync(models, transactionContext).ConfigureAwait(false);
 
                     //Local
-                    await Database.BatchAddAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
                 }
                 else
                 {
@@ -354,19 +356,17 @@ namespace HB.FullStack.Client
                 if (StatusManager.IsInternet())
                 {
                     await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
-
-                    await Database.BatchUpdatePropertiesAsync<TModel>(changedPacks, "", transactionContext).ConfigureAwait(false);
                 }
                 else if (ClientModelDef.AllowOfflineUpdate)
                 {
-                    await _historyManager.RecordOfflineUpdateAsync<TModel>(changedPacks, transactionContext).ConfigureAwait(false);
-
-                    await Database.BatchUpdateAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await _offlineChangeManager.RecordOfflineUpdateAsync<TModel>(changedPacks, transactionContext).ConfigureAwait(false);
                 }
                 else
                 {
                     throw ClientExceptions.NoInternet("没有联网，且不允许离线");
                 }
+
+                await Database.BatchUpdatePropertiesAsync<TModel>(changedPacks, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {
@@ -386,13 +386,13 @@ namespace HB.FullStack.Client
                 {
                     await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
 
-                    await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
                 }
                 else if (ClientModelDef.AllowOfflineDelete)
                 {
-                    await _historyManager.RecordOfflineChangesAsync(models, OfflineChangeType.Delete, transactionContext).ConfigureAwait(false);
+                    await _offlineChangeManager.RecordOfflineDeleteAsync(models, transactionContext).ConfigureAwait(false);
 
-                    await Database.BatchDeleteAsync(models, "", transactionContext).ConfigureAwait(false);
+                    await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
                 }
                 else
                 {

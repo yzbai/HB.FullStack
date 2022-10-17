@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Common.PropertyTrackable
 {
-    public class ChangedProperty2
+    public class ChangedProperty
     {
         /// <summary>
         /// 改变的属性名
@@ -19,7 +19,7 @@ namespace HB.FullStack.Common.PropertyTrackable
         public object? NewValue { get; set; }
 
         [JsonConstructor]
-        public ChangedProperty2(string name, object? oldValue, object? newValue, string? propertyPropertyName = null)
+        public ChangedProperty(string name, object? oldValue, object? newValue, string? propertyPropertyName = null)
         {
             PropertyName = name;
             PropertyPropertyName = propertyPropertyName;

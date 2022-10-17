@@ -154,9 +154,9 @@ namespace HB.FullStack.Repository.CacheStrategies
             cache.RemoveModelAsync(model).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache<T>(IEnumerable<ChangedPack2> cps, ICache cache)
+        public static void InvalidateCache<T>(IEnumerable<ChangedPack> cps, ICache cache)
         {
-            ThrowIf.NotValid<ChangedPack2>(cps, nameof(cps));
+            ThrowIf.NotValid<ChangedPack>(cps, nameof(cps));
 
             cache.RemoveModelByIdsAsync<T>(cps.Select(cp => cp.Id!).ToList()).SafeFireAndForget(OnException);
         }

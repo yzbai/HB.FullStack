@@ -76,7 +76,7 @@ namespace HB.FullStack.Database
         /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
         /// </summary>
         Task UpdatePropertiesAsync<T>(
-            ChangedPack2 changedPropertyPack,
+            ChangedPack changedPropertyPack,
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new();
 
@@ -84,7 +84,7 @@ namespace HB.FullStack.Database
         /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
         /// </summary>
         Task BatchUpdatePropertiesAsync<T>(
-            IEnumerable<ChangedPack2> changedPacks,
+            IEnumerable<ChangedPack> changedPacks,
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new();
 
@@ -121,9 +121,9 @@ namespace HB.FullStack.Database
 
         #region AddOrUpdate
 
-        Task AddOrUpdateByIdAsync<T>(T item, /*string lastUser,*/ TransactionContext? transContext = null) where T : TimelessDbModel, new();
+        Task AddOrUpdateByIdAsync<T>(T item, string lastUser, TransactionContext? transContext = null) where T : TimelessDbModel, new();
 
-        Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, TransactionContext? transContext) where T : TimelessDbModel, new();
+        Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new();
 
         #endregion
     }

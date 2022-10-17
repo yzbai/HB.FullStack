@@ -11,8 +11,7 @@ namespace HB.FullStack.Client.Offline
     {
         Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 
-        Task RecordOfflineUpdateAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
-        Task RecordOfflineUpdateAsync<TModel>(IEnumerable<ChangedPack2> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new();
+        Task RecordOfflineUpdateAsync<TModel>(IEnumerable<ChangedPack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 
         Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 

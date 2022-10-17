@@ -10,9 +10,9 @@ namespace HB.FullStack.Common.PropertyTrackable
     {
         private bool _startTrack;
 
-        private readonly List<ChangedProperty2> _changedProperties = new List<ChangedProperty2>();
+        private readonly List<ChangedProperty> _changedProperties = new List<ChangedProperty>();
 
-        private readonly Dictionary<string, ChangedProperty2> _updatingProperties = new Dictionary<string, ChangedProperty2>();
+        private readonly Dictionary<string, ChangedProperty> _updatingProperties = new Dictionary<string, ChangedProperty>();
 
         public void StartTrack()
         {
@@ -31,7 +31,7 @@ namespace HB.FullStack.Common.PropertyTrackable
                 return;
             }
 
-            _changedProperties.Add(new ChangedProperty2(propertyName, oldValue, newValue));
+            _changedProperties.Add(new ChangedProperty(propertyName, oldValue, newValue));
         }
 
         public void TrackOldValue<T>(string propertyName, string? propertyPropertyName, T oldValue)
@@ -48,7 +48,7 @@ namespace HB.FullStack.Common.PropertyTrackable
                 throw new InvalidOperationException("ITrackPropertyChangedReentrancyNotAllowed");
             }
 
-            _updatingProperties[key] = new ChangedProperty2(propertyName, oldValue, null, propertyPropertyName);
+            _updatingProperties[key] = new ChangedProperty(propertyName, oldValue, null, propertyPropertyName);
         }
 
         public void TrackNewValue<T>(string propertyName, string? propertyPropertyName, T newValue)
@@ -60,7 +60,7 @@ namespace HB.FullStack.Common.PropertyTrackable
 
             string key = propertyName + propertyPropertyName;
 
-            if (!_updatingProperties.TryGetValue(key, out ChangedProperty2? updatingProperty))
+            if (!_updatingProperties.TryGetValue(key, out ChangedProperty? updatingProperty))
             {
                 throw new InvalidOperationException("ITrackPropertyChangedNoOldValueTracked");
             }
@@ -77,7 +77,7 @@ namespace HB.FullStack.Common.PropertyTrackable
             _changedProperties.Clear();
         }
 
-        public IList<ChangedProperty2> GetChangedProperties(bool mergeMultipleChanged = true)
+        public IList<ChangedProperty> GetChangedProperties(bool mergeMultipleChanged = true)
         {
             //TODO: 需要考虑锁吗?
 
@@ -86,11 +86,11 @@ namespace HB.FullStack.Common.PropertyTrackable
                 return _changedProperties;
             }
 
-            Dictionary<string, ChangedProperty2> dict = new Dictionary<string, ChangedProperty2>();
+            Dictionary<string, ChangedProperty> dict = new Dictionary<string, ChangedProperty>();
 
-            foreach (ChangedProperty2 curProperty in _changedProperties)
+            foreach (ChangedProperty curProperty in _changedProperties)
             {
-                if (dict.TryGetValue(curProperty.PropertyName, out ChangedProperty2? storedProperty))
+                if (dict.TryGetValue(curProperty.PropertyName, out ChangedProperty? storedProperty))
                 {
                     storedProperty.NewValue = curProperty.NewValue;
                 }
