@@ -132,7 +132,7 @@ namespace HB.FullStack.Client
 
         protected abstract Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
-        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IList<ChangedPack> changedPacks);
+        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<ChangedPack> changedPacks);
 
         protected abstract Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
