@@ -33,6 +33,8 @@ namespace Microsoft.Extensions.DependencyInjection
         }
         private static void AddCore(IServiceCollection services)
         {
+            services.AddCache();
+
             services.AddSingleton<ICache, RedisCache>();
 
         }

@@ -242,7 +242,7 @@ namespace HB.FullStack.Database.SQL
                 }
 
                 DbModelDef modelDef = _modelDefFactory.GetDef(modelType)!;
-                DbModelPropertyDef propertyDef = modelDef.GetPropertyDef(m.Member.Name)
+                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(m.Member.Name)
                     ?? throw DatabaseExceptions.ModelError(modelDef.ModelFullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
@@ -715,7 +715,7 @@ namespace HB.FullStack.Database.SQL
                 return false;
             }
 
-            DbModelPropertyDef? property = modelDef.GetPropertyDef(name);
+            DbModelPropertyDef? property = modelDef.GetDbPropertyDef(name);
 
             return property != null;
         }
@@ -738,7 +738,7 @@ namespace HB.FullStack.Database.SQL
 
         private DbModelPropertyDef? GetPropertyDef(MemberExpression? memberExpression)
         {
-            return _modelDefFactory.GetDef(memberExpression?.Expression?.Type)?.GetPropertyDef(memberExpression!.Member.Name);
+            return _modelDefFactory.GetDef(memberExpression?.Expression?.Type)?.GetDbPropertyDef(memberExpression!.Member.Name);
         }
 
         private DbModelPropertyDef? GetPropertyDef(MethodCallExpression methodCallExpression)

@@ -262,7 +262,7 @@ namespace HB.FullStack.Database
 
             if (modelDef.IsTimestampDBModel)
             {
-                DbModelPropertyDef timestampProperty = modelDef.GetPropertyDef(nameof(TimestampDbModel.Timestamp))!;
+                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
                 paramters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
             }
 
@@ -285,7 +285,7 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            DbModelPropertyDef? timestampProperty = modelDef.IsTimestampDBModel ? modelDef.GetPropertyDef(nameof(TimestampDbModel.Timestamp))! : null;
+            DbModelPropertyDef? timestampProperty = modelDef.IsTimestampDBModel ? modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))! : null;
 
             foreach (T model in models)
             {
@@ -384,7 +384,7 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            DbModelPropertyDef? timestampProperty = modelDef.IsTimestampDBModel ? modelDef.GetPropertyDef(nameof(TimestampDbModel.Timestamp))! : null;
+            DbModelPropertyDef? timestampProperty = modelDef.IsTimestampDBModel ? modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))! : null;
 
             foreach (var (id, propertyNames, propertyValues, oldTimestamp, newTimestamp) in modelChanges)
             {

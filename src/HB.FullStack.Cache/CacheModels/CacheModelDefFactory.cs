@@ -2,36 +2,27 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 
+using HB.FullStack.Common.Models;
+
 namespace HB.FullStack.Cache
 {
-    public static class CacheModelDefFactory
+    internal class CacheModelDefFactory : ICacheModelDefFactory, IModelDefProvider
     {
-        private static readonly ConcurrentDictionary<Type, CacheModelDef?> _defDict = new ConcurrentDictionary<Type, CacheModelDef?>();
+        private readonly ConcurrentDictionary<Type, CacheModelDef?> _defDict = new ConcurrentDictionary<Type, CacheModelDef?>();
+
+
 
         //private static readonly object _lockObj = new object();
 
-        public static CacheModelDef? Get<T>()
+        public CacheModelDef? GetDef<T>() => GetDef(typeof(T));
+
+
+        public CacheModelDef? GetDef(Type type)
         {
-            return _defDict.GetOrAdd(typeof(T), type => CreateModelDef(type));
-
-            //Type modelType = typeof(TModel);
-
-            //if (!_defDict.ContainsKey(modelType))
-            //{
-            //    lock (_lockObj)
-            //    {
-            //        if (!_defDict.ContainsKey(modelType))
-            //        {
-            //            _defDict[modelType] = CreateModelDef(modelType);
-            //        }
-            //    }
-            //}
-
-            //return _defDict[modelType];
-
+            return _defDict.GetOrAdd(type, type => CreateModelDef(type));
         }
 
-        private static CacheModelDef? CreateModelDef(Type modelType)
+        private CacheModelDef? CreateModelDef(Type modelType)
         {
             CacheModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheModelAttribute>();
 
@@ -42,6 +33,7 @@ namespace HB.FullStack.Cache
 
             CacheModelDef def = new()
             {
+                Kind = ModelKind.Cache,
                 Name = modelType.Name
             };
 
@@ -88,5 +80,13 @@ namespace HB.FullStack.Cache
 
             return def;
         }
+
+        #region IModelDefProvider
+
+        ModelKind IModelDefProvider.ModelKind => ModelKind.Cache;
+
+        ModelDef? IModelDefProvider.GetModelDef(Type type) => GetDef(type);
+
+        #endregion
     }
 }

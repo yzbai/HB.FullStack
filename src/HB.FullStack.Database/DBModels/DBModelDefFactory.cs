@@ -4,18 +4,21 @@ using System.Linq;
 using System.Reflection;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.Models;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database.DbModels
 {
-    internal class DbModelDefFactory : IDbModelDefFactory
+    internal class DbModelDefFactory : IDbModelDefFactory, IModelDefProvider
     {
         /// <summary>
         /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经ConstructModelDefs，后续只有read，没有write
         /// </summary>
         private readonly IDictionary<Type, DbModelDef> _defDict = new Dictionary<Type, DbModelDef>();
+
+
 
         public DbModelDefFactory(IDatabaseEngine databaseEngine)
         {
@@ -166,6 +169,7 @@ namespace HB.FullStack.Database.DbModels
 
             DbModelDef modelDef = new DbModelDef
             {
+                Kind = ModelKind.Db,
                 ModelType = modelType,
                 ModelFullName = modelType.FullName!,
                 DatabaseName = dbSchema.DatabaseName,
@@ -288,7 +292,13 @@ namespace HB.FullStack.Database.DbModels
 
         public IDbPropertyConverter? GetPropertyTypeConverter(Type modelType, string propertyName)
         {
-            return GetDef(modelType)?.GetPropertyDef(propertyName)!.TypeConverter;
+            return GetDef(modelType)?.GetDbPropertyDef(propertyName)!.TypeConverter;
         }
+
+        #region IModelDefProvider Memebers
+        ModelKind IModelDefProvider.ModelKind => ModelKind.Db;
+        ModelDef? IModelDefProvider.GetModelDef(Type type) => GetDef(type);
+
+        #endregion
     }
 }

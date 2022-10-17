@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
-using Microsoft.Extensions.Caching.Distributed;
+using HB.FullStack.Common.Models;
 
 namespace System
 {
@@ -74,6 +72,39 @@ namespace System
         public static Exception ServerNullReturn(string parameter)
         {
             return new CommonException(ErrorCodes.ServerNullReturn, "Server端返回NULL", null, new { Parameter = parameter });
+        }
+
+        /// <summary>
+        /// 不能为非Model类型的类获取ModelDef
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static Exception CannotGetModelDefForNonModel(Type type)
+        {
+            CommonException ex = new CommonException(ErrorCodes.ModelDefError, nameof(CannotGetModelDefForNonModel), null, null);
+            ex.Data["Type"] = type.FullName;
+
+            return ex;
+        }
+
+        internal static Exception LackModelDefProvider(Type type, ModelKind modelKind)
+        {
+            CommonException ex = new CommonException(ErrorCodes.ModelDefError, nameof(LackModelDefProvider), null, null);
+
+            ex.Data["Type"] = type.FullName;
+            ex.Data["ModelKind"] = modelKind;
+
+            return ex;
+        }
+
+        internal static Exception ModelDefProviderDidNotProvideModelDef(Type type, ModelKind modelKind)
+        {
+            CommonException ex = new CommonException(ErrorCodes.ModelDefError, nameof(ModelDefProviderDidNotProvideModelDef), null, null);
+
+            ex.Data["Type"] = type.FullName;
+            ex.Data["ModelKind"] = modelKind;
+
+            return ex;
         }
 
         #endregion

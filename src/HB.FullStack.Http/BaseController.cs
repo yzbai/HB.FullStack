@@ -4,8 +4,10 @@ using System.Text.Json;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
+using HB.FullStack.KVStore.KVStoreModels;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,17 +28,28 @@ namespace HB.FullStack.WebApi
 
     public class ModelController<TModel> : BaseController where TModel : Model
     {
-        protected DbModelDef ModelDef { get; }
+        protected ModelDef ModelDef { get; }
 
-        public IDbModelDefFactory ModelDefFactory { get; }
+        public IModelDefFactory ModelDefFactory { get; }
 
-        public ModelController(IDbModelDefFactory modelDefFactory)
+        public ModelController(IModelDefFactory modelDefFactory)
         {
             ModelDefFactory = modelDefFactory;
 
-            ModelDef = ModelDefFactory.GetDef<TModel>()!;
+            Type modelType = typeof(TModel);
 
-
+            if (typeof(DbModel).IsAssignableFrom(modelType))
+            {
+                ModelDef = ModelDefFactory.GetDef(modelType, ModelKind.Db);
+            }
+            else if (typeof(KVStoreModel).IsAssignableFrom(modelType))
+            {
+                ModelDef = ModelDefFactory.GetDef(modelType, ModelKind.KV);
+            }
+            else
+            {
+                ModelDef = ModelDefFactory.GetDef(modelType, ModelKind.UnKown);
+            }
         }
 
         [HttpGet]
@@ -68,11 +81,11 @@ namespace HB.FullStack.WebApi
             //ChangedProperties
             foreach (ChangedPropertyDto propertyDto in cpt.ChangedProperties)
             {
-                DbModelPropertyDef? propertyDef = ModelDef.GetPropertyDef(propertyDto.PropertyName);
+                ModelPropertyDef? propertyDef = ModelDef.GetPropertyDef(propertyDto.PropertyName);
 
                 if (propertyDef == null)
                 {
-                    throw WebApiExceptions.ChangedPropertyPackError($"包含不属于当前DbModel的属性:{propertyDto.PropertyName}", cpt, ModelDef.ModelFullName);
+                    throw WebApiExceptions.ChangedPropertyPackError($"包含不属于当前Model的属性:{propertyDto.PropertyName}", cpt, ModelDef.ModelFullName);
                 }
 
                 cp.ChangedProperties.Add(
@@ -85,11 +98,11 @@ namespace HB.FullStack.WebApi
             //AddtionalProperties
             foreach (KeyValuePair<string, JsonElement> addtionalDto in cpt.AddtionalProperties)
             {
-                DbModelPropertyDef? propertyDef = ModelDef.GetPropertyDef(addtionalDto.Key);
+                ModelPropertyDef? propertyDef = ModelDef.GetPropertyDef(addtionalDto.Key);
 
                 if (propertyDef == null)
                 {
-                    throw WebApiExceptions.ChangedPropertyPackError($"包含不属于当前DbModel的属性:{addtionalDto.Key}", cpt, ModelDef.ModelFullName);
+                    throw WebApiExceptions.ChangedPropertyPackError($"包含不属于当前Model的属性:{addtionalDto.Key}", cpt, ModelDef.ModelFullName);
                 }
 
                 cp.AddAddtionalProperty(

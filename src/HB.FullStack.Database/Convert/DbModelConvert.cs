@@ -168,7 +168,7 @@ namespace HB.FullStack.Database.Convert
 
             foreach (KeyValuePair<string, object?> kv in propertyValues)
             {
-                DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(kv.Key);
+                DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(kv.Key);
 
                 if (propertyDef == null)
                 {

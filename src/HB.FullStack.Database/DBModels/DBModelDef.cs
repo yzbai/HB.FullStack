@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using HB.FullStack.Common.Models;
@@ -9,19 +8,9 @@ namespace HB.FullStack.Database.DbModels
     /// <summary>
     /// 实体定义
     /// </summary>
-    public class DbModelDef
+    public class DbModelDef : ModelDef
     {
         #region Common ModelDef
-
-        /// <summary>
-        /// 实体名
-        /// </summary>
-        public string ModelFullName { get; set; } = null!;
-
-        /// <summary>
-        /// 实体类型
-        /// </summary>
-        public Type ModelType { get; set; } = null!;
 
         /// <summary>
         /// 属性字典
@@ -81,7 +70,7 @@ namespace HB.FullStack.Database.DbModels
 
         public DbModelPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
 
-        public DbModelPropertyDef? GetPropertyDef(string propertyName)
+        public DbModelPropertyDef? GetDbPropertyDef(string propertyName)
         {
             if (PropertyDict.TryGetValue(propertyName, out DbModelPropertyDef? propertyDef))
             {
@@ -109,5 +98,7 @@ namespace HB.FullStack.Database.DbModels
         {
             return _foreignKeyProperties ??= PropertyDict.Values.Where(p => p.IsForeignKey).ToList();
         }
+
+        public override ModelPropertyDef? GetPropertyDef(string propertyName) => GetDbPropertyDef(propertyName);
     }
 }

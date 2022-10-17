@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
+using HB.FullStack.Common.Models;
+
 [assembly: InternalsVisibleTo("HB.FullStack.Database")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
 [assembly: InternalsVisibleTo("HB.FullStack.Cache")]
@@ -9,5 +11,15 @@
 namespace HB.FullStack.Common
 {
 
-    public class Model : ValidatableObject, IModel { }
+    public abstract class Model : ValidatableObject, IModel
+    {
+        //public virtual ModelKind GetKind()
+        //{
+        //    return ModelKind.Plain;
+        //}
+        public virtual ModelKind GetKind()
+        {
+            return ModelKind.Plain;
+        }
+    }
 }

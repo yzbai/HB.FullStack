@@ -1,21 +1,25 @@
 ﻿
-using HB.FullStack.KVStore.Engine;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using HB.FullStack.Common.Models;
+using HB.FullStack.KVStore.Engine;
+
 namespace HB.FullStack.KVStore.KVStoreModels
 {
-    internal static class KVStoreModelDefFactory
+    internal class KVStoreModelDefFactory : IKVStoreModelDefFactory, IModelDefProvider
     {
-        private static IDictionary<string, KVStoreModelSchema> _typeSchemaDict = null!;
-        private static readonly ConcurrentDictionary<Type, KVStoreModelDef> _defDict = new ConcurrentDictionary<Type, KVStoreModelDef>();
-        private static KVStoreSettings _settings = null!;
-        private static string? _firstDefaultInstanceName = null!;
+        private IDictionary<string, KVStoreModelSchema> _typeSchemaDict = null!;
+        private readonly ConcurrentDictionary<Type, KVStoreModelDef> _defDict = new ConcurrentDictionary<Type, KVStoreModelDef>();
+        private KVStoreSettings _settings = null!;
+        private string? _firstDefaultInstanceName = null!;
 
-        public static void Initialize(IKVStoreEngine kVStoreEngine)
+
+
+        public void Initialize(IKVStoreEngine kVStoreEngine)
         {
             _settings = kVStoreEngine.Settings;
             _firstDefaultInstanceName = kVStoreEngine.FirstDefaultInstanceName;
@@ -39,7 +43,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
             }
         }
 
-        private static IDictionary<string, KVStoreModelSchema> ConstructeSchemaDict(IEnumerable<Type> allModelTypes)
+        private IDictionary<string, KVStoreModelSchema> ConstructeSchemaDict(IEnumerable<Type> allModelTypes)
         {
             IDictionary<string, KVStoreModelSchema> filedDict = _settings.KVStoreModels.ToDictionary(t => t.ModelTypeFullName);
             IDictionary<string, KVStoreModelSchema> resultDict = new Dictionary<string, KVStoreModelSchema>();
@@ -79,24 +83,24 @@ namespace HB.FullStack.KVStore.KVStoreModels
             return resultDict;
         }
 
-        public static KVStoreModelDef GetDef<T>()
+        public KVStoreModelDef GetDef<T>()
         {
             return GetDef(typeof(T));
         }
 
-        public static KVStoreModelDef GetDef(Type type)
+        public KVStoreModelDef GetDef(Type type)
         {
             return _defDict.GetOrAdd(type, t => CreateModelDef(t));
         }
 
-        private static KVStoreModelDef CreateModelDef(Type type)
+        private KVStoreModelDef CreateModelDef(Type type)
         {
             if (!_typeSchemaDict.TryGetValue(type.FullName!, out KVStoreModelSchema? storeModelSchema))
             {
-                throw Exceptions.NoModelSchemaFound(type:type.FullName);
+                throw Exceptions.NoModelSchemaFound(type: type.FullName);
             }
 
-            KVStoreModelDef modelDef = new KVStoreModelDef(storeModelSchema.InstanceName, type);
+            KVStoreModelDef modelDef = new KVStoreModelDef(storeModelSchema.InstanceName, type) { Kind = ModelKind.KV };
 
             #region Handle Key Properties
 
@@ -124,7 +128,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
             {
                 if (backupKeyPropertyInfo == null)
                 {
-                    throw Exceptions.LackKVStoreKeyAttributeError(type:modelDef.ModelType.FullName);
+                    throw Exceptions.LackKVStoreKeyAttributeError(type: modelDef.ModelType.FullName);
                 }
 
                 modelDef.KeyPropertyInfos.Add(0, backupKeyPropertyInfo);
@@ -134,5 +138,13 @@ namespace HB.FullStack.KVStore.KVStoreModels
 
             return modelDef;
         }
+
+        #region IModelDefProvider Memebers
+
+        ModelKind IModelDefProvider.ModelKind => ModelKind.KV;
+
+        ModelDef? IModelDefProvider.GetModelDef(Type type) => GetDef(type);
+
+        #endregion
     }
 }

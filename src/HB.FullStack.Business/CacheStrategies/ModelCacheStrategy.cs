@@ -28,7 +28,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             IMemoryLockManager memoryLockManager,
             ILogger logger) where TModel : ITimestampModel, new()
         {
-            if (!ICache.IsModelCachable<TModel>())
+            if (!cache.IsModelCachable<TModel>())
             {
                 return await dbRetrieve(database).ConfigureAwait(false);
             }

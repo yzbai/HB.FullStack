@@ -27,7 +27,7 @@ namespace HB.FullStack.CacheTests
 		public async Task CacheModels_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
 		{
 			Stopwatch stopwatch = new Stopwatch();
-			CacheModelDef modelDef = CacheModelDefFactory.Get<Book>();
+			CacheModelDef modelDef = Cache.GetDef<Book>()!;
 
 			modelDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
 			modelDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
@@ -116,7 +116,7 @@ namespace HB.FullStack.CacheTests
 		[DataRow(19, 15)]
 		public async Task CacheModels_Abs_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
 		{
-			CacheModelDef modelDef = CacheModelDefFactory.Get<Book>();
+			CacheModelDef modelDef = Cache.GetDef<Book>()!;
 
 			modelDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
 			modelDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
@@ -167,7 +167,7 @@ namespace HB.FullStack.CacheTests
 		[DataRow(null, null)]
 		public async Task CacheModels_Version_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
 		{
-			CacheModelDef modelDef = CacheModelDefFactory.Get<Book>();
+			CacheModelDef modelDef = Cache.GetDef<Book>()!;
 
 			modelDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
 			modelDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);

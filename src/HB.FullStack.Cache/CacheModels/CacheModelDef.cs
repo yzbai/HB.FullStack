@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Reflection;
 
+using HB.FullStack.Common.Models;
+
 namespace HB.FullStack.Cache
 {
 
-    public class CacheModelDef
+    public class CacheModelDef : ModelDef
     {
         public PropertyInfo KeyProperty { get; internal set; } = null!;
 
@@ -24,6 +26,11 @@ namespace HB.FullStack.Cache
         public TimeSpan? AbsoluteTimeRelativeToNow { get; set; }
 
         public string? CacheInstanceName { get; set; }
+
+        public override ModelPropertyDef? GetPropertyDef(string propertyName)
+        {
+            throw new NotImplementedException();
+        }
 
         //public bool IsBatchEnabled { get; set; }
     }

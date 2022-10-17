@@ -58,7 +58,7 @@ namespace HB.FullStack.Database.Convert
 
                 for (int i = startIndex; i < startIndex + length; ++i)
                 {
-                    propertyDefs.Add(def.GetPropertyDef(reader.GetName(i))
+                    propertyDefs.Add(def.GetDbPropertyDef(reader.GetName(i))
                         ?? throw DatabaseExceptions.ModelError(def.ModelFullName, reader.GetName(i), "Lack PropertyDef"));
                 }
 
@@ -503,7 +503,7 @@ namespace HB.FullStack.Database.Convert
             int index = 0;
             foreach (string propertyName in propertyNames)
             {
-                DbModelPropertyDef? propertyDef = modelDef.GetPropertyDef(propertyName);
+                DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(propertyName);
 
                 if (propertyDef == null)
                 {

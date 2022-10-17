@@ -734,7 +734,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
 
                 for (int i = 0; i < len; ++i)
                 {
-                    propertyDefs[i] = definition.GetPropertyDef(reader.GetName(i))!;
+                    propertyDefs[i] = definition.GetDbPropertyDef(reader.GetName(i))!;
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 

@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-using HB.FullStack.Common;
-using HB.FullStack.Common.IdGen;
+﻿using HB.FullStack.Common;
+using HB.FullStack.Common.Models;
 
 /*
  * 
@@ -17,5 +14,7 @@ namespace HB.FullStack.Database.DbModels
         public bool Deleted { get; /*internal*/ set; }
 
         public string LastUser { get; set; } = string.Empty;
+
+        public override ModelKind GetKind() => ModelKind.Db;
     }
 }

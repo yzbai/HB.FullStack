@@ -191,7 +191,7 @@ redis.call('rpush', KEYS[3], rawEvent) return 3";
                 {
                     long now = TimeUtil.UtcNowUnixTimeSeconds;
 
-                    //1, Get Model
+                    //1, GetDef Model
                     IDatabase database = await RedisInstanceManager.GetDatabaseAsync(_instanceSetting, _logger).ConfigureAwait(false);
 
                     RedisValue redisValue = await database.ListRightPopLeftPushAsync(RedisEventBusEngine.QueueName(_eventType), RedisEventBusEngine.HistoryQueueName(_eventType)).ConfigureAwait(false);

@@ -2,6 +2,8 @@
 {
     public static partial class ErrorCodes
     {
+        public static readonly ErrorCode ModelDefError = new ErrorCode(nameof(ModelDefError), "");
+
         public static readonly ErrorCode CertNotInPackage = new ErrorCode(nameof(CertNotInPackage), "证书没有打包在程序里，将试图在服务器中寻找");
         public static readonly ErrorCode CertNotFound = new ErrorCode(nameof(CertNotFound), "没有找到证书");
         public static readonly ErrorCode IsFileSignatureMatchedError = new ErrorCode(nameof(IsFileSignatureMatchedError), "");

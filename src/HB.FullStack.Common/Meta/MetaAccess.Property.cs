@@ -311,7 +311,7 @@ namespace HB.FullStack.Common.Meta
                     Label labelCondition = il.DefineLabel();
                     Label labelTrue = il.DefineLabel();
 
-                    //Get localArrayLength
+                    //GetDef localArrayLength
                     il.Emit(OpCodes.Ldloc, localBoxedPropertyValue);//[propertyInfo-boxed-value]
                     EmitUtil.EmitInt32(il, 0); //[propertyInfo-boxed-value][0]
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetLengthMethod, null); //[length]

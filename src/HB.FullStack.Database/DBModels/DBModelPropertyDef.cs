@@ -9,15 +9,13 @@ namespace HB.FullStack.Database.DbModels
     /// <summary>
     /// 实体内属性定义（一个）
     /// </summary>
-    public class DbModelPropertyDef
+    public class DbModelPropertyDef : ModelPropertyDef
     {
         #region Common ModelPropertyDef
 
         public DbModelDef ModelDef { get; set; } = null!;
 
-        public string Name { get; set; } = null!;
 
-        public Type Type { get; set; } = null!;
 
         public Type? NullableUnderlyingType { get; set; }
 

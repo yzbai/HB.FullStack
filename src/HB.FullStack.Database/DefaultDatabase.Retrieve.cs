@@ -196,7 +196,7 @@ namespace HB.FullStack.Database
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            DbModelPropertyDef? foreignKeyProperty = modelDef.GetPropertyDef(foreignKeyName);
+            DbModelPropertyDef? foreignKeyProperty = modelDef.GetDbPropertyDef(foreignKeyName);
 
             if (foreignKeyProperty == null || !foreignKeyProperty.IsForeignKey)
             {

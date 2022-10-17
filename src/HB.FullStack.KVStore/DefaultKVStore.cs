@@ -12,11 +12,14 @@ namespace HB.FullStack.KVStore
     public class DefaultKVStore : IKVStore
     {
         private readonly IKVStoreEngine _engine;
+        private readonly IKVStoreModelDefFactory _modelDefFactory;
 
-        public DefaultKVStore(IKVStoreEngine kvstoreEngine)
+        public DefaultKVStore(IKVStoreEngine kvstoreEngine, IKVStoreModelDefFactory kvStoreModelDefFactory)
         {
             _engine = kvstoreEngine;
-            KVStoreModelDefFactory.Initialize(kvstoreEngine);
+            _modelDefFactory = kvStoreModelDefFactory;
+
+            _modelDefFactory.Initialize(kvstoreEngine);
         }
 
         private static string GetModelKey<T>(T item, KVStoreModelDef modelDef) where T : KVStoreModel, new()
@@ -40,7 +43,7 @@ namespace HB.FullStack.KVStore
 
         public string GetModelKey<T>(T item) where T : KVStoreModel, new()
         {
-            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             return GetModelKey(item, modelDef);
         }
@@ -54,7 +57,7 @@ namespace HB.FullStack.KVStore
 
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreModel, new()
         {
-            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             try
             {
@@ -73,7 +76,7 @@ namespace HB.FullStack.KVStore
 
         public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreModel, new()
         {
-            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
             try
             {
                 IEnumerable<Tuple<string?, long>> tuples = await _engine.ModelGetAllAsync(
@@ -105,7 +108,7 @@ namespace HB.FullStack.KVStore
 
             ThrowIf.NotValid(items, nameof(items));
 
-            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             try
             {
@@ -149,7 +152,7 @@ namespace HB.FullStack.KVStore
 
             ThrowIf.NotValid(items, nameof(items));
 
-            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             try
             {
@@ -178,7 +181,7 @@ namespace HB.FullStack.KVStore
 
         public async Task DeleteAllAsync<T>() where T : KVStoreModel, new()
         {
-            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             try
             {
@@ -210,7 +213,7 @@ namespace HB.FullStack.KVStore
                 throw Exceptions.VersionsKeysNotEqualError();
             }
 
-            KVStoreModelDef modelDef = KVStoreModelDefFactory.GetDef<T>();
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             try
             {

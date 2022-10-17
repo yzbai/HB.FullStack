@@ -1,5 +1,4 @@
-﻿
-namespace HB.FullStack.Cache
+﻿namespace HB.FullStack.Cache
 {
     public interface ICache : IModelCache2, ITimestampCache, ICollectionCache
     {
@@ -7,11 +6,9 @@ namespace HB.FullStack.Cache
 
         void Dispose();
 
-        public static bool IsModelCachable<T>()
-        {
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<T>();
+        CacheModelDef? GetDef<TCacheModel>();
 
-            return modelDef != null;
-        }
+        bool IsModelCachable<T>();
+
     }
 }

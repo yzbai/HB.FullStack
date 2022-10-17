@@ -519,7 +519,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                 for (int i = 0; i < len; ++i)
                 {
-                    propertyDefs[i] = definition.GetPropertyDef(reader0.GetName(i))!;
+                    propertyDefs[i] = definition.GetDbPropertyDef(reader0.GetName(i))!;
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 

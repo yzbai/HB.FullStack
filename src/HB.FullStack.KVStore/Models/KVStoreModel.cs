@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.KVStore.KVStoreModels
 {
@@ -19,6 +16,8 @@ namespace HB.FullStack.KVStore.KVStoreModels
         public long Timestamp { get; set; } = -1;
 
         public string LastUser { get; set; } = string.Empty;
+
+        public override ModelKind GetKind() => ModelKind.KV;
 
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
 

@@ -293,6 +293,7 @@ for j = 1, modelNum do
     end
 end
 ";
+        private readonly ICacheModelDefFactory _modelDefFactory;
 
         //        /// <summary>
         //        /// keys:model1_dimensionkey, model2_dimensionkey, model3_dimensionKey
@@ -343,16 +344,17 @@ end
         //end
         //";
 
-        public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger) : base(options, logger)
+        public RedisCache(IOptions<RedisCacheOptions> options, ILogger<RedisCache> logger, ICacheModelDefFactory modelDefFactory) : base(options, logger)
         {
             Logger.LogInformation($"RedisCache初始化完成");
+            _modelDefFactory = modelDefFactory;
         }
 
         public async Task<(IList<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : ITimestampModel, new()
         {
             ThrowIf.Null(keyValues, nameof(keyValues));
 
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<TModel>();
+            CacheModelDef? modelDef = _modelDefFactory.GetDef<TModel>();
 
             if (modelDef == null)
             {
@@ -412,7 +414,7 @@ end
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
 
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<TModel>();
+            CacheModelDef? modelDef = _modelDefFactory.GetDef<TModel>();
 
             if (modelDef == null)
             {
@@ -471,7 +473,7 @@ end
 
         public async Task RemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) //where TModel : ITimestampModel, new()
         {
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<TModel>();
+            CacheModelDef? modelDef = _modelDefFactory.GetDef<TModel>();
             //ThrowIfNotCacheEnabled(modelDef);
 
             if (modelDef == null)
@@ -509,7 +511,7 @@ end
 
         //private async Task ForcedRemoveModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : IModelCache, new()
         //{
-        //    CacheModelDef modelDef = CacheModelDefFactory.Get<TModel>();
+        //    CacheModelDef modelDef = CacheModelDefFactory.GetDef<TModel>();
         //    ThrowIfNotCacheEnabled(modelDef);
         //    ThrowIf.Null(keyValues, nameof(keyValues));
 
@@ -705,6 +707,16 @@ end
             }
 
             return (models, true);
+        }
+
+        public CacheModelDef? GetDef<TCacheModel>()
+        {
+            return _modelDefFactory.GetDef<TCacheModel>();
+        }
+
+        public bool IsModelCachable<T>()
+        {
+            return _modelDefFactory.GetDef<T>() != null;
         }
     }
 }

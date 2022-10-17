@@ -12,7 +12,7 @@ namespace HB.FullStack.Cache
     {
         public static async Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(this ICache cache, IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : ITimestampModel, new()
         {
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<TCacheModel>();
+            CacheModelDef? modelDef = cache.GetDef<TCacheModel>();
 
             if (modelDef == null)
             {
@@ -39,7 +39,7 @@ namespace HB.FullStack.Cache
 
         public static async Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : ITimestampModel, new()
         {
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<TCacheModel>();
+            CacheModelDef? modelDef = cache.GetDef<TCacheModel>();
 
             if (modelDef == null)
             {
@@ -68,7 +68,7 @@ namespace HB.FullStack.Cache
                 return;
             }
 
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<T>();
+            CacheModelDef? modelDef = cache.GetDef<T>();
 
             if (modelDef == null)
             {
@@ -85,7 +85,7 @@ namespace HB.FullStack.Cache
 
         public static async Task RemoveModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default)
         {
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<TCacheModel>();
+            CacheModelDef? modelDef = cache.GetDef<TCacheModel>();
 
             if (modelDef == null)
             {
@@ -102,7 +102,7 @@ namespace HB.FullStack.Cache
         {
             ThrowIf.Null(ids, nameof(ids));
 
-            CacheModelDef? modelDef = CacheModelDefFactory.Get<TCacheModel>();
+            CacheModelDef? modelDef = cache.GetDef<TCacheModel>();
 
             if (modelDef == null)
             {

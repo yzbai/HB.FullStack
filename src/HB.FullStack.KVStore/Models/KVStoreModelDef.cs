@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Reflection;
 
+using HB.FullStack.Common.Models;
+
 namespace HB.FullStack.KVStore.KVStoreModels
 {
-    public class KVStoreModelDef
+    public class KVStoreModelDef : ModelDef
     {
         public string KVStoreName { get; set; }
 
-        public Type ModelType { get; set; }
 
         public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; } = new Dictionary<int, PropertyInfo>();
 
@@ -18,5 +19,9 @@ namespace HB.FullStack.KVStore.KVStoreModels
             ModelType = type;
         }
 
+        public override ModelPropertyDef? GetPropertyDef(string propertyName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
