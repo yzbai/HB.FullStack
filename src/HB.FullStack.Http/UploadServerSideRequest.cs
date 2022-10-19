@@ -9,18 +9,11 @@ namespace HB.FullStack.Common.Api
 {
 
     [ModelBinder(BinderType = typeof(FileUpdateServerSideRequestModelBinder))]
-    public class UploadServerSideRequest<T> : UpdateRequest<T> where T : ApiResource2
+    public class UploadServerSideRequest<T> : ApiRequest where T : ApiResource
     {
+        public UploadServerSideRequest(string resName, ApiRequestAuth auth, string? condition) : base(resName, ApiMethod.UpdateProperties, auth, condition) { }
 
-        public UploadServerSideRequest()
-        {
-
-        }
-
-        public UploadServerSideRequest(ApiRequestAuth auth, string? condition) : base(Array.Empty<T>(), auth, condition) { }
-
-
-        [Required]
+        [CollectionNotNullOrEmpty]
         public IEnumerable<IFormFile> Files { get; set; } = null!;
     }
 }

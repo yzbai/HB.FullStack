@@ -8,6 +8,30 @@ namespace HB.FullStack.DatabaseTests.Data
     {
         private static readonly Random _random = new Random();
 
+        public static IList<AutoIdBTTimestamp> GetAutoIdBTTimestamps(int count)
+        {
+            List<AutoIdBTTimestamp> lst = new List<AutoIdBTTimestamp>();
+
+            for (int i = 0; i < count; ++i)
+            {
+                lst.Add(new AutoIdBTTimestamp());
+            }
+
+            return lst;
+        }
+
+        public static IList<AutoIdBTTimeless> GetAutoIdBTTimelesses(int count)
+        {
+            List<AutoIdBTTimeless> lst = new List<AutoIdBTTimeless>();
+
+            for (int i = 0; i < count; ++i)
+            {
+                lst.Add(new AutoIdBTTimeless());
+            }
+
+            return lst;
+        }
+
         public static Book MockOne()
         {
             return new Book
@@ -38,15 +62,15 @@ namespace HB.FullStack.DatabaseTests.Data
             return books;
         }
 
-        public static IList<BookEntity> GetBooks(int? count = null)
+        public static IList<BookModel> GetBooks(int? count = null)
         {
-            List<BookEntity> books = new List<BookEntity>();
+            List<BookModel> books = new List<BookModel>();
 
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                books.Add(new BookEntity
+                books.Add(new BookModel
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),
@@ -57,15 +81,15 @@ namespace HB.FullStack.DatabaseTests.Data
             return books;
         }
 
-        public static IList<Guid_BookEntity> Guid_GetBooks(int? count = null)
+        public static IList<Guid_BookModel> Guid_GetBooks(int? count = null)
         {
-            List<Guid_BookEntity> books = new List<Guid_BookEntity>();
+            List<Guid_BookModel> books = new List<Guid_BookModel>();
 
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                books.Add(new Guid_BookEntity
+                books.Add(new Guid_BookModel
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),
@@ -76,15 +100,15 @@ namespace HB.FullStack.DatabaseTests.Data
             return books;
         }
 
-        public static IList<BookEntity_Client> GetBooks_Client(int? count = null)
+        public static IList<BookModel_Client> GetBooks_Client(int? count = null)
         {
-            List<BookEntity_Client> books = new List<BookEntity_Client>();
+            List<BookModel_Client> books = new List<BookModel_Client>();
 
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                books.Add(new BookEntity_Client
+                books.Add(new BookModel_Client
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),
@@ -95,9 +119,9 @@ namespace HB.FullStack.DatabaseTests.Data
             return books;
         }
 
-        public static PublisherEntity MockOnePublisherEntity()
+        public static PublisherModel MockOnePublisherModel()
         {
-            PublisherEntity entity = new PublisherEntity
+            PublisherModel model = new PublisherModel
             {
                 Type = PublisherType.Online,
                 Name = "中文名字",
@@ -110,12 +134,12 @@ namespace HB.FullStack.DatabaseTests.Data
                 }
             };
 
-            return entity;
+            return model;
         }
 
-        public static Guid_PublisherEntity Guid_MockOnePublisherEntity()
+        public static Guid_PublisherModel Guid_MockOnePublisherModel()
         {
-            Guid_PublisherEntity entity = new Guid_PublisherEntity
+            Guid_PublisherModel model = new Guid_PublisherModel
             {
                 Type = PublisherType.Online,
                 Name = "中文名字",
@@ -128,12 +152,12 @@ namespace HB.FullStack.DatabaseTests.Data
                 }
             };
 
-            return entity;
+            return model;
         }
 
-        public static PublisherEntity_Client MockOnePublisherEntity_Client()
+        public static PublisherModel_Client MockOnePublisherModel_Client()
         {
-            PublisherEntity_Client entity = new PublisherEntity_Client
+            PublisherModel_Client model = new PublisherModel_Client
             {
                 Type = PublisherType.Online,
                 Name = "中文名字",
@@ -146,12 +170,12 @@ namespace HB.FullStack.DatabaseTests.Data
                 }
             };
 
-            return entity;
+            return model;
         }
 
-        public static Guid_PublisherEntity_Client Guid_MockOnePublisherEntity_Client()
+        public static Guid_PublisherModel_Client Guid_MockOnePublisherModel_Client()
         {
-            Guid_PublisherEntity_Client entity = new Guid_PublisherEntity_Client
+            Guid_PublisherModel_Client model = new Guid_PublisherModel_Client
             {
                 Type = PublisherType.Online,
                 Name = "中文名字",
@@ -164,19 +188,19 @@ namespace HB.FullStack.DatabaseTests.Data
                 }
             };
 
-            return entity;
+            return model;
         }
 
-        public static List<PublisherEntity> GetPublishers(int? count = null)
+        public static List<PublisherModel> GetPublishers(int? count = null)
         {
-            List<PublisherEntity> publisherEntities = new List<PublisherEntity>();
+            List<PublisherModel> publisherModels = new List<PublisherModel>();
 
             Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                publisherEntities.Add(new PublisherEntity
+                publisherModels.Add(new PublisherModel
                 {
                     Books = new List<string> { "a", "v", "c" },
                     Type = (PublisherType)random.Next(0, 3),
@@ -186,19 +210,19 @@ namespace HB.FullStack.DatabaseTests.Data
                 });
             }
 
-            return publisherEntities;
+            return publisherModels;
         }
 
-        public static List<Guid_PublisherEntity> Guid_GetPublishers(int? count = null)
+        public static List<Guid_PublisherModel> Guid_GetPublishers(int? count = null)
         {
-            List<Guid_PublisherEntity> publisherEntities = new List<Guid_PublisherEntity>();
+            List<Guid_PublisherModel> publisherModels = new List<Guid_PublisherModel>();
 
             Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                publisherEntities.Add(new Guid_PublisherEntity
+                publisherModels.Add(new Guid_PublisherModel
                 {
                     Books = new List<string> { "a", "v", "c" },
                     Type = (PublisherType)random.Next(0, 3),
@@ -208,19 +232,19 @@ namespace HB.FullStack.DatabaseTests.Data
                 });
             }
 
-            return publisherEntities;
+            return publisherModels;
         }
 
-        public static List<PublisherEntity_Client> GetPublishers_Client(int? count = null)
+        public static List<PublisherModel_Client> GetPublishers_Client(int? count = null)
         {
-            List<PublisherEntity_Client> publisherEntities = new List<PublisherEntity_Client>();
+            List<PublisherModel_Client> publisherModels = new List<PublisherModel_Client>();
 
             Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                publisherEntities.Add(new PublisherEntity_Client
+                publisherModels.Add(new PublisherModel_Client
                 {
                     Books = new List<string> { "a", "v", "c" },
                     Type = (PublisherType)random.Next(0, 3),
@@ -230,19 +254,19 @@ namespace HB.FullStack.DatabaseTests.Data
                 });
             }
 
-            return publisherEntities;
+            return publisherModels;
         }
 
-        public static List<Guid_PublisherEntity_Client> Guid_GetPublishers_Client(int? count = null)
+        public static List<Guid_PublisherModel_Client> Guid_GetPublishers_Client(int? count = null)
         {
-            List<Guid_PublisherEntity_Client> publisherEntities = new List<Guid_PublisherEntity_Client>();
+            List<Guid_PublisherModel_Client> publisherModels = new List<Guid_PublisherModel_Client>();
 
             Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                publisherEntities.Add(new Guid_PublisherEntity_Client
+                publisherModels.Add(new Guid_PublisherModel_Client
                 {
                     Books = new List<string> { "a", "v", "c" },
                     Type = (PublisherType)random.Next(0, 3),
@@ -252,64 +276,64 @@ namespace HB.FullStack.DatabaseTests.Data
                 });
             }
 
-            return publisherEntities;
+            return publisherModels;
         }
 
-        public static IList<PublisherEntity2> GetPublishers2(int? count = null)
+        public static IList<PublisherModel2> GetPublishers2(int? count = null)
         {
-            List<PublisherEntity2> publisherEntities = new List<PublisherEntity2>();
+            List<PublisherModel2> publisherModels = new List<PublisherModel2>();
 
             Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                publisherEntities.Add(new PublisherEntity2
+                publisherModels.Add(new PublisherModel2
                 {
                     Type = (PublisherType)random.Next(1, 3),
                     Name = "Publisher" + i.ToString()
                 });
             }
 
-            return publisherEntities;
+            return publisherModels;
         }
 
-        public static IList<Guid_PublisherEntity2> Guid_GetPublishers2(int? count = null)
+        public static IList<Guid_PublisherModel2> Guid_GetPublishers2(int? count = null)
         {
-            List<Guid_PublisherEntity2> publisherEntities = new List<Guid_PublisherEntity2>();
+            List<Guid_PublisherModel2> publisherModels = new List<Guid_PublisherModel2>();
 
             Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                publisherEntities.Add(new Guid_PublisherEntity2
+                publisherModels.Add(new Guid_PublisherModel2
                 {
                     Type = (PublisherType)random.Next(1, 3),
                     Name = "Publisher" + i.ToString()
                 });
             }
 
-            return publisherEntities;
+            return publisherModels;
         }
 
-        public static IList<PublisherEntity2_Client> GetPublishers2_Client(int? count = null)
+        public static IList<PublisherModel2_Client> GetPublishers2_Client(int? count = null)
         {
-            List<PublisherEntity2_Client> publisherEntities = new List<PublisherEntity2_Client>();
+            List<PublisherModel2_Client> publisherModels = new List<PublisherModel2_Client>();
 
             Random random = new Random();
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                publisherEntities.Add(new PublisherEntity2_Client
+                publisherModels.Add(new PublisherModel2_Client
                 {
                     Type = (PublisherType)random.Next(1, 3),
                     Name = "Publisher" + i.ToString()
                 });
             }
 
-            return publisherEntities;
+            return publisherModels;
         }
 
         public static IList<string> MockResourcesWithOne()

@@ -84,7 +84,7 @@ namespace System
         /// <returns></returns>
 
         [return: NotNullIfNotNull("ts")]
-        public static string? ToJoinedString(this IEnumerable? ts, string seprator, string? nullReplacement = null)
+        public static string? ToJoinedString(this IEnumerable? ts, string? seprator, string? nullReplacement = null)
         {
             if (ts == null)
             {
@@ -98,12 +98,20 @@ namespace System
                 if (obj != null)
                 {
                     stringBuilder.Append(obj.ToString());
-                    stringBuilder.Append(seprator);
+
+                    if (seprator != null)
+                    {
+                        stringBuilder.Append(seprator);
+                    }
                 }
                 else if (nullReplacement != null)
                 {
                     stringBuilder.Append(nullReplacement);
-                    stringBuilder.Append(seprator);
+                    
+                    if (seprator != null)
+                    {
+                        stringBuilder.Append(seprator);
+                    }
                 }
             }
 

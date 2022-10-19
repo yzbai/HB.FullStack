@@ -1,18 +1,17 @@
-﻿using HB.FullStack.Database;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading.Tasks;
+
+using HB.FullStack.Database;
 using HB.FullStack.Database.Engine;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using MySqlConnector;
-using MySqlConnector.Logging;
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HB.Infrastructure.MySQL
 {
@@ -26,7 +25,7 @@ namespace HB.Infrastructure.MySQL
 
         private readonly Dictionary<string, string> _connectionStringDict = new Dictionary<string, string>();
 
-        public DatabaseCommonSettings DatabaseSettings => _options.CommonSettings;
+        public DbCommonSettings DatabaseSettings => _options.CommonSettings;
 
         public EngineType EngineType => EngineType.MySQL;
 
@@ -44,7 +43,7 @@ namespace HB.Infrastructure.MySQL
             }
             catch (InvalidOperationException ex)
             {
-                GlobalSettings.Logger.LogError(ex, $"Connections:{SerializeUtil.ToJson(options.Value.Connections)}");
+                GlobalSettings.Logger.LogError(ex, "Connections:{@Connections}", options.Value.Connections);
             }
 
             _options = options.Value;
@@ -59,7 +58,7 @@ namespace HB.Infrastructure.MySQL
 
         private void SetConnectionStrings()
         {
-            foreach (DatabaseConnectionSettings connection in _options.Connections)
+            foreach (DbConnectionSettings connection in _options.Connections)
             {
                 if (FirstDefaultDatabaseName.IsNullOrEmpty())
                 {
@@ -117,14 +116,6 @@ namespace HB.Infrastructure.MySQL
 
         #region Command 能力
 
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="trans"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <returns></returns>
-
         public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -139,15 +130,6 @@ namespace HB.Infrastructure.MySQL
             }
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="trans"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
-
         public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
@@ -161,15 +143,6 @@ namespace HB.Infrastructure.MySQL
                 return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
             }
         }
-
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="trans"></param>
-        /// <param name="dbName"></param>
-        /// <param name="engineCommand"></param>
-        /// <param name="useMaster"></param>
-        /// <returns></returns>
 
         public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
         {

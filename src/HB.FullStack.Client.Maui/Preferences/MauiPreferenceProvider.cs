@@ -14,7 +14,7 @@ namespace HB.FullStack.Client.Maui
 
         public bool IsLogined() => UserPreferences.IsLogined;
 
-        public void OnTokenFetched(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
+        public void OnTokenReceived(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
         {
             UserPreferences.Login(userId, userCreateTime, mobile, email, loginName, accessToken, refreshToken);
         }

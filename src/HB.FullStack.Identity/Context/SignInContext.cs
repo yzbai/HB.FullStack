@@ -1,7 +1,7 @@
-﻿using HB.FullStack.Common;
-
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+
+using HB.FullStack.Common;
 
 namespace HB.FullStack.Identity
 {
@@ -22,18 +22,21 @@ namespace HB.FullStack.Identity
 
         public bool RememberMe { get; set; }
 
+        [Required]
         public string DeviceId { get; set; } = default!;
 
         public DeviceInfos DeviceInfos { get; set; } = default!;
 
+        [Required]
         public string DeviceVersion { get; set; } = default!;
 
-        //public string DeviceAddress { get; set; } = default!;
+        [Required]
         public string DeviceIp { get; set; } = default!;
 
         /// <summary>
         /// Audience
         /// </summary>
+        [Required]
         public string SignToWhere { get; set; } = default!;
 
         public LogOffType LogOffType { get; set; } = LogOffType.None;

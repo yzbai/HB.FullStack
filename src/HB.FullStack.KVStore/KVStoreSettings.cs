@@ -7,10 +7,10 @@ using System.Linq;
 
 namespace HB.FullStack.KVStore
 {
-    public class KVStoreEntitySchema
+    public class KVStoreModelSchema
     {
         [DisallowNull, NotNull]
-        public string EntityTypeFullName { get; set; } = null!;
+        public string ModelTypeFullName { get; set; } = null!;
 
         [DisallowNull, NotNull]
         public string InstanceName { get; set; } = null!;
@@ -20,9 +20,9 @@ namespace HB.FullStack.KVStore
 
     public class KVStoreSettings
     {
-        public IList<string> AssembliesIncludeEntity { get; } = new List<string>();
+        public IList<string> AssembliesIncludeModel { get; } = new List<string>();
 
-        public IList<KVStoreEntitySchema> KVStoreEntities { get; } = new List<KVStoreEntitySchema>();
+        public IList<KVStoreModelSchema> KVStoreModels { get; } = new List<KVStoreModelSchema>();
 
     }
 }

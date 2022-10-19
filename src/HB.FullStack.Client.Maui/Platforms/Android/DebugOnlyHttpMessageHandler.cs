@@ -58,7 +58,7 @@ namespace HB.FullStack.Client.Maui.Platforms
 
         public bool Verify(string? hostname, ISSLSession? session)
         {
-            if (hostname == _bypassHost)// && session?.PeerPrincipal?.Name == $"CN={_bypassHost}")
+            if (hostname == _bypassHost)// && session?.PeerPrincipal?.EndpointName == $"CN={_bypassHost}")
             {
                 return true;
             }

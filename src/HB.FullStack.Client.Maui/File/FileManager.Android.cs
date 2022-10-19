@@ -1,16 +1,16 @@
-﻿using Java.Util.Zip;
-
-using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Storage;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Java.Util.Zip;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;
 
 namespace HB.FullStack.Client.Maui.File
 {
@@ -32,7 +32,7 @@ namespace HB.FullStack.Client.Maui.File
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    GlobalSettings.Logger?.LogCritical(ex, "File Service Unzip Init AssetFile : {assetFileName} Error.", assetFileName);
+                    GlobalSettings.Logger?.LogCritical(ex, "File Service Unzip Init AssetFile : {AssetFileName} Error.", assetFileName);
                 }
             }
         }

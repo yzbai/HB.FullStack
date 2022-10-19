@@ -19,11 +19,11 @@ namespace HB.FullStack.CacheTests
             };
         }
 
-        public static List<Book> MockMany()
+        public static List<Book> MockMany(int count = 100)
         {
             List<Book> books = new List<Book>();
 
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < count; ++i)
             {
                 books.Add(new Book
                 {
@@ -38,15 +38,15 @@ namespace HB.FullStack.CacheTests
             return books;
         }
 
-        public static IList<BookEntity> GetBooks(int? count = null)
+        public static IList<BookModel> GetBooks(int? count = null)
         {
-            List<BookEntity> books = new List<BookEntity>();
+            List<BookModel> books = new List<BookModel>();
 
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                books.Add(new BookEntity
+                books.Add(new BookModel
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),
@@ -57,15 +57,15 @@ namespace HB.FullStack.CacheTests
             return books;
         }
 
-        public static IList<Guid_BookEntity> Guid_GetBooks(int? count = null)
+        public static IList<Guid_BookModel> Guid_GetBooks(int? count = null)
         {
-            List<Guid_BookEntity> books = new List<Guid_BookEntity>();
+            List<Guid_BookModel> books = new List<Guid_BookModel>();
 
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                books.Add(new Guid_BookEntity
+                books.Add(new Guid_BookModel
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),
@@ -76,15 +76,15 @@ namespace HB.FullStack.CacheTests
             return books;
         }
 
-        public static IList<BookEntity_Client> GetBooks_Client(int? count = null)
+        public static IList<BookModel_Client> GetBooks_Client(int? count = null)
         {
-            List<BookEntity_Client> books = new List<BookEntity_Client>();
+            List<BookModel_Client> books = new List<BookModel_Client>();
 
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                books.Add(new BookEntity_Client
+                books.Add(new BookModel_Client
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),

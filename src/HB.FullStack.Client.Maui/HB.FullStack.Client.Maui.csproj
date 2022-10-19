@@ -1,109 +1,108 @@
-<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\..\common.props" />
-	<PropertyGroup>
-		<TargetFrameworks>net6.0;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
-		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
-		<UseMaui>true</UseMaui>
-		<SingleProject>true</SingleProject>
-		<!--<ImplicitUsings>enable</ImplicitUsings>-->
-		<LangVersion>Latest</LangVersion>
-		<Nullable>enable</Nullable>
-		<!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<WarningsAsErrors />-->
-		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    <Import Project="..\..\common.props" />
 
-		<_MauiTargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</_MauiTargetPlatformIdentifier>
-		<_MauiNoTargetPlatform Condition="'$(_MauiTargetPlatformIdentifier)' == ''">True</_MauiNoTargetPlatform>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net6.0;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
+        <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+        <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
+        <UseMaui>true</UseMaui>
+        <SingleProject>true</SingleProject>
+        <!--<ImplicitUsings>enable</ImplicitUsings>-->
 
-	<ItemGroup Condition="$(TargetFramework.StartsWith('net6.0-android')) != true">
-		<Compile Remove="**\**\*.Android.cs" />
-		<None Include="**\**\*.Android.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-	</ItemGroup>
 
-	<ItemGroup Condition="$(TargetFramework.StartsWith('net6.0-ios')) != true AND $(TargetFramework.StartsWith('net6.0-maccatalyst')) != true">
-		<Compile Remove="**\**\*.iOS.cs" />
-		<None Include="**\**\*.iOS.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-	</ItemGroup>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 
-	<ItemGroup Condition="$(TargetFramework.Contains('-windows')) != true ">
-		<Compile Remove="**\*.Windows.cs" />
-		<None Include="**\*.Windows.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-	</ItemGroup>
+        <_MauiTargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</_MauiTargetPlatformIdentifier>
+        <_MauiNoTargetPlatform Condition="'$(_MauiTargetPlatformIdentifier)' == ''">True</_MauiNoTargetPlatform>
+    </PropertyGroup>
 
-	<ItemGroup Condition="'$(_MauiNoTargetPlatform)' != 'True'">
-		<Compile Remove="**\*.Standard.cs" />
-		<None Include="**\*.Standard.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\Standard\**\*.cs" />
-		<None Include="**\Standard\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-	</ItemGroup>
+    <ItemGroup Condition="$(TargetFramework.StartsWith('net6.0-android')) != true">
+        <Compile Remove="**\**\*.Android.cs" />
+        <None Include="**\**\*.Android.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.4" />
-		<PackageReference Include="CommunityToolkit.Maui" Version="1.0.0" />
-		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="6.0.403" />
-		<PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
-		<PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.1-preview.1" />
-		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.1-preview.1" />
-		<PackageReference Include="Svg.Skia" Version="0.5.14" />
-	</ItemGroup>
+    <ItemGroup Condition="$(TargetFramework.StartsWith('net6.0-ios')) != true AND $(TargetFramework.StartsWith('net6.0-maccatalyst')) != true">
+        <Compile Remove="**\**\*.iOS.cs" />
+        <None Include="**\**\*.iOS.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-        <!--<PackageReference Include="HB.Infrastructure.Aliyun" Version="2.0.3-alpha1655515401" />-->
-	</ItemGroup>
+    <ItemGroup Condition="$(TargetFramework.Contains('-windows')) != true ">
+        <Compile Remove="**\*.Windows.cs" />
+        <None Include="**\*.Windows.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <Compile Update="Controls\Chip.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
-	  </Compile>
-	  <Compile Update="Controls\Cropper\CropperPage.xaml.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
-	  </Compile>
-	  <Compile Update="Controls\TimeEditor.xaml.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
-	  </Compile>
-	  <Compile Update="TCaptcha\TCaptchaPopup.cs">
-	    <DependentUpon>%(Filename)</DependentUpon>
-	  </Compile>
-	</ItemGroup>
+    <ItemGroup Condition="'$(_MauiNoTargetPlatform)' != 'True'">
+        <Compile Remove="**\*.Standard.cs" />
+        <None Include="**\*.Standard.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+        <Compile Remove="**\Standard\**\*.cs" />
+        <None Include="**\Standard\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <MauiXaml Update="Controls\Cropper\CropperPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Controls\Popups\ExceptionPopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Controls\TimeEditor.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />
+        <PackageReference Include="CommunityToolkit.Maui" Version="1.3.0" >
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.1.1" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="6.0.501" />
+        <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
+        <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.3" />
+        <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.3" />
+        <PackageReference Include="Svg.Skia" Version="0.5.16" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <EditorConfigFiles Remove="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
+        <ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+        <ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <EditorConfigFiles Remove="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Update="Controls\Chip.cs">
+            <DependentUpon>%(Filename)</DependentUpon>
+        </Compile>
+        <Compile Update="Controls\Cropper\CropperPage.xaml.cs">
+            <DependentUpon>%(Filename)</DependentUpon>
+        </Compile>
+        <Compile Update="Controls\TimeEditor.xaml.cs">
+            <DependentUpon>%(Filename)</DependentUpon>
+        </Compile>
+        <Compile Update="TCaptcha\TCaptchaPopup.cs">
+            <DependentUpon>%(Filename)</DependentUpon>
+        </Compile>
+    </ItemGroup>
 
-	<ItemGroup>
-	  <None Include="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
-	</ItemGroup>
-	
+    <ItemGroup>
+        <MauiXaml Update="Controls\Cropper\CropperPage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </MauiXaml>
+        <MauiXaml Update="Controls\Popups\ExceptionPopup.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </MauiXaml>
+        <MauiXaml Update="Controls\TimeEditor.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </MauiXaml>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EditorConfigFiles Remove="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EditorConfigFiles Remove="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
+    </ItemGroup>
+
 </Project>

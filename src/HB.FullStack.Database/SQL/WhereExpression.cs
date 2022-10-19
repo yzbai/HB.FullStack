@@ -5,21 +5,21 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-using HB.FullStack.Database.Converter;
+using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
+using HB.FullStack.Database.DbModels;
 
 using static System.FormattableString;
 
 namespace HB.FullStack.Database.SQL
 {
-    public class WhereExpression<T> where T : DatabaseEntity, new()
+    public class WhereExpression<T> where T : DbModel, new()
     {
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private Expression<Func<T, bool>>? _whereExpression;
         private readonly List<string> _orderByProperties = new List<string>();
         private readonly EngineType _engineType;
-        private readonly IEntityDefFactory _entityDefFactory;
+        private readonly IDbModelDefFactory _modelDefFactory;
         private readonly ISQLExpressionVisitor _expressionVisitor;
         private string _whereString = string.Empty;
         private string? _orderByString;
@@ -30,10 +30,10 @@ namespace HB.FullStack.Database.SQL
         private long? _limitRows;
         private long? _limitSkip;
 
-        internal WhereExpression(EngineType engineType, IEntityDefFactory entityDefFactory, ISQLExpressionVisitor expressionVisitor)
+        internal WhereExpression(EngineType engineType, IDbModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
         {
             _engineType = engineType;
-            _entityDefFactory = entityDefFactory;
+            _modelDefFactory = modelDefFactory;
             _expressionVisitor = expressionVisitor;
             _expressionContext = new SQLExpressionVisitorContenxt(engineType)
             {
@@ -134,7 +134,7 @@ namespace HB.FullStack.Database.SQL
         }
 
         /// <summary>
-        /// ֻ֧�ֲ���TypeConverter(ȫ�ֻ�����������)���ֶ�
+        /// ֻ֧�ֲ���DbPropertyConverter(ȫ�ֻ�����������)���ֶ�
         /// </summary>
         /// <param name="sqlText"></param>
         /// <param name="sqlParams"></param>
@@ -166,7 +166,7 @@ namespace HB.FullStack.Database.SQL
                             foreach (object value in sqlInValues.Values)
                             {
                                 string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
-                                object paramValue = TypeConvert.TypeValueToDbValue(value, null, engineType);
+                                object paramValue = DbPropertyConvert.PropertyValueToDbFieldValue(value, null, engineType);
 
                                 _expressionContext.AddParameter(paramPlaceholder, paramValue);
 
@@ -182,7 +182,7 @@ namespace HB.FullStack.Database.SQL
                     else
                     {
                         string paramPlaceholder = _expressionContext.GetNextParamPlaceholder();
-                        object paramValue = TypeConvert.TypeValueToDbValue(sqlParam, null, engineType);
+                        object paramValue = DbPropertyConvert.PropertyValueToDbFieldValue(sqlParam, null, engineType);
 
                         _expressionContext.AddParameter(paramPlaceholder, paramValue);
                         escapedParams.Add(paramPlaceholder);
@@ -547,7 +547,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> AddOrderAndLimits(int? page, int? perPage, string? orderBy)
         {
-            EntityDef entityDef = _entityDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = _modelDefFactory.GetDef<T>()!;
 
             if (orderBy.IsNotNullOrEmpty())
             {
@@ -556,9 +556,9 @@ namespace HB.FullStack.Database.SQL
 
                 foreach (string orderName in orderNames)
                 {
-                    if (!entityDef.ContainsProperty(orderName))
+                    if (!modelDef.ContainsProperty(orderName))
                     {
-                        throw DatabaseExceptions.NoSuchProperty(entityDef.EntityFullName, orderName);
+                        throw DatabaseExceptions.NoSuchProperty(modelDef.ModelFullName, orderName);
                     }
 
                     orderBuilder.Append(SqlHelper.GetQuoted(orderName));

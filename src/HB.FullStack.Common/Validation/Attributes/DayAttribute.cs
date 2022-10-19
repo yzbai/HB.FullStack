@@ -1,6 +1,7 @@
 ﻿
-
 using System.ComponentModel.DataAnnotations;
+
+using HB.FullStack.Common;
 using HB.FullStack.Common.Validate;
 
 namespace System.ComponentModel.DataAnnotations

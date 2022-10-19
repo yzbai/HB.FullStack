@@ -1,5 +1,4 @@
 ﻿
-
 using System.Globalization;
 
 namespace System
@@ -8,7 +7,11 @@ namespace System
     {
         private static readonly ChineseLunisolarCalendar _cc = new ChineseLunisolarCalendar();
 
-        public static UtcNowTicks UtcNowTicks => UtcNowTicks.Instance;
+        //public static UtcNowTicks UtcNowTicks => UtcNowTicks.Instance;
+
+        public static long UtcNowTicks => DateTimeOffset.UtcNow.UtcTicks;
+
+        public static long Timestamp => DateTimeOffset.UtcNow.UtcTicks;
 
         public static long UtcNowUnixTimeSeconds => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 

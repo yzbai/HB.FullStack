@@ -51,9 +51,9 @@ namespace HB.Infrastructure.Redis.EventBus
 
             IDatabase database = await RedisInstanceManager.GetDatabaseAsync(instanceSetting, _logger).ConfigureAwait(false);
 
-            EventMessageEntity entity = new EventMessageEntity(eventName, jsonData);
+            EventMessageModel model = new EventMessageModel(eventName, jsonData);
 
-            await database.ListLeftPushAsync(QueueName(entity.EventName), SerializeUtil.ToJson(entity)).ConfigureAwait(false);
+            await database.ListLeftPushAsync(QueueName(model.EventName), SerializeUtil.ToJson(model)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             if (!_consumeTaskManagers.ContainsKey(eventName))
             {
-                throw Exceptions.NoHandler(eventType: eventName);
+                throw FullStack.EventBus.Exceptions.NoHandler(eventType: eventName);
             }
 
             _consumeTaskManagers[eventName].Start();
@@ -81,7 +81,7 @@ namespace HB.Infrastructure.Redis.EventBus
             {
                 if (_consumeTaskManagers.ContainsKey(eventName))
                 {
-                    throw Exceptions.HandlerAlreadyExisted(eventType: eventName, brokerName: brokerName);
+                    throw FullStack.EventBus.Exceptions.HandlerAlreadyExisted(eventType: eventName, brokerName: brokerName);
                 }
 
                 ConsumeTaskManager consumeTaskManager = new ConsumeTaskManager(_options, instanceSetting, _lockManager, eventName, eventHandler, _logger);
@@ -103,7 +103,7 @@ namespace HB.Infrastructure.Redis.EventBus
             {
                 if (!_consumeTaskManagers.ContainsKey(eventyName))
                 {
-                    throw Exceptions.NoHandler(eventyName);
+                    throw FullStack.EventBus.Exceptions.NoHandler(eventyName);
                 }
 
                 //_consumeTaskManagers[eventType] = null;
@@ -149,7 +149,7 @@ namespace HB.Infrastructure.Redis.EventBus
         {
             if (!_instanceSettingDict.TryGetValue(brokerName, out RedisInstanceSetting? instanceSetting))
             {
-                throw Exceptions.SettingsError(brokerName, $"Not Found matched RedisInstanceSetting");
+                throw FullStack.EventBus.Exceptions.SettingsError(brokerName, $"Not Found matched RedisInstanceSetting");
             }
 
             return instanceSetting;

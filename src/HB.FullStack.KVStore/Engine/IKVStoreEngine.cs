@@ -12,30 +12,36 @@ namespace HB.FullStack.KVStore.Engine
 
         void Close();
 
+        
         /// <summary>
-        /// 
+        /// 返回 modelJson - timestamp
         /// </summary>
-        /// <param name="storeName"></param>
-        /// <param name="entityName"></param>
-        /// <param name="entityKeys"></param>
-        /// <returns></returns>
-        
-        Task<IEnumerable<Tuple<string?, int>>> EntityGetAsync(string storeName, string entityName, IEnumerable<string> entityKeys);
+        Task<IEnumerable<Tuple<string?, long>>> ModelGetAsync(string storeName, string modelName, IEnumerable<string> modelKeys);
+
+        /// <summary>
+        /// 返回 modelJson - timestamp
+        /// </summary>
+        Task<IEnumerable<Tuple<string?, long>>> ModelGetAllAsync(string storeName, string modelName);
+
+
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
+        Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, long newTimestamp);
+
+
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
+        Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<long> modelTimestamps, long newTimestamp);
+
+        /// <summary>
+        /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
+        /// </summary>
+        Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps);
 
         
-        Task<IEnumerable<Tuple<string?, int>>> EntityGetAllAsync(string storeName, string entityName);
-
-        
-        Task EntityAddAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons);
-
-        
-        Task EntityUpdateAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<string?> entityJsons, IEnumerable<int> entityVersions);
-
-        
-        Task EntityDeleteAsync(string storeName, string entityName, IEnumerable<string> entityKeys, IEnumerable<int> entityVersions);
-
-        
-        Task<bool> EntityDeleteAllAsync(string storeName, string entityName);
+        Task<bool> ModelDeleteAllAsync(string storeName, string modelName);
 
 
     }

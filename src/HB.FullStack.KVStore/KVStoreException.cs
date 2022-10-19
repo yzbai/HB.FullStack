@@ -1,32 +1,25 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-
-using HB.FullStack.KVStore;
-
-namespace System
+﻿namespace System
 {
-    public class KVStoreException : ErrorCode2Exception
+    public class KVStoreException : ErrorCodeException
     {
-        public KVStoreException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
 
-        public KVStoreException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
 
+        [Obsolete("DoNotUse")]
         public KVStoreException()
         {
         }
 
+        [Obsolete("DoNotUse")]
         public KVStoreException(string message) : base(message)
         {
         }
 
+        [Obsolete("DoNotUse")]
         public KVStoreException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public KVStoreException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

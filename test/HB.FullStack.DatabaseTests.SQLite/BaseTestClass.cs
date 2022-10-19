@@ -1,16 +1,16 @@
-﻿using HB.FullStack.Database;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+
+using HB.FullStack.Database;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
 
@@ -75,8 +75,9 @@ namespace HB.FullStack.DatabaseTests
                 .AddSQLite(options =>
                 {
                     options.CommonSettings.Version = 1;
+                    options.CommonSettings.DefaultTrulyDelete = true;
 
-                    var connSettings = new DatabaseConnectionSettings
+                    var connSettings = new DbConnectionSettings
                     {
                         DatabaseName = dbName,
                         IsMaster = true

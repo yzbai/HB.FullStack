@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 
-using HB.FullStack.Identity.Entities;
-using HB.FullStack.Repository;
+using HB.FullStack.Cache;
+using HB.FullStack.Identity.Models;
 
 namespace HB.FullStack.Identity
 {
@@ -20,5 +18,7 @@ namespace HB.FullStack.Identity
         public override TimeSpan? AbsoluteExpirationRelativeToNow => null;
 
         public override TimeSpan? SlidingExpiration => null;
+
+        public override string WhenToInvalidate => "UserClaim变动";
     }
 }

@@ -9,7 +9,6 @@
 		<Copyright>@2017 Wuxi Brilliant Technology Company Limited. All rights reserved.</Copyright>
 		<PackageProjectUrl>https://github.com/yzbai/HB.FullStack</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/yzbai/HB.FullStack</RepositoryUrl>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
 		<!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -21,6 +20,15 @@
 		<!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+
+		<LangVersion>Latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<!--<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
+		<ImplicitUsings>disable</ImplicitUsings>
 		
 	</PropertyGroup>
 

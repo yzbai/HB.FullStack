@@ -4,27 +4,28 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
-using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Entities;
-
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
+using HB.FullStack.Database.DbModels;
+using HB.FullStack.Database.Engine;
 
 [assembly: InternalsVisibleTo("HB.FullStack.Client")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.MySQL")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.SQLite")]
 [assembly: InternalsVisibleTo("HB.FullStack.Database.ClientExtension")]
+[assembly: InternalsVisibleTo("HB.FullStack.Repository")]
 
 namespace HB.FullStack.Database
 {
     public interface IDatabase : IDatabaseWriter, IDatabaseReader
     {
         /// <summary>
-        /// 必须加分布式锁进行。
+        /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
-        Task InitializeAsync(IEnumerable<Migration>? migrations = null);
+        Task<bool> InitializeAsync(IEnumerable<Migration>? migrations = null);
 
         EngineType EngineType { get; }
 
@@ -34,7 +35,7 @@ namespace HB.FullStack.Database
 
         internal IDatabaseEngine DatabaseEngine { get; }
 
-        internal IEntityDefFactory EntityDefFactory { get; }
+        internal IDbModelDefFactory ModelDefFactory { get; }
 
         internal IDbCommandBuilder DbCommandBuilder { get; }
     }

@@ -1,30 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace System
+﻿namespace System
 {
-    public class RepositoryException : ErrorCode2Exception
+    public class RepositoryException : ErrorCodeException
     {
-        public RepositoryException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
-
-        public RepositoryException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
+        [Obsolete("DoNotUse")]
         public RepositoryException()
         {
         }
 
-        public RepositoryException(string message) : base(message)
+        [Obsolete("DoNotUse")]
+        public RepositoryException(string? cause) : base(cause)
         {
         }
 
-        public RepositoryException(string message, Exception innerException) : base(message, innerException)
+        [Obsolete("DoNotUse")]
+        public RepositoryException(string? cause, Exception innerException) : base(cause, innerException)
+        {
+        }
+
+        public RepositoryException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

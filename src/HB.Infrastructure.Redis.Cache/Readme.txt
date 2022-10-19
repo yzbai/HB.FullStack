@@ -22,5 +22,5 @@
 
 4, 无锁
 	一般更新缓存时，需要加上分布式锁。
-	这里采用无锁的办法，为每一个entity单独存储一个version，就像abs，dim等一样。只有比version大才能更新。
+	这里采用无锁的办法，为每一个model单独存储一个version，就像abs，dim等一样。只有比version大才能更新。
 	得益于redis的单队列，不会造成写脏数据。

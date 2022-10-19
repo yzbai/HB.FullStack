@@ -4,12 +4,10 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Client.Maui.Base
 {
@@ -43,7 +41,7 @@ namespace HB.FullStack.Client.Maui.Base
 
         protected ExceptionDisplayMode ExceptionDisplayMode { get; set; } = ExceptionDisplayMode.Toast;
 
-        public virtual void OnException(Exception ex, string message, ExceptionHandler handler,  bool report = false, [CallerMemberName] string caller = "")
+        public virtual void OnException(Exception ex, string message, ExceptionHandler handler, bool report = false, [CallerMemberName] string caller = "")
         {
             handler(ex, message, caller);
         }

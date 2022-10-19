@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Extensions;
 using HB.FullStack.Database;
-using HB.FullStack.Identity.Entities;
+using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Distributed;
 
 using Microsoft.Extensions.Logging;
@@ -30,8 +30,8 @@ namespace HB.FullStack.Identity
         private readonly UserClaimRepo _userClaimRepo;
         private readonly LoginControlRepo _userLoginControlRepo;
         private readonly RoleRepo _roleRepo;
-        private readonly UserActivityRepo _userActivityEntityRepo;
-        private readonly UserRoleRepo _userRoleRepo;
+        private readonly UserActivityRepo _userActivityModelRepo;
+        //private readonly UserRoleRepo _userRoleRepo;
 
         //Jwt Signing
         private string _jsonWebKeySetJson = null!;
@@ -56,8 +56,8 @@ namespace HB.FullStack.Identity
             UserClaimRepo userClaimRepo,
             LoginControlRepo userLoginControlRepo,
             RoleRepo roleRepo,
-            UserRoleRepo userRoleRepo,
-            UserActivityRepo userActivityEntityRepo)
+            //UserRoleRepo userRoleRepo,
+            UserActivityRepo userActivityModelRepo)
         {
             _options = options.Value;
             _logger = logger;
@@ -70,9 +70,9 @@ namespace HB.FullStack.Identity
             _signInTokenRepo = signInTokenRepo;
 
             _roleRepo = roleRepo;
-            _userRoleRepo = userRoleRepo;
+            //_userRoleRepo = userRoleRepo;
 
-            _userActivityEntityRepo = userActivityEntityRepo;
+            _userActivityModelRepo = userActivityModelRepo;
 
             InitializeCredencials();
 
@@ -88,7 +88,7 @@ namespace HB.FullStack.Identity
 
         public string JsonWebKeySetJson => _jsonWebKeySetJson;
 
-        public async Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser)
+        public async Task<UserToken> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
 
@@ -182,7 +182,7 @@ namespace HB.FullStack.Identity
                 //构造 Jwt
                 string jwt = await ConstructJwtAsync(user, signInToken, context.SignToWhere, transactionContext).ConfigureAwait(false);
 
-                UserAccessResult result = new UserAccessResult
+                UserToken result = new UserToken
                 (
                     accessToken: jwt,
                     refreshToken: signInToken.RefreshToken,
@@ -208,18 +208,21 @@ namespace HB.FullStack.Identity
             }
         }
 
-        public async Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
+        public async Task<UserToken> RefreshAccessTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
 
-            //解决并发涌入
+            //解决并发涌入：同一设备的在这么长时间内只能刷新一次。
+            //如果刷新失败呢？那就重新登录吧
+
             using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
                nameof(RefreshAccessTokenAsync) + context.DeviceId,
                _options.RefreshIntervalTimeSpan, notUnlockWhenDispose: true).ConfigureAwait(false);
 
             if (!distributedLock.IsAcquired)
             {
-                throw IdentityExceptions.AuthorizationTooFrequent(context: context);
+                //直接短路。
+                throw IdentityExceptions.AccessTokenRefreshing(context: context);
             }
 
             //AccessToken, Claims 验证
@@ -238,25 +241,25 @@ namespace HB.FullStack.Identity
             }
             catch (Exception ex)
             {
-                throw IdentityExceptions.AuthorizationInvalideAccessToken(context: context, innerException: ex);
+                throw IdentityExceptions.RefreshAccessTokenError("验证过期的AccessToken时出错", ex, context);
             }
 
             if (claimsPrincipal == null)
             {
                 //TODO: Black concern SigninToken by RefreshToken
-                throw IdentityExceptions.AuthorizationInvalideAccessToken(context: context);
+                throw IdentityExceptions.RefreshAccessTokenError("验证过期的AccessToken时出错", null, context);
             }
 
             if (claimsPrincipal.GetDeviceId() != context.DeviceId)
             {
-                throw IdentityExceptions.AuthorizationInvalideDeviceId(context: context);
+                throw IdentityExceptions.RefreshAccessTokenError("DeviceId验证不通过", null, context);
             }
 
             Guid userId = claimsPrincipal.GetUserId().GetValueOrDefault();
 
             if (userId.IsEmpty())
             {
-                throw IdentityExceptions.AuthorizationInvalideUserId(context: context);
+                throw IdentityExceptions.RefreshAccessTokenError("UserId验证不通过", null, context);
             }
 
             //SignInToken 验证
@@ -274,14 +277,17 @@ namespace HB.FullStack.Identity
                     signInToken.DeviceId != context.DeviceId ||
                     signInToken.UserId != userId)
                 {
-                    throw IdentityExceptions.AuthorizationNoTokenInStore(cause: "Refresh token error. signInToken not saved in db. ");
+                    throw IdentityExceptions.RefreshAccessTokenError(
+                        "SignInToken验证不通过",
+                        null,
+                        new { Blacked = signInToken?.Blacked, DeviceId = signInToken?.DeviceId, UserId = signInToken?.UserId });
                 }
 
                 //验证SignInToken过期问题,即RefreshToken是否过期
 
                 if (signInToken.ExpireAt < TimeUtil.UtcNow)
                 {
-                    throw IdentityExceptions.AuthorizationRefreshTokenExpired();
+                    throw IdentityExceptions.RefreshAccessTokenError("SignInToken过期", null, null);
                 }
 
                 // User 信息变动验证
@@ -290,15 +296,11 @@ namespace HB.FullStack.Identity
 
                 if (user == null || user.SecurityStamp != claimsPrincipal.GetUserSecurityStamp())
                 {
-                    throw IdentityExceptions.AuthorizationUserSecurityStampChanged(cause: "Refresh token error. User SecurityStamp Changed.");
+                    throw IdentityExceptions.RefreshAccessTokenError("用户SecurityStamp变动", null, null);
                 }
 
                 // 更新SignInToken
-                /*
-                 * 在 OAuth 2.0 安全最佳实践中, 推荐 refresh_token 是一次性的, 什么意思呢? 
-                 * 使用 refresh_token 获取 access_token 时, 同时会返回一个 新的 refresh_token, 之前的 refresh_token 就会失效, 
-                 * 但是两个 refresh_token 的绝对过期时间是一样的, 所以不会存在 refresh_token 快过期就获取一个新的, 然后重复，永不过期的情况
-                 */
+
                 signInToken.RefreshCount++;
                 signInToken.RefreshToken = SecurityUtil.CreateUniqueToken();
 
@@ -309,7 +311,7 @@ namespace HB.FullStack.Identity
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new UserAccessResult(accessToken, signInToken.RefreshToken, user);
+                return new UserToken(accessToken, signInToken.RefreshToken, user);
             }
             catch
             {
@@ -402,13 +404,12 @@ namespace HB.FullStack.Identity
 
         private async Task<string> ConstructJwtAsync(User user, SignInToken signInToken, string audience, TransactionContext transactionContext)
         {
-            IEnumerable<Role> roles = await _roleRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+            IEnumerable<Role> roles = await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
             IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
-
-            IEnumerable<Claim> claims = ConstructClaims(user, roles, userClaims, signInToken);
+            IEnumerable<Claim> jwtClaims = ConstructClaims(user, roles, userClaims, signInToken);
 
             string jwt = JwtHelper.BuildJwt(
-                claims,
+                jwtClaims,
                 _options.OpenIdConnectConfiguration.Issuer,
                 _options.NeedAudienceToBeChecked ? audience : null,
                 _options.SignInOptions.AccessTokenExpireTimeSpan,
@@ -517,14 +518,15 @@ namespace HB.FullStack.Identity
             return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
         }
 
+        /// <summary>
+        /// Jwt中放入：UserId，SecurityStamp，SignInTokenId，DeviceId，UserClaim，Role
+        /// </summary>
         private static IEnumerable<Claim> ConstructClaims(User user, IEnumerable<Role> roles, IEnumerable<UserClaim> userClaims, SignInToken signInToken)
         {
             IList<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimExtensionTypes.USER_ID, user.Id.ToString()),
                 new Claim(ClaimExtensionTypes.SECURITY_STAMP, user.SecurityStamp),
-                //new Claim(ClaimExtensionTypes.LoginName, user.LoginName ?? ""),
-
                 new Claim(ClaimExtensionTypes.SIGN_IN_TOKEN_ID, signInToken.Id.ToString()),
                 new Claim(ClaimExtensionTypes.DEVICE_ID, signInToken.DeviceId),
             };
@@ -541,6 +543,7 @@ namespace HB.FullStack.Identity
             {
                 claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, item.Name));
             }
+
             return claims;
         }
 
@@ -611,74 +614,76 @@ namespace HB.FullStack.Identity
 
         #region Role
 
-        public async Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser)
-        {
-            //TODO: 需要重新构建 jwt
+        //        public async Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser)
+        //        {
+        //            //TODO: 需要重新构建 jwt
 
-            ThrowIf.Empty(ref userId, nameof(userId));
-            ThrowIf.Empty(ref roleId, nameof(roleId));
+        //            ThrowIf.Empty(ref userId, nameof(userId));
+        //            ThrowIf.Empty(ref roleId, nameof(roleId));
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
-            try
-            {
-                //查重
-                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
+        //            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
+        //            try
+        //            {
+        //                //查重
+        //                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
 
-                if (storeds.Any(ur => ur.Id == roleId))
-                {
-                    throw IdentityExceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
-                }
+        //                if (storeds.Any(ur => ur.Id == roleId))
+        //                {
+        //                    throw IdentityExceptions.FoundTooMuch(userId: userId, roleId: roleId, cause: "已经有相同的角色");
+        //                }
 
-                UserRole ru = new UserRole(userId, roleId);
 
-                await _userRoleRepo.AddAsync(ru, lastUser, trans).ConfigureAwait(false);
 
-                await trans.CommitAsync().ConfigureAwait(false);
-            }
-            catch
-            {
-                await trans.RollbackAsync().ConfigureAwait(false);
-                throw;
-            }
-        }
+        //                UserRole ru = new UserRole(userId, roleId);
 
-        public async Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser)
-        {
-            //需要重新构建 jwt
+        //                await _userRoleRepo.AddAsync(ru, lastUser, trans).ConfigureAwait(false);
 
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
+        //                await trans.CommitAsync().ConfigureAwait(false);
+        //            }
+        //            catch
+        //            {
+        //                await trans.RollbackAsync().ConfigureAwait(false);
+        //                throw;
+        //            }
+        //        }
 
-            try
-            {
-                //查重
-                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
+        //        public async Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser)
+        //        {
+        //            //需要重新构建 jwt
 
-                Role? stored = storeds.SingleOrDefault(ur => ur.Id == roleId);
+        //            TransactionContext trans = await _transaction.BeginTransactionAsync<UserRole>().ConfigureAwait(false);
 
-                if (stored == null)
-                {
-                    return false;
-                }
+        //            try
+        //            {
+        //                //查重
+        //                IEnumerable<Role> storeds = await _roleRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
 
-                UserRole? userRole = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
+        //                Role? stored = storeds.SingleOrDefault(ur => ur.Id == roleId);
 
-                await _userRoleRepo.DeleteAsync(userRole!, lastUser, trans).ConfigureAwait(false);
+        //                if (stored == null)
+        //                {
+        //                    return false;
+        //                }
 
-                await trans.CommitAsync().ConfigureAwait(false);
+        //                UserRole? userRole = await _userRoleRepo.GetByUserIdAndRoleIdAsync(userId, roleId, trans).ConfigureAwait(false);
 
-                return true;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                await trans.RollbackAsync().ConfigureAwait(false);
+        //                await _userRoleRepo.DeleteAsync(userRole!, lastUser, trans).ConfigureAwait(false);
 
-                _logger.LogTryRemoveRoleFromUserError(userId, roleId, lastUser, ex);
+        //                await trans.CommitAsync().ConfigureAwait(false);
 
-                return false;
-            }
-        }
+        //                return true;
+        //            }
+        //#pragma warning disable CA1031 // Do not catch general exception types
+        //            catch (Exception ex)
+        //#pragma warning restore CA1031 // Do not catch general exception types
+        //            {
+        //                await trans.RollbackAsync().ConfigureAwait(false);
+
+        //                _logger.LogTryRemoveRoleFromUserError(userId, roleId, lastUser, ex);
+
+        //                return false;
+        //            }
+        //        }
 
         #endregion
 
@@ -710,7 +715,7 @@ namespace HB.FullStack.Identity
                 url = url[..MAX_URL_LENGTH];
             }
 
-            UserActivity entity = new UserActivity
+            UserActivity model = new UserActivity
             {
                 SignInTokenId = signInTokenId,
                 UserId = userId,
@@ -723,7 +728,7 @@ namespace HB.FullStack.Identity
                 ResultError = resultError
             };
 
-            await _userActivityEntityRepo.AddAsync(entity, "", null).ConfigureAwait(false);
+            await _userActivityModelRepo.AddAsync(model, "", null).ConfigureAwait(false);
         }
 
         #endregion

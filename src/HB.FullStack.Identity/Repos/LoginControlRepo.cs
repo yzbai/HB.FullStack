@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Identity.Entities;
+﻿using HB.FullStack.Identity.Models;
 using HB.FullStack.Repository;
 using HB.FullStack.Database;
 using HB.FullStack.KVStore;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Identity
 {
-    public class LoginControlRepo : KVStoreEntityRepository<LoginControl>
+    public class LoginControlRepo : KVStoreModelRepository<LoginControl>
     {
         public LoginControlRepo(IKVStore kvStore) : base(kvStore)
         {

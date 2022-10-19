@@ -2,21 +2,20 @@
 using System.Net.Http;
 
 using HB.FullStack.Client.Network;
-using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 
 namespace HB.FullStack.Client
 {
-    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource2
+    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource
     {
-        public TokenAutoRefreshedHttpClientHandler TokenAutoRefreshedHttpClientHandler { get; }
+        public UserTokenRefreshHttpClientHandler TokenAutoRefreshedHttpClientHandler { get; }
 
         protected BaseFileRepo(
             IApiClient apiClient,
             IPreferenceProvider userPreferenceProvider,
-            TokenAutoRefreshedHttpClientHandler tokenAutoRefreshedHttpClientHandler,
-            ConnectivityManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
+            UserTokenRefreshHttpClientHandler tokenAutoRefreshedHttpClientHandler,
+            StatusManager connectivityManager) : base(apiClient, userPreferenceProvider, connectivityManager)
         {
             TokenAutoRefreshedHttpClientHandler = tokenAutoRefreshedHttpClientHandler;
         }
@@ -25,7 +24,6 @@ namespace HB.FullStack.Client
         {
             return new HttpClient(TokenAutoRefreshedHttpClientHandler);
         }
-
 
         //public Task UploadAsync(string fileSuffix, byte[] file)
         //{

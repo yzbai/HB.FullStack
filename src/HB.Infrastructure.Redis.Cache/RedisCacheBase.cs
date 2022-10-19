@@ -15,7 +15,9 @@ namespace HB.Infrastructure.Redis.Cache
 {
     public class RedisCacheBase
     {
-        protected const int INVALIDATION_VERSION_EXPIRY_SECONDS = 60;
+        //TODO: 放到options中。
+        //TODO: 思考是否需要不过期？
+        protected const int MININAL_TIMESTAMP_LOCK_EXPIRY_SECONDS = 24 * 60 * 60;
 
         private readonly RedisCacheOptions _options;
 
@@ -57,23 +59,25 @@ namespace HB.Infrastructure.Redis.Cache
                 IServer server = RedisInstanceManager.GetServer(setting, Logger);
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
-                    LoadedCollectionGetAndRefreshWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP),
-                    LoadedCollectionRemoveItemWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_REMOVE_ITEM_WITH_TIMESTAMP),
-                    LoadedCollectionSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_SET_WITH_TIMESTAMP),
+                    LoadedCollectionGetAndRefreshWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_GET_AND_REFRESH_WITH_TIMESTAMP_2),
+                    LoadedCollectionRemoveItemWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_REMOVE_ITEMS_WITH_TIMESTAMP_2),
+                    LoadedCollectionSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_COLLECTION_SET_WITH_TIMESTAMP_2),
 
                     LoadedSetWithTimestampLua = server.ScriptLoad(RedisCache.LUA_SET_WITH_TIMESTAMP),
-                    LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_WITH_TIMESTAMP),
-                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_WITH_TIMESTAMP),
-                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH_WITH_TIMESTAMP),
+                    LoadedRemoveWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_2),
+                    LoadedRemoveMultipleWithTimestampLua = server.ScriptLoad(RedisCache.LUA_REMOVE_MULTIPLE_2),
+                    LoadedGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_GET_AND_REFRESH),
 
-                    LoadedEntitiesGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH),
-                    LoadedEntitiesGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_GET_AND_REFRESH_BY_DIMENSION),
-                    LoadedEntitiesSetLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_SET),
-                    LoadedEntitiesRemoveLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE),
-                    LoadedEntitiesRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE_BY_DIMENSION),
+                    LoadedModelsGetAndRefreshLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH),
+                    LoadedModelsGetAndRefreshByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_GET_AND_REFRESH_BY_DIMENSION),
+                    LoadedModelsSetLua = server.ScriptLoad(RedisCache.LUA_MODELS_SET),
+                    //LoadedModelsRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE),
+                    LoadedModelsRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_2),
+                    //LoadedModelsRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION),
+                    LoadedModelsRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION_2),
 
-                    LoadedEntitiesForcedRemoveLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE_FORECED_NO_VERSION),
-                    LoadedEntitiesForcedRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_ENTITIES_REMOVE_BY_DIMENSION_FORCED_NO_VERSION),
+                    //LoadedModelsForcedRemoveLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_FORECED_NO_VERSION),
+                    //LoadedModelsForcedRemoveByDimensionLua = server.ScriptLoad(RedisCache.LUA_MODELS_REMOVE_BY_DIMENSION_FORCED_NO_VERSION),
                 };
 
                 _loadedLuaDict[setting.InstanceName] = loadedLuas;
@@ -141,34 +145,21 @@ namespace HB.Infrastructure.Redis.Cache
             return GetDatabase(DefaultInstanceName);
         }
 
-        protected string GetRealKey(string entityName, string key)
+        protected string GetRealKey(string modelName, string key)
         {
-            return _options.ApplicationName + entityName + key;
+            return _options.ApplicationName + modelName + key;
         }
 
-        protected string GetEntityDimensionKey(string entityName, string dimensionKeyName, string dimensionKeyValue)
+        protected string GetModelDimensionKey(string modelName, string dimensionKeyName, string dimensionKeyValue)
         {
-            return GetRealKey(entityName, dimensionKeyName + dimensionKeyValue);
+            return GetRealKey(modelName, dimensionKeyName + dimensionKeyValue);
         }
 
-        protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheEntityDef entityDef)
+        protected static void ThrowIfNotADimensionKeyName(string dimensionKeyName, CacheModelDef modelDef)
         {
-            if (!entityDef.Dimensions.Any(p => p.Name == dimensionKeyName))
+            if (!modelDef.AltKeyProperties.Any(p => p.Name == dimensionKeyName))
             {
-                throw CacheExceptions.NoSuchDimensionKey(typeName: entityDef.Name, dimensionKeyName: dimensionKeyName);
-            }
-        }
-
-        /// <summary>
-        /// ThrowIfNotCacheEnabled
-        /// </summary>
-        /// <param name="entityDef"></param>
-
-        protected static void ThrowIfNotCacheEnabled(CacheEntityDef entityDef)
-        {
-            if (!entityDef.IsCacheable)
-            {
-                throw CacheExceptions.NotEnabledForEntity(entityDef.Name);
+                throw CacheExceptions.NoSuchDimensionKey(typeName: modelDef.Name, dimensionKeyName: dimensionKeyName);
             }
         }
 

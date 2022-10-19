@@ -4,31 +4,24 @@
 
   <PropertyGroup>
 	  <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
-    <LangVersion>Latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+   
   </PropertyGroup>
 
   
 
   <ItemGroup>
-    <Compile Remove="Mapper\EntityMapperCreator3.cs" />
-    <Compile Remove="SQL\SelectExpression.cs" />
-  </ItemGroup>
-
-
-
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
     <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
   </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HB.FullStack.Database.SourceGenerators\HB.FullStack.Database.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+
 </Project>

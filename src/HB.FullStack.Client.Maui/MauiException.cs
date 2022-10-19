@@ -1,24 +1,23 @@
 ﻿namespace System
 {
-    public class MauiException : ErrorCode2Exception
+    public class MauiException : ErrorCodeException
     {
-        public MauiException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
-
-        public MauiException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
+        [Obsolete("DoNotUse")]
         public MauiException()
         {
         }
 
-        public MauiException(string message) : base(message)
+        [Obsolete("DoNotUse")]
+        public MauiException(string? cause) : base(cause)
         {
         }
 
-        public MauiException(string message, Exception innerException) : base(message, innerException)
+        [Obsolete("DoNotUse")]
+        public MauiException(string? cause, Exception innerException) : base(cause, innerException)
+        {
+        }
+
+        public MauiException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

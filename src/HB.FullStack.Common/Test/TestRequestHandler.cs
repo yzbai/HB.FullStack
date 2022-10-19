@@ -1,10 +1,8 @@
-﻿
-using HB.FullStack.Common.Api;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 
 namespace HB.FullStack.Common.Test
@@ -17,19 +15,16 @@ namespace HB.FullStack.Common.Test
 
         public TestRequestHandler(
             string url,
-            ApiMethodName httpMethod,
+            HttpMethod httpMethod,
             Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>?> handlerAction
         )
         {
             Url = url;
-            HttpMethod = httpMethod.ToHttpMethodString();
+            HttpMethod = httpMethod.Method;
             HandlerAction = handlerAction;
 
             _comparisonRegex = CreateComparisonRegex(url);
         }
-
-        public TestRequestHandler(string url, Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>?> handlerAction)
-            : this(url, ApiMethodName.None, handlerAction) { }
 
         string Url { get; }
         string HttpMethod { get; }
@@ -45,7 +40,7 @@ namespace HB.FullStack.Common.Test
 
             var regex = new Regex(@"{(.*?)}");
 
-            foreach (Match match in regex.Matches(regexString))
+            foreach (Match match in regex.Matches(regexString).Cast<Match>())
             {
                 regexString = regexString.Replace(match.Value, @"(.*?)");
                 _urlParameterNames.Add(match.Groups[1].Value);
@@ -58,7 +53,7 @@ namespace HB.FullStack.Common.Test
 
         public bool TryMatchUrl(string? rawUrl, string httpMethod, out Dictionary<string, string>? parameters)
         {
-            if(rawUrl == null)
+            if (rawUrl == null)
             {
                 parameters = null;
                 return false;

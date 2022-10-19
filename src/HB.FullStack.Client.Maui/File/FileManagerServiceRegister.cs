@@ -1,14 +1,10 @@
-﻿using HB.FullStack.Client.ClientEntity;
+﻿using System;
+
+using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.File;
 using HB.FullStack.Client.Maui.File;
 
 using Microsoft.Extensions.Configuration;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -29,12 +25,13 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IFileManager, FileManager>();
             services.AddSingleton<StsTokenRepo>();
 
-            ClientEntityDefFactory.Register<StsToken>(new ClientEntityDef
+            ClientModelDefFactory.Register<StsToken>(new ClientModelDef
             {
                 ExpiryTime = TimeSpan.MaxValue,
                 AllowOfflineRead = false,
-                AllowOfflineWrite = false,
-                NeedLogined = true
+                AllowOfflineAdd = false,
+                AllowOfflineDelete = false,
+                AllowOfflineUpdate = false
             });
 
             return services;

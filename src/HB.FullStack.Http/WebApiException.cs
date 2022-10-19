@@ -1,30 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HB.FullStack.WebApi
+namespace System
 {
-    public class WebApiException : ErrorCode2Exception
+    public class WebApiException : ErrorCodeException
     {
-        public WebApiException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
 
-        public WebApiException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
+        [Obsolete("DoNotUse")]
         public WebApiException()
         {
         }
-
+        [Obsolete("DoNotUse")]
         public WebApiException(string message) : base(message)
         {
         }
-
+        [Obsolete("DoNotUse")]
         public WebApiException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public WebApiException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

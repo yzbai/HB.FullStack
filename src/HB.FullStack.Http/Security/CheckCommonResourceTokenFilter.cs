@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc;
+
 using HB.FullStack.Common.Api;
-using Microsoft.Extensions.Logging;
 using HB.FullStack.WebApi.Security;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
 namespace HB.FullStack.WebApi.Filters
@@ -23,7 +25,7 @@ namespace HB.FullStack.WebApi.Filters
             _securityService = securityService;
             _commonResTokenService = publicResourceTokenManager;
         }
- 
+
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             try
@@ -39,37 +41,30 @@ namespace HB.FullStack.WebApi.Filters
 
                         if (token.IsNullOrEmpty())
                         {
-                            OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                            OnError(context, ErrorCodes.CommonResourceTokenNeeded);
                             return;
                         }
 
                         string crt = token.First();
 
-                        if(!_commonResTokenService.TryCheckToken(crt,out string? _))
+                        if (!_commonResTokenService.TryCheckToken(crt, out string? _))
                         {
-                            OnError(context, ApiErrorCodes.CommonResourceTokenError);
+                            OnError(context, ErrorCodes.CommonResourceTokenError);
                             return;
                         }
                     }
                 }
                 else
                 {
-                    OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                    OnError(context, ErrorCodes.CommonResourceTokenNeeded);
                     return;
                 }
 
                 await next().ConfigureAwait(false);
             }
-            catch (CacheException ex)
-            {
-                OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
-                _logger.LogError(ex, "CommonResourceToken 验证失败");
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
-                OnError(context, ApiErrorCodes.CommonResourceTokenNeeded);
+                OnError(context, ErrorCodes.CommonResourceTokenNeeded);
                 _logger.LogError(ex, "CommonResourceToken 验证失败");
             }
         }

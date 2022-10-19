@@ -1,4 +1,8 @@
 ﻿
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -6,12 +10,6 @@ using Polly;
 using Polly.Retry;
 
 using StackExchange.Redis;
-
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Redis.Shared
 {
@@ -55,7 +53,7 @@ namespace HB.Infrastructure.Redis.Shared
 
                     SetConnectionEvents(connection, logger);
 
-                    logger.LogInformation($"Redis 链接建立 Connected : {setting.InstanceName}");
+                    logger.LogInformation("Redis 链接建立 Connected : {CacheInstanceName}", setting.InstanceName);
                 });
 
                 _connectionLock.Release();
@@ -68,7 +66,8 @@ namespace HB.Infrastructure.Redis.Shared
             {
                 _connectionLock.Release();
 
-                logger.LogCritical(ex, $"Redis Database获取失败.尝试重新获取。 SettingName:{setting.InstanceName}, Connection:{setting.ConnectionString}");
+                logger.LogCritical(ex, "Redis Database获取失败.尝试重新获取。 SettingName:{CacheInstanceName}, Connection:{ConnectionString}",
+                    setting.InstanceName, setting.ConnectionString);
 
                 Close(setting);
 
@@ -82,12 +81,13 @@ namespace HB.Infrastructure.Redis.Shared
         {
             connection.ErrorMessage += (sender, e) =>
             {
-                logger.LogError($"message:{e.Message}, endpoint:{e.EndPoint}");
+                logger.LogError("Redis Connection ErrorMessage. Message:{Message}, Endpoint:{EndPoint}", e.Message, e.EndPoint);
             };
 
             connection.InternalError += (sernder, e) =>
             {
-                logger.LogError(e.Exception, $"{e.ConnectionType}, {e.EndPoint}, {e.Origin}");
+                logger.LogError(e.Exception, "Redis Connection InternalError. ConnectionType: {ConnectionType}, Endpoint:{EndPoint}, Origin:{Origin}",
+                    e.ConnectionType, e.EndPoint, e.Origin);
             };
         }
 
@@ -126,7 +126,7 @@ namespace HB.Infrastructure.Redis.Shared
 
                     SetConnectionEvents(connection, logger);
 
-                    logger.LogInformation($"Redis 链接建立 Connected : {setting.InstanceName}");
+                    logger.LogInformation("Redis 链接建立 Connected : {CacheInstanceName}", setting.InstanceName);
                 }).ConfigureAwait(false);
 
                 _connectionLock.Release();
@@ -139,7 +139,8 @@ namespace HB.Infrastructure.Redis.Shared
             {
                 _connectionLock.Release();
 
-                logger.LogCritical(ex, $"Redis Database获取失败.尝试重新获取。 SettingName:{setting.InstanceName}, Connection:{setting.ConnectionString}");
+                logger.LogCritical(ex, "Redis Database获取失败.尝试重新获取。 SettingName:{CacheInstanceName}, Connection:{ConnectionString}",
+                    setting.InstanceName, setting.ConnectionString);
 
                 Close(setting);
 
@@ -186,7 +187,8 @@ namespace HB.Infrastructure.Redis.Shared
                             (exception, retryCount, timeSpan) =>
                             {
                                 RedisConnectionException ex = (RedisConnectionException)exception;
-                                logger.LogCritical(exception, $"Redis 建立链接时失败 Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
+                                logger.LogCritical(exception, "Redis 建立链接时失败 Connection lost. Try {RetryCount}th times. Wait For {WaitTime} seconds. Redis Can not connect {ConnectionString}",
+                                    retryCount, timeSpan.TotalSeconds, connectionString);
                             });
         }
 
@@ -200,7 +202,8 @@ namespace HB.Infrastructure.Redis.Shared
                             (exception, retryCount, timeSpan) =>
                             {
                                 RedisConnectionException ex = (RedisConnectionException)exception;
-                                logger.LogCritical(exception, $"Redis 建立链接时失败 Connection lost. Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {connectionString}");
+                                logger.LogCritical(exception, "Redis 建立链接时失败 Connection lost. Try {RetryCount}th times. Wait For {WaitTime} seconds. Redis Can not connect {ConnectionString}",
+                                    retryCount, timeSpan.TotalSeconds, connectionString);
                             });
         }
 

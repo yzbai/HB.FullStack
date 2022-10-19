@@ -1,5 +1,4 @@
 ﻿
-
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -251,14 +250,20 @@ namespace System
             return Convert.ToInt32(str, GlobalSettings.Culture); ;
         }
 
+        public static string Append(this string? str, string toAppend, char seprator)
+        {
+            return str.IsNullOrEmpty() ? toAppend : $"{str}{seprator}{toAppend}";
+        }
+
         #endregion Extensions
 
-        public static StringBuilder RemoveLast(this StringBuilder stringBuilder)
+        public static StringBuilder RemoveLast(this StringBuilder stringBuilder, int lengthToRemve = 1)
         {
-            if (stringBuilder.Length > 0)
+            if (stringBuilder.Length >= lengthToRemve)
             {
-                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+                stringBuilder.Remove(stringBuilder.Length - lengthToRemve, lengthToRemve);
             }
+
             return stringBuilder;
         }
     }

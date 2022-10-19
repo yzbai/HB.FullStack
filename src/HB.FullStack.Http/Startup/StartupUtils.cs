@@ -1,4 +1,8 @@
-﻿using HB.FullStack.Common.Api;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+
 using HB.FullStack.Database;
 using HB.FullStack.Identity;
 using HB.FullStack.Lock.Distributed;
@@ -9,11 +13,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,16 +26,6 @@ using Polly;
 using Serilog;
 
 using StackExchange.Redis;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Encodings.Web;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace System
 {
@@ -149,7 +141,7 @@ namespace System
                 });
         }
 
-        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
+        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
         {
             Assembly httpFrameworkAssembly = typeof(GlobalExceptionController).Assembly;
 
@@ -158,12 +150,15 @@ namespace System
             services
                 .AddControllers(options =>
                 {
-                    //need authenticated by default. no need add [Authorize] everywhere
-                    AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                    options.Filters.Add(new AuthorizeFilter(policy));
+                    if (addAuthentication)
+                    {
+                        //need authenticated by default. no need add [Authorize] everywhere
+                        AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                        options.Filters.Add(new AuthorizeFilter(policy));
 
-                    //options.Filters
-                    options.Filters.AddService<UserActivityFilter>();
+                        //options.Filters
+                        options.Filters.AddService<UserActivityFilter>();
+                    }
                 })
                 .AddJsonOptions(options =>
                 {
@@ -173,7 +168,7 @@ namespace System
                 {
                     apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
                     {
-                        ErrorCode errorCode = ApiErrorCodes.ModelValidationError.WithMessage(actionContext.ModelState.GetErrors());
+                        ErrorCode errorCode = ErrorCodes.ModelValidationError.WithMessage(actionContext.ModelState.GetErrors());
 
                         return new BadRequestObjectResult(errorCode)
                         {
@@ -186,9 +181,16 @@ namespace System
             return services;
         }
 
-        public static async Task InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
+        /// <summary>
+        /// 返回是否有Migration被执行
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="lockManager"></param>
+        /// <param name="migrations"></param>
+        /// <returns></returns>
+        public static async Task<bool> InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
         {
-            GlobalSettings.Logger.LogDebug($"开始初始化数据库:{database.DatabaseNames.ToJoinedString(",")}");
+            GlobalSettings.Logger.LogDebug("开始初始化数据库:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
 
             IDistributedLock distributedLock = await lockManager.LockAsync(
                 resources: database.DatabaseNames,
@@ -202,9 +204,9 @@ namespace System
                     ThrowIfDatabaseInitLockNotGet(database.DatabaseNames);
                 }
 
-                GlobalSettings.Logger.LogDebug($"获取了初始化数据库的锁:{database.DatabaseNames.ToJoinedString(",")}");
+                GlobalSettings.Logger.LogDebug("获取了初始化数据库的锁:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
 
-                await database.InitializeAsync(migrations).ConfigureAwait(false);
+                return await database.InitializeAsync(migrations).ConfigureAwait(false);
             }
             finally
             {

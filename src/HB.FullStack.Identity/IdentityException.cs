@@ -1,25 +1,24 @@
 ﻿namespace System
 {
-    public class IdentityException : ErrorCode2Exception
+    public class IdentityException : ErrorCodeException
     {
-        public IdentityException(ErrorCode errorCode) : base(errorCode)
-        {
-            
-        }
 
-        public IdentityException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
-
+        [Obsolete("DoNotUse")]
         public IdentityException()
         {
         }
 
+        [Obsolete("DoNotUse")]
         public IdentityException(string message) : base(message)
         {
         }
 
+        [Obsolete("DoNotUse")]
         public IdentityException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public IdentityException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

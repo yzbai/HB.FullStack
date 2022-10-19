@@ -17,57 +17,47 @@ namespace HB.Infrastructure.Redis.Cache
     {
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logLuaScriptNotLoaded = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.CacheLoadedLuaNotFound.ToEventId(),
-            "Redis没有加载LuaScript。将要加载并重试。CacheInstance={CacheInstance}, EntityName={EntityName}, Method={Method}");
+            ErrorCodes.CacheLoadedLuaNotFound.ToEventId(),
+            "Redis没有加载LuaScript。将要加载并重试。CacheInstance={CacheInstance}, ModelName={ModelName}, Method={Method}");
 
-        public static void LogLuaScriptNotLoaded(this ILogger logger, string? cacheInstance, string? entityName, string? method)
+        public static void LogLuaScriptNotLoaded(this ILogger logger, string? cacheInstance, string? modelName, string? method)
         {
-            _logLuaScriptNotLoaded(logger, cacheInstance, entityName, method, null);
+            _logLuaScriptNotLoaded(logger, cacheInstance, modelName, method, null);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logGetEntitiesError = LoggerMessage.Define<string?, string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logGetModelsError = LoggerMessage.Define<string?, string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.GetEntitiesError.ToEventId(),
-            "分析这个GetEntitiesAsync.情况1，程序中实体改了. CacheInstance={CacheInstance}, EntityName={EntityName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
+            ErrorCodes.GetModelsError.ToEventId(),
+            "分析这个GetModelsAsync.情况1，程序中实体改了. CacheInstance={CacheInstance}, ModelName={ModelName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
 
-        public static void LogGetEntitiesError(this ILogger logger, string? cacheInstance, string? entityName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
+        public static void LogGetModelsError(this ILogger logger, string? cacheInstance, string? modelName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
         {
-            _logGetEntitiesError(logger, cacheInstance, entityName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
+            _logGetModelsError(logger, cacheInstance, modelName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
         }
 
         private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logForcedRemoveError = LoggerMessage.Define<string?, string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.ForcedRemoveEntitiesError.ToEventId(),
-            "在强制删除中出错. CacheInstance={CacheInstance}, EntityName={EntityName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
+            ErrorCodes.ForcedRemoveModelsError.ToEventId(),
+            "在强制删除中出错. CacheInstance={CacheInstance}, ModelName={ModelName}, DimensionKeyName={DimensionKeyName}, DimensionKeyValues={DimensionKeyValues}");
 
-        public static void LogForcedRemoveError(this ILogger logger, string? cacheInstance, string? entityName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
+        public static void LogForcedRemoveError(this ILogger logger, string? cacheInstance, string? modelName, string? dimensionKeyName, IEnumerable dimensionKeyValues, Exception? ex)
         {
-            _logForcedRemoveError(logger, cacheInstance, entityName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
+            _logForcedRemoveError(logger, cacheInstance, modelName, dimensionKeyName, SerializeUtil.ToJson(dimensionKeyValues), ex);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithEntities = LoggerMessage.Define<string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?, string?, string?, Exception?> _logCacheSetTimestampConcurrency = LoggerMessage.Define<string?, string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.CacheInvalidationConcurrencyWithEntities.ToEventId(),
-            "检测到，Cache Invalidation Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, EntityName={EntityName}, Object={Object}");
+            ErrorCodes.CacheUpdateVersionConcurrency.ToEventId(),
+            "检测到，Cache Update Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, ModelName={ModelName}, Cause={Cause}, Object={Object}");
 
-        public static void LogCacheInvalidationConcurrencyWithEntities(this ILogger logger, string? cacheInstance, string? entityName, object? obj)
+        public static void LogCacheSetTimestampConcurrency(this ILogger logger, string? cacheInstance, string? modelName, string cause, object? obj)
         {
-            _logCacheInvalidationConcurrencyWithEntities(logger, cacheInstance, entityName, SerializeUtil.ToJson(obj), null);
-        }
-
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheUpdateVersionConcurrency = LoggerMessage.Define<string?, string?, string?>(
-            LogLevel.Error,
-            CacheErrorCodes.CacheUpdateVersionConcurrency.ToEventId(),
-            "检测到，Cache Update Concurrency冲突，已被阻止. CacheInstance={CacheInstance}, EntityName={EntityName}, Object={Object}");
-
-        public static void LogCacheUpdateVersionConcurrency(this ILogger logger, string? cacheInstance, string? entityName, object? obj)
-        {
-            _logCacheUpdateVersionConcurrency(logger, cacheInstance, entityName, SerializeUtil.ToJson(obj), null);
+            _logCacheSetTimestampConcurrency(logger, cacheInstance, modelName, cause, SerializeUtil.ToJson(obj), null);
         }
 
         private static readonly Action<ILogger, string?, Exception?> _logCacheGetError = LoggerMessage.Define<string?>(
             LogLevel.Error,
-            CacheErrorCodes.GetError.ToEventId(),
+            ErrorCodes.GetError.ToEventId(),
             "缓存读取错误。Key={Key}");
 
         public static void LogCacheGetError(this ILogger logger, string? key, Exception? innerException)
@@ -77,7 +67,7 @@ namespace HB.Infrastructure.Redis.Cache
 
         private static readonly Action<ILogger, string?, string?, Exception?> _logCacheCollectionGetError = LoggerMessage.Define<string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.GetError.ToEventId(),
+            ErrorCodes.GetError.ToEventId(),
             "缓存读取错误。CollectionKey={CollectionKey}, ItemKey={ItemKey}");
 
         public static void LogCacheCollectionGetError(this ILogger logger, string? collectionKey,string? itemKey, Exception? innerException)
@@ -87,21 +77,21 @@ namespace HB.Infrastructure.Redis.Cache
 
         private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheInvalidationConcurrencyWithTimestamp = LoggerMessage.Define<string?, string?, string?>(
             LogLevel.Error,
-            CacheErrorCodes.CacheInvalidationConcurrencyWithTimestamp.ToEventId(),
-            "检测到，Cache Invalidation Concurrency冲突，已被阻止. Key={Key}, UtcNowTicks={UtcNowTicks}, Options={Options}");
+            ErrorCodes.CacheInvalidationConcurrencyWithTimestamp.ToEventId(),
+            "检测到，Cache Invalidation Concurrency冲突，已被阻止. Key={Key}, Timestamp={Timestamp} Options={Options}");
 
-        public static void LogCacheInvalidationConcurrencyWithTimestamp(this ILogger logger, string? key, UtcNowTicks utcNowTicks, DistributedCacheEntryOptions options)
+        public static void LogCacheInvalidationConcurrencyWithTimestamp(this ILogger logger, string? key, long timestamp, DistributedCacheEntryOptions options)
         {
-            _logCacheInvalidationConcurrencyWithTimestamp(logger, key, utcNowTicks.Ticks.ToString(CultureInfo.InvariantCulture), SerializeUtil.ToJson(options), null);
+            _logCacheInvalidationConcurrencyWithTimestamp(logger, key, timestamp.ToString(GlobalSettings.Culture), SerializeUtil.ToJson(options), null);
         }
 
-        private static readonly Action<ILogger, string?, string?, string?, Exception?> _logCacheUpdateTimestampConcurrency = LoggerMessage.Define<string?, string?, string?>(
+        private static readonly Action<ILogger, string?, string?,string?, Exception?> _logCacheUpdateTimestampConcurrency = LoggerMessage.Define<string?, string?,string?>(
             LogLevel.Error,
-            CacheErrorCodes.CacheUpdateTimestampConcurrency.ToEventId(),
+            ErrorCodes.CacheUpdateTimestampConcurrency.ToEventId(),
             "检测到，Cache Update Concurrency冲突，已被阻止. Key={Key}, UtcNowTicks={UtcNowTicks}, Options={Options}");
-        public static void LogCacheUpdateTimestampConcurrency(this ILogger logger, string? key, UtcNowTicks utcNowTicks, DistributedCacheEntryOptions options)
+        public static void LogCacheUpdateTimestampConcurrency(this ILogger logger, string? key, long timestamp, DistributedCacheEntryOptions options)
         {
-            _logCacheUpdateTimestampConcurrency(logger, key, utcNowTicks.Ticks.ToString(CultureInfo.InvariantCulture), SerializeUtil.ToJson(options), null);
+            _logCacheUpdateTimestampConcurrency(logger, key, timestamp.ToString(GlobalSettings.Culture), SerializeUtil.ToJson(options), null);
         }
     }
 }

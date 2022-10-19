@@ -1,45 +1,64 @@
-﻿using HB.FullStack.Database;
+﻿using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using HB.FullStack.Identity.Entities;
-using System;
-using HB.FullStack.Repository;
+
 using HB.FullStack.Cache;
+using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Database;
+using HB.FullStack.Identity.Models;
 using HB.FullStack.Lock.Memory;
-using HB.FullStack.Common;
+using HB.FullStack.Repository;
+
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Identity
 {
-    public class UserClaimRepo : DbEntityRepository<UserClaim>
+    public class UserClaimRepo : ModelRepository<UserClaim>
     {
- 
 
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override Task InvalidateCacheItemsOnChanged(UserClaim sender, DatabaseWriteEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args)
         {
-            Parallel.Invoke(
-                () => InvalidateCache(new CachedUserClaimsByUserId(sender.UserId).Timestamp(args.UtcNowTicks))
-            );
+            if (sender is IEnumerable<UserClaim> userClaims)
+            {
+                //大部分都是一个，用不着
+                //Parallel.ForEach(userClaims, (userClaim) => InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId)));
+
+                foreach (var userClaim in userClaims)
+                {
+                    InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
+                }
+            }
+            else if (sender is IEnumerable<ChangedPack> cpps)
+            {
+                foreach (var cpp in cpps)
+                {
+                    if (cpp.AddtionalProperties.TryGetValue(nameof(UserClaim.UserId), out object? value))
+                    {
+                        InvalidateCache(new CachedUserClaimsByUserId((Guid)value!));
+                    }
+                    else
+                    {
+                        throw CommonExceptions.AddtionalPropertyNeeded(model: nameof(UserClaim), property: nameof(UserClaim.UserId));
+                    }
+                }
+            }
+            else
+            {
+                throw CommonExceptions.UnkownEventSender(sender);
+            }
 
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// GetByUserIdAsync
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="transContext"></param>
-        /// <returns></returns>
-
         public Task<IEnumerable<UserClaim>> GetByUserIdAsync(Guid userId, TransactionContext? transContext = null)
         {
-            return CacheAsideAsync(new CachedUserClaimsByUserId(userId), dbReader =>
+            return GetUsingCacheAsideAsync(new CachedUserClaimsByUserId(userId), dbReader =>
             {
                 return dbReader.RetrieveAsync<UserClaim>(uc => uc.UserId == userId, transContext);
-            })!;
+            });
         }
     }
 }

@@ -1,30 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace System
+﻿namespace System
 {
-    public class SmsException : ErrorCode2Exception
+    public class SmsException : ErrorCodeException
     {
-        public SmsException(ErrorCode errorCode) : base(errorCode)
-        {
-        }
 
-        public SmsException(ErrorCode errorCode, Exception? innerException) : base(errorCode, innerException)
-        {
-        }
 
+        [Obsolete("Do not use.")]
         public SmsException()
         {
         }
 
+        [Obsolete("Do not use.")]
         public SmsException(string message) : base(message)
         {
         }
 
+        [Obsolete("Do not use.")]
         public SmsException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public SmsException(ErrorCode errorCode, string cause, Exception? innerException = null, object? context = null) : base(errorCode, cause, innerException, context)
         {
         }
     }

@@ -13,9 +13,9 @@ namespace HB.FullStack.Common.Files
         /// </summary>
         public string TopDirectory { get; set; } = null!;
 
-        public bool ReadOnly { get; set; } = true;
+        public IList<string> ReadUserLevels { get; set; } = new List<string>();
 
-        public IList<string> AllowedUserLevels { get; set; } = new List<string>();
+        public IList<string> WriteUserLevels { get; set; } = new List<string>();
 
         /// <summary>
         /// 服务器端根据此来设定Sts的有效期

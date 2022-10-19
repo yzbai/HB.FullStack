@@ -16,7 +16,7 @@ namespace ClassLibrary1
         /// <summary>
         /// Creates default type map
         /// </summary>
-        /// <param name="type">Entity type</param>
+        /// <param name="type">Model type</param>
         public DefaultTypeMap(Type type)
         {
             if (type == null)

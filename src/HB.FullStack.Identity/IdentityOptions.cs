@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Security;
+using System.Collections.Generic;
+
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Collections;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Identity
 {
@@ -54,7 +52,7 @@ namespace HB.FullStack.Identity
         public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; } = new OpenIdConnectConfiguration();
 
         /// <summary>
-        /// 连续两次请求Refresh最小时间间隔
+        /// 连续两次请求Refresh最小时间间隔, 应该小于AccessToken的过期时间<see cref="SignInOptions.AccessTokenExpireTimeSpan"/>
         /// </summary>
         public TimeSpan RefreshIntervalTimeSpan { get; set; } = TimeSpan.FromSeconds(30);
 
@@ -65,6 +63,10 @@ namespace HB.FullStack.Identity
     {
         public TimeSpan RefreshTokenLongExpireTimeSpan { get; set; } = TimeSpan.FromDays(365);
         public TimeSpan RefreshTokenShortExpireTimeSpan { get; set; } = TimeSpan.FromDays(1);
+
+        /// <summary>
+        /// AccessToken过期时间，即每隔多少时间就会重新Refresh
+        /// </summary>
         public TimeSpan AccessTokenExpireTimeSpan { get; set; } = TimeSpan.FromMinutes(5);
         public TimeSpan LockoutTimeSpan { get; set; } = TimeSpan.FromHours(6);
         public bool RequiredMaxFailedCountCheck { get; set; } = true;

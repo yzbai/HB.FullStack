@@ -23,7 +23,7 @@ namespace ClassLibrary1
             {
                 lock (_typeMaps)
                 {   // double-checked; store this to avoid reflection next time we see this type
-                    // since multiple queries commonly use the same domain-entity/DTO/view-model type
+                    // since multiple queries commonly use the same domain-model/DTO/view-model type
                     map = (ITypeMap)_typeMaps[type];
 
                     if (map == null)

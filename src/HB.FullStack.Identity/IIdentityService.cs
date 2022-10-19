@@ -7,9 +7,9 @@ namespace HB.FullStack.Identity
     {
         string JsonWebKeySetJson { get; }
 
-        Task<UserAccessResult> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
+        Task<UserToken> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
 
-        Task<UserAccessResult> SignInAsync(SignInContext context, string lastUser);
+        Task<UserToken> SignInAsync(SignInContext context, string lastUser);
 
         Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
 
@@ -19,9 +19,9 @@ namespace HB.FullStack.Identity
 
         #region Role
 
-        Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser);
+        //Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser);
 
-        Task<bool> TryRemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser);
+        //Task RemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser);
 
         #endregion
 

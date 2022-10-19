@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
@@ -20,7 +21,7 @@ namespace HB.Infrastructure.SQLite
         private readonly SQLiteOptions _options;
         private readonly Dictionary<string, string> _connectionStringDict = new Dictionary<string, string>();
 
-        public DatabaseCommonSettings DatabaseSettings => _options.CommonSettings;
+        public DbCommonSettings DatabaseSettings => _options.CommonSettings;
 
         public EngineType EngineType => EngineType.SQLite;
 
@@ -39,7 +40,7 @@ namespace HB.Infrastructure.SQLite
 
         private void SetConnectionStrings()
         {
-            foreach (DatabaseConnectionSettings schemaInfo in _options.Connections)
+            foreach (DbConnectionSettings schemaInfo in _options.Connections)
             {
                 if (FirstDefaultDatabaseName.IsNullOrEmpty())
                 {
@@ -148,17 +149,27 @@ namespace HB.Infrastructure.SQLite
 
         #region 事务
 
+        //TODO: 解决问题
+        //SQLite Error 1: 'cannot start a transaction within a transaction'.
+        //SQLite Error 5: 'database is locked'.
+        private SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
+
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
         {
+            await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+
             SqliteConnection conn = new SqliteConnection(GetConnectionString(dbName, true));
+
             await conn.OpenAsync().ConfigureAwait(false);
 
-            return conn.BeginTransaction(isolationLevel ?? IsolationLevel.Serializable);
+            return conn.BeginTransaction(isolationLevel ?? IsolationLevel.Unspecified);
         }
 
         public async Task CommitAsync(IDbTransaction transaction)
         {
+            _semaphoreSlim.Release();
+
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
             SqliteConnection connection = sqliteTransaction.Connection!;
@@ -175,6 +186,8 @@ namespace HB.Infrastructure.SQLite
 
         public async Task RollbackAsync(IDbTransaction transaction)
         {
+            _semaphoreSlim.Release();
+
             SqliteTransaction sqliteTransaction = (SqliteTransaction)transaction;
 
             SqliteConnection connection = sqliteTransaction.Connection!;
@@ -189,6 +202,6 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        #endregion 事务
+        #endregion
     }
 }

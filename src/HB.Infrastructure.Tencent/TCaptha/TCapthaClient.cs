@@ -1,14 +1,12 @@
 ﻿
-
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.Tencent
 {
@@ -77,7 +75,7 @@ namespace HB.Infrastructure.Tencent
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger.LogCritical(ex, $"TCaptha Response Parse Error. Content:{content}");
+                _logger.LogCritical(ex, "TCaptha Response Parse Error. Content:{Content}", content);
 
                 return false;
             }

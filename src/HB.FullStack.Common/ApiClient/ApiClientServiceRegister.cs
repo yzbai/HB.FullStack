@@ -1,11 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
-
-using System;
-using System.Net.Http;
-using System.Linq;
-using HB.FullStack.Common.ApiClient;
+﻿using System;
 using System.Net;
-using System.Globalization;
+
+using HB.FullStack.Common.ApiClient;
+
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -37,35 +35,22 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
-            //添加默认HttpClient
-            IHttpClientBuilder httpClientBuilder = services.AddHttpClient(ApiClientOptions.NO_BASEURL_HTTPCLIENT_NAME, httpClient =>
-            {
-#if NET5_0_OR_GREATER
-                httpClient.DefaultRequestVersion = HttpVersion.Version20;
-#endif
-                httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
-            });
-
-            if (options.ConfigureHttpMessageHandler != null)
-            {
-                httpClientBuilder.ConfigurePrimaryHttpMessageHandler(options.ConfigureHttpMessageHandler);
-            }
-
             //添加各站点的HttpClient
-            foreach (EndpointSettings endpoint in options.Endpoints)
+            foreach (SiteSetting endpoint in options.SiteSettings)
             {
-                IHttpClientBuilder builder = services.AddHttpClient(endpoint.HttpClientName, httpClient =>
+                IHttpClientBuilder builder = services.AddHttpClient(endpoint.GetHttpClientName(), httpClient =>
                 {
 #if NET5_0_OR_GREATER
-                    httpClient.DefaultRequestVersion = HttpVersion.Version20;
+                    httpClient.DefaultRequestVersion = endpoint.HttpVersion;
 #endif
-                    if (endpoint.Url != null)
+
+                    if (endpoint.BaseUrl != null)
                     {
-                        httpClient.BaseAddress = endpoint.Url;
+                        httpClient.BaseAddress = endpoint.BaseUrl;
                     }
 
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(DefaultApiClient).FullName);
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", endpoint.UserAgent);
                 });
 
                 //TODO: 调查这个
@@ -84,7 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IApiClient, DefaultApiClient>();
 
             //HttpClientHandler会随着HttpClient Dispose 而Dispose
-            services.AddTransient<TokenAutoRefreshedHttpClientHandler>();
+            services.AddTransient<UserTokenRefreshHttpClientHandler>();
         }
     }
 }

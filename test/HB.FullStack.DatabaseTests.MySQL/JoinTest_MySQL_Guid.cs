@@ -1,14 +1,14 @@
-﻿using HB.FullStack.Database;
-
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.DatabaseTests
+using HB.FullStack.Database;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace HB.FullStack.DatabaseTests.MySQL
 {
     [TestClass]
     public class JoinTest_MySQL_Guid : BaseTestClass

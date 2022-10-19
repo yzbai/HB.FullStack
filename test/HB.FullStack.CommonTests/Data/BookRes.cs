@@ -1,16 +1,13 @@
 ﻿global using static HB.FullStack.CommonTests.Data.ApiConstants;
 
-using HB.FullStack.Common;
-using HB.FullStack.Common.Api;
-
 using System;
 
+using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.CommonTests.Data
 {
 
-    [ApiResource(ApiEndpointName, ApiVersion, ApiAuthType.Jwt, nameof(BookRes))]
-    public class BookRes : ApiResource2
+    public class BookRes : ApiResource
     {
         public string Name { get; set; }
 

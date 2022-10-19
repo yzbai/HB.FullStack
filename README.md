@@ -4,7 +4,7 @@ Not Finished yet.
 
 This project is a complete framework for developer that using .net technologies both in mobile and server.
 
-It can help you maximising the gainings of using many same interface, like Entity, Database ORM, etc.
+It can help you maximising the gainings of using many same interface, like Model, Database ORM, etc.
 
 **NuGets**
 <!--
@@ -29,7 +29,7 @@ It can help you maximising the gainings of using many same interface, like Entit
 
 -->
 
-## Entity & ApiResource
+## Model & ApiResource
 ## ApiClient
 ## Database ORM  
 ## KVStore  
@@ -40,8 +40,8 @@ It can help you maximising the gainings of using many same interface, like Entit
 ## Xamarin.Forms Toolkit
 ## Many others
 
-Entity - Repo ：一对一关系，Repo中处理Cache问题，事件问题，对外提供好像内存操作的对象，隐藏数据存储设施的细节。
-Service : 使用多个Repo, 完成Entity 到 Model 的转换
+Model - Repo ：一对一关系，Repo中处理Cache问题，事件问题，对外提供好像内存操作的对象，隐藏数据存储设施的细节。
+Service : 使用多个Repo, 完成Model 到 复杂Model和Resource 的转换
 
 Api设计：
 1，url设计 https://[endpoint]/[version]/[resource]/[condition]?RandomStr=[randomStr]&Timestamp=[timestamp]&DeviceId=[deviceId]

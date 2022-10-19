@@ -1,5 +1,4 @@
 ﻿
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,15 +10,20 @@ namespace HB.FullStack.Common
 {
     //TODO: 考虑验证嵌套类， 和 集合类
     //asp.net core model binding 可以验证嵌套类，但无法验证集合类
+
+    //TODO: 考虑效率. 是否使用SourceGeneration
+
     /// <summary>
     /// 基础领域模型
     /// 内建验证机制。
     /// 不能应对嵌套的类的验证
     /// </summary>
-    public class ValidatableObject : ISupportValidate
+    public class ValidatableObject : IValidatableObject
     {
         [MessagePack.IgnoreMember]
         private IList<ValidationResult>? _validateResults;
+
+        //TODO: 是否可以一个Type，就一个，不用每次生成
         [MessagePack.IgnoreMember]
         private ValidationContext? _validationContext;
 
@@ -60,10 +64,7 @@ namespace HB.FullStack.Common
             {
                 _validateResults = new List<ValidationResult>();
 
-                if (_validationContext == null)
-                {
-                    _validationContext = new ValidationContext(this);
-                }
+                _validationContext ??= new ValidationContext(this);
 
                 if (!string.IsNullOrEmpty(propertyName))
                 {

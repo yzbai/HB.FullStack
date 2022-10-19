@@ -1,14 +1,16 @@
-﻿using HB.FullStack.Database;
+﻿using System.Collections.Generic;
+
+using HB.FullStack.Database;
+
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 
 namespace HB.Infrastructure.MySQL
 {
     public class MySQLOptions : IOptions<MySQLOptions>
     {
-        public DatabaseCommonSettings CommonSettings { get; set; } = new DatabaseCommonSettings();
+        public DbCommonSettings CommonSettings { get; set; } = new DbCommonSettings();
 
-        public IList<DatabaseConnectionSettings> Connections { get; } = new List<DatabaseConnectionSettings>();
+        public IList<DbConnectionSettings> Connections { get; } = new List<DbConnectionSettings>();
 
         public MySQLOptions Value => this;
     }

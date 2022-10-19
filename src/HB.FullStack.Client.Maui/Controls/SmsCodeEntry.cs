@@ -74,6 +74,7 @@ namespace HB.FullStack.Client.Maui.Controls
 
         public SmsCodeEntry()
         {
+            //TODO: 尝试用Grid
             Content = new AbsoluteLayout
             {
                 Children = {

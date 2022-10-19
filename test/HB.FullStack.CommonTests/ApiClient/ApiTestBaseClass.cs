@@ -1,13 +1,13 @@
-﻿using HB.FullStack.Common.ApiClient;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Test;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace HB.FullStack.CommonTests.ApiClient
 {
@@ -31,21 +31,12 @@ namespace HB.FullStack.CommonTests.ApiClient
                 {
                     options.HttpClientTimeout = TimeSpan.FromSeconds(100);
 
-                    options.DefaultJwtEndpoint = new JwtEndpointSetting {
-                        EndpointName = ApiEndpointName,
-                        ResName = JwtRes,
-                        Version = ApiVersion
-                    };
-
-                    options.Endpoints.Add(new EndpointSettings {
-                        Name = ApiEndpointName,
+                    options.SiteSettings.Add(new SiteSetting
+                    {
+                        SiteName = ApiEndpointName,
                         Version = ApiVersion,
-                        Url = new Uri($"http://localhost:{Port}/api/"),
-                        JwtEndpoint = new JwtEndpointSetting {
-                            EndpointName = ApiEndpointName,
-                            ResName = JwtRes,
-                            Version = ApiVersion
-                        }
+                        BaseUrl = new Uri($"http://localhost:{Port}/api/"),
+                        Endpoints = new List<ResEndpoint> { }
                     });
                 });
 

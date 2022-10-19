@@ -1,12 +1,9 @@
-﻿using HB.FullStack.Cache;
+﻿using System;
+
+using HB.FullStack.Cache;
 using HB.Infrastructure.Redis.Cache;
 
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
-
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -36,6 +33,8 @@ namespace Microsoft.Extensions.DependencyInjection
         }
         private static void AddCore(IServiceCollection services)
         {
+            services.AddCache();
+
             services.AddSingleton<ICache, RedisCache>();
 
         }

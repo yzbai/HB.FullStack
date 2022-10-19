@@ -1,36 +1,38 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using HB.FullStack.Common.Api;
-using System.IO;
+using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Common.Utils;
 
-using System.Threading;
 using Microsoft.Net.Http.Headers;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace System.Net.Http
 {
     public static class HttpClientApiExtensions
     {
-        private static readonly Type _emptyResponseType = typeof(EmptyResponse);
+        private static readonly Type _emptyResourceType = typeof(EmptyApiResource);
 
-        public static async Task<TResponse?> GetAsync<TResponse>(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken) where TResponse : class
+        public static async Task<TResource?> GetAsync<TResource>(this HttpClient httpClient, ApiRequest request, HttpRequestMessageBuilder requestBuilder, CancellationToken cancellationToken) where TResource : class
         {
             //NOTICE:HttpClient不再 在接受response后主动dispose request content。
             //所以要主动用using dispose Request message，requestMessage dispose会dispose掉content
-            using HttpRequestMessage requestMessage = request.GetHttpRequestBuilder().Build(request);
+            using HttpRequestMessage requestMessage = requestBuilder.Build();
 
             using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, request.GetHttpRequestBuilder().EndpointSettings.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.SiteSetting.Challenge).ConfigureAwait(false);
 
-            if (typeof(TResponse) == _emptyResponseType)
+            if (typeof(TResource) == _emptyResourceType)
             {
-                return (TResponse)(object)EmptyResponse.Value;
+                return (TResource)(object)EmptyApiResource.Value;
             }
             else
             {
-                (bool success, TResponse? response) = await responseMessage.TryDeserializeJsonContentAsync<TResponse>().ConfigureAwait(false);
+                (bool success, TResource? response) = await responseMessage.TryDeserializeJsonContentAsync<TResource>().ConfigureAwait(false);
 
                 if (!success)
                 {
@@ -40,21 +42,21 @@ namespace System.Net.Http
                     string responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 #endif
 
-                    throw ApiExceptions.HttpResponseDeserializeError(request, responseString);
+                    throw CommonExceptions.ApiClientInnerError("Server返回成功，但Json解析不成功", null, new { Request = request, ResponseString = responseString });
                 }
 
                 return response;
             }
         }
 
-        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, CancellationToken cancellationToken = default)
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, ApiRequest request, HttpRequestMessageBuilder requestBuilder, CancellationToken cancellationToken = default)
         {
-            using HttpRequestMessage requestMessage = request.GetHttpRequestBuilder().Build(request);
+            using HttpRequestMessage requestMessage = requestBuilder.Build();
 
             //这里不Dispose, Dipose返回的Stream的时候，会通过WrappedStream dispose这个message的
             HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, request, cancellationToken).ConfigureAwait(false);
 
-            await ThrowIfNotSuccessedAsync(responseMessage, request.GetHttpRequestBuilder().EndpointSettings.Challenge).ConfigureAwait(false);
+            await ThrowIfNotSuccessedAsync(responseMessage, requestBuilder.SiteSetting.Challenge).ConfigureAwait(false);
 
 #if NET5_0_OR_GREATER
             return new WrappedStream(await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), responseMessage);
@@ -71,17 +73,9 @@ namespace System.Net.Http
             }
 
             //https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient.sendasync?view=netstandard-2.1
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
-                throw ApiExceptions.RequestAlreadyUsed(request: request, innerException: ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                throw ApiExceptions.RequestTimeout(request: request, innerException: ex);
-            }
-            catch (HttpRequestException ex)
-            {
-                throw ApiExceptions.RequestUnderlyingIssue(request: request, innerException: ex);
+                throw CommonExceptions.ApiClientInnerError("HttpClient.SendAsync出错", ex, new { ApiRequest = request, RequestUri = requestMessage.RequestUri });
             }
         }
 
@@ -94,7 +88,7 @@ namespace System.Net.Http
 
             //开始处理错误
 
-            //401, 解析Header
+            //step 1: 401, 从Header解析ErrorCode
             if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
             {
                 if (responseMessage.Headers.TryGetValues(HeaderNames.WWWAuthenticate, out IEnumerable<string>? headValues) && headValues.Count() == 1)
@@ -109,7 +103,7 @@ namespace System.Net.Http
                         {
                             if (authErrorCode != null)
                             {
-                                throw new ApiException(authErrorCode);
+                                throw CommonExceptions.ServerReturnError(authErrorCode);
                             }
                         }
                     }
@@ -117,18 +111,20 @@ namespace System.Net.Http
             }
 
             //TODO: 可以处理404等ProblemDetails的返回
+
+            //step 2: 从内容处理
             (bool success, ErrorCode? errorCode) = await responseMessage.TryDeserializeJsonContentAsync<ErrorCode>().ConfigureAwait(false);
 
             //responseMessage.Dispose();
 
             if (success && errorCode != null)
             {
-                throw new ApiException(errorCode);
+                throw CommonExceptions.ServerReturnError(errorCode);
             }
             else
             {
                 string? responseString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw ApiExceptions.ServerUnkownError(response: responseString);
+                throw CommonExceptions.ServerUnkownError(responseString: responseString);
             }
         }
     }

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.Network;
+using HB.FullStack.Client.Offline;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Files;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.Logging;
@@ -16,17 +17,26 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Client.Maui.File
 {
-    public class StsTokenRepo : BaseRepo<StsToken, StsTokenRes>
+    public class StsTokenRepo : BaseRepo<StsToken>
     {
         private readonly ILogger<StsTokenRepo> _logger;
         private readonly FileManagerOptions _fileManagerOptions;
         private static readonly SemaphoreSlim _getStsTokenSemaphore = new SemaphoreSlim(1, 1);
 
+        //TODO:有必要使用类似MonkeyCache全局Cache吗？
         private readonly Dictionary<(string, bool, string?), StsToken?> _cachedAliyunStsTokenDict = new Dictionary<(string, bool, string?), StsToken?>();
 
-        private IDictionary<string, DirectoryPermission> _directoryPermissions = null!;
+        private readonly IDictionary<string, DirectoryPermission> _directoryPermissions = null!;
 
-        public StsTokenRepo(ILogger<StsTokenRepo> logger, IOptions<FileManagerOptions> fileManagerOptions, IDatabase database, IApiClient apiClient, IPreferenceProvider preferenceProvider, ConnectivityManager connectivityManager) : base(logger, database, apiClient, preferenceProvider, connectivityManager)
+        public StsTokenRepo(
+            ILogger<StsTokenRepo> logger,
+            IOptions<FileManagerOptions> fileManagerOptions,
+            IDatabase database,
+            IApiClient apiClient,
+            IPreferenceProvider preferenceProvider,
+            IOfflineChangeManager historyManager,
+            StatusManager connectivityManager)
+            : base(logger, database, apiClient, historyManager, preferenceProvider, connectivityManager)
         {
             _logger = logger;
             _fileManagerOptions = fileManagerOptions.Value;
@@ -34,11 +44,48 @@ namespace HB.FullStack.Client.Maui.File
             _directoryPermissions = _fileManagerOptions.DirectoryPermissions.ToDictionary(p => p.PermissionName);
         }
 
-        protected override StsToken ToEntity(StsTokenRes res) => StsTokenResMapper.ToStsToken(res);
+        #region Overrides
 
-        protected override StsTokenRes ToResource(StsToken entity) => StsTokenResMapper.ToStsTokenRes(entity);
+        protected override async Task<IEnumerable<StsToken>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request)
+        {
+            if (request.ResName != nameof(StsTokenRes))
+            {
+                throw Exceptions.UnSupportedResToModel(resName: request.ResName, modelName: nameof(StsToken));
+            }
 
-        public async Task<StsToken?> GetByDirectoryPermissionNameAsync(string directoryPermissionName, bool needWritePermission, string? placeHolderValue, TransactionContext? transactionContext, bool remoteForced = false)
+            IEnumerable<StsTokenRes>? resources = await apiClient.GetAsync<IEnumerable<StsTokenRes>>(request);
+
+            if (resources.IsNullOrEmpty())
+            {
+                return Enumerable.Empty<StsToken>();
+            }
+
+            return resources.Select(Mapping.ToStsToken);
+        }
+
+        protected override Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<StsToken> models)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<ChangedPack> changedPacks)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<StsToken> models)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        public async Task<StsToken?> GetByDirectoryPermissionNameAsync(
+            string directoryPermissionName,
+            bool needWritePermission,
+            string? placeHolderValue,
+            TransactionContext? transactionContext,
+            bool remoteForced = false)
         {
             if (!await _getStsTokenSemaphore.WaitAsync(TimeSpan.FromSeconds(60)))
             {
@@ -63,7 +110,6 @@ namespace HB.FullStack.Client.Maui.File
 
             //TODO: 这里在客户端就先检查一下，用户的UserLvel是否符合,否则到了Server端也是返回null
             //check 2 : UserLevel Check
-
             try
             {
                 if (_cachedAliyunStsTokenDict.TryGetValue((directoryPermissionName, needWritePermission, placeHolderValue), out StsToken? cachedToken))
@@ -72,7 +118,7 @@ namespace HB.FullStack.Client.Maui.File
                     {
                         if (!remoteForced)
                         {
-                            _logger.LogDebug("找到未过期的 AliyunStsToken缓存，为 null, directoryPermissionName: {directoryPermissionName}, needWrite:{needWritePermission}", directoryPermissionName, needWritePermission);
+                            _logger.LogDebug("找到未过期的 AliyunStsToken缓存，为 null, directoryPermissionName: {DirectoryPermissionName}, needWrite:{NeedWritePermission}", directoryPermissionName, needWritePermission);
                             return null;
                         }
                     }
@@ -80,12 +126,12 @@ namespace HB.FullStack.Client.Maui.File
                     {
                         if (!cachedToken.IsExpired())
                         {
-                            _logger.LogDebug("找到找到未过期的 AliyunStsToken缓存， directoryPermissionName: {directoryPermissionName}, needWrite:{needWritePermission}", directoryPermissionName, needWritePermission);
+                            _logger.LogDebug("找到找到未过期的 AliyunStsToken缓存， directoryPermissionName: {DirectoryPermissionName}, needWrite:{NeedWritePermission}", directoryPermissionName, needWritePermission);
                             return cachedToken;
                         }
                         else
                         {
-                            _logger.LogDebug("找到找到已经过期的 AliyunStsToken缓存，移除。 directoryPermissionName: {directoryPermissionName}, needWrite:{directoryPermissionName}", directoryPermissionName, needWritePermission);
+                            _logger.LogDebug("找到找到已经过期的 AliyunStsToken缓存，移除。 directoryPermissionName: {DirectoryPermissionName}, needWrite:{DirectoryPermissionName}", directoryPermissionName, needWritePermission);
                             _cachedAliyunStsTokenDict.Remove((directoryPermissionName, needWritePermission, placeHolderValue));
                         }
                     }
@@ -95,7 +141,7 @@ namespace HB.FullStack.Client.Maui.File
 
                 StsToken? token = await GetFirstOrDefaultAsync(
                     localWhere: token => token.UserId == userId && token.DirectoryPermissionName == directoryPermissionName,
-                    remoteRequest: new StsTokenResGetByDirectoryPermissionNameRequest(ApiRequestAuth.JWT, _fileManagerOptions.AliyunStsTokenRequestUrl, directoryPermissionName, placeHolderValue),
+                    remoteRequest: new StsTokenResGetByDirectoryPermissionNameRequest(directoryPermissionName, placeHolderValue, !needWritePermission),
                     transactionContext: transactionContext,
                     getMode: RepoGetMode.Mixed,
                     ifUseLocalData: (_, tokens) =>
@@ -112,6 +158,23 @@ namespace HB.FullStack.Client.Maui.File
             finally
             {
                 _getStsTokenSemaphore.Release();
+            }
+        }
+
+        private class Mapping
+        {
+            public static StsToken ToStsToken(StsTokenRes res)
+            {
+                return new StsToken
+                {
+                    UserId = res.UserId,
+                    SecurityToken = res.SecurityToken,
+                    AccessKeyId = res.AccessKeyId,
+                    AccessKeySecret = res.AccessKeySecret,
+                    ExpirationAt = res.ExpirationAt,
+                    DirectoryPermissionName = res.DirectoryPermissionName,
+                    ReadOnly = res.ReadOnly
+                };
             }
         }
     }

@@ -8,6 +8,10 @@ namespace HB.FullStack.CommonTests.ApiClient
 {
     public class PreferenceProviderStub : IPreferenceProvider
     {
+        public PreferenceProviderStub()
+        {
+        }
+
         public Guid? UserId { get; set; }
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
@@ -30,7 +34,7 @@ namespace HB.FullStack.CommonTests.ApiClient
             return false;
         }
 
-        public void OnTokenFetched(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
+        public void OnTokenReceived(Guid userId, DateTimeOffset userCreateTime, string mobile, string email, string loginName, string accessToken, string refreshToken)
         {
             AccessToken = accessToken;
             RefreshToken = refreshToken;

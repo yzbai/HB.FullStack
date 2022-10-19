@@ -76,13 +76,13 @@ namespace HB.FullStack.Lock.Memory
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
         // ~MemoryLock()
         // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     // Do not change this code. Update cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);
         // }
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            // Do not change this code. Update cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

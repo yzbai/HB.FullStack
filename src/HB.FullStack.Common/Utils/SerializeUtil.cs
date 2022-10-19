@@ -1,22 +1,16 @@
-﻿
-
-using MessagePack;
-using MessagePack.Resolvers;
-
-using System.Buffers;
-using System.Buffers.Text;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+
+using MessagePack;
+using MessagePack.Resolvers;
 
 namespace System
 {
@@ -43,24 +37,24 @@ namespace System
             //jsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         }
 
-        [return: NotNullIfNotNull("entity")]
-        public static string? ToJson(object? entity)
+        [return: NotNullIfNotNull("model")]
+        public static string? ToJson(object? model)
         {
-            return JsonSerializer.Serialize(entity, _jsonSerializerOptions);
+            return JsonSerializer.Serialize(model, _jsonSerializerOptions);
         }
 
-        public static bool TryToJson(object? entity, out string? json)
+        public static bool TryToJson(object? model, out string? json)
         {
             try
             {
-                json = ToJson(entity);
+                json = ToJson(model);
                 return true;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogSerializeLogError(entity?.GetType().FullName, ex);
+                GlobalSettings.Logger?.LogSerializeLogError(model?.GetType().FullName, ex);
 
                 json = null;
                 return false;
@@ -135,10 +129,6 @@ namespace System
         /// 返回是否成功解析，
         /// 有可能成功解析，但结果是null
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="jsonString"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
         public static bool TryFromJsonWithCollectionCheck<T>(string? jsonString, out T? target) where T : class
         {
             //if json begine with '[', and T is a array or can be assignable to IEnumerable<T> ,ok
@@ -217,6 +207,21 @@ namespace System
             }
         }
 
+        public static object? FromJsonElement(Type type, JsonElement jsonElement)
+        {
+            return JsonSerializer.Deserialize(jsonElement, type, _jsonSerializerOptions);
+        }
+
+        public static JsonElement ToJsonElement(object? obj)
+        {
+            return JsonSerializer.SerializeToElement(obj, _jsonSerializerOptions);
+        }
+
+        public static T? To<T>(this JsonElement jsonElement)
+        {
+            return (T?)FromJsonElement(typeof(T), jsonElement);
+        }
+
         #endregion Json
 
         #region BinaryFormatter Serialize
@@ -260,5 +265,6 @@ namespace System
         }
 
         #endregion MsgPack Serialize
+
     }
 }

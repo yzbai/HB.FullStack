@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddNetworkManager(this IServiceCollection services)
         {
-            services.AddSingleton<ConnectivityManager, MauiConnectivityManager>();
+            services.AddSingleton<StatusManager, MauiConnectivityManager>();
 
             return services;
         }

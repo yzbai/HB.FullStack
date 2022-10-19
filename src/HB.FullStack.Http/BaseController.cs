@@ -1,7 +1,6 @@
-﻿using HB.FullStack.Common.Api;
+﻿using System;
 
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace HB.FullStack.WebApi
 {
@@ -10,6 +9,11 @@ namespace HB.FullStack.WebApi
         protected BadRequestObjectResult Error(ErrorCode errorCode)
         {
             return BadRequest(errorCode);
+        }
+
+        protected BadRequestObjectResult Error(ErrorCode errorCode, string description)
+        {
+            return BadRequest(new ErrorCode(errorCode.Code, description));
         }
     }
 }

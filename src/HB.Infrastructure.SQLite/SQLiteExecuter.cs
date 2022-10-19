@@ -16,21 +16,12 @@ namespace HB.Infrastructure.SQLite
     {
         #region Command Reader
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandReaderAsync(sqliteTransaction.Connection!, false, dbCommand).ConfigureAwait(false);
         }
 
-        /// <returns></returns>
-        
         public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, SqliteCommand dbCommand)
         {
             //这里无法用Using，因为reader要用
@@ -38,14 +29,6 @@ namespace HB.Infrastructure.SQLite
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandReaderAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="isOwnedConnection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
         private static async Task<IDataReader> ExecuteCommandReaderAsync(SqliteConnection connection, bool isOwnedConnection, SqliteCommand command)
         {
             SqliteDataReader? reader = null;
@@ -82,7 +65,7 @@ namespace HB.Infrastructure.SQLite
                     await connection.DisposeAsync().ConfigureAwait(false);
                 }
 
-                throw DatabaseExceptions.ExecuterError(command.CommandText, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
@@ -90,39 +73,18 @@ namespace HB.Infrastructure.SQLite
 
         #region Command Scalar
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<object?> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
             return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<object?> ExecuteCommandScalarAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandScalarAsync(sqliteTransaction.Connection!, dbCommand).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// ExecuteCommandScalarAsync
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
         private static async Task<object?> ExecuteCommandScalarAsync(SqliteConnection connection, SqliteCommand command)
         {
             try
@@ -138,7 +100,7 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                throw DatabaseExceptions.ExecuterError(command.CommandText, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
@@ -146,15 +108,6 @@ namespace HB.Infrastructure.SQLite
 
         #region Comand NonQuery
 
-
-
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="connectString"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, SqliteCommand dbCommand)
         {
             using SqliteConnection conn = new SqliteConnection(connectString);
@@ -162,28 +115,12 @@ namespace HB.Infrastructure.SQLite
             return await ExecuteCommandNonQueryAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
-
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="sqliteTransaction"></param>
-        /// <param name="dbCommand"></param>
-        /// <returns></returns>
-        
         public static async Task<int> ExecuteCommandNonQueryAsync(SqliteTransaction sqliteTransaction, SqliteCommand dbCommand)
         {
             dbCommand.Transaction = sqliteTransaction;
             return await ExecuteCommandNonQueryAsync(sqliteTransaction.Connection!, dbCommand).ConfigureAwait(false);
         }
 
-
-        /// <summary>
-        /// ExecuteCommandNonQueryAsync
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        
         private static async Task<int> ExecuteCommandNonQueryAsync(SqliteConnection conn, SqliteCommand command)
         {
             try
@@ -199,10 +136,25 @@ namespace HB.Infrastructure.SQLite
             }
             catch (Exception ex)
             {
-                throw DatabaseExceptions.ExecuterError(command.CommandText, ex);
+                throw ConvertToDbException(command, ex);
             }
         }
 
         #endregion Comand NonQuery
+
+        private static Exception ConvertToDbException(SqliteCommand command, Exception ex)
+        {
+            if (ex is SqliteException sEx)
+            {
+                if (sEx.SqliteExtendedErrorCode == 1555)
+                {
+                    return DatabaseExceptions.DuplicateKeyError(command.CommandText, ex);
+                }
+
+                return DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
+            }
+
+            return DatabaseExceptions.SQLiteUnKownExecuterError(command.CommandText, ex);
+        }
     }
 }

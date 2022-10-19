@@ -1,36 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using HB.FullStack.WebApi;
+﻿using HB.FullStack.WebApi;
 using HB.FullStack.WebApi.Filters;
 using HB.FullStack.WebApi.Security;
-
-using Microsoft.Extensions.Configuration;
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class FullStackServerServiceRegister
     {
-        public static IServiceCollection AddWebApiServerService(this IServiceCollection services)
+        public static IServiceCollection AddWebApiServerService(this IServiceCollection services, bool addAuthentication = true)
         {
             //services.AddOptions();
 
-            AddCore(services);
+            AddCore(services, addAuthentication);
 
             return services;
         }
 
-        private static void AddCore(IServiceCollection services)
+        private static void AddCore(IServiceCollection services, bool addAuthentication)
         {
             //HB.FullStack.WebApi
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
             services.AddSingleton<ICommonResourceTokenService, CommonResourceTokenService>();
 
-            //UserActivity
-            services.AddScoped<UserActivityFilter>();
-
+            if (addAuthentication)//(services.Where(d => d.ServiceType == typeof(IIdentityService)).Any())
+            {
+                services.AddScoped<UserActivityFilter>();
+            }
 
             services.AddScoped<CheckCommonResourceTokenFilter>();
         }

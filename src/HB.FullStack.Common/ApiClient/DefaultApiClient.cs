@@ -1,21 +1,21 @@
-﻿using HB.FullStack.Common.Api;
-using HB.FullStack.Common.ApiClient;
-
-using Microsoft.Extensions.Options;
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Api;
+
+using Microsoft.Extensions.Options;
+
 namespace HB.FullStack.Common.ApiClient
 {
     /// <summary>
     /// 保持单例复用
     /// </summary>
-    public class DefaultApiClient : IApiClient
+    public partial class DefaultApiClient : IApiClient
     {
         private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
 
@@ -23,21 +23,61 @@ namespace HB.FullStack.Common.ApiClient
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        private readonly IPreferenceProvider _tokenProvider;
+        private IDictionary<string, string> _apiKeys = null!;
+
+        private readonly Type _streamType = typeof(Stream);
+
+        private readonly IDictionary<string, ResEndpoint> _resEndpoints = new Dictionary<string, ResEndpoint>();
+
+        public IPreferenceProvider UserTokenProvider { get; }
+
+        public ResEndpoint? UserTokenResEndpoint { get; private set; }
 
         public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider tokenProvider)
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;
-            _tokenProvider = tokenProvider;
+            UserTokenProvider = tokenProvider;
+
+            RangeApiKeys();
+            RangeEndpoints();
 
             GlobalApiClientAccessor.ApiClient = this;
+
+            if (_resEndpoints.TryGetValue(nameof(UserTokenRes), out ResEndpoint? userTokenResEndpoint))
+            {
+                UserTokenResEndpoint = userTokenResEndpoint;
+            }
+
+            void RangeApiKeys()
+            {
+                _apiKeys = _options.ApiKeys.ToDictionary(item => item.Name, item => item.Key);
+            }
+
+            void RangeEndpoints()
+            {
+                AddResEndpointFromAssemblyToResEndpoints();
+
+                foreach (var siteSetting in _options.SiteSettings)
+                {
+                    foreach (var endpoint in siteSetting.Endpoints)
+                    {
+                        endpoint.SiteSetting = siteSetting;
+
+                        _resEndpoints[endpoint.ResName] = endpoint;
+
+                        //if (!_resEndpoints.TryAdd(endpoint.ResName, endpoint))
+                        //{
+                        //    throw CommonExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
+                        //}
+
+                        //endpoint.SiteSetting = siteSetting;
+                    }
+                }
+            }
         }
 
-        public JwtEndpointSetting GetDefaultJwtEndpointSetting()
-        {
-            return _options.DefaultJwtEndpoint;
-        }
+        partial void AddResEndpointFromAssemblyToResEndpoints();
 
         public event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting
         {
@@ -60,166 +100,112 @@ namespace HB.FullStack.Common.ApiClient
         {
             return _asyncEventManager.RaiseEventAsync(nameof(Responsed), responsedObj, apiEventArgs);
         }
+        public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyApiResource>(request, cancellationToken);
 
-        //public Task<Stream> GetStreamAsync(ApiRequest request)
-        //{
-        //    return GetStreamAsync(request, CancellationToken.None);
-        //}
-
-        //public async Task<Stream> GetStreamAsync(ApiRequest request, CancellationToken cancellationToken)
-        //{
-        //    if (!request.IsValid())
-        //    {
-        //        throw ApiExceptions.ApiRequestInvalidateError(request, request.GetValidateErrorMessage());
-        //    }
-
-        //    HttpRequestBuilder requestBuilder = request.CreateHttpRequestBuilder();
-        //    EndpointSettings? endpointSettings = GetEndpointSettings(requestBuilder);
-        //    HttpClient httpClient = GetHttpClient(endpointSettings);
-
-        //    try
-        //    {
-
-        //        ApplyEndpointSettings(requestBuilder, endpointSettings);
-        //        ApplyTokenInfo(requestBuilder);
-
-        //        //NOTICE: 这里没有必要用using. https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0#httpclient-and-lifetime-management-1
-
-        //        await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.ApiMethodName)).ConfigureAwait(false);
-
-        //        Stream stream = await httpClient.GetStreamAsync(request, requestBuilder, cancellationToken).ConfigureAwait(false);
-
-        //        await OnResponsedAsync(stream, new ApiEventArgs(request.RequestId, request.ApiMethodName)).ConfigureAwait(false);
-
-        //        return stream;
-        //    }
-        //    catch (ErrorCode2Exception ex)
-        //    {
-        //        if (requestBuilder.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
-        //        {
-        //            bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpointSettings, _tokenProvider).ConfigureAwait(false);
-
-        //            if (refreshSuccessed)
-        //            {
-        //                return await GetStreamAsync(request, cancellationToken).ConfigureAwait(false);
-        //            }
-        //        }
-
-        //        throw;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ApiExceptions.ApiClientGetStreamUnkownError(request, innerException: ex);
-        //    }
-        //}
+        public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);
 
         public Task<TResponse?> GetAsync<TResponse>(ApiRequest request) where TResponse : class => GetAsync<TResponse>(request, CancellationToken.None);
 
-        Type _streamType = typeof(Stream);
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Stream will return to user to handle the dispose")]
         public async Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class
         {
             if (!request.IsValid())
             {
-                throw ApiExceptions.ApiRequestInvalidateError(request, request.GetValidateErrorMessage());
+                throw CommonExceptions.ApiModelError("Request没有通过Validate", null, new { ValidateErrorMessage = request.GetValidateErrorMessage() });
             }
 
-            HttpRequestBuilder requestBuilder = request.GetHttpRequestBuilder();
-            EndpointSettings? endpointSettings = GetEndpointSettings(requestBuilder);
-            HttpClient httpClient = GetHttpClient(endpointSettings);
+            if (!_resEndpoints.TryGetValue(request.ResName, out ResEndpoint? resEndpoint))
+            {
+                throw CommonExceptions.ApiClientInnerError($"No ResBinding for {request.ResName}.", null, null);
+            }
+
+            HttpRequestMessageBuilder requestBuilder = new HttpRequestMessageBuilder(resEndpoint, request);
+
+            HttpClient httpClient = GetHttpClient(resEndpoint.SiteSetting!);
 
             try
             {
-                ApplyEndpointSettings(requestBuilder, endpointSettings);
-                ApplyTokenInfo(requestBuilder);
+                ConfigureRequestBuilder(requestBuilder);
 
                 //NOTICE: 这里没有必要用using. https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0#httpclient-and-lifetime-management-1
 
-                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.ApiMethodName)).ConfigureAwait(false);
+                await OnRequestingAsync(request, new ApiEventArgs(request.RequestId, request.ApiMethod)).ConfigureAwait(false);
 
                 TResponse? rt;
 
                 if (_streamType == typeof(TResponse))
                 {
-#pragma warning disable CA2000 // 会返回，由用户处理
-                    Stream stream = await httpClient.GetStreamAsync(request, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2000 // Dispose objects before losing scope
+                    Stream stream = await httpClient.GetStreamAsync(request, requestBuilder, cancellationToken).ConfigureAwait(false);
                     rt = stream as TResponse;
                 }
                 else
                 {
-                    rt = await httpClient.GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+                    rt = await httpClient.GetAsync<TResponse>(request, requestBuilder, cancellationToken).ConfigureAwait(false);
                 }
 
-                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.ApiMethodName)).ConfigureAwait(false);
+                await OnResponsedAsync(rt, new ApiEventArgs(request.RequestId, request.ApiMethod)).ConfigureAwait(false);
 
                 return rt;
             }
-            catch (ErrorCode2Exception ex)
+            catch (ErrorCodeException ex)
             {
-                if (requestBuilder.Auth.AuthType == ApiAuthType.Jwt && ex.ErrorCode == ApiErrorCodes.AccessTokenExpired)
+                if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await TokenRefresher.RefreshAccessTokenAsync(this, endpointSettings, _tokenProvider).ConfigureAwait(false);
+                    bool refreshSuccessed = await this.RefreshUserTokenAsync().ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
                         return await GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
                     }
                 }
+                else if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AuthorizationNoTokenInStore)
+                {
+                    //TODO: 重新登陆， 客户端应该针对Authroization开头的ErrorCode进行相应处理
+                }
+
+                //ErrorCodes.SmsCacheError
 
                 throw;
             }
             catch (Exception ex)
             {
-                throw ApiExceptions.ApiClientUnkownError($"ApiClient.SendAsync Failed.", request, ex);
+                throw CommonExceptions.ApiClientInnerError("ApiClient非ErrorCodeException", ex, new { Request = request });
             }
         }
 
-        public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyResponse>(request, cancellationToken);
-
-        public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);
-        
-        private static void ApplyEndpointSettings(HttpRequestBuilder requestBuilder, EndpointSettings? endpointSettings)
+        private void ConfigureRequestBuilder(HttpRequestMessageBuilder requestBuilder)
         {
-            requestBuilder.EndpointSettings.HttpMethodOverrideMode = endpointSettings?.HttpMethodOverrideMode ?? HttpMethodOverrideMode.None;
+            requestBuilder.SetDeviceId(UserTokenProvider.DeviceId);
+            requestBuilder.SetDeviceVersion(UserTokenProvider.DeviceVersion);
 
-            if (endpointSettings!= null && endpointSettings.Challenge.IsNotNullOrEmpty())
-            {
-                requestBuilder.EndpointSettings.Challenge = endpointSettings.Challenge;
-            }
-        }
-
-        private void ApplyTokenInfo(HttpRequestBuilder requestBuilder)
-        {
-            requestBuilder.SetDeviceId(_tokenProvider.DeviceId);
-            requestBuilder.SetDeviceVersion(_tokenProvider.DeviceVersion);
+            ApiRequestAuth auth = requestBuilder.Request.Auth!;
 
             //Auto
-            switch (requestBuilder.Auth.AuthType)
+            switch (auth.AuthType)
             {
                 case ApiAuthType.ApiKey:
                     {
-                        ThrowIf.NullOrEmpty(requestBuilder.Auth.ApiKeyName, nameof(RestfulHttpRequestBuilder.Auth.ApiKeyName));
+                        ThrowIf.NullOrEmpty(auth.ApiKeyName, "ApiKeyName");
 
-                        if (_options.TryGetApiKey(requestBuilder.Auth.ApiKeyName, out string? key))
+                        if (_apiKeys.TryGetValue(auth.ApiKeyName, out string? key))
                         {
                             requestBuilder.SetApiKey(key);
                         }
                         else
                         {
-                            throw ApiExceptions.ApiRequestSetApiKeyError(requestBuilder);
+                            throw CommonExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.BuildUriString() });
                         }
 
                         break;
                     }
 
                 case ApiAuthType.Jwt:
-                    if (_tokenProvider.AccessToken.IsNullOrEmpty())
+                    if (UserTokenProvider.AccessToken.IsNullOrEmpty())
                     {
-                        throw ApiExceptions.ApiRequestSetJwtError(requestBuilder);
+                        throw CommonExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
                     }
 
-                    requestBuilder.SetJwt(_tokenProvider.AccessToken);
+                    requestBuilder.SetJwt(UserTokenProvider.AccessToken);
                     break;
 
                 default:
@@ -227,40 +213,15 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private HttpClient GetHttpClient(EndpointSettings? endpointSettings)
+        private HttpClient GetHttpClient(SiteSetting endpointSettings)
         {
-            string httpClientName = endpointSettings == null ? ApiClientOptions.NO_BASEURL_HTTPCLIENT_NAME : endpointSettings.HttpClientName;
+            string httpClientName = endpointSettings.GetHttpClientName();
 
             HttpClient httpClient = _httpClientFactory.CreateClient(httpClientName);
 
             httpClient.Timeout = _options.HttpClientTimeout;
 
             return httpClient;
-        }
-
-        private EndpointSettings? GetEndpointSettings(HttpRequestBuilder requestBuilder)
-        {
-            EndpointSettings? endpointSettings = null;
-
-            if (requestBuilder is RestfulHttpRequestBuilder restfulApiRequestBuilder)
-            {
-                //TODO: 用字典提高效率
-                endpointSettings = _options.Endpoints.FirstOrDefault(e =>
-                    e.Name == restfulApiRequestBuilder.EndpointName
-                        &&
-                    (
-                        e.Version == restfulApiRequestBuilder.ApiVersion
-                            ||
-                        (restfulApiRequestBuilder.ApiVersion.IsNullOrEmpty() && e.Version.IsNullOrEmpty())
-                    ));
-            }
-
-            if (endpointSettings == null && _options.DefaultEndpointName.IsNotNullOrEmpty())
-            {
-                endpointSettings = _options.Endpoints.FirstOrDefault(e => e.Name == _options.DefaultEndpointName);
-            }
-
-            return endpointSettings;
         }
     }
 }

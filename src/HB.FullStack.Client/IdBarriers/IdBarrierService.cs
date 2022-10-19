@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.IdGen;
 using HB.FullStack.Database;
-using HB.FullStack.Common;
-using HB.FullStack.Common.ApiClient;
-using System.Net.Http;
 
 namespace HB.FullStack.XamarinForms.IdBarriers
 {
@@ -43,17 +42,17 @@ namespace HB.FullStack.XamarinForms.IdBarriers
 
         private async Task OnApiClientRequestingAsync(ApiRequest request, ApiEventArgs args)
         {
-            if (request.ApiMethodName == ApiMethodName.Post)
+            if (request.ApiMethod == ApiMethod.Add)
             {
                 _addRequestClientIdDict[request.RequestId] = new List<long>();
             }
 
-            await ChangeIdAsync(request, request.RequestId, request.ApiMethodName, ChangeDirection.ToServer).ConfigureAwait(false);
+            await ChangeIdAsync(request, request.RequestId, request.ApiMethod, ChangeDirection.ToServer).ConfigureAwait(false);
         }
 
         private async Task OnApiClientResponsedAsync(object? sender, ApiEventArgs args)
         {
-            if (args.RequestHttpMethod == ApiMethodName.Post)
+            if (args.RequestHttpMethod == ApiMethod.Add)
             {
                 if (sender is IEnumerable<long> servierIds)
                 {
@@ -64,7 +63,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                     _addRequestClientIdDict.Remove(args.RequestId);
                 }
             }
-            else if (args.RequestHttpMethod == ApiMethodName.Get)
+            else if (args.RequestHttpMethod == ApiMethod.Get)
             {
                 if (sender is IEnumerable enumerable)
                 {
@@ -80,7 +79,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             }
         }
 
-        private async Task ChangeIdAsync(object? obj, string requestId, ApiMethodName httpMethod, ChangeDirection direction)
+        private async Task ChangeIdAsync(object? obj, string requestId, ApiMethod apiMethod, ChangeDirection direction)
         {
             if (obj == null) { return; }
 
@@ -96,25 +95,25 @@ namespace HB.FullStack.XamarinForms.IdBarriers
 
                 if (propertyValue is long id)
                 {
-                    await ConvertLongIdAsync(obj, id, propertyInfo, httpMethod, direction, requestId).ConfigureAwait(false);
+                    await ConvertLongIdAsync(obj, id, propertyInfo, apiMethod, direction, requestId).ConfigureAwait(false);
                 }
                 else if (propertyValue is IEnumerable<long> longIds)
                 {
                     foreach (long iditem in longIds)
                     {
-                        await ConvertLongIdAsync(obj, iditem, propertyInfo, httpMethod, direction, requestId).ConfigureAwait(false);
+                        await ConvertLongIdAsync(obj, iditem, propertyInfo, apiMethod, direction, requestId).ConfigureAwait(false);
                     }
                 }
                 else if (propertyValue is IEnumerable enumerable)
                 {
                     foreach (object subObj in enumerable)
                     {
-                        await ChangeIdAsync(subObj, requestId, httpMethod, direction).ConfigureAwait(false);
+                        await ChangeIdAsync(subObj, requestId, apiMethod, direction).ConfigureAwait(false);
                     }
                 }
                 else if (propertyInfo.PropertyType.IsClass)
                 {
-                    await ChangeIdAsync(propertyValue, requestId, httpMethod, direction).ConfigureAwait(false);
+                    await ChangeIdAsync(propertyValue, requestId, apiMethod, direction).ConfigureAwait(false);
                 }
                 else
                 {
@@ -123,14 +122,14 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             }
         }
 
-        private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, ApiMethodName httpMethod, ChangeDirection direction, string requestId)
+        private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, ApiMethod apiMethod, ChangeDirection direction, string requestId)
         {
             if (id < 0)
             {
                 return;
             }
 
-            if (propertyInfo.Name == nameof(LongIdResource.Id) && httpMethod == ApiMethodName.Post && direction == ChangeDirection.ToServer)
+            if (propertyInfo.Name == "Id" && apiMethod == ApiMethod.Add && direction == ChangeDirection.ToServer)
             {
                 _addRequestClientIdDict[requestId].Add(id);
 
@@ -149,12 +148,12 @@ namespace HB.FullStack.XamarinForms.IdBarriers
             if (direction == ChangeDirection.FromServer
                 && changedId < 0
                 && id > 0
-                && httpMethod == ApiMethodName.Get)
+                && apiMethod == ApiMethod.Get)
             {
                 changedId = StaticIdGen.GetId();
                 await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);
             }
-            //TODO: 如果服务器返回Id=-1，即这个数据不是使用Id来作为主键的，客户端实体应该避免使用IdGenEntity
+            //TODO: 如果服务器返回Id=-1，即这个数据不是使用Id来作为主键的，客户端实体应该避免使用IdGenModel
 
             propertyInfo.SetValue(obj, changedId);
         }
