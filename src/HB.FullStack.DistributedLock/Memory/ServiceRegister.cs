@@ -14,12 +14,14 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class MemoryLockManagerServiceRegister
     {
+        public static IServiceCollection AddMemoryLock(this IServiceCollection services)
+        {
+            return services.AddMemoryLock(options => { });
+        }
+
         public static IServiceCollection AddMemoryLock(this IServiceCollection services, IConfiguration configuration)
         {
-            if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
-            {
-                throw LockExceptions.MemoryLockError(cause: "MemoryLockManager需要MemoryCache服务");
-            }
+            AddMemoryCacheIfNone(services);
 
             services.Configure<MemoryLockOptions>(configuration);
 
@@ -30,10 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddMemoryLock(this IServiceCollection services, Action<MemoryLockOptions> action)
         {
-            if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
-            {
-                throw LockExceptions.MemoryLockError(cause: "MemoryLockManager需要MemoryCache服务");
-            }
+            AddMemoryCacheIfNone(services);
 
             services.Configure(action);
 
@@ -42,9 +41,14 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddMemoryLock(this IServiceCollection services)
+        private static void AddMemoryCacheIfNone(IServiceCollection services)
         {
-            return services.AddMemoryLock(options => { });
+            if (!services.Any(sd => sd.ServiceType == typeof(IMemoryCache)))
+            {
+                services.AddMemoryCache();
+                //throw LockExceptions.MemoryLockError(cause: "MemoryLockManager需要MemoryCache服务");
+            }
         }
+
     }
 }

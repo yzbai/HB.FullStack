@@ -7,7 +7,7 @@ namespace HB.FullStack.Common.ApiClient
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class ResEndpointAttribute : Attribute
     {
-        public ResEndpointType Type { get; set; }
+        public ResEndpointType? Type { get; set; }
 
         public string? ResName { get; set; }
 
@@ -17,7 +17,14 @@ namespace HB.FullStack.Common.ApiClient
 
         public ApiRequestAuth? DefaultWriteAuth { get; set; }
 
-        public ResEndpointAttribute() { }
+        public ResEndpointAttribute()
+        {
 
+        }
+
+        public ResEndpointAttribute(string resName)
+        {
+            ResName = resName;
+        }
     }
 }

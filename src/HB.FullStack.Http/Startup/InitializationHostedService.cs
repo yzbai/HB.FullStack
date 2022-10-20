@@ -1,0 +1,84 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using HB.FullStack.Cache;
+using HB.FullStack.Database;
+using HB.FullStack.Lock.Distributed;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+using IDatabase = HB.FullStack.Database.IDatabase;
+
+namespace HB.FullStack.WebApi.Startup
+{
+    /// <summary>
+    /// 初始化任务包括：
+    /// 1， Db初始化
+    /// 2， Cache清理
+    /// </summary>
+    public class InitializationHostedService : IHostedService
+    {
+        private readonly IDatabase _database;
+        private readonly IDistributedLockManager _lockManager;
+        private readonly ICache _cache;
+        private readonly InitializationContext _context;
+
+        public InitializationHostedService(IDatabase database, IDistributedLockManager lockManager, ICache cache, InitializationContext context)
+        {
+            _database = database;
+            _lockManager = lockManager;
+            _cache = cache;
+            _context = context;
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            bool migrationExecuted = await InitializeDatabaseAsync(_database, _lockManager, _context.Migrations).ConfigureAwait(false);
+
+            if (migrationExecuted)
+            {
+                //TODO: clear the cache
+                //清理比如xxx开头的CacheItem,要求Cache有统一开头，且不能与KVStore冲突。所以KVStore最好与cache是不同的实例
+
+                _context.CacheCleanAction?.Invoke(_cache);
+            }
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 返回是否有Migration被执行
+        /// </summary>
+        public static async Task<bool> InitializeDatabaseAsync(IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
+        {
+            GlobalSettings.Logger.LogDebug("开始初始化数据库:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
+
+            IDistributedLock distributedLock = await lockManager.LockAsync(
+                resources: database.DatabaseNames,
+                expiryTime: TimeSpan.FromMinutes(5),
+                waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);
+
+            try
+            {
+                if (!distributedLock.IsAcquired)
+                {
+                    throw WebApiExceptions.DatabaseInitLockError(database.DatabaseNames);
+                }
+
+                GlobalSettings.Logger.LogDebug("获取了初始化数据库的锁:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
+
+                return await database.InitializeAsync(migrations).ConfigureAwait(false);
+            }
+            finally
+            {
+                await distributedLock.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+    }
+}

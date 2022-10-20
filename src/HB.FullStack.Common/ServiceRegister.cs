@@ -6,6 +6,8 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddFullStackCommon(this IServiceCollection services)
         {
+            services.AddOptions();
+
             services.AddSingleton<IModelDefFactory, ModelDefFactory>();
 
             services.AddSingleton<IModelDefProvider, PlainModelDefProvider>();

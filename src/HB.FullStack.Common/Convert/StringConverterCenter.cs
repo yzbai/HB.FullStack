@@ -28,6 +28,11 @@ namespace HB.FullStack.Common.Convert
                 valueType = value!.GetType();
             }
 
+            if (valueType.IsEnum)
+            {
+                return value?.ToString();
+            }
+
             if (!_stringConverters.TryGetValue(valueType, out IStringConverter? stringConverter))
             {
                 throw new NotImplementedException($"不支持这种Type的ConvertToString. Type:{valueType.FullName}");

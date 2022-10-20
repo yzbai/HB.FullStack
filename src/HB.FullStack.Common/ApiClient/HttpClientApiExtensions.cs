@@ -91,7 +91,7 @@ namespace System.Net.Http
             //step 1: 401, 从Header解析ErrorCode
             if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
             {
-                if (responseMessage.Headers.TryGetValues(HeaderNames.WWWAuthenticate, out IEnumerable<string>? headValues) && headValues.Count() == 1)
+                if (responseMessage.Headers.TryGetValues(HeaderNames.Authorization, out IEnumerable<string>? headValues) && headValues.Count() == 1)
                 {
                     string authenticate = headValues.First();
 

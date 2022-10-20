@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Reflection;
 
 namespace System
 {
@@ -74,5 +75,7 @@ namespace System
                 throw CommonExceptions.EnvironmentVariableError(value: EnvironmentUtil.MachineId, cause: "环境变量MachineId设置错误");
             }
         }
+
+        public static string? ApplicationName => Assembly.GetEntryAssembly()?.FullName;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -53,31 +54,44 @@ namespace HB.FullStack.Common.ApiClient
             {
                 _apiKeys = _options.ApiKeys.ToDictionary(item => item.Name, item => item.Key);
             }
+        }
 
-            void RangeEndpoints()
+        public void RangeEndpoints()
+        {
+            //From Attribute
+            IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
+
+            foreach (Type resType in resTypes)
             {
-                AddResEndpointFromAssemblyToResEndpoints();
+                ResEndpoint endpoint = new ResEndpoint(resType.Name);
+                endpoint.SiteSetting = _options.SiteSettings.First(); //TODO: 有待商榷
 
-                foreach (var siteSetting in _options.SiteSettings)
+                ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
+
+                if (attr != null)
                 {
-                    foreach (var endpoint in siteSetting.Endpoints)
-                    {
-                        endpoint.SiteSetting = siteSetting;
+                    endpoint.ResName = attr.ResName ?? endpoint.ResName;
+                    endpoint.Type = attr.Type ?? endpoint.Type;
+                    endpoint.ControllerOrPlainUrl = attr.ControllerOrPlainUrl ?? endpoint.ControllerOrPlainUrl;
+                    endpoint.DefaultReadAuth = attr.DefaultReadAuth ?? endpoint.DefaultReadAuth;
+                    endpoint.DefaultWriteAuth = attr.DefaultWriteAuth ?? endpoint.DefaultWriteAuth;
+                }
 
-                        _resEndpoints[endpoint.ResName] = endpoint;
+                _resEndpoints[endpoint.ResName] = endpoint;
+            }
 
-                        //if (!_resEndpoints.TryAdd(endpoint.ResName, endpoint))
-                        //{
-                        //    throw CommonExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
-                        //}
+            //From SiteSettings
+            foreach (var siteSetting in _options.SiteSettings)
+            {
+                foreach (var endpoint in siteSetting.Endpoints)
+                {
+                    endpoint.SiteSetting = siteSetting;
 
-                        //endpoint.SiteSetting = siteSetting;
-                    }
+                    //may override attribute of res
+                    _resEndpoints[endpoint.ResName] = endpoint;
                 }
             }
         }
-
-        partial void AddResEndpointFromAssemblyToResEndpoints();
 
         public event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting
         {

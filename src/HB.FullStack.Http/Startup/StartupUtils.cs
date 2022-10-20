@@ -3,11 +3,13 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
+using HB.FullStack.Cache;
 using HB.FullStack.Database;
 using HB.FullStack.Identity;
 using HB.FullStack.Lock.Distributed;
 using HB.FullStack.WebApi;
 using HB.FullStack.WebApi.Filters;
+using HB.FullStack.WebApi.Startup;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -72,11 +74,8 @@ namespace System
             return services;
         }
 
-        /// <summary>
-        /// audience:我是谁，即jwt是颁发给谁的
-        /// authority:当局。我该去向谁核实，即是谁颁发了这个jwt
-        /// </summary>
-        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration,
+        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, 
+            IConfiguration configuration,
             Func<JwtBearerChallengeContext, Task> onChallenge,
             Func<TokenValidatedContext, Task> onTokenValidated,
             Func<AuthenticationFailedContext, Task> onAuthenticationFailed,
@@ -86,10 +85,40 @@ namespace System
             JwtClientSettings jwtSettings = new JwtClientSettings();
             configuration.Bind(jwtSettings);
 
+            return AddJwtAuthenticationCore(services, onChallenge, onTokenValidated, onAuthenticationFailed, onForbidden, onMessageReceived, jwtSettings);
+        }
+
+        
+        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, 
+            Action<JwtClientSettings> configureJwtClientSettings,
+            Func<JwtBearerChallengeContext, Task> onChallenge,
+            Func<TokenValidatedContext, Task> onTokenValidated,
+            Func<AuthenticationFailedContext, Task> onAuthenticationFailed,
+            Func<ForbiddenContext, Task> onForbidden,
+            Func<MessageReceivedContext, Task> onMessageReceived)
+        {
+            JwtClientSettings jwtSettings = new JwtClientSettings();
+            configureJwtClientSettings(jwtSettings);
+            return AddJwtAuthenticationCore(services, onChallenge, onTokenValidated, onAuthenticationFailed, onForbidden, onMessageReceived, jwtSettings);
+        }
+
+        /// <summary>
+        /// audience:我是谁，即jwt是颁发给谁的
+        /// authority:当局。我该去向谁核实，即是谁颁发了这个jwt
+        /// </summary>
+        private static AuthenticationBuilder AddJwtAuthenticationCore(
+            IServiceCollection services, 
+            Func<JwtBearerChallengeContext, Task> onChallenge, 
+            Func<TokenValidatedContext, Task> onTokenValidated, 
+            Func<AuthenticationFailedContext, Task> onAuthenticationFailed, 
+            Func<ForbiddenContext, Task> onForbidden, 
+            Func<MessageReceivedContext, Task> onMessageReceived, 
+            JwtClientSettings jwtSettings)
+        {
             X509Certificate2 encryptCert = CertificateUtil.GetCertificateFromSubjectOrFile(
-                jwtSettings.JwtContentCertificateSubject,
-                jwtSettings.JwtContentCertificateFileName,
-                jwtSettings.JwtContentCertificateFilePassword);
+                            jwtSettings.JwtContentCertificateSubject,
+                            jwtSettings.JwtContentCertificateFileName,
+                            jwtSettings.JwtContentCertificateFilePassword);
 
             return
                 services
@@ -117,7 +146,7 @@ namespace System
                         ValidateIssuer = true,
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
-                        
+
                         //内容证书：jwt中签名一个证书，内容加密一个证书
                         //TODO: 是否也可以从Authority获取？
                         TokenDecryptionKey = CredentialHelper.GetSecurityKey(encryptCert)
@@ -146,7 +175,7 @@ namespace System
                 });
         }
 
-        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
+        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addGlobalAuthorizeFilter = true)
         {
             Assembly httpFrameworkAssembly = typeof(GlobalExceptionController).Assembly;
 
@@ -155,7 +184,7 @@ namespace System
             services
                 .AddControllers(options =>
                 {
-                    if (addAuthentication)
+                    if (addGlobalAuthorizeFilter)
                     {
                         //need authenticated by default. no need add [Authorize] everywhere
                         AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
@@ -186,42 +215,15 @@ namespace System
             return services;
         }
 
-        /// <summary>
-        /// 返回是否有Migration被执行
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="lockManager"></param>
-        /// <param name="migrations"></param>
-        /// <returns></returns>
-        public static async Task<bool> InitializeDatabaseAsync(HB.FullStack.Database.IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
+        public static IServiceCollection AddFullStackInitialization(this IServiceCollection services, IEnumerable<Migration>? migrations, Action<ICache>? cacheClean)
         {
-            GlobalSettings.Logger.LogDebug("开始初始化数据库:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
 
-            IDistributedLock distributedLock = await lockManager.LockAsync(
-                resources: database.DatabaseNames,
-                expiryTime: TimeSpan.FromMinutes(5),
-                waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);
+            InitializationContext context = new InitializationContext { Migrations = migrations, CacheCleanAction = cacheClean };
 
-            try
-            {
-                if (!distributedLock.IsAcquired)
-                {
-                    ThrowIfDatabaseInitLockNotGet(database.DatabaseNames);
-                }
+            services.AddSingleton(context);
+            services.AddHostedService<InitializationHostedService>();
 
-                GlobalSettings.Logger.LogDebug("获取了初始化数据库的锁:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
-
-                return await database.InitializeAsync(migrations).ConfigureAwait(false);
-            }
-            finally
-            {
-                await distributedLock.DisposeAsync().ConfigureAwait(false);
-            }
-        }
-
-        private static void ThrowIfDatabaseInitLockNotGet(IEnumerable<string> databaseNames)
-        {
-            throw WebApiExceptions.DatabaseInitLockError(databases: databaseNames);
+            return services;
         }
     }
 }

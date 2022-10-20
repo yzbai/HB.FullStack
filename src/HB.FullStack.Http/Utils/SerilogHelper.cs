@@ -88,7 +88,7 @@ namespace HB.FullStack.WebApi
             string logFileName = string.Format(
                 CultureInfo.InvariantCulture,
                 LogFileNameTemplate,
-                Assembly.GetEntryAssembly()?.FullName ?? "UnKown",
+                EnvironmentUtil.ApplicationName ?? "UnKown" + Guid.NewGuid().ToString(),
                 EnvironmentUtil.MachineId.GetValueOrDefault());
 
             logDirectory ??= DefaultLogDirectory;
