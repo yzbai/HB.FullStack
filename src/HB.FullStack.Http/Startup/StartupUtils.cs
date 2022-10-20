@@ -104,6 +104,8 @@ namespace System
                     //                    jwtOptions.RequireHttpsMetadata = false;
                     //#endif
                     jwtOptions.Audience = jwtSettings.Audience;
+
+                    //从Authority获取signing证书 公钥
                     jwtOptions.Authority = jwtSettings.Authority;
                     jwtOptions.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -115,6 +117,9 @@ namespace System
                         ValidateIssuer = true,
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
+                        
+                        //内容证书：jwt中签名一个证书，内容加密一个证书
+                        //TODO: 是否也可以从Authority获取？
                         TokenDecryptionKey = CredentialHelper.GetSecurityKey(encryptCert)
                     };
                     jwtOptions.Events = new JwtBearerEvents

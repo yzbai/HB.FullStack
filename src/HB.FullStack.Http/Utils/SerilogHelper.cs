@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -15,7 +16,8 @@ namespace HB.FullStack.WebApi
 {
     public static class SerilogHelper
     {
-        private const string LogFilePathTemplate = "logs/{0}_{1}_Id.log";
+        private const string DefaultLogDirectory = "logs";
+        private const string LogFileNameTemplate = "{0}_{1}_Id.log";
         private const string LogOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}[{Level:u3}] {Message:lj} [{SourceContext}]{NewLine}{Exception}{Properties:j}{NewLine}";
 
         private static SerilogLoggerFactory? _loggerFactory;
@@ -29,9 +31,9 @@ namespace HB.FullStack.WebApi
         /// <summary>
         /// https://github.com/serilog/serilog-aspnetcore
         /// </summary>
-        public static void OpenLogs()
+        public static void OpenLogs(string? logDirectory = null)
         {
-            LoggerConfiguration loggerConfiguration = CreateLoggerConfiguration();
+            LoggerConfiguration loggerConfiguration = CreateLoggerConfiguration(logDirectory);
 
             //TODO: 这句话要在前面?
             _loggerFactory = new SerilogLoggerFactory();
@@ -57,14 +59,8 @@ namespace HB.FullStack.WebApi
             };
         }
 
-        private static LoggerConfiguration CreateLoggerConfiguration()
+        private static LoggerConfiguration CreateLoggerConfiguration(string? logDirectory)
         {
-            string logFilePath = string.Format(
-                CultureInfo.InvariantCulture,
-                LogFilePathTemplate,
-                Assembly.GetEntryAssembly()?.FullName ?? "UnKown",
-                EnvironmentUtil.MachineId.GetValueOrDefault());
-
             LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
 
             if (EnvironmentUtil.IsDevelopment())
@@ -88,6 +84,16 @@ namespace HB.FullStack.WebApi
                     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
                     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning); // for use Serialog request log;
             }
+
+            string logFileName = string.Format(
+                CultureInfo.InvariantCulture,
+                LogFileNameTemplate,
+                Assembly.GetEntryAssembly()?.FullName ?? "UnKown",
+                EnvironmentUtil.MachineId.GetValueOrDefault());
+
+            logDirectory ??= DefaultLogDirectory;
+
+            string logFilePath = Path.Combine(logDirectory, logFileName);
 
             loggerConfiguration
                 .Enrich.FromLogContext()
