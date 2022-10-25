@@ -5,26 +5,33 @@ using CommunityToolkit.Maui.Core;
 
 using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.Controls.Popups;
-using HB.FullStack.Client.Navigation;
 
 using Microsoft.Extensions.Configuration;
-using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Dispatching;
 
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace System
 {
+    /// <summary>
+    /// Useful Shortcuts
+    /// </summary>
     public static class Currents
     {
+        private static IConfiguration? _configuration;
+        private static PopupSizeConstants? _popupSizeConstants;
+
+        #region Environment
+
         public static string Environment =>
 #if DEBUG
     "Debug";
@@ -32,10 +39,9 @@ namespace System
 #if RELEASE
      "Release";
 #endif
-        
+
         public static bool IsDebug => Environment == "Debug";
 
-        private static IConfiguration? _configuration;
         /// <summary>
         /// 要确保在App项目中调用
         /// </summary>
@@ -65,12 +71,15 @@ namespace System
             }
         }
 
+        public static IServiceProvider Services => IPlatformApplication.Current!.Services;
 
-        public static IList<Task> AppendingTasks { get; } = new List<Task>();
+        #endregion
+
+        #region Controls
 
         public static BaseApplication Application => (BaseApplication?)Microsoft.Maui.Controls.Application.Current!;
 
-        public static IServiceProvider Services => IPlatformApplication.Current!.Services;
+        public static Window? Window => Application.MainPage?.Window;
 
         public static Page Page
         {
@@ -95,15 +104,17 @@ namespace System
             }
         }
 
+        public static Shell Shell => Shell.Current;
+
+        public static INavigation Navigation => Shell.Current.Navigation;
+
         public static IDispatcher Dispatcher => Page.Dispatcher;
 
-        public static INavigationManager Navigation => INavigationManager.Current;
-
-        private static PopupSizeConstants? _popupSizeConstants;
         public static PopupSizeConstants PopupSizeConstants => _popupSizeConstants ??= Services.GetRequiredService<PopupSizeConstants>();
 
+        #endregion
 
-        #region UIs
+        #region Pops
 
         public static void ShowToast(string message, ToastDuration duration = ToastDuration.Long, double textSize = 14)
         {
@@ -115,7 +126,34 @@ namespace System
         }
 
         #endregion
+
+        public static IList<Task> AppendingTasks { get; } = new List<Task>();
     }
 
+    public static class CurrentsExtensions
+    {
+        public static Task GoToAsync(this Shell shell, string uri, IDictionary<string, object?> parameters)
+        {
+            return shell.GoToAsync(BuildUri(uri, parameters));
+        }
+
+        public static Task GoBackAsync(this Shell shell, IDictionary<string, object?>? parameters) => shell.GoToAsync("..", parameters);
+
+        public static Task GoBackAsync(this Shell shell) => shell.GoToAsync("..");
+
+        private static string BuildUri(string uri, IDictionary<string, object?>? parameters)
+        {
+            if (parameters.IsNullOrEmpty())
+            {
+                return uri;
+            }
+
+            StringBuilder fullUrl = new StringBuilder();
+            fullUrl.Append(uri);
+            fullUrl.Append('?');
+            fullUrl.Append(string.Join("&", parameters.Select(kvp => $"{kvp.Key}={kvp.Value}")));
+            return fullUrl.ToString();
+        }
+    }
 
 }

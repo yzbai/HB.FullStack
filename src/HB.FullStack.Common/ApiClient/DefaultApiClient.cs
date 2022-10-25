@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Common.Api;
 
 using Microsoft.Extensions.Options;
@@ -16,9 +18,10 @@ namespace HB.FullStack.Common.ApiClient
     /// <summary>
     /// 保持单例复用
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD110:Observe result of async calls", Justification = "<Pending>")]
     public partial class DefaultApiClient : IApiClient
     {
-        private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
+        //private readonly WeakEventManager _eventManager = new WeakEventManager();
 
         private readonly ApiClientOptions _options;
 
@@ -93,27 +96,23 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        public event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting
-        {
-            add => _asyncEventManager.Add(value);
-            remove => _asyncEventManager.Remove(value);
-        }
+        #region Events
 
-        public event AsyncEventHandler<object, ApiEventArgs> Responsed
-        {
-            add => _asyncEventManager.Add(value);
-            remove => _asyncEventManager.Remove(value);
-        }
+        public event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
+        public event Func<object?, ApiEventArgs, Task>? Responsed;
 
         private Task OnRequestingAsync(ApiRequest apiRequest, ApiEventArgs apiEventArgs)
         {
-            return _asyncEventManager.RaiseEventAsync(nameof(Requesting), apiRequest, apiEventArgs);
+            return Requesting?.Invoke(apiRequest, apiEventArgs) ?? Task.CompletedTask;
         }
 
         private Task OnResponsedAsync(object? responsedObj, ApiEventArgs apiEventArgs)
         {
-            return _asyncEventManager.RaiseEventAsync(nameof(Responsed), responsedObj, apiEventArgs);
+            return Responsed?.Invoke(responsedObj, apiEventArgs) ?? Task.CompletedTask;
         }
+
+        #endregion
+
         public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyApiResource>(request, cancellationToken);
 
         public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);

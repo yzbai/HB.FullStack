@@ -19,7 +19,7 @@ namespace HB.FullStack.Identity
         public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override async Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args)
+        protected override async Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
         {
             //解决方案1：删除所有。Role改变，对于CachedRolesByUserId来说，就是Values变了，所以要全部Invalidate
             //问题：速度慢

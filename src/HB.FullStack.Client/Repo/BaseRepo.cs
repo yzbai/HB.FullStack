@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Client.Network;
 using HB.FullStack.Client.Offline;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
@@ -26,9 +25,10 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo
     {
         protected IPreferenceProvider PreferenceProvider { get; }
-        protected StatusManager StatusManager { get; }
-
+        
         protected IApiClient ApiClient { get; }
+
+        protected IStatusManager StatusManager { get; }
 
         protected string LastUser => PreferenceProvider.UserId?.ToString() ?? "NotLogined";
 
@@ -40,34 +40,6 @@ namespace HB.FullStack.Client
             }
         }
 
-        //protected bool IsInternetConnected(bool throwIfNot = true)
-        //{
-        //    bool isInternetConnected = StatusManager.IsInternet();
-
-        //    if (throwIfNot && !isInternetConnected)
-        //    {
-        //        throw ClientExceptions.NoInternet("没有联网，且不允许离线");
-        //    }
-
-        //    return isInternetConnected;
-        //}
-
-        protected void EnsureInternetConnected()
-        {
-            if (!StatusManager.IsInternet())
-            {
-                throw ClientExceptions.NoInternet("没有联网");
-            }
-        }
-
-        protected void EnsureNotSyncing()
-        {
-            if (StatusManager.NeedSyncAfterReconnected)
-            {
-                throw ClientExceptions.OperationInvalidCauseofSyncingAfterReconnected();
-            }
-        }
-
         protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string modelName)
         {
             if (obj == null)
@@ -76,11 +48,11 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, StatusManager connectivityManager)
+        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, IStatusManager statusManager)
         {
             ApiClient = apiClient;
             PreferenceProvider = userPreferenceProvider;
-            StatusManager = connectivityManager;
+            StatusManager = statusManager;
         }
     }
 
@@ -100,7 +72,7 @@ namespace HB.FullStack.Client
             IApiClient apiClient,
             IOfflineChangeManager offlineChangeManager,
             IPreferenceProvider userPreferenceProvider,
-            StatusManager statusManager) : base(apiClient, userPreferenceProvider, statusManager)
+            IStatusManager statusManager) : base(apiClient, userPreferenceProvider, statusManager)
         {
             _logger = logger;
             _modelDef = database.ModelDefFactory.GetDef<TModel>()!;
@@ -147,7 +119,7 @@ namespace HB.FullStack.Client
             RepoGetMode getMode,
             IfUseLocalData<TModel>? ifUseLocalData = null)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
@@ -170,7 +142,7 @@ namespace HB.FullStack.Client
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
@@ -194,7 +166,7 @@ namespace HB.FullStack.Client
             RepoGetMode getMode,
             IfUseLocalData<TModel>? ifUseLocalData = null)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> models = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
@@ -210,7 +182,7 @@ namespace HB.FullStack.Client
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
@@ -253,13 +225,13 @@ namespace HB.FullStack.Client
                 {
                     _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{Type}", typeof(TModel).Name);
 
-                    StatusManager.OnOfflineDataReaded();
+                    //StatusManager.OnOfflineDataReaded();
 
                     return localModels;
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                    throw ClientExceptions.NoInternet();
                 }
             }
 
@@ -304,7 +276,8 @@ namespace HB.FullStack.Client
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
-            EnsureNotSyncing();
+            
+            StatusManager.WaitUntilSynced();
 
             try
             {
@@ -329,7 +302,7 @@ namespace HB.FullStack.Client
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                    throw ClientExceptions.NoInternet();
                 }
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
@@ -347,7 +320,7 @@ namespace HB.FullStack.Client
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             List<ChangedPack> changedPacks = models.Select(m => m.GetChangedPack()).ToList();
 
@@ -363,7 +336,7 @@ namespace HB.FullStack.Client
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                    throw ClientExceptions.NoInternet();
                 }
 
                 await Database.BatchUpdatePropertiesAsync<TModel>(changedPacks, LastUser, transactionContext).ConfigureAwait(false);
@@ -378,7 +351,7 @@ namespace HB.FullStack.Client
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             try
             {
@@ -396,7 +369,7 @@ namespace HB.FullStack.Client
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                    throw ClientExceptions.NoInternet();
                 }
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)

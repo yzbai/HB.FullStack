@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using HB.FullStack.Client;
+using HB.FullStack.Client.Maui;
 using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.Controls;
 using HB.FullStack.Client.Maui.Controls.Popups;
@@ -43,9 +45,9 @@ namespace Microsoft.Maui.Hosting
 
             //HB.FullStack.Client.Maui
             services.AddPreferences();
-            services.AddNavigationManager();
             services.AddFileManager(fileManagerOptionConfig);
-            services.AddNetworkManager();
+            services.AddSingleton<StatusManager>();
+            services.AddSingleton(typeof(IStatusManager), sp => sp.GetRequiredService<StatusManager>());
             services.AddTCaptcha(tCaptchaAppId);
 
             //Initializers

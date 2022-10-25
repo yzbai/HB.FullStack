@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
+using HB.FullStack.Client.Offline;
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -50,8 +51,8 @@ namespace HB.FullStack.Client.Maui.Base
 
             #endregion
 
-            //Database
-            //TODO: 是否在这里等他是最好的选择？
+            #region Database
+
             IDatabase database = services.GetRequiredService<IDatabase>();
 
             //Currents.AppendingTasks.Add(
@@ -63,6 +64,17 @@ namespace HB.FullStack.Client.Maui.Base
                 }, TaskScheduler.Default));
 
             //TODO: 使用ApiClient获取一些初始化参数，或者私密信息
+
+            #endregion
+
+            #region Syncing
+
+            StatusManager statusManager = services.GetRequiredService<StatusManager>();
+            IOfflineChangeManager offlineChangeManager = services.GetRequiredService<IOfflineChangeManager>();
+
+            statusManager.Syncing += () => offlineChangeManager.ReSyncAsync();
+
+            #endregion
         }
     }
 }

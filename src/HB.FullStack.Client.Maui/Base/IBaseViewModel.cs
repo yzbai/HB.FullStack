@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Client.Maui
 {
     //TODO: 是否使用Toolkit中的ObservableObject
     public interface IBaseViewModel : INotifyPropertyChanging, INotifyPropertyChanged

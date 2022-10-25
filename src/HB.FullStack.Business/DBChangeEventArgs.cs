@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Repository
 {
-    public class DBChangedEventArgs:EventArgs
+    public class DBChangeEventArgs:EventArgs
     {
         public DBChangeType ChangeType { get;set; }
     }

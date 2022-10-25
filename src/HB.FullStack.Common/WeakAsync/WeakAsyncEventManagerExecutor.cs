@@ -119,6 +119,8 @@ namespace HB.FullStack.Common
             return method is DynamicMethod || (typeInfoRTDynamicMethod?.IsAssignableFrom(method.GetType().GetTypeInfo()) ?? false);
         }
     }
+
+    
 }
 
 #nullable restore

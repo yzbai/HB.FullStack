@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Client.Maui
 {
     public delegate void ExceptionHandler(Exception ex, string message, string? caller);
 

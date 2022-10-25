@@ -1,46 +1,43 @@
-﻿using CommunityToolkit.Maui.Views;
-
-using HB.FullStack.Client.Navigation;
-
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Dispatching;
-
-using System;
-using System.Threading.Tasks;
+﻿using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Client.Maui.Base
 {
     public abstract class BaseApplication : Application
     {
+        private readonly StatusManager _statusManager;
+
+        public BaseApplication(StatusManager statusManager)
+        {
+            _statusManager = statusManager;
+            
+            _statusManager.OnAppConstructed();
+        }
+
         #region Lifecycle
 
+        //进入方式1：启动，从not running or destroyed
+        protected override void OnStart()
+        {
+            base.OnStart();
+            
+            _statusManager.OnAppResume();
+            
+        }
+
+        //进入方式2：恢复，从stopped
         protected override void OnResume()
         {
             base.OnResume();
 
-            SubscribeMessages();
+            _statusManager.OnAppResume();
         }
 
+        //退出
         protected override void OnSleep()
         {
             base.OnSleep();
-            UnSubscribeMessages();
-        }
 
-        #endregion
-
-        #region Messaging
-
-        private void SubscribeMessages()
-        {
-            //MessagingCenter.Subscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName, OnExceptionDisplayRequested);
-            throw new NotImplementedException();
-        }
-
-        private void UnSubscribeMessages()
-        {
-            //MessagingCenter.Unsubscribe<BaseViewModel, ExceptionDisplayArguments>(this, BaseViewModel.ExceptionDisplaySignalName);
-            throw new NotImplementedException();
+            _statusManager.OnAppSleep();
         }
 
         #endregion

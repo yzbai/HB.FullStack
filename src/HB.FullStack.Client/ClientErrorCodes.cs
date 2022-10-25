@@ -1,29 +1,32 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HB.FullStack.Client;
+
+using Microsoft.Extensions.Logging;
 
 namespace System
 {
     public static class ClientErrorCodes
     {
-        public static ErrorCode NoSuchDirectory { get; } = new ErrorCode(nameof(NoSuchDirectory), "");
+        public static ErrorCode NoSuchDirectory   = new ErrorCode(nameof(NoSuchDirectory), "");
 
-        public static ErrorCode ImageOptionsOutOfRange { get; } = new ErrorCode(nameof(ImageOptionsOutOfRange), "");
-        public static ErrorCode IdBarrierError { get; } = new ErrorCode(nameof(IdBarrierError), "");
-        public static ErrorCode ResourceNotFound { get; } = new ErrorCode(nameof(ResourceNotFound), "");
-        public static ErrorCode BizError { get; } = new ErrorCode(nameof(BizError), "");
-        public static ErrorCode NotLogined { get; } = new ErrorCode(nameof(NotLogined), "");
-        public static ErrorCode AliyunStsTokenError { get; } = new ErrorCode(nameof(AliyunStsTokenError), "");
-        public static ErrorCode FileServiceError { get; } = new ErrorCode(nameof(FileServiceError), "");
-        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(nameof(AliyunOssPutObjectError), "");
-        public static ErrorCode LocalFileCopyError { get; } = new ErrorCode(nameof(LocalFileCopyError), "");
-        public static ErrorCode LocalFileSaveError { get; } = new ErrorCode(nameof(LocalFileSaveError), "");
-        public static ErrorCode AliyunStsTokenOverTime { get; } = new ErrorCode(nameof(AliyunStsTokenOverTime), "");
-        public static ErrorCode SmsCodeValidateError { get; } = new ErrorCode(nameof(SmsCodeValidateError), "");
-        public static ErrorCode NoInternet { get; } = new ErrorCode(nameof(NoInternet), "");
-        public static ErrorCode UploadError { get; } = new ErrorCode(nameof(UploadError), "");
+        public static ErrorCode ImageOptionsOutOfRange  = new ErrorCode(nameof(ImageOptionsOutOfRange), "");
+        public static ErrorCode IdBarrierError  = new ErrorCode(nameof(IdBarrierError), "");
+        public static ErrorCode ResourceNotFound  = new ErrorCode(nameof(ResourceNotFound), "");
+        public static ErrorCode BizError  = new ErrorCode(nameof(BizError), "");
+        public static ErrorCode NotLogined  = new ErrorCode(nameof(NotLogined), "");
+        public static ErrorCode AliyunStsTokenError  = new ErrorCode(nameof(AliyunStsTokenError), "");
+        public static ErrorCode FileServiceError  = new ErrorCode(nameof(FileServiceError), "");
+        public static ErrorCode AliyunOssPutObjectError  = new ErrorCode(nameof(AliyunOssPutObjectError), "");
+        public static ErrorCode LocalFileCopyError  = new ErrorCode(nameof(LocalFileCopyError), "");
+        public static ErrorCode LocalFileSaveError  = new ErrorCode(nameof(LocalFileSaveError), "");
+        public static ErrorCode AliyunStsTokenOverTime  = new ErrorCode(nameof(AliyunStsTokenOverTime), "");
+        public static ErrorCode SmsCodeValidateError  = new ErrorCode(nameof(SmsCodeValidateError), "");
+        public static ErrorCode NoInternet  = new ErrorCode(nameof(NoInternet), "");
+        public static ErrorCode UploadError  = new ErrorCode(nameof(UploadError), "");
 
-        public static ErrorCode DbSimpleLockerNoWaitLockFailed { get; } = new ErrorCode(nameof(DbSimpleLockerNoWaitLockFailed), "");
-        public static ErrorCode UnSupportedModelType { get; } = new ErrorCode(nameof(UnSupportedModelType), "");
-        public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected { get; } = new ErrorCode(nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
+        public static ErrorCode DbSimpleLockerNoWaitLockFailed  = new ErrorCode(nameof(DbSimpleLockerNoWaitLockFailed), "");
+        public static ErrorCode UnSupportedModelType  = new ErrorCode(nameof(UnSupportedModelType), "");
+        public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected  = new ErrorCode(nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
+        public static ErrorCode SyncError  = new ErrorCode(nameof(SyncError), "");
     }
 
     public static class LoggerExtensions
@@ -62,11 +65,10 @@ namespace System
             return ex;
         }
 
-        public static Exception NoInternet(string cause)
+        public static Exception NoInternet()
         {
             ClientException ex = new ClientException(ClientErrorCodes.NoInternet, nameof(NoInternet));
 
-            ex.Data["Cause"] = cause;
 
             return ex;
         }
@@ -175,6 +177,13 @@ namespace System
         {
             ClientException ex = new ClientException(ClientErrorCodes.NoSuchDirectory, nameof(NoSuchDirectory));
             ex.Data["DirectoryName"] = directoryName;
+            return ex;
+        }
+
+        public static Exception SyncError(SyncStatus syncStatus)
+        {
+            ClientException ex = new ClientException(ClientErrorCodes.SyncError, nameof(SyncError), null, null);
+
             return ex;
         }
     }

@@ -3,10 +3,7 @@
 using HB.FullStack.Client.Maui.Base;
 using HB.FullStack.Client.Maui.Figures;
 using HB.FullStack.Common;
-
-using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
-using CommunityToolkit.Mvvm.Input;
 
 using SkiaSharp;
 
@@ -15,7 +12,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using HB.FullStack.Client.Navigation;
 using System.Collections.Generic;
 
 namespace HB.FullStack.Client.Maui.Controls.Cropper
@@ -117,7 +113,7 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
             bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, _croppedImageFullPath);
 
-            await INavigationManager.Current.GoBackAsync(new Dictionary<string, object?> { { CropperPage.Query_CroppedSucceed, isSucceed } });
+            await Currents.Shell.GoBackAsync(new Dictionary<string, object?> { { CropperPage.Query_CroppedSucceed, isSucceed } });
         }
 
         private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPathToSave)
@@ -139,7 +135,7 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
         private static async Task CancelAsync()
         {
-            await INavigationManager.Current!.GoBackAsync();
+            await Currents.Shell.GoBackAsync();
         }
     }
 }

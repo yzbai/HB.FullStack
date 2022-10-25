@@ -19,7 +19,7 @@ namespace HB.FullStack.Identity
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
         {
             if (sender is IEnumerable<UserClaim> userClaims)
             {

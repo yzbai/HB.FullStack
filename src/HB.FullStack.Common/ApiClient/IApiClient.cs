@@ -12,9 +12,9 @@ namespace HB.FullStack.Common.ApiClient
 
         ResEndpoint? UserTokenResEndpoint { get; }
 
-        event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting;
+        event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
 
-        event AsyncEventHandler<object, ApiEventArgs> Responsed;
+        event Func<object?, ApiEventArgs, Task>? Responsed;
 
         Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class;
 

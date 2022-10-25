@@ -30,6 +30,7 @@ namespace HB.FullStack.Repository
     public abstract class ModelRepository<TMainDBModel> where TMainDBModel : TimestampDbModel, new()
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
+
         protected ILogger Logger { get; }
         protected ICache Cache { get; }
         private IDatabase Database { get; }
@@ -52,7 +53,7 @@ namespace HB.FullStack.Repository
             RegisterModelChangedEvents(InvalidateCacheItemsOnChanged);
         }
 
-        public void RegisterModelChangedEvents(AsyncEventHandler<object, DBChangedEventArgs> OnModelsChanged)
+        public void RegisterModelChangedEvents(Func<object, DBChangeEventArgs, Task> OnModelsChanged)
         {
             ModelAdded += OnModelsChanged;
 
@@ -64,131 +65,131 @@ namespace HB.FullStack.Repository
         /// <summary>
         /// //NOTICE: 为什么再基类中要abstract而不是virtual，就是强迫程序员思考这里需要释放的Cache有没有
         /// </summary>
-        protected abstract Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args);
+        protected abstract Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args);
 
         #region Events
 
-        public event AsyncEventHandler<object, DBChangingEventArgs> ModelUpdating
+        public event Func<object, DBChangeEventArgs, Task>? ModelUpdating
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangedEventArgs> ModelUpdated
+        public event Func<object, DBChangeEventArgs, Task>? ModelUpdated
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangedEventArgs> ModelUpdateFailed
+        public event Func<object, DBChangeEventArgs, Task>? ModelUpdateFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangingEventArgs> ModelAdding
+        public event Func<object, DBChangeEventArgs, Task>? ModelAdding
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangedEventArgs> ModelAdded
+        public event Func<object, DBChangeEventArgs, Task>? ModelAdded
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangedEventArgs> ModelAddFailed
+        public event Func<object, DBChangeEventArgs, Task>? ModelAddFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangingEventArgs> ModelDeleting
+        public event Func<object, DBChangeEventArgs, Task>? ModelDeleting
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangedEventArgs> ModelDeleted
+        public event Func<object, DBChangeEventArgs, Task>? ModelDeleted
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        public event AsyncEventHandler<object, DBChangedEventArgs> ModelDeleteFailed
+        public event Func<object, DBChangeEventArgs, Task>? ModelDeleteFailed
         {
             add => AsyncEventManager.Add(value);
             remove => AsyncEventManager.Remove(value);
         }
 
-        protected virtual Task OnModelUpdatingFieldsAsync(IEnumerable<ChangedPack> cpps)
+        protected virtual Task OnModelUpdatingPropertiesAsync(IEnumerable<ChangedPack> cpps)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateProperties });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
         protected virtual Task OnModelUpdatedPropertiesAsync(IEnumerable<ChangedPack> cpps)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateProperties });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
         protected virtual Task OnModelUpdatePropertiesFailedAsync(IEnumerable<ChangedPack> cpps)
         {
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangingEventArgs { ChangeType = DBChangeType.UpdateProperties });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
         protected virtual Task OnModelUpdatingAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), models, new DBChangingEventArgs { ChangeType = DBChangeType.Update });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), models, new DBChangeEventArgs { ChangeType = DBChangeType.Update });
         }
 
         protected virtual Task OnModelUpdatedAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), models, new DBChangedEventArgs { ChangeType = DBChangeType.Update });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), models, new DBChangeEventArgs { ChangeType = DBChangeType.Update });
         }
 
         protected virtual Task OnModelUpdateFailedAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), models, new DBChangedEventArgs { ChangeType = DBChangeType.Update });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), models, new DBChangeEventArgs { ChangeType = DBChangeType.Update });
         }
 
         protected virtual Task OnModelAddingAsync(IEnumerable<DbModel> models)
         {
             //events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdding), models, new DBChangingEventArgs { ChangeType = DBChangeType.Add });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdding), models, new DBChangeEventArgs { ChangeType = DBChangeType.Add });
         }
 
         protected virtual Task OnModelAddedAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdded), models, new DBChangedEventArgs { ChangeType = DBChangeType.Add });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAdded), models, new DBChangeEventArgs { ChangeType = DBChangeType.Add });
         }
 
         protected virtual Task OnModelAddFailedAsync(IEnumerable<DbModel> models)
         {
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelAddFailed), models, new DBChangedEventArgs { ChangeType = DBChangeType.Add });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelAddFailed), models, new DBChangeEventArgs { ChangeType = DBChangeType.Add });
         }
 
         protected virtual Task OnModelDeletingAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleting), models, new DBChangingEventArgs { ChangeType = DBChangeType.Delete });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleting), models, new DBChangeEventArgs { ChangeType = DBChangeType.Delete });
         }
 
         protected virtual Task OnModelDeletedAsync(IEnumerable<DbModel> models)
         {
             //Events
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleted), models, new DBChangedEventArgs { ChangeType = DBChangeType.Delete });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleted), models, new DBChangeEventArgs { ChangeType = DBChangeType.Delete });
         }
 
         protected virtual Task OnModelDeleteFailedAsync(IEnumerable<DbModel> models)
         {
-            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleteFailed), models, new DBChangedEventArgs { ChangeType = DBChangeType.Delete });
+            return AsyncEventManager.RaiseEventAsync(nameof(ModelDeleteFailed), models, new DBChangeEventArgs { ChangeType = DBChangeType.Delete });
         }
 
         #endregion
@@ -287,7 +288,7 @@ namespace HB.FullStack.Repository
 
             ThrowIfAddtionalPropertiesLack(new ChangedPack[] { cp }, modelDef);
 
-            await OnModelUpdatingFieldsAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+            await OnModelUpdatingPropertiesAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
 
             try
             {
@@ -310,7 +311,7 @@ namespace HB.FullStack.Repository
 
             ThrowIfAddtionalPropertiesLack(cps, modelDef);
 
-            await OnModelUpdatingFieldsAsync(cps).ConfigureAwait(false);
+            await OnModelUpdatingPropertiesAsync(cps).ConfigureAwait(false);
 
             try
             {
