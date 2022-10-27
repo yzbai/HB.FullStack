@@ -17,10 +17,10 @@ namespace HB.FullStack.Client.Maui
     public class StatusManager : IStatusManager
     {
         private readonly WeakEventManager _eventManager = new WeakEventManager();
-        
+
         public StatusManager()
         {
-            OnceNetworkReady += OnceNetworkReady_StartSync;
+            OnceNetworkReady += async (sender, e) => { await StartSync(); };
         }
 
         #region Lifecycle
@@ -159,11 +159,11 @@ namespace HB.FullStack.Client.Maui
 
         #region Syncing
 
+        private readonly EventWaitHandle _syncedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, "Sync");
+
         public SyncStatus SyncStatus { get; private set; }
 
         public event Func<Task>? Syncing;
-
-        private readonly EventWaitHandle _syncedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, "Sync");
 
         public void WaitUntilSynced()
         {
@@ -178,11 +178,6 @@ namespace HB.FullStack.Client.Maui
             {
                 throw ClientExceptions.SyncError(SyncStatus);
             }
-        }
-
-        private async void OnceNetworkReady_StartSync(object? sender, EventArgs e)
-        {
-            await StartSync();
         }
 
         private async Task StartSync()
@@ -203,6 +198,8 @@ namespace HB.FullStack.Client.Maui
 
                 //TODO: 处理Sync Failed
                 Currents.ShowToast("处理Sync Failed");
+
+                //TODO: 处理完，set Status为Synced
             }
             finally
             {
@@ -210,7 +207,7 @@ namespace HB.FullStack.Client.Maui
             }
         }
 
-        private  Task OnSyncingAsync()
+        private Task OnSyncingAsync()
         {
             return Syncing?.Invoke() ?? Task.CompletedTask;
         }

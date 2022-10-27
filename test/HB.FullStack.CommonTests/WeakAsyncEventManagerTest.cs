@@ -20,7 +20,7 @@ namespace HB.FullStack.CommonTests
         private readonly WeakAsyncEventManager _weakAsyncEventManager = new WeakAsyncEventManager();
 
 
-        public event AsyncEventHandler Updating
+        public event Func<object, object, Task> Updating
         {
             add => _weakAsyncEventManager.Add(value);
             remove => _weakAsyncEventManager.Remove(value);

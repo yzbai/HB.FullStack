@@ -132,27 +132,31 @@ namespace System
 
     public static class CurrentsExtensions
     {
-        public static Task GoToAsync(this Shell shell, string uri, IDictionary<string, object?> parameters)
+        public static async Task GoBackAsync(this Shell shell, IDictionary<string, object?>? parameters = null)
         {
-            return shell.GoToAsync(BuildUri(uri, parameters));
+            if (parameters == null)
+            {
+                await shell.GoToAsync("..");
+            }
+            else
+            {
+                await shell.GoToAsync("..", parameters);
+            }
         }
 
-        public static Task GoBackAsync(this Shell shell, IDictionary<string, object?>? parameters) => shell.GoToAsync("..", parameters);
+        public static Task GoBackAsync(this INavigation navigation, IDictionary<string, object?>? parameters = null) => Shell.Current.GoBackAsync(parameters);
 
-        public static Task GoBackAsync(this Shell shell) => shell.GoToAsync("..");
 
-        private static string BuildUri(string uri, IDictionary<string, object?>? parameters)
+        public static async Task GoToAsync(this INavigation navigation, ShellNavigationState state, IDictionary<string, object?>? parameters = null)
         {
-            if (parameters.IsNullOrEmpty())
+            if (parameters == null)
             {
-                return uri;
+                await Shell.Current.GoToAsync(state);
             }
-
-            StringBuilder fullUrl = new StringBuilder();
-            fullUrl.Append(uri);
-            fullUrl.Append('?');
-            fullUrl.Append(string.Join("&", parameters.Select(kvp => $"{kvp.Key}={kvp.Value}")));
-            return fullUrl.ToString();
+            else
+            {
+                await Shell.Current.GoToAsync(state, parameters);
+            }
         }
     }
 

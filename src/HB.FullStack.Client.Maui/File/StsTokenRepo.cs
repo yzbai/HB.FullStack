@@ -32,7 +32,7 @@ namespace HB.FullStack.Client.Maui.File
             IDatabase database,
             IApiClient apiClient,
             IPreferenceProvider preferenceProvider,
-            IOfflineChangeManager historyManager,
+            IOfflineManager historyManager,
             StatusManager connectivityManager)
             : base(logger, database, apiClient, historyManager, preferenceProvider, connectivityManager)
         {

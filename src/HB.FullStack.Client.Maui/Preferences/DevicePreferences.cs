@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-
+using HB.FullStack.Client.Maui.Utils;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Devices.Sensors;

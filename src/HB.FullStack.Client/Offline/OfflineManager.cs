@@ -11,15 +11,19 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Offline
 {
-    public class OfflineChangeManager : IOfflineChangeManager
+    public class OfflineManager : IOfflineManager
     {
         private readonly IDatabase _database;
         private readonly IModelDefFactory _modelDefFactory;
+        private readonly IStatusManager _statusManager;
 
-        public OfflineChangeManager(IDatabase database, IModelDefFactory modelDefFactory)
+        public OfflineManager(IDatabase database, IModelDefFactory modelDefFactory, IStatusManager statusManager)
         {
             _database = database;
             _modelDefFactory = modelDefFactory;
+            _statusManager = statusManager;
+
+            _statusManager.Syncing += ReSyncAsync;
         }
 
         public Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new()
@@ -76,6 +80,15 @@ namespace HB.FullStack.Client.Offline
             }
 
             await _database.BatchAddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
+        }
+
+        public async Task<bool> HasOfflineDataAsync()
+        {
+            _statusManager.WaitUntilSynced();
+
+            long count = await _database.CountAsync<OfflineChange>(null).ConfigureAwait(false);
+
+            return count != 0;
         }
 
         public async Task ReSyncAsync()

@@ -1,9 +1,6 @@
 ﻿using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Maui.Views;
 
-using HB.FullStack.Client.Maui.Base;
-using HB.FullStack.Client.Navigation;
-
 using Microsoft.Maui.Controls;
 
 using System;
@@ -71,7 +68,7 @@ namespace HB.FullStack.Client.Maui.Controls
 
         private async void Confirm_Button_Clicked(object? sender, EventArgs e)
         {
-            await INavigationManager.Current!.GoBackAsync();
+            await Currents.Shell.GoBackAsync();
         }
     }
 }

@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Storage;
 
-namespace HB.FullStack.Client.Maui
+namespace HB.FullStack.Client.Maui.Utils
 {
     //TODO: 如果SecurityStorage不支持，改用普通的Preference
 

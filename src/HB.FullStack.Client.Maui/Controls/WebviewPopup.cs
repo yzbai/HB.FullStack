@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using System;
 
-using HB.FullStack.Client.Navigation;
+using CommunityToolkit.Maui.Views;
 
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
@@ -37,7 +37,7 @@ namespace HB.FullStack.Client.Maui.Controls
             };
             retButton.Clicked += async (sender, e) =>
             {
-                await INavigationManager.Current.GoBackAsync();
+                await Currents.Shell.GoBackAsync();
             };
 
 

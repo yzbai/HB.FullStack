@@ -12,17 +12,23 @@ namespace HB.FullStack.Client
     {
         #region Network
 
+        bool IsNetworkDown() => NetworkStatus != NetworkStatus.Connected;
+
         NetworkStatus NetworkStatus { get; }
 
         event EventHandler OnceNetworkReady;
+        
         event EventHandler OnceNetworkFailed;
 
         void EnsureNetworkReady();
+        
         void ReportNoInternet();
 
         #endregion
 
         #region Syncing
+        
+        SyncStatus SyncStatus { get; }
 
         event Func<Task>? Syncing;
 
@@ -31,5 +37,25 @@ namespace HB.FullStack.Client
         void EnsureSynced();
 
         #endregion
+    }
+
+    public enum NetworkStatus
+    {
+        Disconnected,
+
+        Connected
+    }
+
+    public enum SyncStatus
+    {
+        Syncing,
+        SynceFailed,//失败 
+        Synced //成功
+    }
+
+    public enum UserStatus
+    {
+        UnLogined,
+        Logined
     }
 }

@@ -25,7 +25,7 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo
     {
         protected IPreferenceProvider PreferenceProvider { get; }
-        
+
         protected IApiClient ApiClient { get; }
 
         protected IStatusManager StatusManager { get; }
@@ -59,7 +59,7 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo<TModel> : BaseRepo where TModel : ClientDbModel, new()
     {
         private readonly ILogger _logger;
-        private readonly IOfflineChangeManager _offlineChangeManager;
+        private readonly IOfflineManager _offlineChangeManager;
         private readonly DbModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
@@ -70,7 +70,7 @@ namespace HB.FullStack.Client
             ILogger logger,
             IDatabase database,
             IApiClient apiClient,
-            IOfflineChangeManager offlineChangeManager,
+            IOfflineManager offlineChangeManager,
             IPreferenceProvider userPreferenceProvider,
             IStatusManager statusManager) : base(apiClient, userPreferenceProvider, statusManager)
         {
@@ -219,7 +219,7 @@ namespace HB.FullStack.Client
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!StatusManager.IsInternet())
+            if (StatusManager.IsNetworkDown())
             {
                 if (ClientModelDef.AllowOfflineRead)
                 {
@@ -276,34 +276,33 @@ namespace HB.FullStack.Client
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
-            
+
+            //等待同步完，包括处理完冲突
             StatusManager.WaitUntilSynced();
 
             try
             {
-                //正常
-                if (StatusManager.IsInternet())
+                if (StatusManager.IsNetworkDown())
+                {
+                    if (ClientModelDef.AllowOfflineAdd)
+                    {
+                        //Offline History
+                        await _offlineChangeManager.RecordOfflineAddAsync(models, transactionContext).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        throw ClientExceptions.NoInternet();
+                    }
+                }
+                else
                 {
                     //Remote
                     //TODO: 罗列处理可能的异常：1， 存在重复；
                     await AddToRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                }
 
-                    //Local
-                    await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
-                }
-                //离线写
-                else if (ClientModelDef.AllowOfflineAdd)
-                {
-                    //Offline History
-                    await _offlineChangeManager.RecordOfflineAddAsync(models, transactionContext).ConfigureAwait(false);
-
-                    //Local
-                    await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
-                }
-                else
-                {
-                    throw ClientExceptions.NoInternet();
-                }
+                //Local
+                await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
             {
@@ -326,17 +325,20 @@ namespace HB.FullStack.Client
 
             try
             {
-                if (StatusManager.IsInternet())
+                if (StatusManager.IsNetworkDown())
                 {
-                    await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
-                }
-                else if (ClientModelDef.AllowOfflineUpdate)
-                {
-                    await _offlineChangeManager.RecordOfflineUpdateAsync<TModel>(changedPacks, transactionContext).ConfigureAwait(false);
+                    if (ClientModelDef.AllowOfflineUpdate)
+                    {
+                        await _offlineChangeManager.RecordOfflineUpdateAsync<TModel>(changedPacks, transactionContext).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        throw ClientExceptions.NoInternet();
+                    }
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet();
+                    await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
                 }
 
                 await Database.BatchUpdatePropertiesAsync<TModel>(changedPacks, LastUser, transactionContext).ConfigureAwait(false);
@@ -355,22 +357,25 @@ namespace HB.FullStack.Client
 
             try
             {
-                if (StatusManager.IsInternet())
+                if (StatusManager.IsNetworkDown())
                 {
-                    await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                    if (ClientModelDef.AllowOfflineDelete)
+                    {
+                        await _offlineChangeManager.RecordOfflineDeleteAsync(models, transactionContext).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        throw ClientExceptions.NoInternet();
+                    }
 
-                    await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
-                }
-                else if (ClientModelDef.AllowOfflineDelete)
-                {
-                    await _offlineChangeManager.RecordOfflineDeleteAsync(models, transactionContext).ConfigureAwait(false);
-
-                    await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet();
+                    await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
+
                 }
+
+                await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {

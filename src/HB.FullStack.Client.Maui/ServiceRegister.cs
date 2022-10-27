@@ -42,6 +42,7 @@ namespace Microsoft.Maui.Hosting
 
             //HB.FullStack.Client
             services.AddKVManager();
+            services.AddOfflineManager();
 
             //HB.FullStack.Client.Maui
             services.AddPreferences();

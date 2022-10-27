@@ -67,12 +67,10 @@ namespace HB.FullStack.Client.Maui.Base
 
             #endregion
 
-            #region Syncing
+            #region Need Initialize
 
             StatusManager statusManager = services.GetRequiredService<StatusManager>();
-            IOfflineChangeManager offlineChangeManager = services.GetRequiredService<IOfflineChangeManager>();
-
-            statusManager.Syncing += () => offlineChangeManager.ReSyncAsync();
+            IOfflineManager offlineManager = services.GetRequiredService<IOfflineManager>();
 
             #endregion
         }

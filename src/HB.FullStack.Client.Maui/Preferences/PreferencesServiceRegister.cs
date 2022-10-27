@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddPreferences(this IServiceCollection services)
         {
-            services.AddSingleton<IPreferenceProvider, MauiPreferenceProvider>();
+            services.AddSingleton<IPreferenceProvider, PreferenceProvider>();
             return services;
         }
     }

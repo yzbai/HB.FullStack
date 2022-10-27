@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Client.Maui
 {
-    public class MauiPreferenceProvider : IPreferenceProvider
+    public class PreferenceProvider : IPreferenceProvider
     {
         public string? AccessToken { get => UserPreferences.AccessToken; set => UserPreferences.AccessToken = value ?? ""; }
         public string? RefreshToken { get => UserPreferences.RefreshToken; set => UserPreferences.RefreshToken = value ?? ""; }

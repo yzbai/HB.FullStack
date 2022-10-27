@@ -8,11 +8,11 @@ using HB.FullStack.Client.Offline;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class OfflineChangeManagerServiceRegister
+    public static class ServiceRegister
     {
-        public static IServiceCollection AddHistoryManager(this IServiceCollection services)
+        public static IServiceCollection AddOfflineManager(this IServiceCollection services)
         {
-            services.AddSingleton<IOfflineChangeManager, OfflineChangeManager>();
+            services.AddSingleton<IOfflineManager, OfflineManager>();
 
             return services;
         }

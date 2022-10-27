@@ -7,7 +7,7 @@ using HB.FullStack.Database;
 
 namespace HB.FullStack.Client.Offline
 {
-    public interface IOfflineChangeManager
+    public interface IOfflineManager
     {
         Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 
@@ -16,5 +16,7 @@ namespace HB.FullStack.Client.Offline
         Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 
         Task ReSyncAsync();
+
+        Task<bool> HasOfflineDataAsync();
     }
 }

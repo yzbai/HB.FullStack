@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using HB.FullStack.Client.Maui.Utils;
 
 namespace HB.FullStack.Client.Maui
 {
