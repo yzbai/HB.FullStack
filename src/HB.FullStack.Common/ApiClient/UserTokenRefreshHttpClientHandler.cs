@@ -26,13 +26,13 @@ namespace HB.FullStack.Common.ApiClient
 #if DEBUG
             ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
             {
-                if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                if (cert!.Issuer.Equals("CN=localhost", Globals.Comparison))
                     return true;
                 return errors == System.Net.Security.SslPolicyErrors.None;
             };
 #endif
 
-            GlobalSettings.Logger.LogInformation("TokenAutoRefreshedHttpClientHandler Inited.");
+            Globals.Logger.LogInformation("TokenAutoRefreshedHttpClientHandler Inited.");
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ namespace HB.FullStack.Common.ApiClient
 
             if (endpointSettings == null)
             {
-                GlobalSettings.Logger.LogDebug("Not found endpoint");
+                Globals.Logger.LogDebug("Not found endpoint");
                 return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
 
@@ -62,7 +62,7 @@ namespace HB.FullStack.Common.ApiClient
                     return responseMessage;
                 }
 
-                GlobalSettings.Logger.Log(LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
+                Globals.Logger.Log(LogLevel.Critical, ex, "FFImageLoading的权限认证图片挂掉了！");
             }
 
             return responseMessage;

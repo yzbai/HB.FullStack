@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace System
 {
-    public static class GlobalSettings
+    public static class Globals
     {
         [NotNull] public static CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
 

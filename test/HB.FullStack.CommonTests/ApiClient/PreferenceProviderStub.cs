@@ -34,15 +34,25 @@ namespace HB.FullStack.CommonTests.ApiClient
             return false;
         }
 
-        public void OnTokenReceived(Guid userId, DateTimeOffset userCreateTime, string mobile, string email, string loginName, string accessToken, string refreshToken)
+        
+
+        public void OnTokenRefreshFailed()
+        {
+
+        }
+
+        public bool IsIntroducedYet { get; set; }
+
+        public void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
         {
             AccessToken = accessToken;
             RefreshToken = refreshToken;
         }
 
-        public void OnTokenRefreshFailed()
+        public void Logout()
         {
-
+            AccessToken = null;
+            RefreshToken = null;
         }
     }
 }

@@ -35,17 +35,20 @@ namespace HB.FullStack.Client.Maui
         public void OnAppStart()
         {
             StartNetworkMonitor();
+            StartUserMonitor();
         }
 
         //进入方式2：App恢复
         public void OnAppResume()
         {
             StartNetworkMonitor();
+            StartUserMonitor();
         }
 
         //退出
         public void OnAppSleep()
         {
+            StopUserMonitor();
             StopNetworkMonitor();
         }
 
@@ -182,6 +185,9 @@ namespace HB.FullStack.Client.Maui
 
         private async Task StartSync()
         {
+            //1. ping check usertoken
+
+
             SyncStatus = SyncStatus.Syncing;
 
             try
@@ -197,6 +203,8 @@ namespace HB.FullStack.Client.Maui
                 SyncStatus = SyncStatus.SynceFailed;
 
                 //TODO: 处理Sync Failed
+                //1. 服务器无法连接,假网络,或者服务器挂了
+                //2. 无法refresh token, 要求登录后再操作
                 Currents.ShowToast("处理Sync Failed");
 
                 //TODO: 处理完，set Status为Synced
@@ -210,6 +218,35 @@ namespace HB.FullStack.Client.Maui
         private Task OnSyncingAsync()
         {
             return Syncing?.Invoke() ?? Task.CompletedTask;
+        }
+
+        #endregion
+
+        #region User
+
+        private void StartUserMonitor()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void StopUserMonitor()
+        {
+            throw new NotImplementedException();
+        }
+
+        public UserStatus UserStatus => throw new NotImplementedException();
+
+        public event Func<Task>? Logined;
+        public event Func<Task>? Logouted;
+
+        public void ReportLogouted()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportLogined()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

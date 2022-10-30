@@ -1,12 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <base:BasePage
     x:Class="HB.FullStack.Client.Maui.Controls.Cropper.CropperPage"
-    x:DataType="cropper:CropperViewModel"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Client.Maui.Base"
     xmlns:cropper="clr-namespace:HB.FullStack.Client.Maui.Controls.Cropper"
-    xmlns:figure="clr-namespace:HB.FullStack.Client.Maui.Figures">
+    xmlns:figure="clr-namespace:HB.FullStack.Client.Maui.Figures"
+    x:DataType="cropper:CropperViewModel"
+    x:TypeArguments="cropper:CropperViewModel">
     <base:BasePage.Resources>
         <ResourceDictionary>
             <Style TargetType="Button">

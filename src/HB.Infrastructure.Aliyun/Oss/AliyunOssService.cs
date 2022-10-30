@@ -91,7 +91,7 @@ namespace HB.Infrastructure.Aliyun.Oss
         {
             if (_bucketSettings.TryGetValue(bucket, out BucketSettings? bucketSettings))
             {
-                string seprator = bucketSettings.BucketUserDirectory.EndsWith("/", GlobalSettings.Comparison) ? "" : "/";
+                string seprator = bucketSettings.BucketUserDirectory.EndsWith("/", Globals.Comparison) ? "" : "/";
                 return bucketSettings.BucketUserDirectory + seprator + userGuid;
             }
 

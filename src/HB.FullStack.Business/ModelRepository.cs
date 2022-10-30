@@ -284,7 +284,7 @@ namespace HB.FullStack.Repository
             //检查必要的AddtionalProperties
             //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
 
-            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = Database.DefFactory.GetDef<T>()!;
 
             ThrowIfAddtionalPropertiesLack(new ChangedPack[] { cp }, modelDef);
 
@@ -307,7 +307,7 @@ namespace HB.FullStack.Repository
 
         public async Task UpdateProperties<T>(IEnumerable<ChangedPack> cps, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
         {
-            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = Database.DefFactory.GetDef<T>()!;
 
             ThrowIfAddtionalPropertiesLack(cps, modelDef);
 
@@ -332,7 +332,7 @@ namespace HB.FullStack.Repository
         {
             foreach (var cp in cps)
             {
-                if (!cp.AddtionalProperties.ContainsAllKey(modelDef.GetForeignKeyProperties().Select(p => p.Name).ToList()))
+                if (!cp.AddtionalProperties.ContainsAllKey(modelDef.ForeignKeyProperties.Select(p => p.Name).ToList()))
                 {
                     throw RepositoryExceptions.AddtionalPropertyNeeded(modelDef.ModelFullName);
                 }

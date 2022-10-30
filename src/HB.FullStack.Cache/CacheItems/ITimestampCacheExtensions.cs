@@ -14,7 +14,7 @@ namespace HB.FullStack.Cache
 
         public static Task<bool> SetIntAsync(this ICache cache, string key, int value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
         {
-            return cache.SetStringAsync(key, value.ToString(GlobalSettings.Culture), timestamp, options, token);
+            return cache.SetStringAsync(key, value.ToString(Globals.Culture), timestamp, options, token);
         }
 
         public static async Task<int?> GetIntAsync(this ICache cache, string key, CancellationToken token = default)
@@ -28,7 +28,7 @@ namespace HB.FullStack.Cache
                     return null;
                 }
 
-                return System.Convert.ToInt32(value, GlobalSettings.Culture);
+                return System.Convert.ToInt32(value, Globals.Culture);
             }
             catch (FormatException ex)
             {

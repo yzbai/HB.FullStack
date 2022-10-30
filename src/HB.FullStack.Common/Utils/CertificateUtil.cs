@@ -13,7 +13,7 @@ namespace System
 
             if (certificate2 == null)
             {
-                GlobalSettings.Logger?.LogCertNotInPackage(fullPath);
+                Globals.Logger?.LogCertNotInPackage(fullPath);
 
                 certificate2 = GetBySubject(subject);
 

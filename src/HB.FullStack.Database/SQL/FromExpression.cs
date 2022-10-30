@@ -13,7 +13,7 @@ namespace HB.FullStack.Database.SQL
     public class FromExpression<T> where T : DbModel, new()
     {
         private readonly StringBuilder _statementBuilder = new StringBuilder();
-
+        private readonly DbModelDef _tModelDef;
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private readonly IDbModelDefFactory _modelDefFactory;
         private readonly ISQLExpressionVisitor _expressionVisitor;
@@ -27,12 +27,14 @@ namespace HB.FullStack.Database.SQL
 
         public string ToStatement()
         {
-            return $" FROM {_modelDefFactory.GetDef<T>()!.DbTableReservedName} {_statementBuilder}";
+            return $" FROM {_tModelDef.DbTableReservedName} {_statementBuilder}";
         }
 
-        internal FromExpression(EngineType engineType, IDbModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
+        internal FromExpression(IDbModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
         {
-            _expressionContext = new SQLExpressionVisitorContenxt(engineType)
+            _tModelDef = modelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
+            _expressionContext = new SQLExpressionVisitorContenxt(_tModelDef.EngineType)
             {
                 ParamPlaceHolderPrefix = SqlHelper.PARAMETERIZED_CHAR + "f__"
             };

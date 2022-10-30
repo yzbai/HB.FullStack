@@ -47,7 +47,7 @@ namespace HB.FullStack.Common.Api
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger.LogWarning(ex, "FileUpdateServerSideRequestModelBinder出错.{ValueProviderResult}", valueProviderResult.FirstValue);
+                Globals.Logger.LogWarning(ex, "FileUpdateServerSideRequestModelBinder出错.{ValueProviderResult}", valueProviderResult.FirstValue);
 
                 bindingContext.ModelState.AddModelError("Request", "Request modelbinding throw.");
                 bindingContext.Result = ModelBindingResult.Failed();

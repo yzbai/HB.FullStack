@@ -26,10 +26,10 @@
 
         public static readonly ErrorCode EventError = new ErrorCode(nameof(EventError), "");
 
-        public static ErrorCode CacheGetError { get; } = new ErrorCode(nameof(CacheGetError), "");
-        public static ErrorCode CacheMissed { get; } = new ErrorCode(nameof(CacheMissed), "");
-        public static ErrorCode CacheGetEmpty { get; } = new ErrorCode(nameof(CacheGetEmpty), "");
-        public static ErrorCode CacheLockAcquireFailed { get; } = new ErrorCode(nameof(CacheLockAcquireFailed), "");
+        public static ErrorCode CacheGetError = new ErrorCode(nameof(CacheGetError), "");
+        public static ErrorCode CacheMissed = new ErrorCode(nameof(CacheMissed), "");
+        public static ErrorCode CacheGetEmpty = new ErrorCode(nameof(CacheGetEmpty), "");
+        public static ErrorCode CacheLockAcquireFailed = new ErrorCode(nameof(CacheLockAcquireFailed), "");
 
         #region 
         public static ErrorCode OssError { get; set; } = new ErrorCode(nameof(OssError), "");
@@ -44,83 +44,83 @@
         #region
         public static readonly ErrorCode ApiClientInnerError = new ErrorCode(nameof(ApiClientInnerError), "ApiClient本身出错");
 
-        public static ErrorCode NoAuthority { get; } = new ErrorCode(nameof(NoAuthority), "");
-        public static ErrorCode AccessTokenExpired { get; } = new ErrorCode(nameof(AccessTokenExpired), "");
-        public static ErrorCode ModelValidationError { get; } = new ErrorCode(nameof(ModelValidationError), "");
-        public static ErrorCode ApiNotAvailable { get; } = new ErrorCode(nameof(ApiNotAvailable), "");
-        public static ErrorCode ApiErrorUnkownFormat { get; } = new ErrorCode(nameof(ApiErrorUnkownFormat), "");
-        public static ErrorCode ApiSmsCodeInvalid { get; } = new ErrorCode(nameof(ApiSmsCodeInvalid), "短信验证码错误。");
-        public static ErrorCode SmsServiceError { get; } = new ErrorCode(nameof(SmsServiceError), "");
-        public static ErrorCode CommonResourceTokenNeeded { get; } = new ErrorCode(nameof(CommonResourceTokenNeeded), "");
-        public static ErrorCode CommonResourceTokenError { get; } = new ErrorCode(nameof(CommonResourceTokenError), "");
-        public static ErrorCode ApiUploadEmptyFile { get; } = new ErrorCode(nameof(ApiUploadEmptyFile), "");
-        public static ErrorCode ApiUploadOverSize { get; } = new ErrorCode(nameof(ApiUploadOverSize), "");
-        public static ErrorCode ApiUploadWrongType { get; } = new ErrorCode(nameof(ApiUploadWrongType), "");
-        public static ErrorCode HttpsRequired { get; } = new ErrorCode(nameof(HttpsRequired), "");
-        public static ErrorCode FromExceptionController { get; } = new ErrorCode(nameof(FromExceptionController), "");
-        public static ErrorCode ApiCapthaError { get; } = new ErrorCode(nameof(ApiCapthaError), "");
-        public static ErrorCode ApiUploadFailed { get; } = new ErrorCode(nameof(ApiUploadFailed), "");
-        public static ErrorCode ServerUnKownError { get; } = new ErrorCode(nameof(ServerUnKownError), "");
-        public static ErrorCode ClientError { get; } = new ErrorCode(nameof(ClientError), "");
-        public static ErrorCode Timeout { get; } = new ErrorCode(nameof(Timeout), "");
-        public static ErrorCode RequestCanceled { get; } = new ErrorCode(nameof(RequestCanceled), "");
-        public static ErrorCode AliyunStsTokenReturnNull { get; } = new ErrorCode(nameof(AliyunStsTokenReturnNull), "");
-        public static ErrorCode AliyunOssPutObjectError { get; } = new ErrorCode(nameof(AliyunOssPutObjectError), "");
-        public static ErrorCode TokenRefreshError { get; } = new ErrorCode(nameof(TokenRefreshError), "");
-        public static ErrorCode UserActivityFilterError { get; } = new ErrorCode(nameof(UserActivityFilterError), "");
-        public static ErrorCode FileUpdateRequestCountNotEven { get; } = new ErrorCode(nameof(FileUpdateRequestCountNotEven), "");
-        public static ErrorCode LackApiResourceAttribute { get; } = new ErrorCode(nameof(LackApiResourceAttribute), "");
-        public static ErrorCode RequestTimeout { get; } = new ErrorCode(nameof(RequestTimeout), "");
+        public static ErrorCode NoAuthority = new ErrorCode(nameof(NoAuthority), "");
+        public static ErrorCode AccessTokenExpired = new ErrorCode(nameof(AccessTokenExpired), "");
+        public static ErrorCode ModelValidationError = new ErrorCode(nameof(ModelValidationError), "");
+        public static ErrorCode ApiNotAvailable = new ErrorCode(nameof(ApiNotAvailable), "");
+        public static ErrorCode ApiErrorUnkownFormat = new ErrorCode(nameof(ApiErrorUnkownFormat), "");
+        public static ErrorCode ApiSmsCodeInvalid = new ErrorCode(nameof(ApiSmsCodeInvalid), "短信验证码错误。");
+        public static ErrorCode SmsServiceError = new ErrorCode(nameof(SmsServiceError), "");
+        public static ErrorCode CommonResourceTokenNeeded = new ErrorCode(nameof(CommonResourceTokenNeeded), "");
+        public static ErrorCode CommonResourceTokenError = new ErrorCode(nameof(CommonResourceTokenError), "");
+        public static ErrorCode ApiUploadEmptyFile = new ErrorCode(nameof(ApiUploadEmptyFile), "");
+        public static ErrorCode ApiUploadOverSize = new ErrorCode(nameof(ApiUploadOverSize), "");
+        public static ErrorCode ApiUploadWrongType = new ErrorCode(nameof(ApiUploadWrongType), "");
+        public static ErrorCode HttpsRequired = new ErrorCode(nameof(HttpsRequired), "");
+        public static ErrorCode FromExceptionController = new ErrorCode(nameof(FromExceptionController), "");
+        public static ErrorCode ApiCapthaError = new ErrorCode(nameof(ApiCapthaError), "");
+        public static ErrorCode ApiUploadFailed = new ErrorCode(nameof(ApiUploadFailed), "");
+        public static ErrorCode ServerUnKownError = new ErrorCode(nameof(ServerUnKownError), "");
+        public static ErrorCode ClientError = new ErrorCode(nameof(ClientError), "");
+        public static ErrorCode Timeout = new ErrorCode(nameof(Timeout), "");
+        public static ErrorCode RequestCanceled = new ErrorCode(nameof(RequestCanceled), "");
+        public static ErrorCode AliyunStsTokenReturnNull = new ErrorCode(nameof(AliyunStsTokenReturnNull), "");
+        public static ErrorCode AliyunOssPutObjectError = new ErrorCode(nameof(AliyunOssPutObjectError), "");
+        public static ErrorCode TokenRefreshError = new ErrorCode(nameof(TokenRefreshError), "");
+        public static ErrorCode UserActivityFilterError = new ErrorCode(nameof(UserActivityFilterError), "");
+        public static ErrorCode FileUpdateRequestCountNotEven = new ErrorCode(nameof(FileUpdateRequestCountNotEven), "");
+        public static ErrorCode LackApiResourceAttribute = new ErrorCode(nameof(LackApiResourceAttribute), "");
+        public static ErrorCode RequestTimeout = new ErrorCode(nameof(RequestTimeout), "");
 
         /// <summary>
         /// 这个Request已经用过一次了
         /// </summary>
-        public static ErrorCode RequestAlreadyUsed { get; } = new ErrorCode(nameof(RequestAlreadyUsed), "");
+        public static ErrorCode RequestAlreadyUsed = new ErrorCode(nameof(RequestAlreadyUsed), "");
 
         /// <summary>
         /// The request failed due to an underlying issue such as network connectivity, DNS failure, server certificate validation or timeout.
         /// </summary>
-        public static ErrorCode RequestUnderlyingIssue { get; } = new ErrorCode(nameof(RequestUnderlyingIssue), "");
+        public static ErrorCode RequestUnderlyingIssue = new ErrorCode(nameof(RequestUnderlyingIssue), "");
 
-        public static ErrorCode HttpResponseDeserializeError { get; } = new ErrorCode(nameof(HttpResponseDeserializeError), "");
-        public static ErrorCode ApiClientSendUnkownError { get; } = new ErrorCode(nameof(ApiClientSendUnkownError), "");
-        public static ErrorCode ApiClientGetStreamUnkownError { get; } = new ErrorCode(nameof(ApiClientGetStreamUnkownError), "");
-        public static ErrorCode ApiRequestInvalidateError { get; } = new ErrorCode(nameof(ApiRequestInvalidateError), "");
-        public static ErrorCode ApiRequestSetJwtError { get; } = new ErrorCode(nameof(ApiRequestSetJwtError), "");
-        public static ErrorCode ApiRequestSetApiKeyError { get; } = new ErrorCode(nameof(ApiRequestSetApiKeyError), "");
-        public static ErrorCode ApiClientUnkownError { get; } = new ErrorCode(nameof(ApiClientUnkownError), "");
-        public static ErrorCode ServerNullReturn { get; } = new ErrorCode(nameof(ServerNullReturn), "");
-        public static ErrorCode ArgumentIdsError { get; } = new ErrorCode(nameof(ArgumentIdsError), "");
-        public static ErrorCode RequestIntervalFilterError { get; } = new ErrorCode(nameof(RequestIntervalFilterError), "");
-        public static ErrorCode CapthcaNotFound { get; } = new ErrorCode(nameof(CapthcaNotFound), "");
-        public static ErrorCode CapthcaError { get; } = new ErrorCode(nameof(CapthcaError), "");
-        public static ErrorCode NeedOwnerResId { get; } = new ErrorCode(nameof(NeedOwnerResId), "");
+        public static ErrorCode HttpResponseDeserializeError = new ErrorCode(nameof(HttpResponseDeserializeError), "");
+        public static ErrorCode ApiClientSendUnkownError = new ErrorCode(nameof(ApiClientSendUnkownError), "");
+        public static ErrorCode ApiClientGetStreamUnkownError = new ErrorCode(nameof(ApiClientGetStreamUnkownError), "");
+        public static ErrorCode ApiRequestInvalidateError = new ErrorCode(nameof(ApiRequestInvalidateError), "");
+        public static ErrorCode ApiRequestSetJwtError = new ErrorCode(nameof(ApiRequestSetJwtError), "");
+        public static ErrorCode ApiRequestSetApiKeyError = new ErrorCode(nameof(ApiRequestSetApiKeyError), "");
+        public static ErrorCode ApiClientUnkownError = new ErrorCode(nameof(ApiClientUnkownError), "");
+        public static ErrorCode ServerNullReturn = new ErrorCode(nameof(ServerNullReturn), "");
+        public static ErrorCode ArgumentIdsError = new ErrorCode(nameof(ArgumentIdsError), "");
+        public static ErrorCode RequestIntervalFilterError = new ErrorCode(nameof(RequestIntervalFilterError), "");
+        public static ErrorCode CapthcaNotFound = new ErrorCode(nameof(CapthcaNotFound), "");
+        public static ErrorCode CapthcaError = new ErrorCode(nameof(CapthcaError), "");
+        public static ErrorCode NeedOwnerResId = new ErrorCode(nameof(NeedOwnerResId), "");
 
-        public static ErrorCode LackParent1ResIdAttribute { get; } = new ErrorCode(nameof(LackParent1ResIdAttribute), "因为制定了Parent1ResName，但缺少Parent1ResIdAttribute");
+        public static ErrorCode LackParent1ResIdAttribute = new ErrorCode(nameof(LackParent1ResIdAttribute), "因为制定了Parent1ResName，但缺少Parent1ResIdAttribute");
 
-        public static ErrorCode LackParent2ResIdAttribute { get; } = new ErrorCode(nameof(LackParent2ResIdAttribute), "因为制定了Parent2ResName，但缺少Parent2ResIdAttribute");
+        public static ErrorCode LackParent2ResIdAttribute = new ErrorCode(nameof(LackParent2ResIdAttribute), "因为制定了Parent2ResName，但缺少Parent2ResIdAttribute");
 
         #region
         //TODO: 客户端应该针对于这些Authorize类的Error进行相应处理
 
-        public static ErrorCode AuthorizationNotFound { get; } = new ErrorCode(nameof(AuthorizationNotFound), "");
-        public static ErrorCode AuthorizationPasswordWrong { get; } = new ErrorCode(nameof(AuthorizationPasswordWrong), "");
-        public static ErrorCode AccessTokenRefreshing { get; } = new ErrorCode(nameof(AccessTokenRefreshing), "同一设备正在Refreshing");
-        public static ErrorCode RefreshAccessTokenError { get; } = new ErrorCode(nameof(RefreshAccessTokenError), "");
-        public static ErrorCode AuthorizationInvalideDeviceId { get; } = new ErrorCode(nameof(AuthorizationInvalideDeviceId), "");
-        public static ErrorCode AuthorizationInvalideUserId { get; } = new ErrorCode(nameof(AuthorizationInvalideUserId), "");
-        public static ErrorCode AuthorizationUserSecurityStampChanged { get; } = new ErrorCode(nameof(AuthorizationUserSecurityStampChanged), "");
-        public static ErrorCode AuthorizationRefreshTokenExpired { get; } = new ErrorCode(nameof(AuthorizationRefreshTokenExpired), "");
-        public static ErrorCode AuthorizationNoTokenInStore { get; } = new ErrorCode(nameof(AuthorizationNoTokenInStore), "");
-        public static ErrorCode AuthorizationMobileNotConfirmed { get; } = new ErrorCode(nameof(AuthorizationMobileNotConfirmed), "");
-        public static ErrorCode AuthorizationEmailNotConfirmed { get; } = new ErrorCode(nameof(AuthorizationEmailNotConfirmed), "");
-        public static ErrorCode AuthorizationLockedOut { get; } = new ErrorCode(nameof(AuthorizationLockedOut), "");
-        public static ErrorCode AuthorizationOverMaxFailedCount { get; } = new ErrorCode(nameof(AuthorizationOverMaxFailedCount), "");
-        public static ErrorCode JwtSigningCertNotFound { get; } = new ErrorCode(nameof(JwtSigningCertNotFound), "");
-        public static ErrorCode ServerReturnError { get; } = new ErrorCode(nameof(ServerReturnError), "Server收到了请求，但返回了错误");
-        public static ErrorCode ApiModelError { get; } = new ErrorCode(nameof(ApiModelError), "ApiRequest等Model出错");
-        public static ErrorCode ApiAuthenticationError { get; } = new ErrorCode(nameof(ApiAuthenticationError), "ApiClient请求时，授权信息有错或缺少");
-        public static ErrorCode ApiResourceError { get; } = new ErrorCode(nameof(ApiResourceError), "");
+        public static ErrorCode AuthorizationNotFound = new ErrorCode(nameof(AuthorizationNotFound), "");
+        public static ErrorCode AuthorizationPasswordWrong = new ErrorCode(nameof(AuthorizationPasswordWrong), "");
+        public static ErrorCode AccessTokenRefreshing = new ErrorCode(nameof(AccessTokenRefreshing), "同一设备正在Refreshing");
+        public static ErrorCode RefreshAccessTokenError = new ErrorCode(nameof(RefreshAccessTokenError), "");
+        public static ErrorCode AuthorizationInvalideDeviceId = new ErrorCode(nameof(AuthorizationInvalideDeviceId), "");
+        public static ErrorCode AuthorizationInvalideUserId = new ErrorCode(nameof(AuthorizationInvalideUserId), "");
+        public static ErrorCode AuthorizationUserSecurityStampChanged = new ErrorCode(nameof(AuthorizationUserSecurityStampChanged), "");
+        public static ErrorCode AuthorizationRefreshTokenExpired = new ErrorCode(nameof(AuthorizationRefreshTokenExpired), "");
+        public static ErrorCode AuthorizationNoTokenInStore = new ErrorCode(nameof(AuthorizationNoTokenInStore), "");
+        public static ErrorCode AuthorizationMobileNotConfirmed = new ErrorCode(nameof(AuthorizationMobileNotConfirmed), "");
+        public static ErrorCode AuthorizationEmailNotConfirmed = new ErrorCode(nameof(AuthorizationEmailNotConfirmed), "");
+        public static ErrorCode AuthorizationLockedOut = new ErrorCode(nameof(AuthorizationLockedOut), "");
+        public static ErrorCode AuthorizationOverMaxFailedCount = new ErrorCode(nameof(AuthorizationOverMaxFailedCount), "");
+        public static ErrorCode JwtSigningCertNotFound = new ErrorCode(nameof(JwtSigningCertNotFound), "");
+        public static ErrorCode ServerReturnError = new ErrorCode(nameof(ServerReturnError), "Server收到了请求，但返回了错误");
+        public static ErrorCode ApiModelError = new ErrorCode(nameof(ApiModelError), "ApiRequest等Model出错");
+        public static ErrorCode ApiAuthenticationError = new ErrorCode(nameof(ApiAuthenticationError), "ApiClient请求时，授权信息有错或缺少");
+        public static ErrorCode ApiResourceError = new ErrorCode(nameof(ApiResourceError), "");
 
         #endregion
         #endregion
@@ -157,62 +157,64 @@
 
         public static readonly ErrorCode RemoveMultipleError = new ErrorCode(nameof(RemoveMultipleError), "");
 
-        public static ErrorCode CacheCollectionKeyNotSame { get; } = new ErrorCode(nameof(CacheCollectionKeyNotSame), "");
-        public static ErrorCode CacheKeyNotSet { get; } = new ErrorCode(nameof(CacheKeyNotSet), "");
-        public static ErrorCode CacheValueNotSet { get; } = new ErrorCode(nameof(CacheValueNotSet), "");
-        public static ErrorCode CachedItemTimestampNotSet { get; } = new ErrorCode(nameof(CachedItemTimestampNotSet), "");
+        public static ErrorCode CacheCollectionKeyNotSame = new ErrorCode(nameof(CacheCollectionKeyNotSame), "");
+        public static ErrorCode CacheKeyNotSet = new ErrorCode(nameof(CacheKeyNotSet), "");
+        public static ErrorCode CacheValueNotSet = new ErrorCode(nameof(CacheValueNotSet), "");
+        public static ErrorCode CachedItemTimestampNotSet = new ErrorCode(nameof(CachedItemTimestampNotSet), "");
         #endregion
         #region
 
-        public static ErrorCode DuplicateKeyEntry { get; } = new ErrorCode(nameof(DuplicateKeyEntry), "");
+        public static ErrorCode DuplicateKeyEntry = new ErrorCode(nameof(DuplicateKeyEntry), "");
 
-        public static ErrorCode DbEngineExecuterError { get; } = new ErrorCode(nameof(DbEngineExecuterError), "");
-        public static ErrorCode DbEngineUnKownExecuterError { get; } = new ErrorCode(nameof(DbEngineUnKownExecuterError), "");
+        public static ErrorCode DbEngineExecuterError = new ErrorCode(nameof(DbEngineExecuterError), "");
+        public static ErrorCode DbEngineUnKownExecuterError = new ErrorCode(nameof(DbEngineUnKownExecuterError), "");
 
-        public static ErrorCode UseDateTimeOffsetOnly { get; } = new ErrorCode(nameof(UseDateTimeOffsetOnly), "");
-        public static ErrorCode ModelError { get; } = new ErrorCode(nameof(ModelError), "");
-        public static ErrorCode MapperError { get; } = new ErrorCode(nameof(MapperError), "");
-        public static ErrorCode SqlError { get; } = new ErrorCode(nameof(SqlError), "");
-        public static ErrorCode DatabaseTableCreateError { get; } = new ErrorCode(nameof(DatabaseTableCreateError), "");
-        public static ErrorCode MigrateError { get; } = new ErrorCode(nameof(MigrateError), "");
-        public static ErrorCode FoundTooMuch { get; } = new ErrorCode(nameof(FoundTooMuch), "");
-        public static ErrorCode DatabaseNotWriteable { get; } = new ErrorCode(nameof(DatabaseNotWriteable), "");
-        public static ErrorCode ConcurrencyConflict { get; } = new ErrorCode(nameof(ConcurrencyConflict), "");
-        public static ErrorCode TransactionError { get; } = new ErrorCode(nameof(TransactionError), "");
-        public static ErrorCode SystemInfoError { get; } = new ErrorCode(nameof(SystemInfoError), "");
-        public static ErrorCode NotSupported { get; } = new ErrorCode(nameof(NotSupported), "");
-        public static ErrorCode BatchError { get; } = new ErrorCode(nameof(BatchError), "");
-        public static ErrorCode TypeConverterError { get; } = new ErrorCode(nameof(TypeConverterError), "");
-        public static ErrorCode EmptyGuid { get; } = new ErrorCode(nameof(EmptyGuid), "");
-        public static ErrorCode UpdatePropertiesCountShouldBePositive { get; } = new ErrorCode(nameof(UpdatePropertiesCountShouldBePositive), "");
-        public static ErrorCode LongIdShouldBePositive { get; } = new ErrorCode(nameof(LongIdShouldBePositive), "");
-        public static ErrorCode PropertyNotFound { get; } = new ErrorCode(nameof(PropertyNotFound), "");
-        public static ErrorCode NoSuchForeignKey { get; } = new ErrorCode(nameof(NoSuchForeignKey), "");
+        public static ErrorCode UseDateTimeOffsetOnly = new ErrorCode(nameof(UseDateTimeOffsetOnly), "");
+        public static ErrorCode ModelError = new ErrorCode(nameof(ModelError), "");
+        public static ErrorCode MapperError = new ErrorCode(nameof(MapperError), "");
+        public static ErrorCode SqlError = new ErrorCode(nameof(SqlError), "");
+        public static ErrorCode DatabaseTableCreateError = new ErrorCode(nameof(DatabaseTableCreateError), "");
+        public static ErrorCode DbSettingError= new ErrorCode(nameof(DbSettingError), "");
 
-        public static ErrorCode NoSuchProperty { get; } = new ErrorCode(nameof(NoSuchProperty), "");
-        public static ErrorCode KeyValueNotLongOrGuid { get; } = new ErrorCode(nameof(KeyValueNotLongOrGuid), "");
+        public static ErrorCode MigrateError = new ErrorCode(nameof(MigrateError), "");
+        public static ErrorCode FoundTooMuch = new ErrorCode(nameof(FoundTooMuch), "");
+        public static ErrorCode DatabaseNotWriteable = new ErrorCode(nameof(DatabaseNotWriteable), "");
+        public static ErrorCode ConcurrencyConflict = new ErrorCode(nameof(ConcurrencyConflict), "");
+        public static ErrorCode TransactionError = new ErrorCode(nameof(TransactionError), "");
+        public static ErrorCode SystemInfoError = new ErrorCode(nameof(SystemInfoError), "");
+        public static ErrorCode NotSupported = new ErrorCode(nameof(NotSupported), "");
+        public static ErrorCode BatchError = new ErrorCode(nameof(BatchError), "");
+        public static ErrorCode TypeConverterError = new ErrorCode(nameof(TypeConverterError), "");
+        public static ErrorCode EmptyGuid = new ErrorCode(nameof(EmptyGuid), "");
+        public static ErrorCode UpdatePropertiesCountShouldBePositive = new ErrorCode(nameof(UpdatePropertiesCountShouldBePositive), "");
+        public static ErrorCode LongIdShouldBePositive = new ErrorCode(nameof(LongIdShouldBePositive), "");
+        public static ErrorCode PropertyNotFound = new ErrorCode(nameof(PropertyNotFound), "");
+        public static ErrorCode NoSuchForeignKey = new ErrorCode(nameof(NoSuchForeignKey), "");
 
-        public static ErrorCode ModelHasNotSupportedPropertyType { get; } = new ErrorCode(nameof(ModelHasNotSupportedPropertyType), "");
+        public static ErrorCode NoSuchProperty = new ErrorCode(nameof(NoSuchProperty), "");
+        public static ErrorCode KeyValueNotLongOrGuid = new ErrorCode(nameof(KeyValueNotLongOrGuid), "");
 
-        public static ErrorCode TimestampError { get; } = new ErrorCode(nameof(TimestampError), "");
-        public static ErrorCode NotInitializedYet { get; } = new ErrorCode(nameof(NotInitializedYet), "");
-        public static ErrorCode UpdateVersionError { get; } = new ErrorCode(nameof(UpdateVersionError), "");
+        public static ErrorCode ModelHasNotSupportedPropertyType = new ErrorCode(nameof(ModelHasNotSupportedPropertyType), "");
+
+        public static ErrorCode TimestampError = new ErrorCode(nameof(TimestampError), "");
+        public static ErrorCode NotInitializedYet = new ErrorCode(nameof(NotInitializedYet), "");
+        public static ErrorCode UpdateVersionError = new ErrorCode(nameof(UpdateVersionError), "");
         #endregion
         #region
-        public static ErrorCode NoHandler { get; } = new ErrorCode(nameof(NoHandler), "");
-        public static ErrorCode HandlerAlreadyExisted { get; } = new ErrorCode(nameof(HandlerAlreadyExisted), "");
-        public static ErrorCode SettingsError { get; } = new ErrorCode(nameof(SettingsError), "");
+        public static ErrorCode NoHandler = new ErrorCode(nameof(NoHandler), "");
+        public static ErrorCode HandlerAlreadyExisted = new ErrorCode(nameof(HandlerAlreadyExisted), "");
+        public static ErrorCode SettingsError = new ErrorCode(nameof(SettingsError), "");
         #endregion
         #region
-        public static ErrorCode NotFound { get; } = new ErrorCode(nameof(NotFound), "");
-        public static ErrorCode IdentityNothingConfirmed { get; } = new ErrorCode(nameof(IdentityNothingConfirmed), "");
-        public static ErrorCode IdentityMobileEmailLoginNameAllNull { get; } = new ErrorCode(nameof(IdentityMobileEmailLoginNameAllNull), "");
-        public static ErrorCode IdentityAlreadyTaken { get; } = new ErrorCode(nameof(IdentityAlreadyTaken), "");
-        public static ErrorCode ServiceRegisterError { get; } = new ErrorCode(nameof(ServiceRegisterError), "");
-        public static ErrorCode TryRemoveRoleFromUserError { get; } = new ErrorCode(nameof(TryRemoveRoleFromUserError), "");
-        public static ErrorCode AudienceNotFound { get; } = new ErrorCode(nameof(AudienceNotFound), "");
-        public static ErrorCode AlreadyHaveRoles { get; } = new ErrorCode(nameof(AlreadyHaveRoles), "用户已经有了一些你要添加的Role");
-        public static ErrorCode InnerError { get; } = new ErrorCode(nameof(InnerError), "");
+        public static ErrorCode NotFound = new ErrorCode(nameof(NotFound), "");
+        public static ErrorCode IdentityNothingConfirmed = new ErrorCode(nameof(IdentityNothingConfirmed), "");
+        public static ErrorCode IdentityMobileEmailLoginNameAllNull = new ErrorCode(nameof(IdentityMobileEmailLoginNameAllNull), "");
+        public static ErrorCode IdentityAlreadyTaken = new ErrorCode(nameof(IdentityAlreadyTaken), "");
+        public static ErrorCode ServiceRegisterError = new ErrorCode(nameof(ServiceRegisterError), "");
+        public static ErrorCode TryRemoveRoleFromUserError = new ErrorCode(nameof(TryRemoveRoleFromUserError), "");
+        public static ErrorCode AudienceNotFound = new ErrorCode(nameof(AudienceNotFound), "");
+        public static ErrorCode AlreadyHaveRoles = new ErrorCode(nameof(AlreadyHaveRoles), "用户已经有了一些你要添加的Role");
+        public static ErrorCode InnerError = new ErrorCode(nameof(InnerError), "");
         #endregion
         #region
         public static ErrorCode LoadedLuaNotFound { get; set; } = new ErrorCode(nameof(LoadedLuaNotFound), "");
@@ -240,29 +242,29 @@
         public static ErrorCode StartupError { get; set; } = new ErrorCode(nameof(StartupError), "");
         public static ErrorCode DatabaseInitLockError { get; set; } = new ErrorCode(nameof(DatabaseInitLockError), "");
 
-        //public static ErrorCode ExceptionHandlerPathFeatureNull { get; } = new ErrorCode(nameof(ExceptionHandlerPathFeatureNull), "");
+        //public static ErrorCode ExceptionHandlerPathFeatureNull = new ErrorCode(nameof(ExceptionHandlerPathFeatureNull), "");
 
-        //public static ErrorCode ServerUnKownNonErrorCodeError { get; } = new ErrorCode(nameof(ServerUnKownNonErrorCodeError), "");
+        //public static ErrorCode ServerUnKownNonErrorCodeError = new ErrorCode(nameof(ServerUnKownNonErrorCodeError), "");
 
-        public static ErrorCode ServerInternalError { get; } = new ErrorCode(nameof(ServerInternalError), "服务器内部运行错误");
+        public static ErrorCode ServerInternalError = new ErrorCode(nameof(ServerInternalError), "服务器内部运行错误");
 
-        public static ErrorCode GlobalExceptionError { get; } = new ErrorCode(nameof(GlobalExceptionError), "");
-        public static ErrorCode UploadError { get; } = new ErrorCode(nameof(UploadError), "");
+        public static ErrorCode GlobalExceptionError = new ErrorCode(nameof(GlobalExceptionError), "");
+        public static ErrorCode UploadError = new ErrorCode(nameof(UploadError), "");
         #endregion
         #region
-        public static ErrorCode NoInternet { get; } = new ErrorCode(nameof(NoInternet), "");
+        public static ErrorCode NoInternet = new ErrorCode(nameof(NoInternet), "");
 
-        public static ErrorCode CaptchaErrorReturn { get; } = new ErrorCode(nameof(CaptchaErrorReturn), "Tecent的Captha服务返回不对，查看");
-        public static ErrorCode UnSupportedResToModel { get; } = new ErrorCode(nameof(UnSupportedResToModel), "");
+        public static ErrorCode CaptchaErrorReturn = new ErrorCode(nameof(CaptchaErrorReturn), "Tecent的Captha服务返回不对，查看");
+        public static ErrorCode UnSupportedResToModel = new ErrorCode(nameof(UnSupportedResToModel), "");
 
         #endregion
         #region
-        public static ErrorCode UpdateWithEmptyResource { get; } = new ErrorCode(nameof(UpdateWithEmptyResource), "");
-        public static ErrorCode OnlyUpdateYours { get; } = new ErrorCode(nameof(OnlyUpdateYours), "");
-        public static ErrorCode AlreadyHasUserProfile { get; } = new ErrorCode(nameof(AlreadyHasUserProfile), "");
-        public static ErrorCode ApiRequestNameConditionMatchError { get; } = new ErrorCode(nameof(ApiRequestNameConditionMatchError), "");
+        public static ErrorCode UpdateWithEmptyResource = new ErrorCode(nameof(UpdateWithEmptyResource), "");
+        public static ErrorCode OnlyUpdateYours = new ErrorCode(nameof(OnlyUpdateYours), "");
+        public static ErrorCode AlreadyHasUserProfile = new ErrorCode(nameof(AlreadyHasUserProfile), "");
+        public static ErrorCode ApiRequestNameConditionMatchError = new ErrorCode(nameof(ApiRequestNameConditionMatchError), "");
 
-        public static ErrorCode CppShouldContainAddtionalProperty { get; } = new ErrorCode(nameof(CppShouldContainAddtionalProperty), "");
+        public static ErrorCode CppShouldContainAddtionalProperty = new ErrorCode(nameof(CppShouldContainAddtionalProperty), "");
 
         #endregion
     }

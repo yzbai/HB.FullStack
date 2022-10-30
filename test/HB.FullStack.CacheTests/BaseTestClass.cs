@@ -67,7 +67,7 @@ namespace HB.FullStack.CacheTests
                 {
                     options.CommonSettings.Version = 1;
 
-                    var connSettings = new DbConnectionSettings
+                    var connSettings = new DbConnectionSetting
                     {
                         DatabaseName = dbName,
                         IsMaster = true
@@ -85,7 +85,7 @@ namespace HB.FullStack.CacheTests
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
+            Globals.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             IDatabase database = serviceProvider.GetRequiredService<IDatabase>();
 

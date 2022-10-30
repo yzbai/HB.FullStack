@@ -57,7 +57,7 @@ namespace HB.FullStack.WebApi.Startup
         /// </summary>
         public static async Task<bool> InitializeDatabaseAsync(IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
         {
-            GlobalSettings.Logger.LogDebug("开始初始化数据库:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
+            Globals.Logger.LogDebug("开始初始化数据库:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
 
             IDistributedLock distributedLock = await lockManager.LockAsync(
                 resources: database.DatabaseNames,
@@ -71,7 +71,7 @@ namespace HB.FullStack.WebApi.Startup
                     throw WebApiExceptions.DatabaseInitLockError(database.DatabaseNames);
                 }
 
-                GlobalSettings.Logger.LogDebug("获取了初始化数据库的锁:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
+                Globals.Logger.LogDebug("获取了初始化数据库的锁:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
 
                 return await database.InitializeAsync(migrations).ConfigureAwait(false);
             }

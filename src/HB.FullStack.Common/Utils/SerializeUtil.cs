@@ -54,7 +54,7 @@ namespace System
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogSerializeLogError(model?.GetType().FullName, ex);
+                Globals.Logger?.LogSerializeLogError(model?.GetType().FullName, ex);
 
                 json = null;
                 return false;
@@ -77,7 +77,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger?.LogUnSerializeLogError(jsonString, ex);
+                Globals.Logger?.LogUnSerializeLogError(jsonString, ex);
 
                 obj = default;
                 return false;
@@ -201,7 +201,7 @@ namespace System
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogTryDeserializeWithCollectionCheckError(jsonString, targetType.FullName, ex);
+                Globals.Logger?.LogTryDeserializeWithCollectionCheckError(jsonString, targetType.FullName, ex);
                 target = null;
                 return false;
             }

@@ -71,11 +71,11 @@ namespace HB.FullStack.Client
             IDatabase database,
             IApiClient apiClient,
             IOfflineManager offlineChangeManager,
-            IPreferenceProvider userPreferenceProvider,
-            IStatusManager statusManager) : base(apiClient, userPreferenceProvider, statusManager)
+            IPreferenceProvider preferenceProvider,
+            IStatusManager statusManager) : base(apiClient, preferenceProvider, statusManager)
         {
             _logger = logger;
-            _modelDef = database.ModelDefFactory.GetDef<TModel>()!;
+            _modelDef = database.DefFactory.GetDef<TModel>()!;
 
             ClientModelDef = ClientModelDefFactory.Get<TModel>() ?? CreateDefaultClientModelDef();
             Database = database;

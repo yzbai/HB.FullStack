@@ -42,7 +42,7 @@ namespace HB.FullStack.CommonTests.ApiClient
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<ApiTestBaseClass>>();
+            Globals.Logger = serviceProvider.GetRequiredService<ILogger<ApiTestBaseClass>>();
 
             ApiClient = serviceProvider.GetRequiredService<IApiClient>();
 

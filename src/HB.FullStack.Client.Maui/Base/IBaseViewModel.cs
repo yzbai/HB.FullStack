@@ -27,7 +27,7 @@ namespace HB.FullStack.Client.Maui
 
         void OnException(Exception ex, string message, ExceptionHandler handler, bool report = false, [CallerMemberName] string caller = "");
 
-        void OnException(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, bool report = false, [CallerMemberName] string caller = "");
+        void OnExceptionDisplay(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, bool report = false, [CallerMemberName] string caller = "");
     }
 
 

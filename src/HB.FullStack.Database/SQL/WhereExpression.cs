@@ -18,8 +18,7 @@ namespace HB.FullStack.Database.SQL
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private Expression<Func<T, bool>>? _whereExpression;
         private readonly List<string> _orderByProperties = new List<string>();
-        private readonly EngineType _engineType;
-        private readonly IDbModelDefFactory _modelDefFactory;
+        private readonly DbModelDef _tModelDef;
         private readonly ISQLExpressionVisitor _expressionVisitor;
         private string _whereString = string.Empty;
         private string? _orderByString;
@@ -30,12 +29,11 @@ namespace HB.FullStack.Database.SQL
         private long? _limitRows;
         private long? _limitSkip;
 
-        internal WhereExpression(EngineType engineType, IDbModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
+        internal WhereExpression(DbModelDef dbModelDef, ISQLExpressionVisitor expressionVisitor)
         {
-            _engineType = engineType;
-            _modelDefFactory = modelDefFactory;
+            _tModelDef = dbModelDef;
             _expressionVisitor = expressionVisitor;
-            _expressionContext = new SQLExpressionVisitorContenxt(engineType)
+            _expressionContext = new SQLExpressionVisitorContenxt(_tModelDef.EngineType)
             {
                 ParamPlaceHolderPrefix = SqlHelper.PARAMETERIZED_CHAR + "w__"
             };
@@ -46,7 +44,7 @@ namespace HB.FullStack.Database.SQL
             return _expressionContext.GetParameters();
         }
 
-        public string ToStatement(EngineType engineType)
+        public string ToStatement()
         {
             StringBuilder sql = new StringBuilder();
 
@@ -84,7 +82,7 @@ namespace HB.FullStack.Database.SQL
                 sql.Append(SqlHelper.GetOrderBySqlUtilInStatement(
                     _expressionContext.OrderByStatementBySQLUtilIn_QuotedColName!,
                     _expressionContext.OrderByStatementBySQLUtilIn_Ins!,
-                    engineType
+                    _tModelDef.EngineType
                     ));
             }
 
@@ -104,7 +102,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> Where(string sqlFilter, params object[] filterParams)
         {
-            _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
+            _whereString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_tModelDef.EngineType, sqlFilter, filterParams);
 
             return this;
         }
@@ -189,7 +187,7 @@ namespace HB.FullStack.Database.SQL
                     }
                 }
             }
-            return string.Format(GlobalSettings.Culture, sqlText, escapedParams.ToArray());
+            return string.Format(Globals.Culture, sqlText, escapedParams.ToArray());
         }
 
         #endregion Where
@@ -214,7 +212,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> And(string sqlFilter, params object[] filterParams)
         {
-            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_tModelDef.EngineType, sqlFilter, filterParams);
 
             if (_whereString.IsNullOrEmpty())
             {
@@ -246,7 +244,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> Or(string sqlFilter, params object[] filterParams)
         {
-            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
+            string sql = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_tModelDef.EngineType, sqlFilter, filterParams);
 
             if (_whereString.IsNullOrEmpty())
             {
@@ -284,7 +282,7 @@ namespace HB.FullStack.Database.SQL
 
             if (!string.IsNullOrEmpty(_groupByString))
             {
-                _groupByString = string.Format(GlobalSettings.Culture, "GROUP BY {0}", _groupByString);
+                _groupByString = string.Format(Globals.Culture, "GROUP BY {0}", _groupByString);
             }
 
             return this;
@@ -301,7 +299,7 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> Having(string sqlFilter, params object[] filterParams)
         {
-            _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_engineType, sqlFilter, filterParams);
+            _havingString = string.IsNullOrEmpty(sqlFilter) ? string.Empty : SqlFormat(_tModelDef.EngineType, sqlFilter, filterParams);
 
             if (!string.IsNullOrEmpty(_havingString))
             {
@@ -490,9 +488,9 @@ namespace HB.FullStack.Database.SQL
                 _limitString = string.Empty;
             }
 
-            string rows = _limitRows.HasValue ? string.Format(GlobalSettings.Culture, ",{0}", _limitRows.Value) : string.Empty;
+            string rows = _limitRows.HasValue ? string.Format(Globals.Culture, ",{0}", _limitRows.Value) : string.Empty;
 
-            _limitString = string.Format(GlobalSettings.Culture, "LIMIT {0}{1}", _limitSkip!.Value, rows);
+            _limitString = string.Format(Globals.Culture, "LIMIT {0}{1}", _limitSkip!.Value, rows);
         }
 
         #endregion Limit
@@ -547,8 +545,6 @@ namespace HB.FullStack.Database.SQL
 
         public WhereExpression<T> AddOrderAndLimits(int? page, int? perPage, string? orderBy)
         {
-            DbModelDef modelDef = _modelDefFactory.GetDef<T>()!;
-
             if (orderBy.IsNotNullOrEmpty())
             {
                 string[] orderNames = orderBy.Trim().Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -556,9 +552,9 @@ namespace HB.FullStack.Database.SQL
 
                 foreach (string orderName in orderNames)
                 {
-                    if (!modelDef.ContainsProperty(orderName))
+                    if (!_tModelDef.ContainsProperty(orderName))
                     {
-                        throw DatabaseExceptions.NoSuchProperty(modelDef.ModelFullName, orderName);
+                        throw DatabaseExceptions.NoSuchProperty(_tModelDef.ModelFullName, orderName);
                     }
 
                     orderBuilder.Append(SqlHelper.GetQuoted(orderName));

@@ -17,10 +17,9 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
-
             TruncateLastUser(ref lastUser);
 
             long oldTimestamp = -1;
@@ -38,9 +37,13 @@ namespace HB.FullStack.Database
                     timestampDBModel.LastUser = lastUser;
                 }
 
-                EngineCommand command = DbCommandBuilder.CreateUpdateCommand(EngineType, modelDef, item, oldTimestamp);
+                EngineCommand command = DbCommandBuilder.CreateUpdateCommand(modelDef, item, oldTimestamp);
 
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
+                var engine = DbManager.GetDatabaseEngine(modelDef);
+
+                long rows = transContext != null
+                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -95,7 +98,7 @@ namespace HB.FullStack.Database
 
         public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
-            if (!items.Any())
+            if (items.IsNullOrEmpty())
             {
                 return;
             }
@@ -106,17 +109,12 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
-            {
-                throw DatabaseExceptions.TooManyForBatch("BatchUpdate超过批量操作的最大数目", items.Count(), lastUser);
-            }
-
             ThrowIf.NotValid(items, nameof(items));
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
+            ThrowIfTooMuchItems(items, lastUser, modelDef);
             ThrowIfNotWriteable(modelDef);
-
             TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();
@@ -126,12 +124,13 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
-                var command = DbCommandBuilder.CreateBatchUpdateCommand(EngineType, modelDef, items, oldTimestamps, transContext == null);
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext?.Transaction,
-                    modelDef.DatabaseName!,
-                    command,
-                    true).ConfigureAwait(false);
+                var command = DbCommandBuilder.CreateBatchUpdateCommand(modelDef, items, oldTimestamps, transContext == null);
+
+                var engine = DbManager.GetDatabaseEngine(modelDef);
+
+                using var reader = transContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -200,7 +199,7 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.TimestampShouldBePositive(timestamp);
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
 
@@ -209,7 +208,6 @@ namespace HB.FullStack.Database
             try
             {
                 EngineCommand command = DbCommandBuilder.CreateUpdatePropertiesCommand(
-                    engineType: EngineType,
                     modelDef: modelDef,
                     id: id,
                     propertyNames: propertyNameValues.Select(t => t.propertyName).ToList(),
@@ -218,7 +216,11 @@ namespace HB.FullStack.Database
                     newTimestamp: newTimestamp ?? TimeUtil.Timestamp,
                     lastUser: lastUser);
 
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
+                var engine = DbManager.GetDatabaseEngine(modelDef);
+
+                long rows = transContext != null
+                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -261,7 +263,7 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
 
@@ -270,7 +272,6 @@ namespace HB.FullStack.Database
             try
             {
                 EngineCommand command = DbCommandBuilder.CreateUpdatePropertiesUsingOldNewCompareCommand(
-                    EngineType,
                     modelDef,
                     id,
                     propertyNameOldNewValues.Select(t => t.propertyName).ToList(),
@@ -279,7 +280,11 @@ namespace HB.FullStack.Database
                     newTimestamp ?? TimeUtil.Timestamp,
                     lastUser);
 
-                int matchedRows = await _databaseEngine.ExecuteCommandNonQueryAsync(transContext?.Transaction, modelDef.DatabaseName!, command).ConfigureAwait(false);
+                var engine = DbManager.GetDatabaseEngine(modelDef);
+
+                int matchedRows = transContext != null
+                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false); ;
 
                 if (matchedRows == 1)
                 {
@@ -305,7 +310,7 @@ namespace HB.FullStack.Database
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new()
         {
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             //这里不包含Timestamp改动
             List<(string propertyName, object? oldValue, object? newValue)> lst = ConvertChangedPackToList(changedPack, modelDef, out long? newTimestamp);
@@ -339,7 +344,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
             TruncateLastUser(ref lastUser);
@@ -349,17 +354,16 @@ namespace HB.FullStack.Database
             try
             {
                 var command = DbCommandBuilder.CreateBatchUpdatePropertiesCommand(
-                    EngineType,
                     modelDef,
                     updateChanges,
                     lastUser,
                     transactionContext == null);
 
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transactionContext?.Transaction,
-                    modelDef.DatabaseName!,
-                    command,
-                    true).ConfigureAwait(false);
+                var engine = DbManager.GetDatabaseEngine(modelDef);
+
+                using var reader = transactionContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -405,27 +409,26 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
-
             TruncateLastUser(ref lastUser);
+
             List<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long newTimestamp)> updateChanges = ConvertToDbModelUpdateProperties(modelChanges);
 
             try
             {
                 var command = DbCommandBuilder.CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
-                    EngineType,
                     modelDef,
                     updateChanges,
                     lastUser,
                     transactionContext == null);
 
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transactionContext?.Transaction,
-                    modelDef.DatabaseName!,
-                    command,
-                    true).ConfigureAwait(false);
+                var engine = DbManager.GetDatabaseEngine(modelDef);
+
+                using var reader = transactionContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false); ;
 
                 int count = 0;
 
@@ -464,7 +467,7 @@ namespace HB.FullStack.Database
                 return UpdatePropertiesAsync<T>(changedPacks.First(), lastUser, transContext);
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>()!;
 
             var lst = ConvertChangedPackToList(changedPacks, modelDef);
 

@@ -51,7 +51,7 @@ namespace HB.FullStack.Client.Maui.Utils
             //catch (FeatureNotSupportedException ex)
             catch (Exception ex)
             {
-                GlobalSettings.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
+                Globals.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
 
                 SecurityStorageSupported = false;
 
@@ -80,7 +80,7 @@ namespace HB.FullStack.Client.Maui.Utils
             //catch (FeatureNotSupportedException ex)
             catch (Exception ex)
             {
-                GlobalSettings.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
+                Globals.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
 
                 SecurityStorageSupported = false;
 

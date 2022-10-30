@@ -16,13 +16,13 @@ namespace HB.FullStack.Database.Engine
     {
         #region 管理功能
 
-        DbCommonSettings DatabaseSettings { get; }
+        //DbSetting DatabaseSettings { get; }
 
         EngineType EngineType { get; }
 
-        string FirstDefaultDatabaseName { get; }
+        //string FirstDefaultDatabaseName { get; }
 
-        IEnumerable<string> DatabaseNames { get; }
+        //IEnumerable<string> DatabaseNames { get; }
 
         #endregion 管理功能
 
@@ -30,22 +30,28 @@ namespace HB.FullStack.Database.Engine
         #region Command执行功能
 
         
-        Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand);
+        Task<int> ExecuteCommandNonQueryAsync(string connectionString, EngineCommand engineCommand);
+
+        Task<int> ExecuteCommandNonQueryAsync(IDbTransaction trans, EngineCommand engineCommand);
 
         /// <summary>
         /// 使用后必须Dispose，必须使用using
         /// </summary>
         
-        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster);
+        Task<IDataReader> ExecuteCommandReaderAsync(string connectionString, EngineCommand engineCommand);
+        
+        Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, EngineCommand engineCommand);
 
         
-        Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster);
+        Task<object?> ExecuteCommandScalarAsync(string connectionString, EngineCommand engineCommand);
+
+        Task<object?> ExecuteCommandScalarAsync(IDbTransaction trans, EngineCommand engineCommand);
 
         #endregion Command执行功能
 
         #region 事务功能
 
-        Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null);
+        Task<IDbTransaction> BeginTransactionAsync(string connectionString, IsolationLevel? isolationLevel = null);
 
         Task CommitAsync(IDbTransaction transaction);
 

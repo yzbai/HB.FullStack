@@ -31,7 +31,7 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 只用于客户端，没有做Timestamp检查
         /// </summary>
-        public static string CreateAddOrUpdateSql(DbModelDef modelDef, EngineType engineType, bool returnModel, int number = 0)
+        public static string CreateAddOrUpdateSql(DbModelDef modelDef, bool returnModel, int number = 0)
         {
             StringBuilder addArgs = new StringBuilder();
             StringBuilder selectArgs = new StringBuilder();
@@ -72,13 +72,13 @@ namespace HB.FullStack.Database.SQL
 
             DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
 
-            string sql = $"insert into {modelDef.DbTableReservedName}({addArgs}) values({addValues}) {OnDuplicateKeyUpdateStatement(engineType, primaryKeyProperty)} {updatePairs};";
+            string sql = $"insert into {modelDef.DbTableReservedName}({addArgs}) values({addValues}) {OnDuplicateKeyUpdateStatement(modelDef.EngineType, primaryKeyProperty)} {updatePairs};";
 
             if (returnModel)
             {
                 if (modelDef.IsIdAutoIncrement)
                 {
-                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {GetLastInsertIdStatement(engineType)};";
+                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {GetLastInsertIdStatement(modelDef.EngineType)};";
                 }
                 else
                 {
@@ -89,7 +89,7 @@ namespace HB.FullStack.Database.SQL
             return sql;
         }
 
-        public static string CreateAddModelSql(DbModelDef modelDef, EngineType engineType, bool returnId, int number = 0)
+        public static string CreateAddModelSql(DbModelDef modelDef, bool returnId, int number = 0)
         {
             StringBuilder args = new StringBuilder();
             StringBuilder values = new StringBuilder();
@@ -109,7 +109,7 @@ namespace HB.FullStack.Database.SQL
             args.RemoveLast();
             values.RemoveLast();
 
-            string returnIdStatement = returnId && modelDef.IsIdAutoIncrement ? $"select {GetLastInsertIdStatement(engineType)};" : string.Empty;
+            string returnIdStatement = returnId && modelDef.IsIdAutoIncrement ? $"select {GetLastInsertIdStatement(modelDef.EngineType)};" : string.Empty;
 
             return $"insert into {modelDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
         }
@@ -338,7 +338,7 @@ namespace HB.FullStack.Database.SQL
         public static string GetQuoted(string name)
         {
 #if NETSTANDARD2_1 || NET5_0_OR_GREATER
-            return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR, GlobalSettings.Comparison) + QUOTED_CHAR;
+            return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR, Globals.Comparison) + QUOTED_CHAR;
 #elif NETSTANDARD2_0
             return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR) + QUOTED_CHAR;
 #endif
@@ -625,9 +625,9 @@ namespace HB.FullStack.Database.SQL
             return $"{dropStatement} create table {modelDef.DbTableReservedName} ( {propertySqlBuilder} {indexSqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
         }
 
-        public static string GetTableCreateSql(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength, EngineType engineType)
+        public static string GetTableCreateSql(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength)
         {
-            return engineType switch
+            return modelDef.EngineType switch
             {
                 EngineType.MySQL => MySQL_Table_Create_Statement(modelDef, addDropStatement, varcharDefaultLength),
                 EngineType.SQLite => SQLite_Table_Create_Statement(modelDef, addDropStatement),

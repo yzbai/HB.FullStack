@@ -6,9 +6,9 @@ namespace HB.Infrastructure.SQLite
 {
     public class SQLiteOptions : IOptions<SQLiteOptions>
     {
-        public DbCommonSettings CommonSettings { get; set; } = new DbCommonSettings();
+        public DbSetting CommonSettings { get; set; } = new DbSetting();
 
-        public IList<DbConnectionSettings> Connections { get; private set; } = new List<DbConnectionSettings>();
+        public IList<DbConnectionSetting> Connections { get; private set; } = new List<DbConnectionSetting>();
 
         public SQLiteOptions Value => this;
     }

@@ -179,7 +179,7 @@ namespace HB.FullStack.Client.Maui.File
             //刚请求过,且存在就返回
             if (!remoteForced && !await _dbLocker.NoWaitLockAsync(nameof(FileManager), ossKey, localFileExpiryTime))
             {
-                GlobalSettings.Logger.LogDebug("前不久请求过文件 {Osskey}", ossKey);
+                Globals.Logger.LogDebug("前不久请求过文件 {Osskey}", ossKey);
 
                 //TODO: 思考，这里有一种，第一个线程已经取锁成功，去下载图片，还没下完，第二个进来一看，以为已经取好了，结果没有
                 string fullPath = GetLocalFullPath(directory, fileName);
@@ -193,11 +193,11 @@ namespace HB.FullStack.Client.Maui.File
                         return fullPath;
                     }
 
-                    GlobalSettings.Logger.LogDebug("前不久请求过文件，现在还不存在，等待 1秒，再尝试");
+                    Globals.Logger.LogDebug("前不久请求过文件，现在还不存在，等待 1秒，再尝试");
                     await Task.Delay(100);
                 }
 
-                GlobalSettings.Logger.LogDebug("前不久请求过文件，现在还不存在，不再等待，远程获取");
+                Globals.Logger.LogDebug("前不久请求过文件，现在还不存在，不再等待，远程获取");
             }
 
             IOss oss = null!;
@@ -210,7 +210,7 @@ namespace HB.FullStack.Client.Maui.File
                 //覆盖本地
                 string localFullPath = await SaveFileToLocalAsync(ossObject.Content, directory, fileName);
 
-                GlobalSettings.Logger.LogDebug("远程文件获取成功，已经保存到本地 {Osskey}", ossKey);
+                Globals.Logger.LogDebug("远程文件获取成功，已经保存到本地 {Osskey}", ossKey);
 
                 return localFullPath;
             }

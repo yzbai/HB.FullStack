@@ -46,14 +46,14 @@ namespace HB.FullStack.Database
             {
                 if (_sysDict.TryGetValue(SystemInfoNames.VERSION, out string? value))
                 {
-                    return System.Convert.ToInt32(value, GlobalSettings.Culture);
+                    return System.Convert.ToInt32(value, Globals.Culture);
                 }
 
                 throw DatabaseExceptions.SystemInfoError(cause: "no Version key in SystemInfoTable");
             }
             set
             {
-                _sysDict[SystemInfoNames.VERSION] = value.ToString(GlobalSettings.Culture);
+                _sysDict[SystemInfoNames.VERSION] = value.ToString(Globals.Culture);
             }
         }
 

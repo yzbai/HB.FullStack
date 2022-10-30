@@ -96,7 +96,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             }
 
             string policy = string.Format(
-                GlobalSettings.Culture,
+                Globals.Culture,
                 readOnly ? OSS_READ_POLICY_TEMPLATE : OSS_WRITE_POLICY_TEMPLATE,
                 bucketName,
                 directory.IsNullOrEmpty() ? "*" : directory + "/*");
@@ -125,7 +125,7 @@ namespace HB.Infrastructure.Aliyun.Sts
                     SecurityToken = assumedRoleResponse.Credentials.SecurityToken,
                     AccessKeyId = assumedRoleResponse.Credentials.AccessKeyId,
                     AccessKeySecret = assumedRoleResponse.Credentials.AccessKeySecret,
-                    ExpirationAt = DateTimeOffset.Parse(assumedRoleResponse.Credentials.Expiration, GlobalSettings.Culture),
+                    ExpirationAt = DateTimeOffset.Parse(assumedRoleResponse.Credentials.Expiration, Globals.Culture),
                     ArId = assumedRoleResponse.AssumedRoleUser.AssumedRoleId,
                     Arn = assumedRoleResponse.AssumedRoleUser.Arn,
                     ReadOnly = readOnly

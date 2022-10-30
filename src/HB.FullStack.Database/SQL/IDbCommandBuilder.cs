@@ -11,38 +11,40 @@ namespace HB.FullStack.Database
 {
     public interface IDbCommandBuilder
     {
-        FromExpression<T> From<T>(EngineType engineType) where T : DbModel, new();
-        WhereExpression<T> Where<T>(EngineType engineType) where T : DbModel, new();
-        WhereExpression<T> Where<T>(EngineType engineType, string sqlFilter, params object[] filterParams) where T : DbModel, new();
-        WhereExpression<T> Where<T>(EngineType engineType, Expression<Func<T, bool>> predicate) where T : DbModel, new();
+        FromExpression<T> From<T>() where T : DbModel, new();
+        WhereExpression<T> Where<T>() where T : DbModel, new();
+        WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DbModel, new();
+        WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DbModel, new();
 
-        EngineCommand CreateAddCommand<T>(EngineType engineType, DbModelDef modelDef, T model) where T : DbModel, new();
-        EngineCommand CreateAddOrUpdateCommand<T>(EngineType engineType, DbModelDef modelDef, T model, bool returnModel) where T : DbModel, new();
-        EngineCommand CreateBatchAddCommand<T>(EngineType engineType, DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new();
-        EngineCommand CreateBatchAddOrUpdateCommand<T>(EngineType engineType, DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new();
-        EngineCommand CreateBatchUpdateCommand<T>(EngineType engineType, DbModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DbModel, new();
-        EngineCommand CreateCountCommand<T>(EngineType engineType, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DbModel, new();
+        EngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : DbModel, new();
+        EngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : DbModel, new();
+        EngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new();
+        EngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new();
+        EngineCommand CreateBatchUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DbModel, new();
+        EngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DbModel, new();
 
         EngineCommand CreateIsTableExistCommand(EngineType engineType, string databaseName, string tableName);
-        EngineCommand CreateRetrieveCommand<T>(EngineType engineType, DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DbModel, new();
-        EngineCommand CreateRetrieveCommand<T1, T2>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
+        EngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DbModel, new();
+        EngineCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
             where T1 : DbModel, new()
             where T2 : DbModel, new();
-        EngineCommand CreateRetrieveCommand<T1, T2, T3>(EngineType engineType, FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
+        EngineCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
             where T1 : DbModel, new()
             where T2 : DbModel, new()
             where T3 : DbModel, new();
-        EngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType engineType, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params DbModelDef[] returnModelDefs)
+        EngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(
+            FromExpression<TFrom>? fromCondition,
+            WhereExpression<TWhere>? whereCondition,
+            params DbModelDef[] returnModelDefs)
             where TSelect : DbModel, new()
             where TFrom : DbModel, new()
             where TWhere : DbModel, new();
         EngineCommand CreateSystemInfoRetrieveCommand(EngineType engineType);
         EngineCommand CreateSystemVersionUpdateCommand(EngineType engineType, string databaseName, int version);
-        EngineCommand CreateTableCreateCommand(EngineType engineType, DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength);
-        EngineCommand CreateUpdateCommand<T>(EngineType engineType, DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new();
+        EngineCommand CreateTableCreateCommand(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength);
+        EngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new();
 
         EngineCommand CreateUpdatePropertiesCommand(
-            EngineType engineType,
             DbModelDef modelDef,
             object id,
             IList<string> propertyNames,
@@ -52,7 +54,6 @@ namespace HB.FullStack.Database
             string lastUser);
 
         EngineCommand CreateBatchUpdatePropertiesCommand(
-            EngineType engineType,
             DbModelDef modelDef,
             IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)> modelChanges,
             string lastUser,
@@ -62,7 +63,6 @@ namespace HB.FullStack.Database
         /// 新旧值版本的乐观锁
         /// </summary>
         EngineCommand CreateUpdatePropertiesUsingOldNewCompareCommand(
-            EngineType engineType,
             DbModelDef modelDef,
             object id,
             IList<string> propertyNames,
@@ -72,14 +72,12 @@ namespace HB.FullStack.Database
             string lastUser);
 
         EngineCommand CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
-            EngineType engineType,
             DbModelDef modelDef,
             IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long newTimestamp)> modelChanges,
             string lastUser,
             bool needTrans);
 
         EngineCommand CreateDeleteCommand(
-            EngineType engineType,
             DbModelDef modelDef,
             object id,
             string lastUser,
@@ -88,14 +86,12 @@ namespace HB.FullStack.Database
             long? newTimestamp);
 
         EngineCommand CreateDeleteCommand<T>(
-            EngineType engineType,
             DbModelDef modelDef,
             WhereExpression<T> whereExpression,
             string lastUser,
             bool trulyDeleted) where T : TimelessDbModel, new();
 
         public EngineCommand CreateBatchDeleteCommand(
-            EngineType engineType,
             DbModelDef modelDef,
             IList<object> ids,
             IList<long?> oldTimestamps,

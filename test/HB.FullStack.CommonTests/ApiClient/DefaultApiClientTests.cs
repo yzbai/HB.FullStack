@@ -24,7 +24,7 @@ namespace HB.FullStack.CommonTests.ApiClient
         [TestMethod()]
         public async Task GetAsyncTest()
         {
-            PreferenceProvider.OnTokenReceived(
+            PreferenceProvider.Login(
                 userId: Guid.NewGuid(),
                 userCreateTime: DateTimeOffset.Now,
                 mobile: null,

@@ -37,6 +37,19 @@ namespace HB.FullStack.Client
         void EnsureSynced();
 
         #endregion
+
+        #region User
+
+        UserStatus UserStatus { get; }
+
+        event Func<Task>? Logined;
+        event Func<Task>? Logouted;
+
+        void ReportLogouted();
+
+        void ReportLogined();
+
+        #endregion
     }
 
     public enum NetworkStatus

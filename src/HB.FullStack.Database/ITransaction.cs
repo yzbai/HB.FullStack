@@ -9,6 +9,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
+    //TODO: 实现 多数据库事务： TransactionScope
     public interface ITransaction
     {
         Task<TransactionContext> BeginTransactionAsync(string databaseName, IsolationLevel? isolationLevel = null);

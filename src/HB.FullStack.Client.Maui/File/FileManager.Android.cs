@@ -32,7 +32,7 @@ namespace HB.FullStack.Client.Maui.File
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    GlobalSettings.Logger?.LogCritical(ex, "File Service Unzip Init AssetFile : {AssetFileName} Error.", assetFileName);
+                    Globals.Logger?.LogCritical(ex, "File Service Unzip Init AssetFile : {AssetFileName} Error.", assetFileName);
                 }
             }
         }

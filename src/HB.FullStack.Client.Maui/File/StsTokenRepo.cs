@@ -98,7 +98,7 @@ namespace HB.FullStack.Client.Maui.File
 
             if (permission.IsUserPrivate)
             {
-                placeHolderValue = UserPreferences.UserId?.ToString();
+                placeHolderValue = PreferenceProvider.UserId?.ToString();
             }
 
             if (permission.ContainsPlaceHoder && placeHolderValue.IsNullOrEmpty())

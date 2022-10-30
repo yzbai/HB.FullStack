@@ -30,9 +30,9 @@ namespace HB.FullStack.Client.Maui.Controls
             }
         }
 
-        public string Hour => (IsDisplay24HourFormat ? Time.Hour : (Time.Hour > 12 ? Time.Hour - 12 : Time.Hour)).ToString("D2", GlobalSettings.Culture);
+        public string Hour => (IsDisplay24HourFormat ? Time.Hour : (Time.Hour > 12 ? Time.Hour - 12 : Time.Hour)).ToString("D2", Globals.Culture);
 
-        public string Minute => Time.Minute.ToString(GlobalSettings.Culture);
+        public string Minute => Time.Minute.ToString(Globals.Culture);
 
         public string AmPm => Time.IsAm ? "上午" : "下午";
 
@@ -64,19 +64,19 @@ namespace HB.FullStack.Client.Maui.Controls
 
         private void OnMinuteChanged(object obj)
         {
-            bool isUp = Convert.ToBoolean(obj, GlobalSettings.Culture);
+            bool isUp = Convert.ToBoolean(obj, Globals.Culture);
             Time = Time.AddTime(0, isUp ? 1 : -1);
         }
 
         private void OnHourChanged(object obj)
         {
-            bool isUp = Convert.ToBoolean(obj, GlobalSettings.Culture);
+            bool isUp = Convert.ToBoolean(obj, Globals.Culture);
             Time = Time.AddTime(isUp ? 1 : -1, 0);
         }
 
         private void OnAmPmChanged(object obj)
         {
-            _ = Convert.ToBoolean(obj, GlobalSettings.Culture);
+            _ = Convert.ToBoolean(obj, Globals.Culture);
             Time = Time.AddTime(Time.IsAm ? 12 : -12, 0);
         }
 

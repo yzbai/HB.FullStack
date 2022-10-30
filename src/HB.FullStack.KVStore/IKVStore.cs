@@ -17,7 +17,7 @@ namespace HB.FullStack.KVStore
         
         Task<T?> GetAsync<T>(long key) where T : KVStoreModel, new()
         {
-            return GetAsync<T>(key.ToString(GlobalSettings.Culture));
+            return GetAsync<T>(key.ToString(Globals.Culture));
         }
 
         

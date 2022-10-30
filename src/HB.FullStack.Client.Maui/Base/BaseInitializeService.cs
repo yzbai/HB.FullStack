@@ -15,9 +15,9 @@ namespace HB.FullStack.Client.Maui.Base
 {
     public class BaseInitializeService : IMauiInitializeService
     {
-        private readonly IEnumerable<Migration>? _migrations;
+        private readonly IEnumerable<Migration> _migrations;
 
-        public BaseInitializeService(IEnumerable<Migration>? migrations = null)
+        public BaseInitializeService(IEnumerable<Migration> migrations)
         {
             _migrations = migrations;
         }
@@ -26,13 +26,13 @@ namespace HB.FullStack.Client.Maui.Base
         {
             #region Logging & Exceptions
 
-            GlobalSettings.Logger = services.GetRequiredService<ILogger<BaseInitializeService>>();
+            Globals.Logger = services.GetRequiredService<ILogger<BaseInitializeService>>();
 
             TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
                 //TODO: 上报
 
-                GlobalSettings.Logger.LogError(e.Exception, $"发现没有处理的UnobservedTaskException。Sender: {sender?.GetType().FullName}");
+                Globals.Logger.LogError(e.Exception, $"发现没有处理的UnobservedTaskException。Sender: {sender?.GetType().FullName}");
 
                 Currents.ShowToast("抱歉，发生了错误");
 
@@ -43,7 +43,7 @@ namespace HB.FullStack.Client.Maui.Base
             {
                 //TODO:上报
 
-                GlobalSettings.Logger.LogError(ex, "使用了SafeFireAndForget的默认异常处理");
+                Globals.Logger.LogError(ex, "使用了SafeFireAndForget的默认异常处理");
 
 
                 Currents.ShowToast("抱歉，发生了错误");

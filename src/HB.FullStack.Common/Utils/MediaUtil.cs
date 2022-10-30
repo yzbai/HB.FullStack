@@ -364,7 +364,7 @@ namespace System
         
         public static string? GetFileTypeByMediaType(string mediaType)
         {
-            string mType = mediaType.ToLower(GlobalSettings.Culture);
+            string mType = mediaType.ToLower(Globals.Culture);
 
             if (_mediaType2FileTypeDict.ContainsKey(mType))
             {

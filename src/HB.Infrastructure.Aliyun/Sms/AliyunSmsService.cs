@@ -40,7 +40,7 @@ namespace HB.Infrastructure.Aliyun.Sms
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
 
-            string templateParam = string.Format(GlobalSettings.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}",
+            string templateParam = string.Format(Globals.Culture, "{{\"{0}\":\"{1}\", \"{2}\":\"{3}\"}}",
                     _options.TemplateIdentityValidation.ParamCode,
                     smsCode,
                     _options.TemplateIdentityValidation.ParamProduct,
@@ -129,7 +129,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             {
                 string? cachedSmsCode = await GetSmsCodeFromCacheAsync(mobile).ConfigureAwait(false);
 
-                return string.Equals(code, cachedSmsCode, GlobalSettings.Comparison);
+                return string.Equals(code, cachedSmsCode, Globals.Comparison);
             }
             catch (CacheException ex)
             {
@@ -172,7 +172,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
             public bool IsSuccessful()
             {
-                return "OK".Equals(Code, GlobalSettings.ComparisonIgnoreCase);
+                return "OK".Equals(Code, Globals.ComparisonIgnoreCase);
             }
         }
     }

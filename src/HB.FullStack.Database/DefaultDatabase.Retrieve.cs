@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
+using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database
@@ -29,79 +29,93 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                throw DatabaseExceptions.FoundTooMuch(type: typeof(T).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
+                throw DatabaseExceptions.FoundTooMuch(type: typeof(T).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement());
             }
 
             return lst.ElementAt(0);
         }
 
-        public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, TransactionContext? transContext = null)
+        public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(
+            FromExpression<TFrom>? fromCondition,
+            WhereExpression<TWhere>? whereCondition,
+            TransactionContext? transContext = null)
             where TSelect : DbModel, new()
             where TFrom : DbModel, new()
             where TWhere : DbModel, new()
         {
+
+            DbModelDef selectDef = DefFactory.GetDef<TSelect>().ThrowIfNull(typeof(TSelect).FullName);
+            DbModelDef fromDef = DefFactory.GetDef<TFrom>().ThrowIfNull(typeof(TFrom).FullName);
+            DbModelDef whereDef = DefFactory.GetDef<TWhere>().ThrowIfNull(typeof(TWhere).FullName);
+
             whereCondition ??= Where<TWhere>();
+            whereCondition.And($"{whereDef.DbTableReservedName}.{whereDef.DeletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{selectDef.DeletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{fromDef.DeletedPropertyReservedName}=0");
 
-            DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>()!;
-            DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>()!;
-            DbModelDef whereDef = ModelDefFactory.GetDef<TWhere>()!;
-
-            whereCondition.And($"{whereDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+            IDatabaseEngine engine = DbManager.GetDatabaseEngine(selectDef);
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(EngineType, fromCondition, whereCondition, selectDef);
 
-                using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, selectDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
+                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(fromCondition, whereCondition, selectDef);
 
-                return reader.ToDbModels<TSelect>(_databaseEngine.EngineType, ModelDefFactory, selectDef);
+                using IDataReader reader = transContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(fromDef, false), command).ConfigureAwait(false);
+
+                return reader.ToDbModels<TSelect>(DefFactory, selectDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: selectDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: selectDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DbModel, new()
         {
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
             whereCondition ??= Where<T>();
-
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
-
-            whereCondition.And($"{modelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+            whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand(EngineType, modelDef, fromCondition, whereCondition);
+                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef);
+                EngineCommand command = DbCommandBuilder.CreateRetrieveCommand(modelDef, fromCondition, whereCondition);
 
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, modelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToDbModels<T>(_databaseEngine.EngineType, ModelDefFactory, modelDef);
+                using var reader = transContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef, false), command).ConfigureAwait(false);
+
+                return reader.ToDbModels<T>(DefFactory, modelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DbModel, new()
         {
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
             whereCondition ??= Where<T>();
-
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
-
-            whereCondition.And($"{modelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+            whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
 
             try
             {
-                EngineCommand command = DbCommandBuilder.CreateCountCommand(EngineType, fromCondition, whereCondition);
-                object? countObj = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, modelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return System.Convert.ToInt32(countObj, GlobalSettings.Culture);
+                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef);
+                EngineCommand command = DbCommandBuilder.CreateCountCommand(fromCondition, whereCondition);
+
+                object? countObj = transContext != null
+                    ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandScalarAsync(DbManager.GetConnectionString(modelDef, false), command).ConfigureAwait(false);
+                return System.Convert.ToInt32(countObj, Globals.Culture);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
@@ -148,7 +162,9 @@ namespace HB.FullStack.Database
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
             where T : DbModel, ILongId, new()
         {
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(ILongId.Id), EngineType)}={{0}}", id);
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
+            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(ILongId.Id), modelDef.EngineType)}={{0}}", id);
 
             return ScalarAsync(where, transContext);
         }
@@ -156,7 +172,8 @@ namespace HB.FullStack.Database
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
             where T : DbModel, IGuidId, new()
         {
-            //WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(TimestampGuidDbModel.Id), EngineType)}={{0}}", guid);
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
             WhereExpression<T> where = Where<T>(t => t.Id == id);
 
             return ScalarAsync(where, transContext);
@@ -194,7 +211,7 @@ namespace HB.FullStack.Database
         {
             string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             DbModelPropertyDef? foreignKeyProperty = modelDef.GetDbPropertyDef(foreignKeyName);
 
@@ -224,25 +241,25 @@ namespace HB.FullStack.Database
             where TSource : DbModel, new()
             where TTarget : DbModel, new()
         {
+            DbModelDef sourceModelDef = DefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
+            DbModelDef targetModelDef = DefFactory.GetDef<TTarget>().ThrowIfNull(typeof(TTarget).FullName);
             whereCondition ??= Where<TSource>();
 
-            DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
-            DbModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>()!;
 
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{targetModelDef.DbTableReservedName}.{targetModelDef.DeletedPropertyReservedName}=0");
                     //whereCondition.And<TTarget>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{targetModelDef.DeletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
 
@@ -250,20 +267,25 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{targetModelDef.DeletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
             }
 
             try
             {
-                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(EngineType, fromCondition, whereCondition, sourceModelDef, targetModelDef);
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceModelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToDbModels<TSource, TTarget>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef);
+                IDatabaseEngine engine = DbManager.GetDatabaseEngine(sourceModelDef);
+
+                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition, sourceModelDef, targetModelDef);
+                using var reader = transContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(sourceModelDef, false), command).ConfigureAwait(false);
+
+                return reader.ToDbModels<TSource, TTarget>(DefFactory, sourceModelDef, targetModelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
@@ -280,7 +302,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                throw DatabaseExceptions.FoundTooMuch(typeof(TSource).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement(_databaseEngine.EngineType));
+                throw DatabaseExceptions.FoundTooMuch(typeof(TSource).FullName, from: fromCondition?.ToStatement(), where: whereCondition?.ToStatement());
             }
 
             return lst.ElementAt(0);
@@ -295,26 +317,26 @@ namespace HB.FullStack.Database
             where TTarget1 : DbModel, new()
             where TTarget2 : DbModel, new()
         {
-            whereCondition ??= Where<TSource>();
+            DbModelDef sourceModelDef = DefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
+            DbModelDef targetModelDef1 = DefFactory.GetDef<TTarget1>().ThrowIfNull(typeof(TTarget1).FullName);
+            DbModelDef targetModelDef2 = DefFactory.GetDef<TTarget2>().ThrowIfNull(typeof(TTarget2).FullName);
 
-            DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>()!;
-            DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>()!;
-            DbModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>()!;
+            whereCondition ??= Where<TSource>();
 
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetModelDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{targetModelDef2.DbTableReservedName}.{targetModelDef2.DeletedPropertyReservedName}=0");
                     //whereCondition.And<TTarget2>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{targetModelDef1.DeletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{targetModelDef2.DeletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
 
@@ -322,20 +344,24 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{_deletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{_deletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{targetModelDef1.DeletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{targetModelDef2.DeletedPropertyReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
             }
 
             try
             {
-                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(EngineType, fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(transContext?.Transaction, sourceModelDef.DatabaseName!, command, transContext != null).ConfigureAwait(false);
-                return reader.ToDbModels<TSource, TTarget1, TTarget2>(_databaseEngine.EngineType, ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
+                var engine = DbManager.GetDatabaseEngine(sourceModelDef);
+                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
+                using var reader = transContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(sourceModelDef, false), command).ConfigureAwait(false);
+
+                return reader.ToDbModels<TSource, TTarget1, TTarget2>(DefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
-                throw DatabaseExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(_databaseEngine.EngineType), innerException: ex);
+                throw DatabaseExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
@@ -353,7 +379,7 @@ namespace HB.FullStack.Database
 
             if (lst.Count() > 1)
             {
-                throw DatabaseExceptions.FoundTooMuch(typeof(TSource).FullName, fromCondition.ToStatement(), whereCondition?.ToStatement(_databaseEngine.EngineType));
+                throw DatabaseExceptions.FoundTooMuch(typeof(TSource).FullName, fromCondition.ToStatement(), whereCondition?.ToStatement());
             }
 
             return lst.ElementAt(0);

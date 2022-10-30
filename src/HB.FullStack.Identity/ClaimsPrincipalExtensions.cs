@@ -84,14 +84,14 @@ namespace System
         //{
         //    string value = principal.GetClaimValue(ClaimExtensionTypes.IsEmailConfirmed);
 
-        //    return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
+        //    return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, Globals.Culture);
         //}
 
         //public static bool GetIsMobileConfirmed(this ClaimsPrincipal principal)
         //{
         //    string value = principal.GetClaimValue(ClaimExtensionTypes.IsMobileConfirmed);
 
-        //    return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, GlobalSettings.Culture);
+        //    return string.IsNullOrEmpty(value) ? false : Convert.ToBoolean(value, Globals.Culture);
         //}
     }
 }

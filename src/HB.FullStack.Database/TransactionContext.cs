@@ -3,6 +3,8 @@
 using System.Data;
 using System.Threading.Tasks;
 
+using HB.FullStack.Database.Engine;
+
 namespace HB.FullStack.Database
 {
     public class TransactionContext
@@ -13,8 +15,11 @@ namespace HB.FullStack.Database
 
         public TransactionStatus Status { get; set; }
 
-        public TransactionContext(IDbTransaction transaction, TransactionStatus status, ITransaction transactionManager)
+        public IDatabaseEngine DatabaseEngine { get; }
+
+        public TransactionContext(IDbTransaction transaction, TransactionStatus status, ITransaction transactionManager, IDatabaseEngine databaseEngine)
         {
+            DatabaseEngine = databaseEngine;
             _transactionManager = transactionManager;
             Transaction = transaction;
             Status = status;

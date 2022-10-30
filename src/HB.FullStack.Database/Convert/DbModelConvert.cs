@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
@@ -18,10 +17,10 @@ namespace HB.FullStack.Database.Convert
     {
         #region IDataReader Row To Model
 
-        public static IList<T> ToDbModels<T>(this IDataReader reader, EngineType engineType, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
+        public static IList<T> ToDbModels<T>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
             where T : DbModel, new()
         {
-            Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedDataReaderRowToModelFunc(reader, modelDef, 0, reader.FieldCount, false, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedDataReaderRowToModelFunc(reader, modelDef, 0, reader.FieldCount, false);
 
             List<T> lst = new List<T>();
 
@@ -35,12 +34,12 @@ namespace HB.FullStack.Database.Convert
             return lst;
         }
 
-        public static IList<Tuple<TSource, TTarget?>> ToDbModels<TSource, TTarget>(this IDataReader reader, EngineType engineType, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef)
+        public static IList<Tuple<TSource, TTarget?>> ToDbModels<TSource, TTarget>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef)
             where TSource : DbModel, new()
             where TTarget : DbModel, new()
         {
-            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false, engineType);
-            Func<IDbModelDefFactory, IDataReader, object?> targetFunc = GetCachedDataReaderRowToModelFunc(reader, targetModelDef, sourceModelDef.FieldCount, reader.FieldCount - sourceModelDef.FieldCount, true, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false);
+            Func<IDbModelDefFactory, IDataReader, object?> targetFunc = GetCachedDataReaderRowToModelFunc(reader, targetModelDef, sourceModelDef.FieldCount, reader.FieldCount - sourceModelDef.FieldCount, true);
 
             IList<Tuple<TSource, TTarget?>> lst = new List<Tuple<TSource, TTarget?>>();
 
@@ -55,14 +54,14 @@ namespace HB.FullStack.Database.Convert
             return lst;
         }
 
-        public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToDbModels<TSource, TTarget2, TTarget3>(this IDataReader reader, EngineType engineType, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
+        public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToDbModels<TSource, TTarget2, TTarget3>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
             where TSource : DbModel, new()
             where TTarget2 : DbModel, new()
             where TTarget3 : DbModel, new()
         {
-            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false, engineType);
-            Func<IDbModelDefFactory, IDataReader, object?> targetFunc1 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef1, sourceModelDef.FieldCount, targetModelDef1.FieldCount, true, engineType);
-            Func<IDbModelDefFactory, IDataReader, object?> targetFunc2 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef2, sourceModelDef.FieldCount + targetModelDef1.FieldCount, reader.FieldCount - (sourceModelDef.FieldCount + targetModelDef1.FieldCount), true, engineType);
+            Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false);
+            Func<IDbModelDefFactory, IDataReader, object?> targetFunc1 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef1, sourceModelDef.FieldCount, targetModelDef1.FieldCount, true);
+            Func<IDbModelDefFactory, IDataReader, object?> targetFunc2 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef2, sourceModelDef.FieldCount + targetModelDef1.FieldCount, reader.FieldCount - (sourceModelDef.FieldCount + targetModelDef1.FieldCount), true);
 
             IList<Tuple<TSource, TTarget2?, TTarget3?>> lst = new List<Tuple<TSource, TTarget2?, TTarget3?>>();
 
@@ -80,11 +79,11 @@ namespace HB.FullStack.Database.Convert
 
         private static readonly ConcurrentDictionary<string, Func<IDbModelDefFactory, IDataReader, object?>> _toDbModelFuncDict = new ConcurrentDictionary<string, Func<IDbModelDefFactory, IDataReader, object?>>();
 
-        private static Func<IDbModelDefFactory, IDataReader, object?> GetCachedDataReaderRowToModelFunc(IDataReader reader, DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
+        private static Func<IDbModelDefFactory, IDataReader, object?> GetCachedDataReaderRowToModelFunc(IDataReader reader, DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull)
         {
-            string key = GetKey(modelDef, startIndex, length, returnNullIfFirstNull, engineType);
+            string key = GetKey(modelDef, startIndex, length, returnNullIfFirstNull);
 
-            return _toDbModelFuncDict.GetOrAdd(key, _ => CreateDataReaderRowToModelDelegate(modelDef, reader, startIndex, length, returnNullIfFirstNull, engineType));
+            return _toDbModelFuncDict.GetOrAdd(key, _ => CreateDataReaderRowToModelDelegate(modelDef, reader, startIndex, length, returnNullIfFirstNull));
 
             //if (!_toDbModelFuncDict.ContainsKey(key))
             //{
@@ -99,9 +98,9 @@ namespace HB.FullStack.Database.Convert
 
             //return _toDbModelFuncDict[key];
 
-            static string GetKey(DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType)
+            static string GetKey(DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull)
             {
-                return $"{engineType}_{modelDef.DatabaseName}_{modelDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
+                return $"{modelDef.DbName ?? modelDef.DbKind}_{modelDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
             }
         }
 
@@ -109,14 +108,15 @@ namespace HB.FullStack.Database.Convert
 
         #region Model To DbParameters
 
-        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, EngineType engineType, int number = 0) where T : DbModel, new()
+        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, int number = 0) where T : DbModel, new()
         {
             if (model is TimestampDbModel serverModel && serverModel.Timestamp <= 0)
             {
-                throw DatabaseExceptions.ModelVersionError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DatabaseExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(modelDef.FieldCount);
+            EngineType engineType = modelDef.EngineType;
 
             foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
@@ -131,29 +131,29 @@ namespace HB.FullStack.Database.Convert
         /// <summary>
         /// ToDbParameters. number为属性名的后缀数字
         /// </summary>
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, EngineType engineType, IDbModelDefFactory modelDefFactory, int number = 0) where T : DbModel, new()
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, int number = 0) where T : DbModel, new()
         {
             if (model is TimestampDbModel serverModel && serverModel.Timestamp <= 0)
             {
-                throw DatabaseExceptions.ModelVersionError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DatabaseExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
-            Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef, engineType);
+            Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef);
 
             return new List<KeyValuePair<string, object>>(func(modelDefFactory, model, number));
         }
 
         private static readonly ConcurrentDictionary<string, Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]>> _toDbParametersFuncDict = new ConcurrentDictionary<string, Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]>>();
 
-        private static Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> GetCachedModelToParametersFunc(DbModelDef modelDef, EngineType engineType)
+        private static Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> GetCachedModelToParametersFunc(DbModelDef modelDef)
         {
-            string key = GetKey(modelDef, engineType);
+            string key = GetKey(modelDef);
 
-            return _toDbParametersFuncDict.GetOrAdd(key, _ => CreateModelToDbParametersDelegate(modelDef, engineType));
+            return _toDbParametersFuncDict.GetOrAdd(key, _ => CreateModelToDbParametersDelegate(modelDef));
 
-            static string GetKey(DbModelDef modelDef, EngineType engineType)
+            static string GetKey(DbModelDef modelDef)
             {
-                return $"{engineType}_{modelDef.DatabaseName}_{modelDef.TableName}_ModelToParameters";
+                return $"{modelDef.DbName ?? modelDef.DbKind}_{modelDef.TableName}_ModelToParameters";
             }
         }
 
@@ -162,9 +162,11 @@ namespace HB.FullStack.Database.Convert
         #region PropertyValues To DbParameters
 
         public static IList<KeyValuePair<string, object>> PropertyValuesToParametersUsingReflection(
-            DbModelDef modelDef, EngineType engineType, IDictionary<string, object?> propertyValues, string parameterNameSuffix = "0")
+            DbModelDef modelDef, IDictionary<string, object?> propertyValues, string parameterNameSuffix = "0")
         {
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(propertyValues.Count);
+
+            EngineType engineType = modelDef.EngineType;
 
             foreach (KeyValuePair<string, object?> kv in propertyValues)
             {
@@ -187,22 +189,22 @@ namespace HB.FullStack.Database.Convert
             new ConcurrentDictionary<string, Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]>>();
 
         private static Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]> GetCachedPropertyValuesToParametersFunc(
-            DbModelDef modelDef, EngineType engineType, IList<string> propertyNames)
+            DbModelDef modelDef, IList<string> propertyNames)
         {
-            string key = GetKey(modelDef, engineType, propertyNames);
+            string key = GetKey(modelDef, propertyNames);
 
-            return _propertyValuesToParametersFuncDict.GetOrAdd(key, _ => CreatePropertyValuesToParametersDelegate(modelDef, engineType, propertyNames));
+            return _propertyValuesToParametersFuncDict.GetOrAdd(key, _ => CreatePropertyValuesToParametersDelegate(modelDef, propertyNames));
 
-            static string GetKey(DbModelDef modelDef, EngineType engineType, IList<string> names)
+            static string GetKey(DbModelDef modelDef, IList<string> names)
             {
-                return $"{engineType}_{modelDef.DatabaseName}_{modelDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
+                return $"{modelDef.DbName ?? modelDef.DbKind}_{modelDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
             }
         }
 
         public static IList<KeyValuePair<string, object>> PropertyValuesToParameters(
-            DbModelDef modelDef, EngineType engineType, IDbModelDefFactory modelDefFactory, IList<string> propertyNames, IList<object?> propertyValues, string parameterNameSuffix = "0")
+            DbModelDef modelDef, IDbModelDefFactory modelDefFactory, IList<string> propertyNames, IList<object?> propertyValues, string parameterNameSuffix = "0")
         {
-            Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]> func = GetCachedPropertyValuesToParametersFunc(modelDef, engineType, propertyNames);
+            Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]> func = GetCachedPropertyValuesToParametersFunc(modelDef, propertyNames);
 
             return new List<KeyValuePair<string, object>>(func(modelDefFactory, propertyValues.ToArray(), parameterNameSuffix));
         }

@@ -42,7 +42,7 @@ namespace HB.FullStack.KVStoreTests
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
+            Globals.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             KVStore = serviceProvider.GetRequiredService<IKVStore>();
         }

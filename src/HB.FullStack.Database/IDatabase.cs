@@ -26,17 +26,5 @@ namespace HB.FullStack.Database
         /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
         Task<bool> InitializeAsync(IEnumerable<Migration>? migrations = null);
-
-        EngineType EngineType { get; }
-
-        IEnumerable<string> DatabaseNames { get; }
-
-        public int VarcharDefaultLength { get; }
-
-        internal IDatabaseEngine DatabaseEngine { get; }
-
-        internal IDbModelDefFactory ModelDefFactory { get; }
-
-        internal IDbCommandBuilder DbCommandBuilder { get; }
     }
 }

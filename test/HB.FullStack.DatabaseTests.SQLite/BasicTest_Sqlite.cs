@@ -515,7 +515,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DbModelDef definition = Db.ModelDefFactory.GetDef<BookModel_Client>()!;
+                DbModelDef definition = Db.DefFactory.GetDef<BookModel_Client>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -537,7 +537,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(Db.ModelDefFactory, reader0);
+                    object obj1 = mapper1(Db.DefFactory, reader0);
 
                     list1.Add((BookModel_Client)obj1);
                     stopwatch1.Stop();

@@ -479,7 +479,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
                 DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DbModelDef definition = Db.ModelDefFactory.GetDef<BookModel_Client>()!;
+                DbModelDef definition = Db.DefFactory.GetDef<BookModel_Client>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -501,7 +501,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(Db.ModelDefFactory, reader0);
+                    object obj1 = mapper1(Db.DefFactory, reader0);
 
                     list1.Add((BookModel_Client)obj1);
                     stopwatch1.Stop();

@@ -30,6 +30,7 @@ namespace System
         private static IConfiguration? _configuration;
         private static PopupSizeConstants? _popupSizeConstants;
 
+
         #region Environment
 
         public static string Environment =>
@@ -61,9 +62,13 @@ namespace System
 
                 using Stream? resFileStream = assembly.GetManifestResourceStream(fileName);
 
+
                 IConfigurationBuilder builder = new ConfigurationBuilder();
 
-                builder.AddJsonStream(resFileStream);
+                if (resFileStream != null)
+                {
+                    builder.AddJsonStream(resFileStream);
+                }
 
                 _configuration = builder.Build();
 
@@ -104,6 +109,8 @@ namespace System
             }
         }
 
+        public static string PageName => Page.GetType().Name;
+
         public static Shell Shell => Shell.Current;
 
         public static INavigation Navigation => Shell.Current.Navigation;
@@ -122,7 +129,7 @@ namespace System
             Toast
                 .Make(message, duration, textSize)
                 .Show()
-                .SafeFireAndForget(ex => { GlobalSettings.Logger.LogCritical(ex, "ViewModel的OnException显示Alert挂了."); });
+                .SafeFireAndForget(ex => { Globals.Logger.LogCritical(ex, "ViewModel的OnException显示Alert挂了."); });
         }
 
         #endregion

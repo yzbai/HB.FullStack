@@ -48,7 +48,7 @@ namespace HB.FullStack.LockTests
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
+            Globals.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             DistributedLockManager = serviceProvider.GetRequiredService<IDistributedLockManager>();
             MemoryLockManager = serviceProvider.GetRequiredService<IMemoryLockManager>();

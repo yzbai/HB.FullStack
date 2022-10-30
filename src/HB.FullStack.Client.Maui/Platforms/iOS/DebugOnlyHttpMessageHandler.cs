@@ -16,15 +16,15 @@ namespace HB.FullStack.Client.Maui.Platforms
 
             ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
             {
-                if (cert!.Issuer.Equals($"CN={_bypassHost}", GlobalSettings.Comparison))
+                if (cert!.Issuer.Equals($"CN={_bypassHost}", Globals.Comparison))
                 {
                     return true;
                 }
-                else if (cert!.Issuer.Equals($"CN=localhost", GlobalSettings.Comparison))
+                else if (cert!.Issuer.Equals($"CN=localhost", Globals.Comparison))
                 {
                     return true;
                 }
-                else if (cert.Issuer.Contains("DO_NOT_TRUST_FiddlerRoot", GlobalSettings.Comparison))
+                else if (cert.Issuer.Contains("DO_NOT_TRUST_FiddlerRoot", Globals.Comparison))
                 {
                     return true;
                 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Common
 {
     /// <summary>
-    /// 加入的任务，不能确定按顺序完成。
+    /// 先加入的任务先执行，但无法确保完成的先后顺序
     /// </summary>
     public class WeakAsyncEventManager
     {

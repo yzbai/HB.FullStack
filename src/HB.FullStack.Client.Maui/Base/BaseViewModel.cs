@@ -7,6 +7,8 @@ using AsyncAwaitBestPractices;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using HB.FullStack.Client.File;
+
 using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Client.Maui.Base
@@ -15,6 +17,8 @@ namespace HB.FullStack.Client.Maui.Base
     {
         public const string ExceptionDisplaySignalName = "HB.FullStack.Client.Maui.ExceptionDisplay";
         public ILogger Logger { get; }
+        public IPreferenceProvider PreferenceProvider { get; }
+        public IFileManager FileManager { get; }
 
         [ObservableProperty]
         private bool _isBusy;
@@ -22,9 +26,11 @@ namespace HB.FullStack.Client.Maui.Base
         [ObservableProperty]
         private string _title = string.Empty;
 
-        protected BaseViewModel(ILogger? logger = null)
+        protected BaseViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager)
         {
-            Logger = logger ?? GlobalSettings.Logger;
+            Logger = logger ?? Globals.Logger;
+            PreferenceProvider = preferenceProvider;
+            FileManager = fileManager;
         }
 
         /// <summary>
@@ -33,7 +39,7 @@ namespace HB.FullStack.Client.Maui.Base
         public abstract Task OnPageAppearingAsync();
 
         /// <summary>
-        /// page将要消失时执行，viewmodel做清理工作。与这个page相关的数据被清楚
+        /// page将要消失时执行，viewmodel做清理工作。与这个page相关的数据被清除
         /// </summary>
         public abstract Task OnPageDisappearingAsync();
 
@@ -46,15 +52,14 @@ namespace HB.FullStack.Client.Maui.Base
             handler(ex, message, caller);
         }
 
-        public virtual void OnException(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, bool report = false, [CallerMemberName] string caller = "")
+        public virtual void OnExceptionDisplay(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, bool report = false, [CallerMemberName] string caller = "")
         {
             Logger.LogError(ex, message);
 
             //TODO:错误上报处理report
             //TODO: 处理displayMode
 
-            Currents.Page.DisplayAlert("Exception", message, "OK")
-                .SafeFireAndForget(ex => { GlobalSettings.Logger.LogCritical(ex, "ViewModel的OnException显示Alert挂了."); });
+            Currents.Page.DisplayAlert("Exception", message, "OK").SafeFireAndForget();
         }
 
         #endregion

@@ -88,7 +88,7 @@ namespace HB.FullStack.Common
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogPerformValidateError(propertyName, ex);
+                Globals.Logger?.LogPerformValidateError(propertyName, ex);
                 return false;
             }
         }

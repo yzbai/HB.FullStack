@@ -21,7 +21,7 @@ namespace HB.Infrastructure.SQLite
         private readonly SQLiteOptions _options;
         private readonly Dictionary<string, string> _connectionStringDict = new Dictionary<string, string>();
 
-        public DbCommonSettings DatabaseSettings => _options.CommonSettings;
+        public DbSetting DatabaseSettings => _options.CommonSettings;
 
         public EngineType EngineType => EngineType.SQLite;
 
@@ -40,7 +40,7 @@ namespace HB.Infrastructure.SQLite
 
         private void SetConnectionStrings()
         {
-            foreach (DbConnectionSettings schemaInfo in _options.Connections)
+            foreach (DbConnectionSetting schemaInfo in _options.Connections)
             {
                 if (FirstDefaultDatabaseName.IsNullOrEmpty())
                 {

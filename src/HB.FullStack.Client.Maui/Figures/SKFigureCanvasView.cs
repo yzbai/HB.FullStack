@@ -94,17 +94,17 @@ namespace HB.FullStack.Client.Maui.Figures
 
         public void OnPageAppearing()
         {
-            GlobalSettings.Logger.LogDebug("SKFigureCanvasView即将显示. Type: {type}", this.GetType().Name);
+            Globals.Logger.LogDebug("SKFigureCanvasView即将显示. Type: {type}", this.GetType().Name);
 
             IsAppearred = true;
 
             if (EnableTimeTick)
             {
-                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 2);
+                Globals.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 2);
                 ResumeTimeTick();
             }
 
-            GlobalSettings.Logger.LogDebug("SKFigureCanvasView 结束 即将显示. Type: {type}", this.GetType().Name);
+            Globals.Logger.LogDebug("SKFigureCanvasView 结束 即将显示. Type: {type}", this.GetType().Name);
         }
 
         public void OnPageDisappearing()
@@ -147,7 +147,7 @@ namespace HB.FullStack.Client.Maui.Figures
 
             if (EnableTimeTick)
             {
-                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 3);
+                Globals.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 3);
                 ResumeTimeTick();
             }
         }
@@ -231,17 +231,17 @@ namespace HB.FullStack.Client.Maui.Figures
 
         private void OnEnableTimeTickChanged(bool oldValue, bool newValue)
         {
-            GlobalSettings.Logger.LogDebug("SKFigureCanvasView EnableTimeTick 改变 from {old} to {new}", oldValue, newValue);
+            Globals.Logger.LogDebug("SKFigureCanvasView EnableTimeTick 改变 from {old} to {new}", oldValue, newValue);
 
             if (oldValue == newValue)
             {
-                GlobalSettings.Logger.LogDebug("SKFigureCanvasView EnableTimeTick 与上次改变相同，直接返回 from {old} to {new}", oldValue, newValue);
+                Globals.Logger.LogDebug("SKFigureCanvasView EnableTimeTick 与上次改变相同，直接返回 from {old} to {new}", oldValue, newValue);
                 return;
             }
 
             if (newValue && IsAppearred)
             {
-                GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 1);
+                Globals.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 1);
                 ResumeTimeTick();
             }
             else if (!newValue)
@@ -252,7 +252,7 @@ namespace HB.FullStack.Client.Maui.Figures
 
         private void OnTimeTickIntervalChanged()
         {
-            GlobalSettings.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 6);
+            Globals.Logger.LogDebug("调用ResumeResponseTimeTick， Place {pos}", 6);
             ResumeTimeTick();
         }
 
@@ -263,7 +263,7 @@ namespace HB.FullStack.Client.Maui.Figures
                 return;
             }
 
-            GlobalSettings.Logger.LogDebug("SKFigureCanvasView开启TimeTick模式");
+            Globals.Logger.LogDebug("SKFigureCanvasView开启TimeTick模式");
 
             _stopwatch.Restart();
             //IsResponsingTimeTick = true;
@@ -285,7 +285,7 @@ namespace HB.FullStack.Client.Maui.Figures
             //IsResponsingTimeTick = false;
             _stopwatch.Stop();
 
-            GlobalSettings.Logger.LogDebug("SKFigureCanvasView关闭TimeTick模式");
+            Globals.Logger.LogDebug("SKFigureCanvasView关闭TimeTick模式");
         }
 
         #endregion
@@ -294,7 +294,7 @@ namespace HB.FullStack.Client.Maui.Figures
 
         private void OnTouch(object? sender, SKTouchEventArgs args)
         {
-            //GlobalSettings.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
+            //Globals.Logger.LogDebug($"HHHHHHHHHHHHHH:{SerializeUtil.ToJson(args)}");
 
             if (Figures.IsNullOrEmpty())
             {

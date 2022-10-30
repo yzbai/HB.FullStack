@@ -66,7 +66,7 @@ namespace System
 
         public static string CreateUniqueToken()
         {
-            return Guid.NewGuid().ToString("N", GlobalSettings.Culture);
+            return Guid.NewGuid().ToString("N", Globals.Culture);
         }
 
         /// <summary>

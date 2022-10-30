@@ -28,13 +28,12 @@ namespace HB.FullStack.Database.Convert
             IDataReader reader,
             int startIndex,
             int length,
-            bool returnNullIfFirstNull,
-            EngineType engineType)
+            bool returnNullIfFirstNull)
         {
             DynamicMethod dm = new DynamicMethod("ToModel" + Guid.NewGuid().ToString(), def.ModelType, new[] { typeof(IDbModelDefFactory), typeof(IDataReader) }, true);
             ILGenerator il = dm.GetILGenerator();
 
-            EmitDataReaderRowToModel(def, reader, startIndex, length, returnNullIfFirstNull, engineType, il);
+            EmitDataReaderRowToModel(def, reader, startIndex, length, returnNullIfFirstNull, il);
 
             Type funcType = Expression.GetFuncType(typeof(IDbModelDefFactory), typeof(IDataReader), def.ModelType);
             return (Func<IDbModelDefFactory, IDataReader, object>)dm.CreateDelegate(funcType);
@@ -50,7 +49,7 @@ namespace HB.FullStack.Database.Convert
         /// <param name="returnNullIfFirstNull"></param>
         /// <param name="engineType"></param>
         /// <param name="il"></param>
-        private static void EmitDataReaderRowToModel(DbModelDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, EngineType engineType, ILGenerator il)
+        private static void EmitDataReaderRowToModel(DbModelDef def, IDataReader reader, int startIndex, int length, bool returnNullIfFirstNull, ILGenerator il)
         {
             try
             {
@@ -112,13 +111,13 @@ namespace HB.FullStack.Database.Convert
                     {
                         //======全局Converter
 
-                        IDbPropertyConverter? globalTypeConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, engineType);
+                        IDbPropertyConverter? globalTypeConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, def.EngineType);
 
                         if (globalTypeConverter != null)
                         {
                             il.Emit(OpCodes.Ldtoken, trueType);
                             il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);
-                            EmitUtil.EmitInt32(il, (int)engineType);
+                            EmitUtil.EmitInt32(il, (int)def.EngineType);
 
                             //TODO: 不能直接把globalTypeConverter变量加进来吗?
                             il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);//stack is now [target][target][DbPropertyConverter]
@@ -279,7 +278,7 @@ namespace HB.FullStack.Database.Convert
         /// <param name="modelDef"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        public static Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> CreateModelToDbParametersDelegate(DbModelDef modelDef, EngineType engineType)
+        public static Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> CreateModelToDbParametersDelegate(DbModelDef modelDef)
         {
             DynamicMethod dm = new DynamicMethod("ModelToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(IDbModelDefFactory), typeof(object), typeof(int) }, true);
             ILGenerator il = dm.GetILGenerator();
@@ -364,7 +363,7 @@ namespace HB.FullStack.Database.Convert
 
                     //查看全局TypeConvert
 
-                    IDbPropertyConverter? globalConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, engineType);
+                    IDbPropertyConverter? globalConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, modelDef.EngineType);
 
                     if (globalConverter != null)
                     {
@@ -375,7 +374,7 @@ namespace HB.FullStack.Database.Convert
                         il.Emit(OpCodes.Stloc, tmpTrueTypeLocal);
                         il.Emit(OpCodes.Ldloc, tmpTrueTypeLocal);
 
-                        EmitUtil.EmitInt32(il, (int)engineType);
+                        EmitUtil.EmitInt32(il, (int)modelDef.EngineType);
                         il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);//[rtArray][key][typeconverter]
 
                         il.Emit(OpCodes.Ldloc, tmpObj);//[rtArray][key][typeconverter][property_value_obj]
@@ -458,7 +457,7 @@ namespace HB.FullStack.Database.Convert
         /// <param name="engineType"></param>
         /// <param name="propertyNames"></param>
         /// <returns></returns>
-        public static Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]> CreatePropertyValuesToParametersDelegate(DbModelDef modelDef, EngineType engineType, IList<string> propertyNames)
+        public static Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]> CreatePropertyValuesToParametersDelegate(DbModelDef modelDef, IList<string> propertyNames)
         {
             DynamicMethod dm = new DynamicMethod(
                 "PropertyValuesToParameters" + Guid.NewGuid().ToString(),
@@ -574,7 +573,7 @@ namespace HB.FullStack.Database.Convert
 
                     //查看全局TypeConvert
 
-                    IDbPropertyConverter? globalConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, engineType);
+                    IDbPropertyConverter? globalConverter = DbPropertyConvert.GetGlobalDbPropertyConverter(trueType, modelDef.EngineType);
 
                     if (globalConverter != null)
                     {
@@ -591,7 +590,7 @@ namespace HB.FullStack.Database.Convert
                         il.Emit(OpCodes.Ldloc, tmpTrueTypeLocal);
                         //emiter.LoadLocal(tmpTrueTypeLocal);
 
-                        EmitUtil.EmitInt32(il, (int)engineType);
+                        EmitUtil.EmitInt32(il, (int)modelDef.EngineType);
                         //emiter.LoadConstant((int)engineType);
                         il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);
                         //emiter.Call(DBModelConverterEmit._getGlobalTypeConverterMethod);

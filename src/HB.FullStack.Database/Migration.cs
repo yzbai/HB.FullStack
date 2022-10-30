@@ -8,56 +8,41 @@ namespace HB.FullStack.Database
 {
 
     /// <summary>
+    /// 一个Migration代表一次升级的记录
     /// 先执行SQLStatement，再执行ModifyAction
     /// </summary>
     public class Migration
     {
+        public string? DbName { get; set; }
+        public string? DbKind { get; set; }
         public int OldVersion { get; set; }
         public int NewVersion { get; set; }
         public string? SqlStatement { get; set; }
 
-        public string DatabaseName { get; set; }
-
         public Func<IDatabase, TransactionContext, Task>? ModifyFunc { get; private set; }
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="databaseName"></param>
-        /// <param name="oldVersion"></param>
-        /// <param name="newVersion"></param>
-        /// <param name="sql"></param>
-        
-        public Migration(string databaseName, int oldVersion, int newVersion)
+        public Migration(string? dbName, string? dbKind, int oldVersion, int newVersion, string? sql = null, Func<IDatabase, TransactionContext, Task>? func = null)
         {
-            if (databaseName.IsNullOrEmpty())
+            if (dbName.IsNullOrEmpty() && dbKind.IsNullOrEmpty())
             {
-                throw DatabaseExceptions.MigrateError(databaseName, "databaseName is Empty");
+                throw DatabaseExceptions.MigrateError(dbName, "DbName 和 DbKind不能同时为空");
             }
 
             if (oldVersion < 0)
             {
-                throw DatabaseExceptions.MigrateError(databaseName, "oldVersion < 0");
+                throw DatabaseExceptions.MigrateError(dbName ?? dbKind, "oldVersion < 0");
             }
 
             if (newVersion != oldVersion + 1)
             {
-                throw DatabaseExceptions.MigrateError(databaseName, "newVersion != oldVersoin + 1 ");
+                throw DatabaseExceptions.MigrateError(dbName ?? dbKind, "newVersion != oldVersoin + 1 ");
             }
 
-            DatabaseName = databaseName;
+            DbName = dbName;
+            DbKind = dbKind;
             OldVersion = oldVersion;
             NewVersion = newVersion;
-        }
-
-        
-        public Migration(string targetSchema, int oldVersion, int newVersion, string sql) : this(targetSchema, oldVersion, newVersion)
-        {
             SqlStatement = sql;
-        }
-
-        public Migration(string targetSchema, int oldVersion, int newVersion, Func<IDatabase, TransactionContext, Task> func) : this(targetSchema, oldVersion, newVersion)
-        {
             ModifyFunc = func;
         }
     }

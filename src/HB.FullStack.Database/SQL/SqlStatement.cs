@@ -66,7 +66,7 @@ namespace HB.FullStack.Database.SQL
 
         public static string As<T>(T value, object asValue)
         {
-            return value == null ? "" : string.Format(GlobalSettings.Culture, "{0} AS {1}", value.ToString(), asValue);
+            return value == null ? "" : string.Format(Globals.Culture, "{0} AS {1}", value.ToString(), asValue);
         }
 
         public static T Sum<T>(T value)

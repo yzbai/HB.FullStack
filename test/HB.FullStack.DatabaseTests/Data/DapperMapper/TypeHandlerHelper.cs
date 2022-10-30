@@ -37,7 +37,7 @@ namespace ClassLibrary1
 
             if (dbValueType == typeof(string))
             {
-                return DateTimeOffset.Parse(value.ToString(), GlobalSettings.Culture);
+                return DateTimeOffset.Parse(value.ToString(), Globals.Culture);
             }
             else if (dbValueType == typeof(long))
             {

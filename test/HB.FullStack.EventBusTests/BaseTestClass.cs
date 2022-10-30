@@ -50,7 +50,7 @@ namespace HB.Infrastructure.Redis.Test
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
+            Globals.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             EventBus = serviceProvider.GetRequiredService<IEventBus>();
             EventSchemas = serviceProvider.GetRequiredService<IOptions<RedisEventBusOptions>>().Value.EventBusSettings.EventSchemas;

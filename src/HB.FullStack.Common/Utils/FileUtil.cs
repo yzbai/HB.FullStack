@@ -94,7 +94,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger?.LogIsFileSignatureMatchedError(extension, ex);
+                Globals.Logger?.LogIsFileSignatureMatchedError(extension, ex);
                 return false;
             }
         }
@@ -137,7 +137,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger?.LogSaveFileError(fullPath, @override, createDirectoryIfNotExist, ex);
+                Globals.Logger?.LogSaveFileError(fullPath, @override, createDirectoryIfNotExist, ex);
                 return false;
             }
         }
@@ -170,7 +170,7 @@ namespace System
             }
             catch (Exception ex)
             {
-                GlobalSettings.Logger?.LogSaveFileError(fullPath, @override, createDirectoryIfNotExist, ex);
+                Globals.Logger?.LogSaveFileError(fullPath, @override, createDirectoryIfNotExist, ex);
                 return false;
             }
         }
@@ -196,7 +196,7 @@ namespace System
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogReadFileError(fullPath, ex);
+                Globals.Logger?.LogReadFileError(fullPath, ex);
                 return null;
             }
         }

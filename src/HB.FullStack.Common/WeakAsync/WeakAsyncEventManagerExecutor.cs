@@ -3,7 +3,6 @@
  * Email: yuzhaobai@outlook.com
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
-#nullable disable
 
 using System;
 using System.Collections.Generic;
@@ -18,7 +17,7 @@ namespace HB.FullStack.Common
     {
         internal static void Add(string eventName, object caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
         {
-            if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper> wrappers))
+            if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper>? wrappers))
             {
                 wrappers = new List<DelegateWrapper>();
                 delegateWrapperDict.Add(eventName, wrappers);
@@ -36,12 +35,12 @@ namespace HB.FullStack.Common
 
         internal static void Remove(string eventName, object caller, MethodInfo methodInfo, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict)
         {
-            if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper> wrappers))
+            if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper>? wrappers))
             {
                 return;
             }
 
-            DelegateWrapper wrapper = wrappers.SingleOrDefault(w => w.CallerWeakReference?.Target == caller && w.Handler.Name == methodInfo.Name);
+            DelegateWrapper? wrapper = wrappers.SingleOrDefault(w => w.CallerWeakReference?.Target == caller && w.Handler.Name == methodInfo.Name);
 
             if (wrapper != null)
             {
@@ -51,17 +50,17 @@ namespace HB.FullStack.Common
 
         internal static Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict) where TSender : class where TEventArgs : class
         {
-            if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper> wrappers))
+            if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper>? wrappers))
             {
                 return Task.CompletedTask;
             }
 
             List<DelegateWrapper> toRemoves = new List<DelegateWrapper>();
-            List<(object, MethodInfo)> toRaises = new List<(object, MethodInfo)>();
+            List<(object?, MethodInfo)> toRaises = new List<(object?, MethodInfo)>();
 
             foreach (DelegateWrapper wrapper in wrappers)
             {
-                object caller = wrapper.CallerWeakReference?.Target;
+                object? caller = wrapper.CallerWeakReference?.Target;
 
                 if (wrapper.CallerWeakReference != null && caller == null)
                 {
@@ -81,13 +80,19 @@ namespace HB.FullStack.Common
             //Invoke
             for (int i = 0; i < toRaises.Count; ++i)
             {
-                (object caller, MethodInfo methodInfo) = toRaises[i];
+                (object? caller, MethodInfo methodInfo) = toRaises[i];
 
-                object rtObj;
+                object? rtObj;
 
                 if (methodInfo.IsLightweightMethod())
                 {
-                    DynamicMethod dynamicMethodInfo = TryGetDynamicMethod(methodInfo);
+                    DynamicMethod? dynamicMethodInfo = TryGetDynamicMethod(methodInfo);
+
+                    if(dynamicMethodInfo==null)
+                    {
+                        throw new InvalidOperationException("Invest this LightWeightMethod thing.");
+                    }
+
                     rtObj = dynamicMethodInfo?.Invoke(caller, new object[] { sender, eventArgs });
                 }
                 else
@@ -95,21 +100,19 @@ namespace HB.FullStack.Common
                     rtObj = methodInfo.Invoke(caller, new object[] { sender, eventArgs });
                 }
 
-                Task task = (Task)rtObj;
-
-                tasks.Add(task);
+                if (rtObj is Task task) tasks.Add(task);
             }
 
             return Task.WhenAll(tasks);
         }
 
-        private static DynamicMethod TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
+        private static DynamicMethod? TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
         {
             var typeInfoRTDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
             var typeRTDynamicMethod = typeInfoRTDynamicMethod?.AsType();
 
             return (typeInfoRTDynamicMethod?.IsAssignableFrom(rtDynamicMethod.GetType().GetTypeInfo()) ?? false) ?
-                 (DynamicMethod)typeRTDynamicMethod.GetRuntimeFields().First(f => f.Name is "m_owner").GetValue(rtDynamicMethod)
+                 (DynamicMethod?)typeRTDynamicMethod?.GetRuntimeFields().First(f => f.Name is "m_owner")?.GetValue(rtDynamicMethod)
                 : null;
         }
 
@@ -120,7 +123,5 @@ namespace HB.FullStack.Common
         }
     }
 
-    
-}
 
-#nullable restore
+}

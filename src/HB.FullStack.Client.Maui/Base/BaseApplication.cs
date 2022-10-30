@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Controls;
+﻿using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Client.Maui.Base
 {
@@ -13,6 +14,13 @@ namespace HB.FullStack.Client.Maui.Base
             _statusManager.OnAppConstructed();
         }
 
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            Window window =  base.CreateWindow(activationState);
+
+            return window;
+        }
+
         #region Lifecycle
 
         //进入方式1：启动，从not running or destroyed
@@ -20,7 +28,7 @@ namespace HB.FullStack.Client.Maui.Base
         {
             base.OnStart();
             
-            _statusManager.OnAppResume();
+            _statusManager.OnAppStart();
             
         }
 

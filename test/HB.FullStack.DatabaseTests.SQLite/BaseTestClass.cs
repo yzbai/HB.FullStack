@@ -77,7 +77,7 @@ namespace HB.FullStack.DatabaseTests
                     options.CommonSettings.Version = 1;
                     options.CommonSettings.DefaultTrulyDelete = true;
 
-                    var connSettings = new DbConnectionSettings
+                    var connSettings = new DbConnectionSetting
                     {
                         DatabaseName = dbName,
                         IsMaster = true
@@ -90,7 +90,7 @@ namespace HB.FullStack.DatabaseTests
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
+            Globals.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             return (serviceProvider, dbName);
         }

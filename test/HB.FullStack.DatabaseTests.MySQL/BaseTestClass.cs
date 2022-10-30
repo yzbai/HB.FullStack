@@ -42,7 +42,7 @@ namespace HB.FullStack.DatabaseTests
 
             Db = database;
             Trans = serviceProvider1.GetRequiredService<ITransaction>();
-            ConnectionString = serviceProvider1.GetRequiredService<IOptions<MySQLOptions>>().Value.Connections[0].ConnectionString;
+            ConnectionString = serviceProvider1.GetRequiredService<IOptions<DatabaseOptions>>().Value.Connections[0].ConnectionString;
 
             await database.InitializeAsync().ConfigureAwait(false);
 
@@ -76,7 +76,7 @@ namespace HB.FullStack.DatabaseTests
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            GlobalSettings.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
+            Globals.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             return serviceProvider;
         }

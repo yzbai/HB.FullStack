@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
 
 using HB.FullStack.Client.Maui.Utils;
 
@@ -24,11 +25,12 @@ namespace HB.FullStack.Client.Maui.Base
     {
         public BaseViewModel? ViewModel { get; protected set; }
 
-        /// <summary>
-        /// TODO: ViewModelOnPageAppearingTask应该在OnNavigatedTo方法里等待。但需要官方团队解决问题
-        /// https://github.com/dotnet/maui/issues/7320
-        /// </summary>
-        private List<Task> _pendingTasks = new List<Task>();
+        //TODO: 使用SourceGeneration代替
+        public IList<IBaseContentView> CustomerControls { get; } = new List<IBaseContentView>();
+
+        protected abstract void RegisterCustomerControls(IList<IBaseContentView> customerControls);
+
+        //private List<Task> _pendingTasks = new List<Task>();
 
         protected BasePage(BaseViewModel? viewModel)
         {
@@ -39,7 +41,25 @@ namespace HB.FullStack.Client.Maui.Base
 
             BindingContext = ViewModel = viewModel;
 
-            this.SetBinding(TitleProperty, nameof(IBaseViewModel.Title));
+            this.SetBinding(TitleProperty, nameof(BaseViewModel.Title));
+
+            RegisterCustomerControls(CustomerControls);
+
+            Loaded += BasePage_Loaded;
+
+            Unloaded += BasePage_Unloaded;
+        }
+
+        private void BasePage_Loaded(object? sender, EventArgs e)
+        {
+            //TODO: Do we need ViewModel.OnPageLoaded()?
+            //TODO: Do we need View.OnPageLoaded()?
+        }
+
+
+        private void BasePage_Unloaded(object? sender, EventArgs e)
+        {
+
         }
 
         protected override void OnAppearing()
@@ -47,48 +67,43 @@ namespace HB.FullStack.Client.Maui.Base
             base.OnAppearing();
 
             //viewmodel
-            if (ViewModel != null)
-            {
-                _pendingTasks.Add(ViewModel.OnPageAppearingAsync());
-            }
+            ViewModel?.OnPageAppearingAsync().SafeFireAndForget();
+            //_pendingTasks.Add(ViewModel?.OnPageAppearingAsync()??Task.CompletedTask);
 
             //baseContentViews
             //TODO: 检查各个自定义控件的OnPageAppearing方法有没有改成异步的。
-            if (CustomerControls != null)
+            if (CustomerControls.IsNotNullOrEmpty())
             {
-                Parallel.ForEach(CustomerControls, v => v.OnPageAppearing());
+                Parallel.ForEach(CustomerControls, controls => controls.OnPageAppearing());
             }
         }
 
         protected override void OnNavigatedTo(NavigatedToEventArgs args)
         {
+            //TODO: ViewModelOnPageAppearingTask应该在OnNavigatedTo方法里等待。但需要官方团队解决问题
+            // https://github.com/dotnet/maui/issues/7320
             base.OnNavigatedTo(args);
 
-            if (_pendingTasks.Any())
-            {
-                Task.WaitAll(_pendingTasks.ToArray());
-            }
+            //if (_pendingTasks.Any())
+            //{
+            //    Task.WaitAll(_pendingTasks.ToArray());
+            //}
 
             //TODO:是否需要在ViewModel中设置PageAppeared呢？
         }
 
-        protected override async void OnDisappearing()
+        protected override void OnDisappearing()
         {
             if (CustomerControls != null)
             {
                 Parallel.ForEach(CustomerControls, v => v.OnPageDisappearing());
             }
 
-            if (ViewModel != null)
-            {
-                await ViewModel.OnPageDisappearingAsync();
-            }
+            ViewModel?.OnPageDisappearingAsync().SafeFireAndForget();
 
             base.OnDisappearing();
         }
 
-        //TODO: 使用SourceGeneration代替
-        public IList<IBaseContentView> CustomerControls { get; } = new List<IBaseContentView>();
 
         #region Back Button
 

@@ -14,12 +14,12 @@ namespace HB.FullStack.Client.Maui.Converters
         {
             int time = (int)value;
 
-            return string.Format(GlobalSettings.Culture, "{0:d2}", time);
+            return string.Format(Globals.Culture, "{0:d2}", time);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return System.Convert.ToInt32(value, GlobalSettings.Culture);
+            return System.Convert.ToInt32(value, Globals.Culture);
         }
     }
 }

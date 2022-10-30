@@ -43,19 +43,19 @@ namespace HB.FullStack.WebApi
             Log.Logger.Information("Serilog 创建成功");
 
             //设置全局Logger
-            GlobalSettings.Logger = _loggerFactory.CreateLogger(nameof(GlobalSettings));
+            Globals.Logger = _loggerFactory.CreateLogger(nameof(Globals));
 
             //捕捉漏网Exception
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {
-                GlobalSettings.Logger.LogCritical(args.Exception, "未被发现的Task异常，Sender : {Sender}", sender);
+                Globals.Logger.LogCritical(args.Exception, "未被发现的Task异常，Sender : {Sender}", sender);
                 args.SetObserved();
             };
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 Exception? ex = e.ExceptionObject as Exception;
-                GlobalSettings.Logger.LogCritical(ex, "未被发现的Exception, {Sender}, {IsTerminating}", sender, e.IsTerminating);
+                Globals.Logger.LogCritical(ex, "未被发现的Exception, {Sender}, {IsTerminating}", sender, e.IsTerminating);
             };
         }
 

@@ -11,7 +11,7 @@ namespace HB.FullStack.Common.Utils
             {
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
                 {
-                    if (cert!.Issuer.Equals("CN=localhost", GlobalSettings.Comparison))
+                    if (cert!.Issuer.Equals("CN=localhost", Globals.Comparison))
                         return true;
                     return errors == System.Net.Security.SslPolicyErrors.None;
                 }
