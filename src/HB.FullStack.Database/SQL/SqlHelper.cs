@@ -686,32 +686,32 @@ namespace HB.FullStack.Database.SQL
         }
 
         private const string MySqlTbSysinfoCreate =
-@"CREATE TABLE `tb_sys_info` (
+$@"CREATE TABLE `tb_sys_info` (
 `Id` int (11) NOT NULL AUTO_INCREMENT,
 `Name` varchar(100) DEFAULT NULL,
 `Value` varchar(1024) DEFAULT NULL,
 PRIMARY KEY(`Id`),
 UNIQUE KEY `Name_UNIQUE` (`Name`)
 );
-INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('Version', '1');
-INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('DatabaseName', @databaseName);";
+INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('{SystemInfoNames.VERSION}', '1');
+INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('{SystemInfoNames.DATABASE_SCHEMA}', @{SystemInfoNames.DATABASE_SCHEMA});";
 
-        private const string MySqlTbSysInfoUpdateVersion = @"UPDATE `tb_sys_info` SET `Value` = @Value WHERE `Name` = 'Version';";
+        private const string MySqlTbSysInfoUpdateVersion = $@"UPDATE `tb_sys_info` SET `Value` = @Value WHERE `Name` = '{SystemInfoNames.VERSION}';";
 
         private const string MySqlTbSysInfoRetrieve = @"SELECT * FROM `tb_sys_info`;";
 
-        private const string MySqlIsTableExistsStatement = "SELECT count(1) FROM information_schema.TABLES WHERE table_name =@tableName and table_schema=@databaseName;";
+        private const string MySqlIsTableExistsStatement = "SELECT count(1) FROM information_schema.TABLES WHERE table_name =@tableName and table_schema=Database();";
 
         private const string SqliteTbSysinfoCreate =
-@"CREATE TABLE ""tb_sys_info"" (
+$@"CREATE TABLE ""tb_sys_info"" (
 ""Id"" INTEGER PRIMARY KEY AUTOINCREMENT,
 ""Name"" TEXT UNIQUE,
 ""Value"" TEXT
 );
-INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('Version', '1');
-INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('DatabaseName', @databaseName);";
+INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('{SystemInfoNames.VERSION}', '1');
+INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('{SystemInfoNames.DATABASE_SCHEMA}', @{SystemInfoNames.DATABASE_SCHEMA});";
 
-        private const string SqliteTbSysinfoUpdateVersion = @"UPDATE ""tb_sys_info"" SET ""Value"" = @Value WHERE ""Name"" = 'Version';";
+        private const string SqliteTbSysinfoUpdateVersion = $@"UPDATE ""tb_sys_info"" SET ""Value"" = @Value WHERE ""Name"" = '{SystemInfoNames.VERSION}';";
 
         private const string SqliteTbSysinfoRetrieve = @"SELECT * FROM ""tb_sys_info"";";
 

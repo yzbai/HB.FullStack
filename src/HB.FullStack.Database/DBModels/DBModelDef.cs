@@ -26,12 +26,14 @@ namespace HB.FullStack.Database.DbModels
 
         #endregion
 
-        /// <summary>
-        /// 为null时，根据DatabaseKind获取
-        /// </summary>
-        public string? DbName { get; set; }
+        ///// <summary>
+        ///// 为null时，根据DatabaseKind获取
+        ///// </summary>
+        //public string? DbName { get; set; }
 
-        public string? DbKind { get; set; }
+        //public string? DbKind { get; set; }
+
+        public DbSchema DbSchema { get; set; } = null!; 
 
         /// <summary>
         /// 属于那种数据库

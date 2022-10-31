@@ -57,10 +57,8 @@ namespace HB.FullStack.Database
             DbCommandBuilder = commandBuilder;
         }
 
-        public Task<bool> InitializeAsync(IEnumerable<Migration>? migrations = null)
-        {
-            return DbManager.InitializeAsync(migrations);
-        }
+        public Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations) 
+            => DbManager.InitializeAsync(dbSchema, connectionString, slaveConnectionStrings, migrations);
 
         #region 条件构造
 
@@ -117,7 +115,7 @@ namespace HB.FullStack.Database
         {
             if (!modelDef.DbWriteable)
             {
-                throw DatabaseExceptions.NotWriteable(type: modelDef.ModelFullName, database: modelDef.DbName ?? modelDef.DbKind);
+                throw DatabaseExceptions.NotWriteable(type: modelDef.ModelFullName, database: modelDef.DbSchema);
             }
         }
 

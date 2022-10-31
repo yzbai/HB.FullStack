@@ -20,30 +20,27 @@ namespace HB.FullStack.Database
     {
         #region Settings
 
-        int GetVarcharDefaultLength(DbModelDef modelDef);
-        int GetMaxBatchNumber(DbModelDef modelDef);
-        bool GetDefaultTrulyDelete(DbModelDef modelDef);
+        int GetVarcharDefaultLength(DbSchema dbSchema);
+        int GetMaxBatchNumber(DbSchema dbSchema);
+        bool GetDefaultTrulyDelete(DbSchema dbSchema);
 
         #endregion
 
         #region ConnectionString
 
-        ConnectionString GetConnectionStringByDbName(string dbName, bool userMaster);
-        ConnectionString GetConnectionString(DbModelDef modelDef, bool userMaster);
+        ConnectionString GetConnectionString(DbSchema dbSchema, bool userMaster);
 
         #endregion
 
         #region Engine
 
-        IDatabaseEngine GetDatabaseEngineByDbName(string databaseName);
+        IDatabaseEngine GetDatabaseEngine(DbSchema dbSchema);
 
-        IDatabaseEngine GetDatabaseEngine(DbModelDef modelDef);
+        IDatabaseEngine GetDatabaseEngine(EngineType engineType);
 
         #endregion
 
 
-        Task<bool> InitializeByDbNameAsync(string dbName, IEnumerable<Migration>? migrations);
-
-        Task<bool> InitializeByDbKindAsync(string dbKind, IEnumerable<Migration>? migrations);
+        Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
     }
 }

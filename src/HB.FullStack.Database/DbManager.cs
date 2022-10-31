@@ -1,7 +1,11 @@
-﻿using System;
+﻿global using DbSchema = System.String;
+
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
@@ -9,124 +13,102 @@ using HB.FullStack.Database.Engine;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+
 namespace HB.FullStack.Database
 {
     //TODO: 增加数据库坏掉，自动切换, 比如屏蔽某个Slave，或者master切换到slave
+    //TODO: 记录Settings到tb_sys_info表中，自动加载
     internal class DbManager : IDbManager
     {
         class DbManageUnit
         {
             public ushort SlaveAccessCount = 0;
-            public readonly int SlaveCount;
+            public int SlaveCount;
 
             public DbSetting Setting;
 
             public DbManageUnit(DbSetting setting)
             {
                 Setting = setting;
-                SlaveCount = setting.SlaveConnectionStrings.Count;
+                SlaveCount = setting.SlaveConnectionStrings == null ? 0 : setting.SlaveConnectionStrings.Count;
             }
         }
 
-        private readonly Dictionary<string, DbManageUnit> _dbNameDbSettings = new Dictionary<string, DbManageUnit>();
-        private readonly Dictionary<string, DbManageUnit> _dbKindDbSettings = new Dictionary<string, DbManageUnit>();
         private readonly ILogger<DbManager> _logger;
         private readonly IEnumerable<IDatabaseEngine> _databaseEngines;
+        private readonly ITransaction _transaction;
+        private readonly IDbCommandBuilder _commandBuilder;
+        private readonly IDbModelDefFactory _defFactory;
+        private readonly IDatabaseEngine? _mysqlEngine;
+        private readonly IDatabaseEngine? _sqliteEngine;
+        private readonly Dictionary<DbSchema, DbManageUnit> _dbManageUnits = new Dictionary<string, DbManageUnit>();
 
-        private IDatabaseEngine? _mysqlEngine;
-        private IDatabaseEngine? _sqliteEngine;
-
-        public DbManager(ILogger<DbManager> logger, IOptions<DatabaseOptions> options, IEnumerable<IDatabaseEngine> databaseEngines)
+        public DbManager(ILogger<DbManager> logger, IOptions<DatabaseOptions> options, IEnumerable<IDatabaseEngine> databaseEngines, ITransaction transaction, IDbCommandBuilder commandBuilder, IDbModelDefFactory defFactory)
         {
             DatabaseOptions _options = options.Value;
             _logger = logger;
             _databaseEngines = databaseEngines;
+            _transaction = transaction;
+            _commandBuilder = commandBuilder;
+            _defFactory = defFactory;
 
-            RangeDbSettings();
-
-            RangeEngines();
-
-            void RangeDbSettings()
+            //Range DbSettings
+            foreach (DbSetting dbSetting in _options.DbSettings)
             {
-                //Range DbSettings
-                foreach (DbSetting dbSetting in _options.DbSettings)
+                if (dbSetting.Version < 0)
                 {
-                    if (dbSetting.Version < 0)
-                    {
-                        throw DatabaseExceptions.DbSettingError(dbSetting.Version, dbSetting.DbName, "database Version must be 1");
-                    }
-
-                    if (dbSetting.DbName.IsNullOrEmpty() && dbSetting.DbName.IsNullOrEmpty())
-                    {
-                        throw DatabaseExceptions.DbSettingError(dbSetting.DbName, dbSetting.DbKind, "DbName和DbKind不能都为空");
-                    }
-
-                    if (dbSetting.DbName.IsNotNullOrEmpty())
-                    {
-                        _dbNameDbSettings[dbSetting.DbName] = new DbManageUnit(dbSetting);
-                    }
-
-                    if (dbSetting.DbKind.IsNotNullOrEmpty())
-                    {
-                        _dbKindDbSettings[dbSetting.DbKind] = new DbManageUnit(dbSetting);
-                    }
+                    throw DatabaseExceptions.DbSettingError(dbSetting.Version, dbSetting.DbSchema, "database Version must be 1");
                 }
+
+                if (dbSetting.DbSchema.IsNullOrEmpty())
+                {
+                    throw new ArgumentNullException("DbSetting中DbSchema不应该为空");
+                }
+
+                _dbManageUnits[dbSetting.DbSchema] = new DbManageUnit(dbSetting);
             }
 
-            void RangeEngines()
+            //Range DatabaseEngines
+            foreach (IDatabaseEngine engine in _databaseEngines)
             {
-                //Range DatabaseEngines
-                foreach (IDatabaseEngine engine in _databaseEngines)
+                if (engine.EngineType == EngineType.SQLite)
                 {
-                    if (engine.EngineType == EngineType.SQLite)
-                    {
-                        _sqliteEngine = engine;
-                    }
-                    else if (engine.EngineType == EngineType.MySQL)
-                    {
-                        _mysqlEngine = engine;
-                    }
+                    _sqliteEngine = engine;
+                }
+                else if (engine.EngineType == EngineType.MySQL)
+                {
+                    _mysqlEngine = engine;
                 }
             }
         }
 
-        private DbManageUnit GetDbManageUnit(DbModelDef modelDef) => modelDef.DbName != null ? _dbNameDbSettings[modelDef.DbName] : _dbKindDbSettings[modelDef.DbKind!];
-        private DbManageUnit GetDbManageUnitByDbName(string dbName) => _dbNameDbSettings[dbName];
-        private DbManageUnit GetDbManageUnitByDbKind(string dbKind) => _dbNameDbSettings[dbKind];
+        #region Settings
 
-        private static ConnectionString GetSlaveConnectionString(DbManageUnit dbUnit)
+        public ConnectionString GetConnectionString(DbSchema dbSchema, bool useMaster)
         {
-            //这里采取平均轮训的方法
-            if (dbUnit.SlaveCount == 0)
-            {
-                return dbUnit.Setting.ConnectionString.ThrowIfNull($"{dbUnit.Setting.DbName ?? dbUnit.Setting.DbKind} 没有ConnectionString");
-            }
+            DbManageUnit unit = _dbManageUnits[dbSchema];
 
-            return dbUnit.Setting.SlaveConnectionStrings[dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];
-        }
-        private static ConnectionString GetConnectionString(bool useMaster, DbManageUnit unit)
-        {
             return useMaster
-                            ? unit.Setting.ConnectionString.ThrowIfNull($"{unit.Setting.DbName ?? unit.Setting.DbKind} 没有ConnectionString")
-                            : GetSlaveConnectionString(unit);
+                ? unit.Setting.ConnectionString.ThrowIfNull($"{unit.Setting.DbSchema} 没有ConnectionString")
+                : GetSlaveConnectionString(unit);
+
+            static ConnectionString GetSlaveConnectionString(DbManageUnit dbUnit)
+            {
+                //这里采取平均轮训的方法
+                if (dbUnit.SlaveCount == 0)
+                {
+                    return dbUnit.Setting.ConnectionString.ThrowIfNull($"{dbUnit.Setting.DbSchema} 没有ConnectionString");
+                }
+
+                return dbUnit.Setting.SlaveConnectionStrings![dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];
+            }
         }
 
-        public ConnectionString GetConnectionString(DbModelDef modelDef, bool useMaster)
-        {
-            DbManageUnit unit = GetDbManageUnit(modelDef);
-            return GetConnectionString(useMaster, unit);
-        }
+        public IDatabaseEngine GetDatabaseEngine(DbSchema dbSchema) => GetDatabaseEngine(_dbManageUnits[dbSchema].Setting.EngineType);
 
-        public ConnectionString GetConnectionStringByDbName(string dbName, bool useMaster)
+        public IDatabaseEngine GetDatabaseEngine(EngineType engineType)
         {
-            DbManageUnit unit = GetDbManageUnitByDbName(dbName);
-
-            return GetConnectionString(useMaster, unit);
-        }
-
-        public IDatabaseEngine GetDatabaseEngineByDbName(string dbName)
-        {
-            return GetDbManageUnitByDbName(dbName).Setting.EngineType switch
+            return engineType switch
             {
                 EngineType.MySQL => _mysqlEngine.ThrowIfNull("没有添加MySql"),
                 EngineType.SQLite => _sqliteEngine.ThrowIfNull("没有添加Sqlite"),
@@ -134,235 +116,202 @@ namespace HB.FullStack.Database
             };
         }
 
-        public IDatabaseEngine GetDatabaseEngine(DbModelDef modelDef)
+        public int GetVarcharDefaultLength(DbSchema dbSchema)
         {
-            return modelDef.EngineType switch
-            {
-                EngineType.MySQL => _mysqlEngine.ThrowIfNull("没有添加MySql"),
-                EngineType.SQLite => _sqliteEngine.ThrowIfNull("没有添加Sqlite"),
-                _ => throw new NotImplementedException(),
-            };
-        }
-
-        public int GetVarcharDefaultLength(DbModelDef modelDef)
-        {
-            int optionLength = GetDbManageUnit(modelDef).Setting.DefaultVarcharLength;
+            int optionLength = _dbManageUnits[dbSchema].Setting.DefaultVarcharLength;
 
             return optionLength == 0 ? DefaultLengthConventions.DEFAULT_VARCHAR_LENGTH : optionLength;
         }
 
-        public int GetMaxBatchNumber(DbModelDef modelDef)
+        public int GetMaxBatchNumber(DbSchema dbSchema)
         {
-            return GetDbManageUnit(modelDef).Setting.MaxBatchNumber;
+            return _dbManageUnits[dbSchema].Setting.MaxBatchNumber;
         }
 
-        public bool GetDefaultTrulyDelete(DbModelDef modelDef)
+        public bool GetDefaultTrulyDelete(DbSchema dbSchema)
         {
-            return GetDbManageUnit(modelDef).Setting.DefaultTrulyDelete;
+            return _dbManageUnits[dbSchema].Setting.DefaultTrulyDelete;
         }
+
+        #endregion
 
         #region Initialize
 
         /// <summary>
+        /// 有几个DbSchema，就初始化几次
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task<bool> InitializeAsync(IEnumerable<Migration>? migrations, string? connectionString, IList<string>? slaveConnectionString)
+        public async Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
 
-            if (_databaseSettings.AutomaticCreateTable)
-            {
-                IEnumerable<Migration>? initializeMigrations = migrations?.Where(m => m.OldVersion == 0 && m.NewVersion == 1);
+            DbManageUnit unit = _dbManageUnits[dbSchema];
 
-                await AutoCreateTablesIfBrandNewAsync(_databaseSettings.AddDropStatementWhenCreateTable, initializeMigrations).ConfigureAwait(false);
+            FillConnectionStringIfNeed(connectionString, slaveConnectionStrings, unit);
 
-                _logger.LogInformation("Database Auto Create Tables Finished.");
-            }
+            IEnumerable<Migration>? curMigrations = migrations?.Where(m => m.DbSchema == dbSchema).ToList();
 
-            bool migrationExecuted = false;
+            await CreateTablesIfNeed(curMigrations, unit).ConfigureAwait(false);
 
-            if (migrations != null && migrations.Any())
-            {
-                migrationExecuted = await MigarateAsync(migrations).ConfigureAwait(false);
+            await MigrateIfNeeded(curMigrations, unit).ConfigureAwait(false);
 
-                _logger.LogInformation("Database Migarate Finished.");
-            }
-
-            _logger.LogInformation("数据初始化成功！");
-
-            return migrationExecuted;
+            _logger.LogInformation("数据初{DbSchema}始化成功！, Version:{Version}", dbSchema, unit.Setting.Version);
         }
 
-        public void ReportFullConnectionStringAndDatabaseName()
+        private static void FillConnectionStringIfNeed(string? connectionString, IList<string>? slaveConnectionStrings, DbManageUnit unit)
         {
-            //对于没有指定DbName和ConnectionString的DbSetting，后期总得补充好.
-            //ModelDef 没必要补充
+            //补充ConnectionString，不替换
+            if (unit.Setting.ConnectionString == null)
+            {
+                unit.Setting.ConnectionString = new ConnectionString(connectionString.ThrowIfNullOrEmpty($"在初始化时，应该为 {unit.Setting.DbSchema} 提供连接字符串"));
+            }
+
+            //补充SlaveConnectionString,不替换
+            if (unit.Setting.SlaveConnectionStrings == null && slaveConnectionStrings != null)
+            {
+                unit.Setting.SlaveConnectionStrings = slaveConnectionStrings.Select(c => new ConnectionString(c)).ToList();
+                unit.SlaveCount = slaveConnectionStrings.Count;
+            }
         }
 
-        private async Task AutoCreateTablesIfBrandNewAsync(bool addDropStatement, IEnumerable<Migration>? initializeMigrations)
+        private async Task CreateTablesIfNeed(IEnumerable<Migration>? migrations, DbManageUnit unit)
         {
-            foreach (string databaseName in _databaseEngine.DatabaseNames)
+            if (!unit.Setting.AutomaticCreateTable)
             {
-                TransactionContext transactionContext = await Transaction.BeginTransactionAsync(databaseName, IsolationLevel.Serializable).ConfigureAwait(false);
+                return;
+            }
 
-                try
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync(unit.Setting.DbSchema, System.Data.IsolationLevel.Serializable).ConfigureAwait(false);
+            DbSetting dbSetting = unit.Setting;
+
+            try
+            {
+                SystemInfo? sys = await GetSystemInfoAsync(dbSetting, transactionContext.Transaction).ConfigureAwait(false);
+
+                //表明是新数据库
+                if (sys == null)
                 {
-                    SystemInfo? sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
+                    Migration? initMigration = migrations?.Where(m => m.OldVersion == 0 && m.NewVersion == dbSetting.Version).FirstOrDefault();
 
-                    //表明是新数据库
-                    if (sys == null)
+                    if (initMigration == null && dbSetting.Version != 1)
                     {
-                        //要求新数据必须从version = 1开始
-                        if (_databaseSettings.Version != 1)
-                        {
-                            await Transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                            throw DatabaseExceptions.TableCreateError(_databaseSettings.Version, databaseName, "Database does not exists, database Version must be 1");
-                        }
-
-                        await CreateTablesByDatabaseAsync(databaseName, transactionContext, addDropStatement).ConfigureAwait(false);
-
-                        await UpdateSystemVersionAsync(databaseName, 1, transactionContext.Transaction).ConfigureAwait(false);
-
-                        //初始化数据
-                        IEnumerable<Migration>? curInitMigrations = initializeMigrations?.Where(m => m.DatabaseName.Equals(databaseName, Globals.ComparisonIgnoreCase)).ToList();
-
-                        if (curInitMigrations.IsNotNullOrEmpty())
-                        {
-                            if (curInitMigrations.Count() > 1)
-                            {
-                                throw DatabaseExceptions.MigrateError(databaseName, "Database have more than one Initialize Migrations");
-                            }
-
-                            await ApplyMigration(databaseName, transactionContext, curInitMigrations.First()).ConfigureAwait(false);
-                        }
+                        await transactionContext.RollbackAsync().ConfigureAwait(false);
+                        throw DatabaseExceptions.TableCreateError(dbSetting.Version, dbSetting.DbSchema,
+                            $"要从头创建Tables，且Version不从1开始，那么必须提供 从 Version :{0} 到 Version：{dbSetting.Version} 的Migration.");
                     }
 
-                    await Transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-                }
-                catch (DatabaseException)
-                {
-                    await Transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    await Transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                    await CreateTablesByDbSchemaAsync(dbSetting, transactionContext).ConfigureAwait(false);
 
-                    throw DatabaseExceptions.TableCreateError(_databaseSettings.Version, databaseName, "Unkown", ex);
+                    await SetSystemVersionAsync(dbSetting.Version, dbSetting, transactionContext.Transaction).ConfigureAwait(false);
+
+                    //初始化数据
+                    if (initMigration != null)
+                    {
+                        await ApplyMigration(dbSetting, transactionContext, initMigration).ConfigureAwait(false);
+                    }
+
+                    _logger.LogInformation("自动创建了{DbSchema}的数据库表, Version:{Version}", dbSetting.DbSchema, dbSetting.Version);
                 }
+
+                await transactionContext.CommitAsync().ConfigureAwait(false);
             }
-        }
-
-        private Task<int> CreateTableAsync(DbModelDef def, TransactionContext transContext, bool addDropStatement)
-        {
-            var command = DbCommandBuilder.CreateTableCreateCommand(EngineType, def, addDropStatement, VarcharDefaultLength);
-
-            _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
-
-            return _databaseEngine.ExecuteCommandNonQueryAsync(transContext.Transaction, def.DatabaseName!, command);
-        }
-
-        private async Task CreateTablesByDatabaseAsync(string databaseName, TransactionContext transactionContext, bool addDropStatement)
-        {
-            foreach (DbModelDef modelDef in DefFactory.GetAllDefsByDatabase(databaseName))
+            catch (DatabaseException)
             {
-                await CreateTableAsync(modelDef, transactionContext, addDropStatement).ConfigureAwait(false);
+                await transactionContext.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                await transactionContext.RollbackAsync().ConfigureAwait(false);
+
+                throw DatabaseExceptions.TableCreateError(dbSetting.Version, dbSetting.DbSchema, "Unkown", ex);
             }
         }
 
-        /// <summary>
-        /// 返回是否真正执行过Migration
-        /// </summary>
-        private async Task<bool> MigarateAsync(IEnumerable<Migration> migrations)
+        private async Task MigrateIfNeeded(IEnumerable<Migration>? migrations, DbManageUnit unit)
         {
+            if (migrations.IsNullOrEmpty())
+            {
+                return;
+            }
+
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
             {
                 throw DatabaseExceptions.MigrateError("", "Migraion NewVersion <= OldVersion");
             }
 
-            bool migrationExecuted = false;
+            DbSetting dbSetting = unit.Setting;
 
-            foreach (string databaseName in _databaseEngine.DatabaseNames)
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync(dbSetting.DbSchema, System.Data.IsolationLevel.Serializable).ConfigureAwait(false);
+
+            try
             {
-                TransactionContext transactionContext = await Transaction.BeginTransactionAsync(databaseName, IsolationLevel.Serializable).ConfigureAwait(false);
+                SystemInfo? sys = await GetSystemInfoAsync(dbSetting, transactionContext.Transaction).ConfigureAwait(false);
 
-                try
+                if (sys!.Version < dbSetting.Version)
                 {
-
-                    SystemInfo? sys = await GetSystemInfoAsync(databaseName, transactionContext.Transaction).ConfigureAwait(false);
-
-                    if (sys!.Version < _databaseSettings.Version)
+                    if (migrations == null)
                     {
-                        if (migrations == null)
-                        {
-                            throw DatabaseExceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
-                        }
-
-                        IEnumerable<Migration> curOrderedMigrations = migrations
-                            .Where(m => m.DatabaseName.Equals(sys.DatabaseName, Globals.ComparisonIgnoreCase))
-                            .OrderBy(m => m.OldVersion).ToList();
-
-                        if (curOrderedMigrations == null)
-                        {
-                            throw DatabaseExceptions.MigrateError(sys.DatabaseName, "Lack Migrations");
-                        }
-
-                        if (!CheckMigrations(sys.Version, _databaseSettings.Version, curOrderedMigrations!))
-                        {
-                            throw DatabaseExceptions.MigrateError(sys.DatabaseName, "Migrations not sufficient.");
-                        }
-
-                        foreach (Migration migration in curOrderedMigrations!)
-                        {
-                            await ApplyMigration(databaseName, transactionContext, migration).ConfigureAwait(false);
-                            migrationExecuted = true;
-                        }
-
-                        await UpdateSystemVersionAsync(sys.DatabaseName, _databaseSettings.Version, transactionContext.Transaction).ConfigureAwait(false);
+                        throw DatabaseExceptions.MigrateError(sys.DatabaseSchema, $"缺少 {sys.DatabaseSchema}的Migration.");
                     }
 
-                    await Transaction.CommitAsync(transactionContext).ConfigureAwait(false);
-                }
-                catch (DatabaseException)
-                {
-                    await Transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    await Transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
+                    IEnumerable<Migration> curOrderedMigrations = migrations.OrderBy(m => m.OldVersion).ToList();
 
-                    throw DatabaseExceptions.MigrateError(databaseName, "", ex);
+                    if (!IsMigrationSufficient(sys.Version, dbSetting.Version, curOrderedMigrations))
+                    {
+                        throw DatabaseExceptions.MigrateError(sys.DatabaseSchema, $"Migrations not sufficient.{sys.DatabaseSchema}");
+                    }
+
+                    foreach (Migration migration in curOrderedMigrations)
+                    {
+                        await ApplyMigration(dbSetting, transactionContext, migration).ConfigureAwait(false);
+                    }
+
+                    await SetSystemVersionAsync(dbSetting.Version, dbSetting, transactionContext.Transaction).ConfigureAwait(false);
+
+                    _logger.LogInformation("{DbSchema} Migarate Finished. From {OldVersion} to {NewVersion}", dbSetting.DbSchema, sys.Version, dbSetting.Version);
                 }
+
+                await transactionContext.CommitAsync().ConfigureAwait(false);
             }
+            catch (DatabaseException)
+            {
+                await transactionContext.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                await transactionContext.RollbackAsync().ConfigureAwait(false);
 
-            return migrationExecuted;
+                throw DatabaseExceptions.MigrateError(dbSetting.DbSchema, "未知Migration错误", ex);
+            }
         }
 
-        private async Task ApplyMigration(string databaseName, TransactionContext transactionContext, Migration migration)
+        private async Task ApplyMigration(DbSetting dbSetting, TransactionContext transactionContext, Migration migration)
         {
-            _logger.LogInformation(
-                "数据库Migration, {DatabaseName}, from {OldVersion}, to {NewVersion}, {Sql}",
-                databaseName, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
+            var engine = GetDatabaseEngine(dbSetting.EngineType);
 
             if (migration.SqlStatement.IsNotNullOrEmpty())
             {
                 EngineCommand command = new EngineCommand(migration.SqlStatement);
 
-                await _databaseEngine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, databaseName, command).ConfigureAwait(false);
+                await engine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, command).ConfigureAwait(false);
             }
 
             if (migration.ModifyFunc != null)
             {
-                await migration.ModifyFunc(this, transactionContext).ConfigureAwait(false);
+                await migration.ModifyFunc(engine, transactionContext).ConfigureAwait(false);
             }
+
+            _logger.LogInformation("数据库Migration, {DbShema}, from {OldVersion}, to {NewVersion}, {Sql}",
+                dbSetting.DbSchema, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
         }
 
         /// <summary>
         /// 检查是否依次提供了不中断的Migration
         /// </summary>
-        private static bool CheckMigrations(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
+        private static bool IsMigrationSufficient(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
         {
             int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
 
@@ -383,20 +332,11 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        #region SystemInfo
+        #region SystemInfo 管理
 
-        private async Task<bool> IsTableExistsAsync(string databaseName, string tableName, IDbTransaction transaction)
+        public async Task<SystemInfo?> GetSystemInfoAsync(DbSetting dbSetting, IDbTransaction transaction)
         {
-            var command = DbCommandBuilder.CreateIsTableExistCommand(EngineType, databaseName, tableName);
-
-            object? result = await _databaseEngine.ExecuteCommandScalarAsync(transaction, databaseName, command, true).ConfigureAwait(false);
-
-            return System.Convert.ToBoolean(result, Globals.Culture);
-        }
-
-        internal async Task<SystemInfo?> GetSystemInfoAsync(string databaseName, IDbTransaction transaction)
-        {
-            bool isExisted = await IsTableExistsAsync(databaseName, SystemInfoNames.SYSTEM_INFO_TABLE_NAME, transaction).ConfigureAwait(false);
+            bool isExisted = await IsTableExistsAsync(dbSetting, SystemInfoNames.SYSTEM_INFO_TABLE_NAME, transaction).ConfigureAwait(false);
 
             if (!isExisted)
             {
@@ -404,11 +344,13 @@ namespace HB.FullStack.Database
                 return null;
             }
 
-            var command = DbCommandBuilder.CreateSystemInfoRetrieveCommand(EngineType);
+            var command = _commandBuilder.CreateSystemInfoRetrieveCommand(dbSetting.EngineType);
 
-            using IDataReader reader = await _databaseEngine.ExecuteCommandReaderAsync(transaction, databaseName, command, false).ConfigureAwait(false);
+            var engine = GetDatabaseEngine(dbSetting.EngineType);
 
-            SystemInfo systemInfo = new SystemInfo(databaseName);
+            using IDataReader reader = await engine.ExecuteCommandReaderAsync(transaction, command).ConfigureAwait(false);
+
+            SystemInfo systemInfo = new SystemInfo(dbSetting.DbSchema);
 
             while (reader.Read())
             {
@@ -418,14 +360,52 @@ namespace HB.FullStack.Database
             return systemInfo;
         }
 
-        public async Task UpdateSystemVersionAsync(string databaseName, int version, IDbTransaction transaction)
+        public async Task SetSystemVersionAsync(int version, DbSetting dbSetting, IDbTransaction transaction)
         {
-            var command = DbCommandBuilder.CreateSystemVersionUpdateCommand(EngineType, databaseName, version);
+            var command = _commandBuilder.CreateSystemVersionSetCommand(dbSetting.EngineType, dbSetting.DbSchema, version);
 
-            await _databaseEngine.ExecuteCommandNonQueryAsync(transaction, databaseName, command).ConfigureAwait(false);
+            var engine = GetDatabaseEngine(dbSetting.EngineType);
+
+            await engine.ExecuteCommandNonQueryAsync(transaction, command).ConfigureAwait(false);
         }
 
+        #endregion
 
+        #region Table 管理
+
+        public async Task<bool> IsTableExistsAsync(DbSetting dbSetting, string tableName, IDbTransaction transaction)
+        {
+            var command = _commandBuilder.CreateIsTableExistCommand(dbSetting.EngineType, tableName);
+
+            var engine = GetDatabaseEngine(dbSetting.EngineType);
+
+            object? result = await engine.ExecuteCommandScalarAsync(transaction, command).ConfigureAwait(false);
+
+            return System.Convert.ToBoolean(result, Globals.Culture);
+        }
+
+        private async Task<int> CreateTableAsync(DbModelDef def, TransactionContext transContext, bool addDropStatement, int varcharDefaultLength)
+        {
+            var command = _commandBuilder.CreateTableCreateCommand(def, addDropStatement, varcharDefaultLength);
+
+            var engine = GetDatabaseEngine(def.EngineType);
+
+            _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
+
+            return await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
+        }
+
+        private async Task CreateTablesByDbSchemaAsync(DbSetting dbSetting, TransactionContext transactionContext)
+        {
+            foreach (DbModelDef modelDef in _defFactory.GetAllDefsByDbSchema(dbSetting.DbSchema))
+            {
+                await CreateTableAsync(
+                    modelDef,
+                    transactionContext,
+                    dbSetting.AddDropStatementWhenCreateTable,
+                    GetVarcharDefaultLength(dbSetting.DbSchema)).ConfigureAwait(false);
+            }
+        }
 
         #endregion
     }

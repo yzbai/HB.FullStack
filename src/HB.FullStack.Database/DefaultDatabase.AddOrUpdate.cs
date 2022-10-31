@@ -24,7 +24,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef);
+                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
 
                 item.LastUser = lastUser;
 
@@ -32,7 +32,7 @@ namespace HB.FullStack.Database
 
                 _ = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -62,13 +62,13 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef);
+                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
 
                 var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(modelDef, items, transContext == null);
 
                 _ = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {

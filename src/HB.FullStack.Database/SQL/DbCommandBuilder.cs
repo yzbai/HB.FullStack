@@ -61,7 +61,7 @@ namespace HB.FullStack.Database
 
             static string GetCommandTextCacheKey(SqlType textType, DbModelDef[] modelDefs, IEnumerable<string>? propertyNames, bool addOrUpdateReturnModel)
             {
-                StringBuilder builder = new StringBuilder(modelDefs[0].DbName ?? modelDefs[0].DbKind);
+                StringBuilder builder = new StringBuilder(modelDefs[0].DbSchema);
 
                 foreach (DbModelDef modelDef in modelDefs)
                 {
@@ -796,13 +796,12 @@ namespace HB.FullStack.Database
             return new EngineCommand(sql);
         }
 
-        public EngineCommand CreateIsTableExistCommand(EngineType engineType, string databaseName, string tableName)
+        public EngineCommand CreateIsTableExistCommand(EngineType engineType, string tableName)
         {
             string sql = SqlHelper.GetIsTableExistSql(engineType);
 
             var parameters = new List<KeyValuePair<string, object>> {
-                new KeyValuePair<string, object>("@tableName", tableName ),
-                new KeyValuePair<string, object>( "@databaseName", databaseName)
+                new KeyValuePair<string, object>("@tableName", tableName )
             };
 
             return new EngineCommand(sql, parameters);
@@ -815,7 +814,7 @@ namespace HB.FullStack.Database
             return new EngineCommand(sql);
         }
 
-        public EngineCommand CreateSystemVersionUpdateCommand(EngineType engineType, string databaseName, int version)
+        public EngineCommand CreateSystemVersionSetCommand(EngineType engineType, string dbSchema, int version)
         {
             string sql;
             List<KeyValuePair<string, object>> parameters;
@@ -824,13 +823,13 @@ namespace HB.FullStack.Database
             {
                 sql = SqlHelper.GetSystemInfoCreateSql(engineType);
 
-                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("@databaseName", databaseName) };
+                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>($"@{SystemInfoNames.DATABASE_SCHEMA}", dbSchema) };
             }
             else
             {
                 sql = SqlHelper.GetSystemInfoUpdateVersionSql(engineType);
 
-                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("@Value", version) };
+                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>($"@{SystemInfoNames.VERSION}", version) };
             }
 
             return new EngineCommand(sql, parameters);

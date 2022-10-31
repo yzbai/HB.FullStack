@@ -19,11 +19,11 @@ namespace HB.FullStack.Database
         /// </summary>
 
         [NotNull, DisallowNull]
-        public string DatabaseName
+        public string DatabaseSchema
         {
             get
             {
-                if (_sysDict.TryGetValue(SystemInfoNames.DATABASE_NAME, out string? value))
+                if (_sysDict.TryGetValue(SystemInfoNames.DATABASE_SCHEMA, out string? value))
                 {
                     return value;
                 }
@@ -32,7 +32,7 @@ namespace HB.FullStack.Database
             }
             private set
             {
-                _sysDict[SystemInfoNames.DATABASE_NAME] = value;
+                _sysDict[SystemInfoNames.DATABASE_SCHEMA] = value;
             }
         }
 
@@ -57,9 +57,9 @@ namespace HB.FullStack.Database
             }
         }
 
-        public SystemInfo(string databaseName)
+        public SystemInfo(string dbSchema)
         {
-            DatabaseName = databaseName;
+            DatabaseSchema = dbSchema;
         }
 
         public void Set(string name, string value)

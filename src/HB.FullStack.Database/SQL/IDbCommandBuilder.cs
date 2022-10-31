@@ -23,7 +23,10 @@ namespace HB.FullStack.Database
         EngineCommand CreateBatchUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DbModel, new();
         EngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DbModel, new();
 
-        EngineCommand CreateIsTableExistCommand(EngineType engineType, string databaseName, string tableName);
+        /// <summary>
+        /// 当前Connection下
+        /// </summary>
+        EngineCommand CreateIsTableExistCommand(EngineType engineType, string tableName);
         EngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : DbModel, new();
         EngineCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
             where T1 : DbModel, new()
@@ -40,7 +43,11 @@ namespace HB.FullStack.Database
             where TFrom : DbModel, new()
             where TWhere : DbModel, new();
         EngineCommand CreateSystemInfoRetrieveCommand(EngineType engineType);
-        EngineCommand CreateSystemVersionUpdateCommand(EngineType engineType, string databaseName, int version);
+
+        /// <summary>
+        /// 如果tb_sys_info不存在则创建
+        /// </summary>
+        EngineCommand CreateSystemVersionSetCommand(EngineType engineType, string databaseName, int version);
         EngineCommand CreateTableCreateCommand(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength);
         EngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new();
 

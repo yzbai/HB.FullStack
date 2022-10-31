@@ -26,8 +26,10 @@ namespace HB.FullStack.Database
     public interface IDatabase : IDatabaseWriter, IDatabaseReader
     {
         /// <summary>
+        /// 有几个DbSchema，就初始化几次
         /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
-        Task<bool> InitializeAsync(IEnumerable<Migration>? migrations = null);
+        /// 
+        Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
     }
 }

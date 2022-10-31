@@ -42,17 +42,10 @@ namespace HB.FullStack.Database
         public EngineType EngineType { get; set; }
 
         /// <summary>
-        /// DbName和DbKind不能同时为null
-        /// Master的DbName应该和Slave的DbName一样
-        /// 后期不补
-        /// </summary>
-        public string? DbName { get; set; }
-
-        /// <summary>
         /// 为了实现数据库切换，比如不同用户登录，使用不同数据库
         /// 动态数据库
         /// </summary>
-        public string? DbKind { get; set; }
+        public string DbSchema { get; set; } = null!;
 
         /// <summary>
         /// 从1开始
@@ -60,9 +53,12 @@ namespace HB.FullStack.Database
         public int Version { get; set; }
 
         //TODO: 确保useAffectedRows=false
+        /// <summary>
+        /// 可能在初始化才确定
+        /// </summary>
         public ConnectionString? ConnectionString { get; set; }
 
-        public IList<ConnectionString> SlaveConnectionStrings { get; set; } = new List<ConnectionString>();
+        public IList<ConnectionString>? SlaveConnectionStrings { get; set; }
 
 
         #region Other Settings
@@ -94,12 +90,14 @@ namespace HB.FullStack.Database
         [DisallowNull, NotNull]
         public string ModelFullName { get; set; } = null!;
 
-        /// <summary>
-        /// 有DbName按DbName为准，没有按DbKind来
-        /// </summary>
-        public string? DbName { get; set; }
+        ///// <summary>
+        ///// 有DbName按DbName为准，没有按DbKind来
+        ///// </summary>
+        //public string? DbName { get; set; }
 
-        public string? DbKind { get; set; }
+        //public string? DbKind { get; set; }
+
+        public DbSchema DbSchema { get; set; } = null!;
 
         [DisallowNull, NotNull]
         public string TableName { get; set; } = null!;

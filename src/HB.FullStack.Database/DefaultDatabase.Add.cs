@@ -40,13 +40,13 @@ namespace HB.FullStack.Database
                     serverModel.LastUser = lastUser;
                 }
 
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef);
+                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
 
                 var command = DbCommandBuilder.CreateAddCommand(modelDef, item);
 
                 object? rt = transContext != null
                     ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandScalarAsync(DbManager.GetConnectionString(modelDef, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandScalarAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 if (modelDef.IsIdAutoIncrement)
                 {
@@ -107,7 +107,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef);
+                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
 
                 //Prepare
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
@@ -118,7 +118,7 @@ namespace HB.FullStack.Database
 
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef, true), command);
+                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command);
 
                 if (modelDef.IsIdAutoIncrement)
                 {
@@ -174,7 +174,7 @@ namespace HB.FullStack.Database
 
         private void ThrowIfTooMuchItems<TObj>(IEnumerable<TObj> items, string lastUser, DbModelDef modelDef)
         {
-            if (DbManager.GetMaxBatchNumber(modelDef) < items.Count())
+            if (DbManager.GetMaxBatchNumber(modelDef.DbSchema) < items.Count())
             {
                 throw DatabaseExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
             }
