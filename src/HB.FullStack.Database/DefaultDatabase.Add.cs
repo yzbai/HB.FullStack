@@ -174,9 +174,7 @@ namespace HB.FullStack.Database
 
         private void ThrowIfTooMuchItems<TObj>(IEnumerable<TObj> items, string lastUser, DbModelDef modelDef)
         {
-            DbSetting dbSetting = DbManager.GetDbSetting(modelDef);
-
-            if (dbSetting.MaxBatchNumber < items.Count())
+            if (DbManager.GetMaxBatchNumber(modelDef) < items.Count())
             {
                 throw DatabaseExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
             }

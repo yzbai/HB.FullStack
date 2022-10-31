@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using HB.FullStack.Database;
@@ -14,6 +15,7 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// 有哪些数据库
+        /// 由DbManager处理
         /// </summary>
         public IList<DbSetting> DbSettings { get; set; } = new List<DbSetting>();
 
@@ -24,6 +26,7 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// 有哪些DbModel
+        /// 由DbModelDefFactory处理
         /// </summary>
         public IList<DbModelSetting> DbModelSettings { get; set; } = new List<DbModelSetting>();
     }
@@ -40,11 +43,14 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// DbName和DbKind不能同时为null
+        /// Master的DbName应该和Slave的DbName一样
+        /// 后期不补
         /// </summary>
         public string? DbName { get; set; }
 
         /// <summary>
         /// 为了实现数据库切换，比如不同用户登录，使用不同数据库
+        /// 动态数据库
         /// </summary>
         public string? DbKind { get; set; }
 
@@ -52,6 +58,14 @@ namespace HB.FullStack.Database
         /// 从1开始
         /// </summary>
         public int Version { get; set; }
+
+        //TODO: 确保useAffectedRows=false
+        public ConnectionString? ConnectionString { get; set; }
+
+        public IList<ConnectionString> SlaveConnectionStrings { get; set; } = new List<ConnectionString>();
+
+
+        #region Other Settings
 
         public string? TableNameSuffixToRemove { get; set; } = "Model";
 
@@ -68,11 +82,8 @@ namespace HB.FullStack.Database
         /// </summary>
         public bool DefaultTrulyDelete { get; set; } = false;
 
+        #endregion
 
-        //TODO: 确保useAffectedRows=false
-        public string? ConnectionString { get; set; }
-
-        public bool IsMaster { get; set; } = true;
     }
 
     /// <summary>

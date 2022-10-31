@@ -47,7 +47,7 @@ namespace HB.Infrastructure.MySQL
 
         #region Command 能力
 
-        public async Task<int> ExecuteCommandNonQueryAsync(string connectionString, EngineCommand engineCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
             return await MySQLExecuter.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
@@ -60,28 +60,28 @@ namespace HB.Infrastructure.MySQL
             return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
         }
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(string connectionString, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectionString, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
             return await MySQLExecuter.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
         }
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
             return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
         }
 
-        public async Task<object?> ExecuteCommandScalarAsync(string connectionString, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectionString, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
             return await MySQLExecuter.ExecuteCommandScalarAsync(connectionString, command).ConfigureAwait(false);
         }
 
-        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction trans, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction trans, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
@@ -92,9 +92,9 @@ namespace HB.Infrastructure.MySQL
 
         #region 事务
 
-        public async Task<IDbTransaction> BeginTransactionAsync(string connectionString, IsolationLevel? isolationLevel = null)
+        public async Task<IDbTransaction> BeginTransactionAsync(ConnectionString connectionString, IsolationLevel? isolationLevel = null)
         {
-            MySqlConnection conn = new MySqlConnection(connectionString);
+            MySqlConnection conn = new MySqlConnection(connectionString.ToString());
             await conn.OpenAsync().ConfigureAwait(false);
 
             return await conn.BeginTransactionAsync(isolationLevel ?? IsolationLevel.RepeatableRead).ConfigureAwait(false);

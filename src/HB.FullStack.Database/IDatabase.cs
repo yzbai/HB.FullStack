@@ -20,6 +20,9 @@ using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
+    /// <summary>
+    /// 对外提供数据库操作
+    /// </summary>
     public interface IDatabase : IDatabaseWriter, IDatabaseReader
     {
         /// <summary>

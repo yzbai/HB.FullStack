@@ -30,7 +30,7 @@ namespace HB.FullStack.Database.Engine
         #region Command执行功能
 
         
-        Task<int> ExecuteCommandNonQueryAsync(string connectionString, EngineCommand engineCommand);
+        Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, EngineCommand engineCommand);
 
         Task<int> ExecuteCommandNonQueryAsync(IDbTransaction trans, EngineCommand engineCommand);
 
@@ -38,12 +38,12 @@ namespace HB.FullStack.Database.Engine
         /// 使用后必须Dispose，必须使用using
         /// </summary>
         
-        Task<IDataReader> ExecuteCommandReaderAsync(string connectionString, EngineCommand engineCommand);
+        Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectionString, EngineCommand engineCommand);
         
         Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, EngineCommand engineCommand);
 
         
-        Task<object?> ExecuteCommandScalarAsync(string connectionString, EngineCommand engineCommand);
+        Task<object?> ExecuteCommandScalarAsync(ConnectionString connectionString, EngineCommand engineCommand);
 
         Task<object?> ExecuteCommandScalarAsync(IDbTransaction trans, EngineCommand engineCommand);
 
@@ -51,7 +51,7 @@ namespace HB.FullStack.Database.Engine
 
         #region 事务功能
 
-        Task<IDbTransaction> BeginTransactionAsync(string connectionString, IsolationLevel? isolationLevel = null);
+        Task<IDbTransaction> BeginTransactionAsync(ConnectionString connectionString, IsolationLevel? isolationLevel = null);
 
         Task CommitAsync(IDbTransaction transaction);
 
