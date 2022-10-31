@@ -38,9 +38,10 @@ namespace HB.FullStack.Database
 
         private IDbManager DbManager { get; }
 
-        public IDbModelDefFactory DefFactory { get; }
+        public IDbModelDefFactory ModelDefFactory { get; }
 
         public IDbCommandBuilder DbCommandBuilder { get; }
+       
 
         public DefaultDatabase(
             ILogger<DefaultDatabase> logger,
@@ -52,12 +53,12 @@ namespace HB.FullStack.Database
             _logger = logger;
             Transaction = transaction;
 
-            DefFactory = modelDefFactory;
+            ModelDefFactory = modelDefFactory;
             DbManager = dbManager;
             DbCommandBuilder = commandBuilder;
         }
 
-        public Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations) 
+        public Task<bool> InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations) 
             => DbManager.InitializeAsync(dbSchema, connectionString, slaveConnectionStrings, migrations);
 
         #region 条件构造
@@ -128,5 +129,6 @@ namespace HB.FullStack.Database
                 lastUser = lastUser[..DefaultLengthConventions.MAX_LAST_USER_LENGTH];
             }
         }
+        
     }
 }

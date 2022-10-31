@@ -44,9 +44,9 @@ namespace HB.FullStack.Database
             where TWhere : DbModel, new()
         {
 
-            DbModelDef selectDef = DefFactory.GetDef<TSelect>().ThrowIfNull(typeof(TSelect).FullName);
-            DbModelDef fromDef = DefFactory.GetDef<TFrom>().ThrowIfNull(typeof(TFrom).FullName);
-            DbModelDef whereDef = DefFactory.GetDef<TWhere>().ThrowIfNull(typeof(TWhere).FullName);
+            DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>().ThrowIfNull(typeof(TSelect).FullName);
+            DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>().ThrowIfNull(typeof(TFrom).FullName);
+            DbModelDef whereDef = ModelDefFactory.GetDef<TWhere>().ThrowIfNull(typeof(TWhere).FullName);
 
             whereCondition ??= Where<TWhere>();
             whereCondition.And($"{whereDef.DbTableReservedName}.{whereDef.DeletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{selectDef.DeletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{fromDef.DeletedPropertyReservedName}=0");
@@ -62,7 +62,7 @@ namespace HB.FullStack.Database
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(fromDef.DbSchema, false), command).ConfigureAwait(false);
 
-                return reader.ToDbModels<TSelect>(DefFactory, selectDef);
+                return reader.ToDbModels<TSelect>(ModelDefFactory, selectDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -73,7 +73,7 @@ namespace HB.FullStack.Database
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DbModel, new()
         {
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             whereCondition ??= Where<T>();
             whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
@@ -87,7 +87,7 @@ namespace HB.FullStack.Database
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef.DbSchema, false), command).ConfigureAwait(false);
 
-                return reader.ToDbModels<T>(DefFactory, modelDef);
+                return reader.ToDbModels<T>(ModelDefFactory, modelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -98,7 +98,7 @@ namespace HB.FullStack.Database
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : DbModel, new()
         {
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             whereCondition ??= Where<T>();
             whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
@@ -162,7 +162,7 @@ namespace HB.FullStack.Database
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
             where T : DbModel, ILongId, new()
         {
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(ILongId.Id), modelDef.EngineType)}={{0}}", id);
 
@@ -172,7 +172,7 @@ namespace HB.FullStack.Database
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
             where T : DbModel, IGuidId, new()
         {
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             WhereExpression<T> where = Where<T>(t => t.Id == id);
 
@@ -211,7 +211,7 @@ namespace HB.FullStack.Database
         {
             string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
 
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             DbModelPropertyDef? foreignKeyProperty = modelDef.GetDbPropertyDef(foreignKeyName);
 
@@ -241,8 +241,8 @@ namespace HB.FullStack.Database
             where TSource : DbModel, new()
             where TTarget : DbModel, new()
         {
-            DbModelDef sourceModelDef = DefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
-            DbModelDef targetModelDef = DefFactory.GetDef<TTarget>().ThrowIfNull(typeof(TTarget).FullName);
+            DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
+            DbModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>().ThrowIfNull(typeof(TTarget).FullName);
             whereCondition ??= Where<TSource>();
 
 
@@ -281,7 +281,7 @@ namespace HB.FullStack.Database
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(sourceModelDef.DbSchema, false), command).ConfigureAwait(false);
 
-                return reader.ToDbModels<TSource, TTarget>(DefFactory, sourceModelDef, targetModelDef);
+                return reader.ToDbModels<TSource, TTarget>(ModelDefFactory, sourceModelDef, targetModelDef);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {
@@ -317,9 +317,9 @@ namespace HB.FullStack.Database
             where TTarget1 : DbModel, new()
             where TTarget2 : DbModel, new()
         {
-            DbModelDef sourceModelDef = DefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
-            DbModelDef targetModelDef1 = DefFactory.GetDef<TTarget1>().ThrowIfNull(typeof(TTarget1).FullName);
-            DbModelDef targetModelDef2 = DefFactory.GetDef<TTarget2>().ThrowIfNull(typeof(TTarget2).FullName);
+            DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
+            DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>().ThrowIfNull(typeof(TTarget1).FullName);
+            DbModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>().ThrowIfNull(typeof(TTarget2).FullName);
 
             whereCondition ??= Where<TSource>();
 
@@ -357,7 +357,7 @@ namespace HB.FullStack.Database
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(sourceModelDef.DbSchema, false), command).ConfigureAwait(false);
 
-                return reader.ToDbModels<TSource, TTarget1, TTarget2>(DefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
+                return reader.ToDbModels<TSource, TTarget1, TTarget2>(ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {

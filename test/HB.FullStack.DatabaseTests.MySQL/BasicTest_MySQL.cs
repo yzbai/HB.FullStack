@@ -405,7 +405,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DbModelDef definition = Db.DefFactory.GetDef<BookModel>()!;
+                DbModelDef definition = Db.ModelDefFactory.GetDef<BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -426,7 +426,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 {
                     stopwatch1.Start();
 
-                    object obj1 = mapper1(Db.DefFactory, reader0);
+                    object obj1 = mapper1(Db.ModelDefFactory, reader0);
 
                     list1.Add((BookModel)obj1);
                     stopwatch1.Stop();

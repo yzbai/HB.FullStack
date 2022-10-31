@@ -30,6 +30,8 @@ namespace HB.FullStack.Database
         /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
         /// 
-        Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
+        Task<bool> InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
+
+        IDbModelDefFactory ModelDefFactory { get; }
     }
 }

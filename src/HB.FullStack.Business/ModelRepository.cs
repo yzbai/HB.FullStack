@@ -32,7 +32,9 @@ namespace HB.FullStack.Repository
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
 
         protected ILogger Logger { get; }
+
         protected ICache Cache { get; }
+
         private IDatabase Database { get; }
 
         protected IDatabaseReader DbReader => Database;
@@ -284,7 +286,7 @@ namespace HB.FullStack.Repository
             //检查必要的AddtionalProperties
             //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
 
-            DbModelDef modelDef = Database.DefFactory.GetDef<T>()!;
+            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
 
             ThrowIfAddtionalPropertiesLack(new ChangedPack[] { cp }, modelDef);
 
@@ -307,7 +309,7 @@ namespace HB.FullStack.Repository
 
         public async Task UpdateProperties<T>(IEnumerable<ChangedPack> cps, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
         {
-            DbModelDef modelDef = Database.DefFactory.GetDef<T>()!;
+            DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
 
             ThrowIfAddtionalPropertiesLack(cps, modelDef);
 

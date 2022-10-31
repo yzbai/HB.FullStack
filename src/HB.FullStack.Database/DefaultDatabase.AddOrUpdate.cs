@@ -17,7 +17,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DbModelDef modelDef = DefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
             TruncateLastUser(ref lastUser);
@@ -49,7 +49,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DbModelDef modelDef = DefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
             ThrowIfTooMuchItems(items, lastUser, modelDef);

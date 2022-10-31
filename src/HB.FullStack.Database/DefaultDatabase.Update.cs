@@ -17,7 +17,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
             TruncateLastUser(ref lastUser);
@@ -111,7 +111,7 @@ namespace HB.FullStack.Database
 
             ThrowIf.NotValid(items, nameof(items));
 
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfTooMuchItems(items, lastUser, modelDef);
             ThrowIfNotWriteable(modelDef);
@@ -199,7 +199,7 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.TimestampShouldBePositive(timestamp);
             }
 
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
 
@@ -263,7 +263,7 @@ namespace HB.FullStack.Database
                 throw DatabaseExceptions.GuidShouldNotEmpty();
             }
 
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
 
@@ -310,7 +310,7 @@ namespace HB.FullStack.Database
             string lastUser,
             TransactionContext? transContext) where T : DbModel, new()
         {
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             //这里不包含Timestamp改动
             List<(string propertyName, object? oldValue, object? newValue)> lst = ConvertChangedPackToList(changedPack, modelDef, out long? newTimestamp);
@@ -344,7 +344,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
             TruncateLastUser(ref lastUser);
@@ -409,7 +409,7 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DbModelDef modelDef = DefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
             TruncateLastUser(ref lastUser);
@@ -467,7 +467,7 @@ namespace HB.FullStack.Database
                 return UpdatePropertiesAsync<T>(changedPacks.First(), lastUser, transContext);
             }
 
-            DbModelDef modelDef = DefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             var lst = ConvertChangedPackToList(changedPacks, modelDef);
 

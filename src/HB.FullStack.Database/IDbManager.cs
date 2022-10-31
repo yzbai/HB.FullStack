@@ -41,6 +41,6 @@ namespace HB.FullStack.Database
         #endregion
 
 
-        Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
+        Task<bool> InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
     }
 }

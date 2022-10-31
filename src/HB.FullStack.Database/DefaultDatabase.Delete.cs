@@ -22,7 +22,7 @@ namespace HB.FullStack.Database
             bool? trulyDelete = null) where T : DbModel, new()
         {
 
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
             TruncateLastUser(ref lastUser);
@@ -101,7 +101,7 @@ namespace HB.FullStack.Database
             }
 
 
-            DbModelDef modelDef = DefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
             ThrowIfTooMuchItems(ids, lastUser, modelDef);
@@ -191,7 +191,7 @@ namespace HB.FullStack.Database
             TransactionContext? transactionContext = null,
             bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
-            DbModelDef modelDef = DefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
 

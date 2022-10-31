@@ -36,14 +36,17 @@ namespace HB.FullStack.WebApi.Startup
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            bool migrationExecuted = await InitializeDatabaseAsync(_database, _lockManager, _context.Migrations).ConfigureAwait(false);
-
-            if (migrationExecuted)
+            foreach (var dbContext in _context.DbInitializeContexts)
             {
-                //TODO: clear the cache
-                //清理比如xxx开头的CacheItem,要求Cache有统一开头，且不能与KVStore冲突。所以KVStore最好与cache是不同的实例
+                bool haveMigrationExecuted = await InitializeDatabaseAsync(dbContext.DbSchema, dbContext.Migrations).ConfigureAwait(false);
 
-                _context.CacheCleanAction?.Invoke(_cache);
+                if (haveMigrationExecuted)
+                {
+                    //TODO: clear the cache
+                    //清理比如xxx开头的CacheItem,要求Cache有统一开头，且不能与KVStore冲突。所以KVStore最好与cache是不同的实例
+
+                    dbContext.CacheCleanAction?.Invoke(_cache);
+                }
             }
         }
 
@@ -55,12 +58,12 @@ namespace HB.FullStack.WebApi.Startup
         /// <summary>
         /// 返回是否有Migration被执行
         /// </summary>
-        public static async Task<bool> InitializeDatabaseAsync(IDatabase database, IDistributedLockManager lockManager, IEnumerable<Migration>? migrations)
+        public async Task<bool> InitializeDatabaseAsync(string dbSchema, IEnumerable<Migration>? migrations)
         {
-            Globals.Logger.LogDebug("开始初始化数据库:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
+            Globals.Logger.LogDebug("开始初始化数据库:{DbSchema}", dbSchema);
 
-            IDistributedLock distributedLock = await lockManager.LockAsync(
-                resources: database.DatabaseNames,
+            IDistributedLock distributedLock = await _lockManager.LockAsync(
+                resource: dbSchema,
                 expiryTime: TimeSpan.FromMinutes(5),
                 waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);
 
@@ -68,12 +71,12 @@ namespace HB.FullStack.WebApi.Startup
             {
                 if (!distributedLock.IsAcquired)
                 {
-                    throw WebApiExceptions.DatabaseInitLockError(database.DatabaseNames);
+                    throw WebApiExceptions.DatabaseInitLockError(dbSchema);
                 }
 
-                Globals.Logger.LogDebug("获取了初始化数据库的锁:{DatabaseNames}", database.DatabaseNames.ToJoinedString(","));
+                Globals.Logger.LogDebug("获取了初始化数据库的锁:{DbSchema}", dbSchema);
 
-                return await database.InitializeAsync(migrations).ConfigureAwait(false);
+                return await _database.InitializeAsync(dbSchema, null, null, migrations).ConfigureAwait(false);
             }
             finally
             {

@@ -142,7 +142,7 @@ namespace HB.FullStack.Database
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations)
+        public async Task<bool> InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
 
@@ -154,9 +154,11 @@ namespace HB.FullStack.Database
 
             await CreateTablesIfNeed(curMigrations, unit).ConfigureAwait(false);
 
-            await MigrateIfNeeded(curMigrations, unit).ConfigureAwait(false);
+            bool haveExecutedMigration = await MigrateIfNeeded(curMigrations, unit).ConfigureAwait(false);
 
             _logger.LogInformation("数据初{DbSchema}始化成功！, Version:{Version}", dbSchema, unit.Setting.Version);
+
+            return haveExecutedMigration;
         }
 
         private static void FillConnectionStringIfNeed(string? connectionString, IList<string>? slaveConnectionStrings, DbManageUnit unit)
@@ -229,11 +231,11 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task MigrateIfNeeded(IEnumerable<Migration>? migrations, DbManageUnit unit)
+        private async Task<bool> MigrateIfNeeded(IEnumerable<Migration>? migrations, DbManageUnit unit)
         {
             if (migrations.IsNullOrEmpty())
             {
-                return;
+                return false;
             }
 
             if (migrations != null && migrations.Any(m => m.NewVersion <= m.OldVersion))
@@ -242,6 +244,7 @@ namespace HB.FullStack.Database
             }
 
             DbSetting dbSetting = unit.Setting;
+            bool haveExecutedMigration = false;
 
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync(dbSetting.DbSchema, System.Data.IsolationLevel.Serializable).ConfigureAwait(false);
 
@@ -266,6 +269,7 @@ namespace HB.FullStack.Database
                     foreach (Migration migration in curOrderedMigrations)
                     {
                         await ApplyMigration(dbSetting, transactionContext, migration).ConfigureAwait(false);
+                        haveExecutedMigration = true;
                     }
 
                     await SetSystemVersionAsync(dbSetting.Version, dbSetting, transactionContext.Transaction).ConfigureAwait(false);
@@ -274,6 +278,8 @@ namespace HB.FullStack.Database
                 }
 
                 await transactionContext.CommitAsync().ConfigureAwait(false);
+
+                return haveExecutedMigration;
             }
             catch (DatabaseException)
             {

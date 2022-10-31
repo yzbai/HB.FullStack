@@ -21,9 +21,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             PublisherModel publisherModel = Mocker.MockOnePublisherModel();
 
-            var emit_results = publisherModel.ToDbParameters(Db.DefFactory.GetDef<PublisherModel>()!, engineType, Db.DefFactory, 1);
+            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, Db.ModelDefFactory, 1);
 
-            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.DefFactory.GetDef<PublisherModel>()!, engineType, 1);
+            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel>()!, engineType, 1);
 
             AssertEqual(emit_results, reflect_results, engineType);
 
@@ -31,9 +31,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             PublisherModel2 publisherModel2 = new PublisherModel2();
 
-            var emit_results2 = publisherModel2.ToDbParameters(Db.DefFactory.GetDef<PublisherModel2>()!, engineType, Db.DefFactory, 1);
+            var emit_results2 = publisherModel2.ToDbParameters(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, Db.ModelDefFactory, 1);
 
-            var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.DefFactory.GetDef<PublisherModel2>()!, engineType, 1);
+            var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel2>()!, engineType, 1);
 
             AssertEqual(emit_results2, reflect_results2, engineType);
 
@@ -41,9 +41,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             PublisherModel3 publisherModel3 = new PublisherModel3();
 
-            var emit_results3 = publisherModel3.ToDbParameters(Db.DefFactory.GetDef<PublisherModel3>()!, engineType, Db.DefFactory, 1);
+            var emit_results3 = publisherModel3.ToDbParameters(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, Db.ModelDefFactory, 1);
 
-            var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.DefFactory.GetDef<PublisherModel3>()!, engineType, 1);
+            var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel3>()!, engineType, 1);
 
             AssertEqual(emit_results3, reflect_results3, engineType);
         }
@@ -71,14 +71,14 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var models = Mocker.GetPublishers(10000);
 
-            var def = Db.DefFactory.GetDef<PublisherModel>();
+            var def = Db.ModelDefFactory.GetDef<PublisherModel>();
 
             Stopwatch stopwatch = new Stopwatch();
 
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ToDbParameters(def!, engineType, Db.DefFactory);
+                _ = model.ToDbParameters(def!, engineType, Db.ModelDefFactory);
             }
             stopwatch.Stop();
 

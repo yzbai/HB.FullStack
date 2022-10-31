@@ -75,7 +75,7 @@ namespace HB.FullStack.Client
             IStatusManager statusManager) : base(apiClient, preferenceProvider, statusManager)
         {
             _logger = logger;
-            _modelDef = database.DefFactory.GetDef<TModel>()!;
+            _modelDef = database.ModelDefFactory.GetDef<TModel>()!;
 
             ClientModelDef = ClientModelDefFactory.Get<TModel>() ?? CreateDefaultClientModelDef();
             Database = database;

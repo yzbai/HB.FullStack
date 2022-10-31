@@ -74,7 +74,7 @@ namespace System
             return services;
         }
 
-        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, 
+        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services,
             IConfiguration configuration,
             Func<JwtBearerChallengeContext, Task> onChallenge,
             Func<TokenValidatedContext, Task> onTokenValidated,
@@ -88,8 +88,8 @@ namespace System
             return AddJwtAuthenticationCore(services, onChallenge, onTokenValidated, onAuthenticationFailed, onForbidden, onMessageReceived, jwtSettings);
         }
 
-        
-        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, 
+
+        public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services,
             Action<JwtClientSettings> configureJwtClientSettings,
             Func<JwtBearerChallengeContext, Task> onChallenge,
             Func<TokenValidatedContext, Task> onTokenValidated,
@@ -107,12 +107,12 @@ namespace System
         /// authority:当局。我该去向谁核实，即是谁颁发了这个jwt
         /// </summary>
         private static AuthenticationBuilder AddJwtAuthenticationCore(
-            IServiceCollection services, 
-            Func<JwtBearerChallengeContext, Task> onChallenge, 
-            Func<TokenValidatedContext, Task> onTokenValidated, 
-            Func<AuthenticationFailedContext, Task> onAuthenticationFailed, 
-            Func<ForbiddenContext, Task> onForbidden, 
-            Func<MessageReceivedContext, Task> onMessageReceived, 
+            IServiceCollection services,
+            Func<JwtBearerChallengeContext, Task> onChallenge,
+            Func<TokenValidatedContext, Task> onTokenValidated,
+            Func<AuthenticationFailedContext, Task> onAuthenticationFailed,
+            Func<ForbiddenContext, Task> onForbidden,
+            Func<MessageReceivedContext, Task> onMessageReceived,
             JwtClientSettings jwtSettings)
         {
             X509Certificate2 encryptCert = CertificateUtil.GetCertificateFromSubjectOrFile(
@@ -215,10 +215,14 @@ namespace System
             return services;
         }
 
-        public static IServiceCollection AddFullStackInitialization(this IServiceCollection services, IEnumerable<Migration>? migrations, Action<ICache>? cacheClean)
+        public static IServiceCollection AddFullStackInitialization(this IServiceCollection services, IEnumerable<DbInitializeContext>? dbInitializeContexts)
         {
+            InitializationContext context = new InitializationContext();
 
-            InitializationContext context = new InitializationContext { Migrations = migrations, CacheCleanAction = cacheClean };
+            if (dbInitializeContexts != null)
+            {
+                context.DbInitializeContexts = dbInitializeContexts;
+            }
 
             services.AddSingleton(context);
             services.AddHostedService<InitializationHostedService>();

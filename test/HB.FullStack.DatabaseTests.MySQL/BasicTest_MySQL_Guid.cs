@@ -730,7 +730,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
                 DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DbModelDef definition = Db.DefFactory.GetDef<Guid_BookModel>()!;
+                DbModelDef definition = Db.ModelDefFactory.GetDef<Guid_BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -768,7 +768,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
                 while (reader.Read())
                 {
                     stopwatch1.Start();
-                    object obj1 = fullStack_mapper(Db.DefFactory, reader);
+                    object obj1 = fullStack_mapper(Db.ModelDefFactory, reader);
                     list1.Add((Guid_BookModel)obj1);
                     stopwatch1.Stop();
 
@@ -804,9 +804,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
             Guid_PublisherModel publisherModel = Mocker.Guid_MockOnePublisherModel();
             //publisherModel.Version = 0;
 
-            var emit_results = publisherModel.ToDbParameters(Db.DefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, Db.DefFactory, 1);
+            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
 
-            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.DefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, 1);
+            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results, reflect_results, EngineType.MySQL);
 
@@ -814,9 +814,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
 
             Guid_PublisherModel2 publisherModel2 = new Guid_PublisherModel2();
 
-            IList<KeyValuePair<string, object>>? emit_results2 = publisherModel2.ToDbParameters(Db.DefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, Db.DefFactory, 1);
+            IList<KeyValuePair<string, object>>? emit_results2 = publisherModel2.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
 
-            var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.DefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, 1);
+            var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results2, reflect_results2, EngineType.MySQL);
 
@@ -824,9 +824,9 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
 
             Guid_PublisherModel3 publisherModel3 = new Guid_PublisherModel3();
 
-            var emit_results3 = publisherModel3.ToDbParameters(Db.DefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, Db.DefFactory, 1);
+            var emit_results3 = publisherModel3.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, Db.ModelDefFactory, 1);
 
-            var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.DefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, 1);
+            var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, EngineType.MySQL, 1);
 
             AssertEqual(emit_results3, reflect_results3, EngineType.MySQL);
         }
@@ -836,14 +836,14 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
         {
             var models = Mocker.Guid_GetPublishers(1000000);
 
-            var def = Db.DefFactory.GetDef<Guid_PublisherModel>();
+            var def = Db.ModelDefFactory.GetDef<Guid_PublisherModel>();
 
             Stopwatch stopwatch = new Stopwatch();
 
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ToDbParameters(def!, EngineType.MySQL, Db.DefFactory);
+                _ = model.ToDbParameters(def!, EngineType.MySQL, Db.ModelDefFactory);
             }
             stopwatch.Stop();
 
