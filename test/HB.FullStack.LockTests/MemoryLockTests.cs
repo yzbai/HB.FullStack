@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.BaseTest;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.DependencyInjection;

@@ -37,15 +37,15 @@ namespace HB.FullStack.Database
     public class DbSetting
     {
         /// <summary>
-        /// 支持不同数据库混用
-        /// </summary>
-        public EngineType EngineType { get; set; }
-
-        /// <summary>
         /// 为了实现数据库切换，比如不同用户登录，使用不同数据库
         /// 动态数据库
         /// </summary>
         public string DbSchema { get; set; } = null!;
+
+        /// <summary>        
+        /// 支持不同数据库混用
+        /// </summary>
+        public EngineType EngineType { get; set; }
 
         /// <summary>
         /// 从1开始

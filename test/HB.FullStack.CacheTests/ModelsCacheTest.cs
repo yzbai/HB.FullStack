@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
+using HB.FullStack.BaseTest;
 using HB.FullStack.Cache;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,7 +34,7 @@ namespace HB.FullStack.CacheTests
 			modelDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
 			modelDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-			IDatabase database = RedisConnection.GetDatabase(DatabaseNumber);
+			IDatabase database = RedisConnection.GetDatabase(RedisDbNumber);
 
 			List<Book> books = Mocker.MockMany(10);
 
@@ -121,7 +123,7 @@ namespace HB.FullStack.CacheTests
 			modelDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
 			modelDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-			IDatabase database = RedisConnection.GetDatabase(DatabaseNumber);
+			IDatabase database = RedisConnection.GetDatabase(RedisDbNumber);
 
 			Book book = Mocker.MockOne();
 
@@ -172,7 +174,7 @@ namespace HB.FullStack.CacheTests
 			modelDef.AbsoluteTimeRelativeToNow = absoluteSecondsRelativeToNow == null ? null : (TimeSpan?)TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value);
 			modelDef.SlidingTime = slidingSeconds == null ? null : (TimeSpan?)TimeSpan.FromSeconds(slidingSeconds.Value);
 
-			IDatabase database = RedisConnection.GetDatabase(DatabaseNumber);
+			IDatabase database = RedisConnection.GetDatabase(RedisDbNumber);
 
 			IList<Book> books = Mocker.MockMany();
 
@@ -199,12 +201,18 @@ namespace HB.FullStack.CacheTests
 
 		private static async Task AddToDatabaeAsync(IEnumerable<Book> books)
 		{
-			await Db.BatchAddAsync(books, "", GetFakeTransactionContext()).ConfigureAwait(false);
-		}
+			Database.TransactionContext transContext = await Trans.BeginTransactionAsync<Book>();
 
-		private static Database.TransactionContext GetFakeTransactionContext()
-		{
-			return new Database.TransactionContext(null!, Database.TransactionStatus.InTransaction, null!);
+			try
+			{
+				await Db.BatchAddAsync(books, "", transContext).ConfigureAwait(false);
+				await transContext.CommitAsync();
+			}
+			catch
+			{
+				await transContext.RollbackAsync();
+				throw;
+			}
 		}
 	}
 }

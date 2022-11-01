@@ -1,14 +1,11 @@
-﻿global using static HB.FullStack.BaseTest.BaseTestClass;
-using System;
+﻿using HB.FullStack.Database.DbModels;
 
-using HB.FullStack.Database.DbModels;
-
-namespace HB.FullStack.CacheTests
+namespace HB.FullStack.DatabaseTests.Data.MySqls
 {
-    [DbModel(DbSchema_Sqlite)]
-    [CacheModel]
+    [DbModel(DbSchema_Mysql)]
     public class BookModel : TimestampFlackIdDbModel
     {
+
         [DbModelProperty]
         public string Name { get; set; } = default!;
 
@@ -16,10 +13,10 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
-    [CacheModel]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_BookModel : TimestampGuidDbModel
     {
+
         [DbModelProperty]
         public string Name { get; set; } = default!;
 
@@ -27,16 +24,15 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
-    [CacheModel]
+    [DbModel(DbSchema_Mysql)]
     public class Book : TimestampFlackIdDbModel
     {
         [DbModelProperty]
-        [CacheModelAltKey]
+
         public string Name { get; set; } = null!;
 
         [DbModelProperty]
-        [CacheModelAltKey]
+
         public long BookID { get; set; }
 
         [DbModelProperty]
@@ -46,10 +42,10 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; }
     }
 
-    [DbModel(DbSchema_Sqlite)]
-    [CacheModel]
+    [DbModel(DbSchema_Mysql)]
     public class BookModel_Client : TimestampFlackIdDbModel
     {
+
         [DbModelProperty(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
@@ -57,16 +53,15 @@ namespace HB.FullStack.CacheTests
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
-    [CacheModel]
+    [DbModel(DbSchema_Mysql)]
     public class Book_Client : TimestampFlackIdDbModel
     {
-        [CacheModelAltKey]
+
         [DbModelProperty]
         public string Name { get; set; } = null!;
 
         [DbModelProperty]
-        [CacheModelAltKey]
+
         public long BookID { get; set; }
 
         [DbModelProperty]

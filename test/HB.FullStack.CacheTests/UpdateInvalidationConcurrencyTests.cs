@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using HB.FullStack.BaseTest;
 using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;

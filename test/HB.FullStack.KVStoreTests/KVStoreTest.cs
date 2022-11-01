@@ -1,4 +1,5 @@
 ﻿using HB.FullStack;
+using HB.FullStack.BaseTest;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

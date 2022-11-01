@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using HB.FullStack.BaseTest;
 using HB.FullStack.Cache;
 
 using Microsoft.Extensions.Caching.Distributed;
@@ -27,7 +28,7 @@ namespace HB.FullStack.CacheTests
                 SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
             };
 
-            IDatabase database = RedisConnection.GetDatabase(DatabaseNumber);
+            IDatabase database = RedisConnection.GetDatabase(RedisDbNumber);
 
             List<Book> books = Mocker.MockMany();
 
@@ -56,7 +57,7 @@ namespace HB.FullStack.CacheTests
                 SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
             };
 
-            IDatabase database = RedisConnection.GetDatabase(DatabaseNumber);
+            IDatabase database = RedisConnection.GetDatabase(RedisDbNumber);
 
             Book book = Mocker.MockOne();
 
@@ -99,7 +100,7 @@ namespace HB.FullStack.CacheTests
                 SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
             };
 
-            IDatabase database = RedisConnection.GetDatabase(DatabaseNumber);
+            IDatabase database = RedisConnection.GetDatabase(RedisDbNumber);
 
             Book book = Mocker.MockOne();
 
@@ -130,20 +131,22 @@ namespace HB.FullStack.CacheTests
             Assert.IsTrue(cached2?.Name == book.Name);
         }
 
-        /// <summary>
-        /// AddToDatabaeAsync
-        /// </summary>
-        /// <param name="books"></param>
-        /// <returns></returns>
-
         private async Task AddToDatabaeAsync(IEnumerable<Book> books)
         {
-            await Db.BatchAddAsync(books, "", GetFakeTransactionContext()).ConfigureAwait(false);
+            var transContext = await Trans.BeginTransactionAsync<Book>();
+
+            try
+            {
+                await Db.BatchAddAsync(books, "", transContext).ConfigureAwait(false);
+                await transContext.CommitAsync();
+            }
+            catch
+            {
+                await transContext.RollbackAsync();
+                throw;
+            }
         }
 
-        private static Database.TransactionContext GetFakeTransactionContext()
-        {
-            return new Database.TransactionContext(null!, Database.TransactionStatus.InTransaction, null!);
-        }
+    
     }
 }

@@ -10,5 +10,10 @@ namespace HB.FullStack.Database.DbModels
         public string? TableName { get; set; }
 
         public bool? ReadOnly { get; set; }
+
+        public DbModelAttribute(DbSchema dbSchema)
+        {
+            DbSchema = dbSchema;
+        }
     }
 }

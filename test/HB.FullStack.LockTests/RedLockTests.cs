@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.BaseTest;
 using HB.FullStack.Lock.Distributed;
 using HB.Infrastructure.Redis.DistributedLock;
 
