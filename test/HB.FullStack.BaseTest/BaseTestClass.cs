@@ -85,7 +85,7 @@ namespace HB.FullStack.BaseTest
 
 
         [AssemblyInitialize]
-        public static async Task AssemblyInit(TestContext _)
+        public static async Task BaseAssemblyInit(TestContext _)
         {
             ServiceProvider = BuildServices();
 
@@ -143,7 +143,7 @@ namespace HB.FullStack.BaseTest
         }
 
         [AssemblyCleanup]
-        public static void AssemblyCleanup()
+        public static void BaseAssemblyCleanup()
         {
             SqliteConnection.ClearAllPools();
 

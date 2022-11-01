@@ -27,7 +27,6 @@ namespace HB.FullStack.DatabaseTests.MySQL
     [TestClass]
     public class BasicTest_Guid_MySQL : BaseTestClass
     {
-
         [TestMethod]
         public async Task Test_Add_Key_Conflict_ErrorAsync()
         {

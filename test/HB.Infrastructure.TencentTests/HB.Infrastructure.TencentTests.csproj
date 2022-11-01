@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
+    <ProjectReference Include="..\HB.FullStack.BaseTest\HB.FullStack.BaseTest.csproj" />
   </ItemGroup>
 
 </Project>
