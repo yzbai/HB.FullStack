@@ -8,9 +8,9 @@ namespace HB.FullStack.BaseTest
     public class AssemblyLifecycle
     {
         [AssemblyInitialize]
-        public static async Task AssemblyInit(TestContext _) => await BaseAssemblyInit(_);
+        public static async Task AssemblyInit(TestContext _) => await BaseTestClass. BaseAssemblyInit(_);
 
         [AssemblyCleanup]
-        public static void AssemblyCleanup() => BaseAssemblyCleanup();
+        public static void AssemblyCleanup() => BaseTestClass.BaseAssemblyCleanup();
     }
 }

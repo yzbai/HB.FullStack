@@ -1,11 +1,15 @@
-﻿using MessagePack;
+﻿using System;
+
+using HB.FullStack.Database.DbModels;
+
+using MessagePack;
 
 namespace HB.FullStack.CacheTests
 {
+
     public class VersionData
     {
-        public string Guid { get; set; } = null!;
-
-        public long Timestamp { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public long Timestamp { get; set; } = TimeUtil.Timestamp;
     }
 }

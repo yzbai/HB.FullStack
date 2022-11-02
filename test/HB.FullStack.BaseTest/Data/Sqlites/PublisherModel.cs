@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.DatabaseTests.Data.MySqls;
+using HB.FullStack.BaseTest.Data.MySqls;
 
-namespace HB.FullStack.DatabaseTests.Data.Sqlites
+namespace HB.FullStack.BaseTest.Data.Sqlites
 {
     [DbModel(DbSchema_Sqlite)]
     public class PublisherModel3 : TimestampFlackIdDbModel

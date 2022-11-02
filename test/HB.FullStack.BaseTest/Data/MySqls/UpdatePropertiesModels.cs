@@ -10,7 +10,7 @@ using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.DatabaseTests.Data.MySqls
+namespace HB.FullStack.BaseTest.Data.MySqls
 {
     public record InnerModel(string? InnerName);
 

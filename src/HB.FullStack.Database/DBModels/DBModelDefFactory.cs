@@ -241,12 +241,10 @@ namespace HB.FullStack.Database.DbModels
                 {
                     string key = $"{modelDef.DbSchema} + {modelDef.TableName}";
 
-                    if (hashSet.Contains(key))
+                    if(!hashSet.Add(key))
                     {
                         throw DatabaseExceptions.SameTableNameInSameDbSchema(modelDef.DbSchema, modelDef.TableName);
                     }
-
-                    hashSet.Add(key);
                 }
             }
         }

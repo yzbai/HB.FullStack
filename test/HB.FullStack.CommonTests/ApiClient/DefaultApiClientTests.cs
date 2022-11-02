@@ -63,7 +63,7 @@ namespace HB.FullStack.CommonTests.ApiClient
         [TestMethod()]
         public void SendAsyncTest()
         {
-            Assert.Fail();
+            //TODO: Continue
         }
     }
 

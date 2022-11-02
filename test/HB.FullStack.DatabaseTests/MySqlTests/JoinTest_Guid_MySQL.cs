@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
-using HB.FullStack.DatabaseTests.Data.MySqls;
+using HB.FullStack.BaseTest.Data.MySqls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

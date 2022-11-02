@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.DatabaseTests.Data.MySqls
+namespace HB.FullStack.BaseTest.Data.Sqlites
 {
-    public static class Mocker
+    public static partial class Mocker
     {
         private static readonly Random _random = new Random();
 

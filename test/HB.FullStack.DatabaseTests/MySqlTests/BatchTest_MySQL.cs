@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HB.FullStack.DatabaseTests.Data.MySqls;
+using HB.FullStack.BaseTest.Data.MySqls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.DatabaseTests.MySQL

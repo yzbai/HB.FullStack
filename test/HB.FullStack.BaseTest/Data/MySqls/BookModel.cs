@@ -1,22 +1,8 @@
 ﻿using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.DatabaseTests.Data.Sqlites
+namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    public enum PublisherType
-    {
-        Online,
-        Big,
-        Small
-    }
-
-    public class Author
-    {
-        public string Name { get; set; } = default!;
-
-        public string Mobile { get; set; } = default!;
-    }
-
-    [DbModel(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Mysql)]
     public class Book2Model : TimestampFlackIdDbModel
     {
 
@@ -27,7 +13,7 @@ namespace HB.FullStack.DatabaseTests.Data.Sqlites
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_BookModel : TimestampGuidDbModel
     {
 
@@ -38,7 +24,7 @@ namespace HB.FullStack.DatabaseTests.Data.Sqlites
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Mysql)]
     public class Book : TimestampFlackIdDbModel
     {
         [DbModelProperty]
@@ -56,7 +42,7 @@ namespace HB.FullStack.DatabaseTests.Data.Sqlites
         public double Price { get; set; }
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Mysql)]
     public class BookModel_Client : TimestampFlackIdDbModel
     {
 
@@ -67,7 +53,7 @@ namespace HB.FullStack.DatabaseTests.Data.Sqlites
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Mysql)]
     public class Book_Client : TimestampFlackIdDbModel
     {
 

@@ -3,7 +3,7 @@ using System;
 
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.DatabaseTests.Data.MySqls
+namespace HB.FullStack.BaseTest.Data.MySqls
 {
     [DbModel(DbSchema_Mysql)]
     public class AutoIdBTTimestamp : TimestampAutoIncrementIdDbModel

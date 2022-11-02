@@ -1,8 +1,23 @@
 ﻿using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.DatabaseTests.Data.MySqls
+namespace HB.FullStack.BaseTest.Data.Sqlites
 {
-    [DbModel(DbSchema_Mysql)]
+    public enum PublisherType
+    {
+        Online,
+        Big,
+        Small
+    }
+
+    public class Author
+    {
+        public string Name { get; set; } = default!;
+
+        public string Mobile { get; set; } = default!;
+    }
+
+    [DbModel(DbSchema_Sqlite)]
+    [CacheModel]
     public class Book2Model : TimestampFlackIdDbModel
     {
 
@@ -13,7 +28,8 @@ namespace HB.FullStack.DatabaseTests.Data.MySqls
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbModel(DbSchema_Sqlite)]
+    [CacheModel]
     public class Guid_BookModel : TimestampGuidDbModel
     {
 
@@ -24,15 +40,16 @@ namespace HB.FullStack.DatabaseTests.Data.MySqls
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbModel(DbSchema_Sqlite)]
+    [CacheModel]
     public class Book : TimestampFlackIdDbModel
     {
         [DbModelProperty]
-
+        [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
         [DbModelProperty]
-
+        [CacheModelAltKey]
         public long BookID { get; set; }
 
         [DbModelProperty]
@@ -42,7 +59,8 @@ namespace HB.FullStack.DatabaseTests.Data.MySqls
         public double Price { get; set; }
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbModel(DbSchema_Sqlite)]
+    [CacheModel]
     public class BookModel_Client : TimestampFlackIdDbModel
     {
 
@@ -53,15 +71,17 @@ namespace HB.FullStack.DatabaseTests.Data.MySqls
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbModel(DbSchema_Sqlite)]
+    [CacheModel]
     public class Book_Client : TimestampFlackIdDbModel
     {
 
         [DbModelProperty]
+        [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
         [DbModelProperty]
-
+        [CacheModelAltKey]
         public long BookID { get; set; }
 
         [DbModelProperty]

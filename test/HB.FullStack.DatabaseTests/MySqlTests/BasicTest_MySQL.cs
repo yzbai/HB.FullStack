@@ -15,7 +15,7 @@ using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.DatabaseTests.Data.MySqls;
+using HB.FullStack.BaseTest.Data.MySqls;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

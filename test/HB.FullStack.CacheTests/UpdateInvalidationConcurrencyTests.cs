@@ -107,19 +107,24 @@ namespace HB.FullStack.CacheTests
         [DataRow(null, null)]
         public async Task Timestamp_Update_Invalidation_Concurrency_TestAsync(int? absoluteSecondsRelativeToNow, int? slidingSeconds)
         {
+            //Prepare Data
+            DatabaseMocker dbMocker = new DatabaseMocker();
+            VersionData versionData = new VersionData();
+            dbMocker.Add(versionData);
+
             DistributedCacheEntryOptions entryOptions = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = absoluteSecondsRelativeToNow == null ? null : TimeSpan.FromSeconds(absoluteSecondsRelativeToNow.Value),
                 SlidingExpiration = slidingSeconds == null ? null : TimeSpan.FromSeconds(slidingSeconds.Value)
             };
 
-            DatabaseMocker databaseMocker = new DatabaseMocker(SecurityUtil.CreateUniqueToken());
+            //DatabaseMocker databaseMocker = new DatabaseMocker(SecurityUtil.CreateUniqueToken());
 
             //线程1从数据库获取最新数据 版本为1
-            Task task1 = RetrieveDbAndUpdateCacheAsync(entryOptions, databaseMocker);
+            Task task1 = RetrieveDbAndUpdateCacheAsync(entryOptions, dbMocker);
 
             //线程2启动更新了数据库， 数据版本变为 2. Invalidate Cache中的数据
-            Task task2 = UpdateDbAndInvalidateCacheAsync(databaseMocker, entryOptions);
+            Task task2 = UpdateDbAndInvalidateCacheAsync(dbMocker, entryOptions);
 
             //线程1这时才去更新Cache， 可能会将版本又变为1
 
@@ -127,22 +132,23 @@ namespace HB.FullStack.CacheTests
 
         }
 
-        private static async Task<VersionData> RetrieveDbAndUpdateCacheAsync(DistributedCacheEntryOptions entryOptions, DatabaseMocker databaseMocker)
+        private static async Task<VersionData> RetrieveDbAndUpdateCacheAsync(DistributedCacheEntryOptions entryOptions, DatabaseMocker dbMocker)
         {
             //模拟Retrieve data
-            VersionData versionData = await databaseMocker.RetrieveAsync().ConfigureAwait(false);
-            bool rt = await Cache.SetAsync(versionData.Guid, versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
+            VersionData versionData = await dbMocker.RetrieveAsync();
+
+            bool rt = await Cache.SetAsync(versionData.Id.ToString(), versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
             Assert.IsTrue(rt);
 
             //先update
-            await databaseMocker.UpdateAsync(versionData).ConfigureAwait(false);
+            await dbMocker.UpdateAsync(versionData).ConfigureAwait(false);
 
-            //模拟发生其他事情
+            //模拟发生其他事情,这个时候Task去修改了数据库，并且更新了Cache
             await Task.Delay(7000);
 
             //Update Cache
             //Cache.SetAsync<VersionData>()
-            bool rt2 = await Cache.SetAsync(versionData.Guid, versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
+            bool rt2 = await Cache.SetAsync(versionData.Id.ToString(), versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
 
             Assert.IsFalse(rt2);
 
@@ -154,16 +160,44 @@ namespace HB.FullStack.CacheTests
             //模拟Update Database
             VersionData versionData = await databaseMocker.RetrieveAsync().ConfigureAwait(false);
             await Task.Delay(500);
-            bool rt = await Cache.SetAsync(versionData.Guid, versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
+            bool rt = await Cache.SetAsync(versionData.Id.ToString(), versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
             Assert.IsFalse(rt);//因为RetrieveDbAndUpdateCacheAsync中，已经添加了，重复的timestamp导致添加不成功
 
             //模拟发生其他事情
             await Task.Delay(1000);
 
-            //后update
+            //后update. Task1 这时还在Delay中
             await databaseMocker.UpdateAsync(versionData).ConfigureAwait(false);
-            bool rt2 = await Cache.SetAsync(versionData.Guid, versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
+            bool rt2 = await Cache.SetAsync(versionData.Id.ToString(), versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
             Assert.IsTrue(rt2);
         }
+
+
+    }
+
+    public class DatabaseMocker
+    {
+        private Guid? _id;
+        private long? _timestamp;
+
+        public void Add(VersionData versionData)
+        {
+            _id = versionData.Id;
+            _timestamp = versionData.Timestamp;
+        }
+
+        public async Task<VersionData> RetrieveAsync()
+        {
+            await Task.Delay(10);
+            return new VersionData { Id = _id!.Value, Timestamp = _timestamp!.Value };
+        }
+
+        public async Task UpdateAsync(VersionData versionData)
+        {
+            await Task.Delay(20);
+            versionData.Timestamp = TimeUtil.Timestamp;
+        }
+
+        
     }
 }

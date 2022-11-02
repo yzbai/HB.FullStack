@@ -2,16 +2,16 @@
 
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.DatabaseTests.Data.MySqls
+namespace HB.FullStack.BaseTest.Data.Sqlites
 {
-    [DbModel(DbSchema_Mysql)]
+    [DbModel(DbSchema_Sqlite)]
     public class User : TimestampGuidDbModel
     {
         public string Name { get; set; } = null!;
 
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbModel(DbSchema_Sqlite)]
     public class UserProfile : TimestampGuidDbModel
     {
         [ForeignKey(typeof(User), true)]

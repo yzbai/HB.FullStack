@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
+using HB.FullStack.BaseTest.Data.Sqlites;
 using HB.FullStack.Cache;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;

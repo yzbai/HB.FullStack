@@ -2,7 +2,7 @@
 
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.DatabaseTests.Data.Sqlites
+namespace HB.FullStack.BaseTest.Data.Sqlites
 {
 
 

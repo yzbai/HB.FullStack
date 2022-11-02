@@ -5,7 +5,7 @@ using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.DatabaseTests.Data.MySqls
+namespace HB.FullStack.BaseTest.Data.MySqls
 {
     [DbModel(DbSchema_Mysql)]
     public class PublisherModel3 : TimestampFlackIdDbModel

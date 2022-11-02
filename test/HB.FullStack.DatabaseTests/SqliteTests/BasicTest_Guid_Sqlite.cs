@@ -14,7 +14,7 @@ using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.DatabaseTests.Data.Sqlites;
+using HB.FullStack.BaseTest.Data.Sqlites;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

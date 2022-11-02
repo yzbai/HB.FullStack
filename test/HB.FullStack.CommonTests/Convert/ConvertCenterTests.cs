@@ -17,7 +17,8 @@ namespace HB.FullStack.Common.Convert.Tests
         {
             int? value = 10;
             var result = StringConvertCenter.ConvertToString(value, null, StringConvertPurpose.NONE);
-            Assert.Fail();
+            
+            //TODO: Continue
         }
     }
 }

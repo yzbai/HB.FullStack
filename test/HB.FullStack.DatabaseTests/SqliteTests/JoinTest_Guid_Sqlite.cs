@@ -1,5 +1,5 @@
 ﻿using HB.FullStack.Database;
-using HB.FullStack.DatabaseTests.Data.Sqlites;
+using HB.FullStack.BaseTest.Data.Sqlites;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

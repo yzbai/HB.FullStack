@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.DatabaseTests.Data.MySqls;
+using HB.FullStack.BaseTest.Data.MySqls;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
