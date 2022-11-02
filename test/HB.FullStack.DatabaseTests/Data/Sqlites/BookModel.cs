@@ -17,7 +17,7 @@ namespace HB.FullStack.DatabaseTests.Data.Sqlites
     }
 
     [DbModel(DbSchema_Sqlite)]
-    public class BookModel : TimestampFlackIdDbModel
+    public class Book2Model : TimestampFlackIdDbModel
     {
 
         [DbModelProperty]

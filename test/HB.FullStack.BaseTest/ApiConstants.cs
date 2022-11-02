@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.CommonTests.Data
+﻿namespace HB.FullStack.BaseTest
 {
     public static class ApiConstants
     {

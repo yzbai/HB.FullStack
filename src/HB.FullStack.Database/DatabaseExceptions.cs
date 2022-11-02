@@ -402,5 +402,16 @@ namespace HB.FullStack.Database
 
             return exception;
         }
+
+        internal static Exception SameTableNameInSameDbSchema(string? dbSchema, string? tableName)
+        {
+            DatabaseException ex = new DatabaseException(ErrorCodes.ModelDefError, nameof(SameTableNameInSameDbSchema), null, null);
+
+            ex.Data["DbSchema"] = dbSchema;
+            ex.Data["TableName"] = tableName;
+
+            //TODO: 对所有的DbName和DbKind进行清理
+            return ex;
+        }
     }
 }

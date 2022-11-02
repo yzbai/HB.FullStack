@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database.Engine;
@@ -25,9 +26,9 @@ namespace HB.FullStack.Database
         public int NewVersion { get; set; }
         public string? SqlStatement { get; set; }
 
-        public Func<IDatabaseEngine, TransactionContext, Task>? ModifyFunc { get; private set; }
+        public Func<IDatabaseEngine, IDbTransaction, Task>? ModifyFunc { get; private set; }
 
-        public Migration(string dbSchema, int oldVersion, int newVersion, string? sql = null, Func<IDatabaseEngine, TransactionContext, Task>? func = null)
+        public Migration(string dbSchema, int oldVersion, int newVersion, string? sql = null, Func<IDatabaseEngine, IDbTransaction, Task>? func = null)
         {
             if (oldVersion < 0)
             {

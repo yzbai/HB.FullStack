@@ -62,15 +62,15 @@ namespace HB.FullStack.DatabaseTests.Data.Sqlites
             return books;
         }
 
-        public static IList<BookModel> GetBooks(int? count = null)
+        public static IList<Book2Model> GetBooks(int? count = null)
         {
-            List<BookModel> books = new List<BookModel>();
+            List<Book2Model> books = new List<Book2Model>();
 
             int length = count == null ? 50 : count.Value;
 
             for (int i = 0; i < length; ++i)
             {
-                books.Add(new BookModel
+                books.Add(new Book2Model
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),

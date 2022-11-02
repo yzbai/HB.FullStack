@@ -36,6 +36,8 @@ namespace HB.FullStack.Database.DbModels
 
             ConstructDbModelDefs(allModelTypes, dbModelSettings);
 
+            CheckDbModelDefs();
+
             IDictionary<Type, (DbModelSetting, DbSetting)> RangeDbModelSettings(IEnumerable<Type> allModelTypes)
             {
                 IDictionary<Type, (DbModelSetting, DbSetting)> resusltSettings = new Dictionary<Type, (DbModelSetting, DbSetting)>();
@@ -67,7 +69,7 @@ namespace HB.FullStack.Database.DbModels
                     {
                         //resultSetting.DbName = optionSetting.DbName ?? resultSetting.DbName;
                         //resultSetting.DbKind = optionSetting.DbKind ?? resultSetting.DbKind;
-                        resultSetting.DbSchema = optionSetting.DbSchema?? resultSetting.DbSchema;
+                        resultSetting.DbSchema = optionSetting.DbSchema ?? resultSetting.DbSchema;
                         resultSetting.TableName = optionSetting.TableName ?? resultSetting.TableName;
                         resultSetting.ReadOnly = optionSetting.ReadOnly ?? resultSetting.ReadOnly;
                     }
@@ -228,6 +230,24 @@ namespace HB.FullStack.Database.DbModels
                 }
 
                 return propertyDef;
+            }
+
+            void CheckDbModelDefs()
+            {
+                //Same table name under same dbschema
+                HashSet<string> hashSet = new HashSet<string>();
+
+                foreach (var modelDef in _dbModelDefs.Values)
+                {
+                    string key = $"{modelDef.DbSchema} + {modelDef.TableName}";
+
+                    if (hashSet.Contains(key))
+                    {
+                        throw DatabaseExceptions.SameTableNameInSameDbSchema(modelDef.DbSchema, modelDef.TableName);
+                    }
+
+                    hashSet.Add(key);
+                }
             }
         }
 

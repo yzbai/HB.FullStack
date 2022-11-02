@@ -5,7 +5,7 @@ using HB.FullStack.Common.Convert.Converters;
 
 namespace HB.FullStack.Common.Convert
 {
-    public static class ConvertCenter
+    public static class StringConvertCenter
     {
 
         private static readonly Dictionary<Type, IStringConverter?> _stringConverters = new Dictionary<Type, IStringConverter?>
@@ -35,7 +35,13 @@ namespace HB.FullStack.Common.Convert
 
             if (!_stringConverters.TryGetValue(valueType, out IStringConverter? stringConverter))
             {
-                throw new NotImplementedException($"不支持这种Type的ConvertToString. Type:{valueType.FullName}");
+                //TODO: 考虑支持TypeConverter converter = TypeDescriptor.GetConverter(type);
+
+                //TODO: 考虑直接返回ToString，如果没有converter的话
+
+                //throw new NotImplementedException($"不支持这种Type的ConvertToString. Type:{valueType.FullName}");
+
+                return value?.ToString();
             }
 
             return stringConverter!.ConvertToString(value, purpose);
@@ -45,5 +51,7 @@ namespace HB.FullStack.Common.Convert
         {
             _stringConverters[type] = stringConverter;
         }
+
+        
     }
 }

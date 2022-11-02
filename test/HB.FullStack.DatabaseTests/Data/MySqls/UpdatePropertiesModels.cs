@@ -12,12 +12,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.DatabaseTests.Data.MySqls
 {
-    [DbModel(DbSchema_Mysql)]
-    public partial class InnerModel : ObservableObject
-    {
-        [ObservableProperty]
-        private string? _innerName;
-    }
+    public record InnerModel(string? InnerName);
 
     [DbModel(DbSchema_Mysql)]
     [PropertyTrackableObject]

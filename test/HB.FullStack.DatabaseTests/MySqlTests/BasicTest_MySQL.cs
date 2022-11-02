@@ -366,7 +366,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var books = Mocker.GetBooks(500);
 
-            var trans = await Trans.BeginTransactionAsync<BookModel>().ConfigureAwait(false);
+            var trans = await Trans.BeginTransactionAsync<Book2Model>().ConfigureAwait(false);
 
             try
             {
@@ -393,19 +393,19 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 await mySqlConnection.OpenAsync().ConfigureAwait(false);
 
-                using MySqlCommand command0 = new MySqlCommand("select * from tb_bookmodel limit 10000", mySqlConnection);
+                using MySqlCommand command0 = new MySqlCommand("select * from tb_Book2 limit 10000", mySqlConnection);
 
                 var reader0 = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
-                List<BookModel> list1 = new List<BookModel>();
-                List<BookModel> list2 = new List<BookModel>();
-                List<BookModel> list3 = new List<BookModel>();
+                List<Book2Model> list1 = new List<Book2Model>();
+                List<Book2Model> list2 = new List<Book2Model>();
+                List<Book2Model> list3 = new List<Book2Model>();
 
                 int len = reader0.FieldCount;
                 DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DbModelDef definition = Db.ModelDefFactory.GetDef<BookModel>()!;
+                DbModelDef definition = Db.ModelDefFactory.GetDef<Book2Model>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -416,7 +416,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 Func<IDbModelDefFactory, IDataReader, object> mapper1 = DbModelConvert.CreateDataReaderRowToModelDelegate(definition, reader0, 0, definition.FieldCount, false);
 
                 //Warning: �����Dapper��С��DateTimeOffset�Ĵ洢���ᶪʧoffset��Ȼ��ת����ʱ�򣬻���ϵ���ʱ���offset
-                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(BookModel), reader0);
+                Func<IDataReader, object> mapper2 = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Book2Model), reader0);
 
                 Stopwatch stopwatch1 = new Stopwatch();
                 Stopwatch stopwatch2 = new Stopwatch();
@@ -428,18 +428,18 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
                     object obj1 = mapper1(Db.ModelDefFactory, reader0);
 
-                    list1.Add((BookModel)obj1);
+                    list1.Add((Book2Model)obj1);
                     stopwatch1.Stop();
 
                     stopwatch2.Start();
                     object obj2 = mapper2(reader0);
 
-                    list2.Add((BookModel)obj2);
+                    list2.Add((Book2Model)obj2);
                     stopwatch2.Stop();
 
                     stopwatch3.Start();
 
-                    BookModel item = new BookModel();
+                    Book2Model item = new Book2Model();
 
                     for (int i = 0; i < len; ++i)
                     {

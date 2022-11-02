@@ -1,6 +1,4 @@
-﻿global using static HB.FullStack.CommonTests.Data.ApiConstants;
-
-using System;
+﻿using System;
 
 using HB.FullStack.Common.Api;
 

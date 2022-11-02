@@ -13,11 +13,7 @@ using HB.FullStack.Database.DbModels;
 namespace HB.FullStack.DatabaseTests.Data.Sqlites
 {
     [DbModel(DbSchema_Sqlite)]
-    public partial class InnerModel : ObservableObject
-    {
-        [ObservableProperty]
-        private string? _innerName;
-    }
+    public record InnerModel(string? InnerName);
 
     [DbModel(DbSchema_Sqlite)]
     [PropertyTrackableObject]

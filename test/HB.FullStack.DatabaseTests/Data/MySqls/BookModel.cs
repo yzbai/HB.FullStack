@@ -3,7 +3,7 @@
 namespace HB.FullStack.DatabaseTests.Data.MySqls
 {
     [DbModel(DbSchema_Mysql)]
-    public class BookModel : TimestampFlackIdDbModel
+    public class Book2Model : TimestampFlackIdDbModel
     {
 
         [DbModelProperty]

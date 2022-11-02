@@ -26,10 +26,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 {
                     Name = SecurityUtil.CreateRandomString(5),
                     Age = SecurityUtil.GetRandomInteger(0, 100),
-                    InnerModel = new InnerModel()
-                    {
-                        InnerName = SecurityUtil.CreateRandomString(10)
-                    }
+                    InnerModel = new InnerModel(SecurityUtil.CreateRandomString(10))
                 };
             }
 
@@ -39,10 +36,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 {
                     Name = SecurityUtil.CreateRandomString(5),
                     Age = SecurityUtil.GetRandomInteger(0, 100),
-                    InnerModel = new InnerModel()
-                    {
-                        InnerName = SecurityUtil.CreateRandomString(10)
-                    }
+                    InnerModel = new InnerModel(SecurityUtil.CreateRandomString(10))
                 };
             }
 
@@ -263,7 +257,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             model.Name = "ChangedName";
             model.Age = 999;
-            model.InnerModel.InnerName = "ChangedName_InnerName";
+            model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
             ChangedPack cp = model.GetChangedPack(model.Id);
 
@@ -284,7 +278,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             model.Name = "ChangedName";
             model.Age = 999;
-            model.InnerModel.InnerName = "ChangedName_InnerName";
+            model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
             model.Timestamp = TimeUtil.Timestamp;
 
             ChangedPack cp = model.GetChangedPack(model.Id);
@@ -314,7 +308,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                     model.Name = "ChangedName";
                     model.Age = 999;
-                    model.InnerModel.InnerName = "ChangedName_InnerName";
+                    model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
                     cps.Add(model.GetChangedPack(model.Id));
                 }
@@ -350,7 +344,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                     model.Name = "ChangedName";
                     model.Age = 999;
-                    model.InnerModel.InnerName = "ChangedName_InnerName";
+                    model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
                     model.Timestamp = TimeUtil.Timestamp;
 
                     cps.Add(model.GetChangedPack(model.Id));

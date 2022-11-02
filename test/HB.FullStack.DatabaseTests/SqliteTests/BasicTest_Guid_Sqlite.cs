@@ -108,8 +108,8 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             long timestamp = TimeUtil.Timestamp;
             string sql = $@"
-update tb_guid_bookmodel set LastUser='TTTgdTTTEEST' where Id = '{book.Id}' and Deleted = 0 and Timestamp={timestamp};
-select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
+update tb_guid_book set LastUser='TTTgdTTTEEST' where Id = '{book.Id}' and Deleted = 0 and Timestamp={timestamp};
+select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
 ";
 
             var engine = DbManager.GetDatabaseEngine(DbSchema_Sqlite);
@@ -447,7 +447,7 @@ select count(1) from tb_guid_bookmodel where Id = '{book.Id}' and Deleted = 0;
 
             try
             {
-                //await Db.AddAsync<BookModel>(books[0], "", trans);
+                //await Db.AddAsync<Book2Model>(books[0], "", trans);
 
                 await Db.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
                 await Trans.CommitAsync(trans).ConfigureAwait(false);

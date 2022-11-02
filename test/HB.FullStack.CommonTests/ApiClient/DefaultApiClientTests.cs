@@ -1,9 +1,11 @@
-﻿using System;
+﻿global using static HB.FullStack.BaseTest.ApiConstants;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
+using HB.FullStack.BaseTest;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Test;
 using HB.FullStack.CommonTests.Data;
@@ -13,7 +15,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace HB.FullStack.CommonTests.ApiClient
 {
     [TestClass()]
-    public class DefaultApiClientTests : ApiTestBaseClass
+    public class DefaultApiClientTests : BaseTestClass
     {
         [TestMethod()]
         public void GetStreamAsyncTest()

@@ -10,6 +10,20 @@ namespace System
 {
     public static class ReflectionUtil
     {
+        private static readonly Type _isExternalInitType = typeof(System.Runtime.CompilerServices.IsExternalInit);
+
+        public static bool IsInitOnlyOrNoSetMethod(this PropertyInfo propertyInfo)
+        {
+            MethodInfo? setMethod = propertyInfo.SetMethod;
+
+            if (setMethod == null)
+            {
+                return true;
+            }
+
+            return setMethod.ReturnParameter.GetRequiredCustomModifiers().Contains(_isExternalInitType);
+        }
+
         public static bool IsValueTypeOrString(Type? propertyType)
         {
             return propertyType != null && (propertyType.IsValueType || propertyType == typeof(string));

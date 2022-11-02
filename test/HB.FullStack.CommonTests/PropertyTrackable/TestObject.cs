@@ -1,4 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+
+using CommunityToolkit.Mvvm.ComponentModel;
 
 using HB.FullStack.Common.PropertyTrackable;
 
@@ -10,14 +15,33 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TrackProperty]
         private string? _name;
 
-        [TrackProperty]
-        private ObservableCollection2<string>? _testCollection;
+        //[TrackProperty]
+        //private ObservableCollection2<string>? _testCollection;
+
+        //[TrackProperty]
+        //public InnerTestObject? _innerCls;
 
         [TrackProperty]
-        public InnerTestObject? _innerCls;
+        public InnerTestRecord? _innerRecord;
 
         [TrackProperty]
         [AddtionalProperty]
         private string _forwordAttributeName = "This is a Addtional";
+
+        [TrackProperty]
+        private ImmutableList<string>? _immutables;
+
+        [TrackProperty]
+        private ImmutableArray<string>? _immutables2;
+
+        //[TrackProperty]
+        //private InnerModel? _innerModel;
+
+    }
+
+    public partial class InnerModel : ObservableObject
+    {
+        [ObservableProperty]
+        private string? _innerName;
     }
 }

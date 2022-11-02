@@ -63,7 +63,7 @@ namespace HB.FullStack.Common.Api
             //    throw CommonExceptions.ApiResourceError("不存在这样的属性", null, new { ResName = request.ResName, PropertyName = propertyName });
             //}
 
-            string? propertyValueString = ConvertCenter.ConvertToString(propertyValue, null, StringConvertPurpose.HTTP_QUERY);
+            string? propertyValueString = StringConvertCenter.ConvertToString(propertyValue, null, StringConvertPurpose.HTTP_QUERY);
 
             request.WherePropertyNames.Add(propertyName);
             request.WherePropertyValues.Add(propertyValueString);

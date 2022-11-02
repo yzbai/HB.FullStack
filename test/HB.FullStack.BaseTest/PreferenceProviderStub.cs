@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.CommonTests.ApiClient
+namespace HB.FullStack.BaseTest
 {
     public class PreferenceProviderStub : IPreferenceProvider
     {

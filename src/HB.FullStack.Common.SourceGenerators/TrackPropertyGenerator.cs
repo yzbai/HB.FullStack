@@ -29,12 +29,12 @@ public sealed partial class TrackPropertyGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
 
-        //#if DEBUG
-        //        if (!Debugger.IsAttached)
-        //        {
-        //            Debugger.Launch();
-        //        }
-        //#endif
+//#if DEBUG
+//        if (!Debugger.IsAttached)
+//        {
+//            Debugger.Launch();
+//        }
+//#endif
 
         // Gather info for all annotated fields
         IncrementalValuesProvider<(HierarchyInfo Hierarchy, Result<TrackPropertyInfo?> Info)> propertyInfoWithErrors =

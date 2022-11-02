@@ -17,11 +17,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
             var lst = Mocker.GetCExtModels(1);
             CExtModel model = lst[0];
 
-            await Db.AddOrUpdateByIdAsync(model, null);
+            await Db.AddOrUpdateByIdAsync(model, "");
 
             //Assert.AreEqual(model.Version, 0);
 
-            await Db.AddOrUpdateByIdAsync(model, null);
+            await Db.AddOrUpdateByIdAsync(model, "");
 
             //Assert.AreEqual(model.Version, 1);
         }

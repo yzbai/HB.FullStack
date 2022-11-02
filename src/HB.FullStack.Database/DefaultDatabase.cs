@@ -122,6 +122,11 @@ namespace HB.FullStack.Database
 
         private void TruncateLastUser(ref string lastUser)
         {
+            if(lastUser == null)
+            {
+                throw new ArgumentNullException(lastUser);    
+            }
+
             if (lastUser.Length > DefaultLengthConventions.MAX_LAST_USER_LENGTH)
             {
                 _logger.LogWarning("LastUser 截断. {LastUser}", lastUser);

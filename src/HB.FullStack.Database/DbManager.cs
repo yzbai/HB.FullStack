@@ -18,6 +18,8 @@ namespace HB.FullStack.Database
 {
     //TODO: 增加数据库坏掉，自动切换, 比如屏蔽某个Slave，或者master切换到slave
     //TODO: 记录Settings到tb_sys_info表中，自动加载
+    //TODO: 处理slave库的brandNewCreate，以及Migration
+    
     internal class DbManager : IDbManager
     {
         class DbManageUnit
@@ -36,19 +38,17 @@ namespace HB.FullStack.Database
 
         private readonly ILogger<DbManager> _logger;
         private readonly IEnumerable<IDatabaseEngine> _databaseEngines;
-        private readonly ITransaction _transaction;
         private readonly IDbCommandBuilder _commandBuilder;
         private readonly IDbModelDefFactory _defFactory;
         private readonly IDatabaseEngine? _mysqlEngine;
         private readonly IDatabaseEngine? _sqliteEngine;
         private readonly Dictionary<DbSchema, DbManageUnit> _dbManageUnits = new Dictionary<string, DbManageUnit>();
 
-        public DbManager(ILogger<DbManager> logger, IOptions<DatabaseOptions> options, IEnumerable<IDatabaseEngine> databaseEngines, ITransaction transaction, IDbCommandBuilder commandBuilder, IDbModelDefFactory defFactory)
+        public DbManager(ILogger<DbManager> logger, IOptions<DatabaseOptions> options, IEnumerable<IDatabaseEngine> databaseEngines, IDbCommandBuilder commandBuilder, IDbModelDefFactory defFactory)
         {
             DatabaseOptions _options = options.Value;
             _logger = logger;
             _databaseEngines = databaseEngines;
-            _transaction = transaction;
             _commandBuilder = commandBuilder;
             _defFactory = defFactory;
 
@@ -184,12 +184,17 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync(unit.Setting.DbSchema, System.Data.IsolationLevel.Serializable).ConfigureAwait(false);
             DbSetting dbSetting = unit.Setting;
+
+            var engine = GetDatabaseEngine(dbSetting.EngineType);
+            var connectionString = GetConnectionString(dbSetting.DbSchema, true);
+
+            var trans = await engine.BeginTransactionAsync(connectionString, System.Data.IsolationLevel.Serializable).ConfigureAwait(false);
 
             try
             {
-                SystemInfo? sys = await GetSystemInfoAsync(dbSetting, transactionContext.Transaction).ConfigureAwait(false);
+                //TODO: 这里没有对slave库进行操作
+                SystemInfo? sys = await GetSystemInfoAsync(dbSetting, trans).ConfigureAwait(false);
 
                 //表明是新数据库
                 if (sys == null)
@@ -198,34 +203,34 @@ namespace HB.FullStack.Database
 
                     if (initMigration == null && dbSetting.Version != 1)
                     {
-                        await transactionContext.RollbackAsync().ConfigureAwait(false);
+                        trans.Rollback();
                         throw DatabaseExceptions.TableCreateError(dbSetting.Version, dbSetting.DbSchema,
                             $"要从头创建Tables，且Version不从1开始，那么必须提供 从 Version :{0} 到 Version：{dbSetting.Version} 的Migration.");
                     }
 
-                    await CreateTablesByDbSchemaAsync(dbSetting, transactionContext).ConfigureAwait(false);
+                    await CreateTablesByDbSchemaAsync(dbSetting, trans).ConfigureAwait(false);
 
-                    await SetSystemVersionAsync(dbSetting.Version, dbSetting, transactionContext.Transaction).ConfigureAwait(false);
+                    await SetSystemVersionAsync(dbSetting.Version, dbSetting, trans).ConfigureAwait(false);
 
                     //初始化数据
                     if (initMigration != null)
                     {
-                        await ApplyMigration(dbSetting, transactionContext, initMigration).ConfigureAwait(false);
+                        await ApplyMigration(dbSetting, trans, initMigration).ConfigureAwait(false);
                     }
 
                     _logger.LogInformation("自动创建了{DbSchema}的数据库表, Version:{Version}", dbSetting.DbSchema, dbSetting.Version);
                 }
 
-                await transactionContext.CommitAsync().ConfigureAwait(false);
+                trans.Commit();
             }
             catch (DatabaseException)
             {
-                await transactionContext.RollbackAsync().ConfigureAwait(false);
+                trans.Rollback();
                 throw;
             }
             catch (Exception ex)
             {
-                await transactionContext.RollbackAsync().ConfigureAwait(false);
+                trans.Rollback();
 
                 throw DatabaseExceptions.TableCreateError(dbSetting.Version, dbSetting.DbSchema, "Unkown", ex);
             }
@@ -246,11 +251,15 @@ namespace HB.FullStack.Database
             DbSetting dbSetting = unit.Setting;
             bool haveExecutedMigration = false;
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync(dbSetting.DbSchema, System.Data.IsolationLevel.Serializable).ConfigureAwait(false);
+            var engine = GetDatabaseEngine(dbSetting.EngineType);
+            ConnectionString connectionString = GetConnectionString(dbSetting.DbSchema, true);
+
+            //TODO: 这里没有对slave库进行操作
+            IDbTransaction trans = await engine.BeginTransactionAsync(connectionString, System.Data.IsolationLevel.Serializable);
 
             try
             {
-                SystemInfo? sys = await GetSystemInfoAsync(dbSetting, transactionContext.Transaction).ConfigureAwait(false);
+                SystemInfo? sys = await GetSystemInfoAsync(dbSetting, trans).ConfigureAwait(false);
 
                 if (sys!.Version < dbSetting.Version)
                 {
@@ -268,33 +277,33 @@ namespace HB.FullStack.Database
 
                     foreach (Migration migration in curOrderedMigrations)
                     {
-                        await ApplyMigration(dbSetting, transactionContext, migration).ConfigureAwait(false);
+                        await ApplyMigration(dbSetting, trans, migration).ConfigureAwait(false);
                         haveExecutedMigration = true;
                     }
 
-                    await SetSystemVersionAsync(dbSetting.Version, dbSetting, transactionContext.Transaction).ConfigureAwait(false);
+                    await SetSystemVersionAsync(dbSetting.Version, dbSetting, trans).ConfigureAwait(false);
 
                     _logger.LogInformation("{DbSchema} Migarate Finished. From {OldVersion} to {NewVersion}", dbSetting.DbSchema, sys.Version, dbSetting.Version);
                 }
 
-                await transactionContext.CommitAsync().ConfigureAwait(false);
+                trans.Commit();
 
                 return haveExecutedMigration;
             }
             catch (DatabaseException)
             {
-                await transactionContext.RollbackAsync().ConfigureAwait(false);
+                trans.Rollback();
                 throw;
             }
             catch (Exception ex)
             {
-                await transactionContext.RollbackAsync().ConfigureAwait(false);
+                trans.Rollback();
 
                 throw DatabaseExceptions.MigrateError(dbSetting.DbSchema, "未知Migration错误", ex);
             }
         }
 
-        private async Task ApplyMigration(DbSetting dbSetting, TransactionContext transactionContext, Migration migration)
+        private async Task ApplyMigration(DbSetting dbSetting, IDbTransaction trans, Migration migration)
         {
             var engine = GetDatabaseEngine(dbSetting.EngineType);
 
@@ -302,12 +311,12 @@ namespace HB.FullStack.Database
             {
                 EngineCommand command = new EngineCommand(migration.SqlStatement);
 
-                await engine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, command).ConfigureAwait(false);
+                await engine.ExecuteCommandNonQueryAsync(trans, command).ConfigureAwait(false);
             }
 
             if (migration.ModifyFunc != null)
             {
-                await migration.ModifyFunc(engine, transactionContext).ConfigureAwait(false);
+                await migration.ModifyFunc(engine, trans).ConfigureAwait(false);
             }
 
             _logger.LogInformation("数据库Migration, {DbShema}, from {OldVersion}, to {NewVersion}, {Sql}",
@@ -390,7 +399,7 @@ namespace HB.FullStack.Database
             return System.Convert.ToBoolean(result, Globals.Culture);
         }
 
-        private async Task<int> CreateTableAsync(DbModelDef def, TransactionContext transContext, bool addDropStatement, int varcharDefaultLength)
+        private async Task<int> CreateTableAsync(DbModelDef def, IDbTransaction trans, bool addDropStatement, int varcharDefaultLength)
         {
             var command = _commandBuilder.CreateTableCreateCommand(def, addDropStatement, varcharDefaultLength);
 
@@ -398,16 +407,16 @@ namespace HB.FullStack.Database
 
             _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
 
-            return await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
+            return await engine.ExecuteCommandNonQueryAsync(trans, command).ConfigureAwait(false);
         }
 
-        private async Task CreateTablesByDbSchemaAsync(DbSetting dbSetting, TransactionContext transactionContext)
+        private async Task CreateTablesByDbSchemaAsync(DbSetting dbSetting, IDbTransaction trans)
         {
             foreach (DbModelDef modelDef in _defFactory.GetAllDefsByDbSchema(dbSetting.DbSchema))
             {
                 await CreateTableAsync(
                     modelDef,
-                    transactionContext,
+                    trans,
                     dbSetting.AddDropStatementWhenCreateTable,
                     GetVarcharDefaultLength(dbSetting.DbSchema)).ConfigureAwait(false);
             }

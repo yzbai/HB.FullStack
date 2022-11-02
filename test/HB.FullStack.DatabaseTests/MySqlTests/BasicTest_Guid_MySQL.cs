@@ -204,24 +204,24 @@ namespace HB.FullStack.DatabaseTests.MySQL
         [TestMethod]
         public async Task Test_Repeate_Update_Return()
         {
-            BookModel book = Mocker.GetBooks(1).First();
+            Book2Model book = Mocker.GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
-            BookModel? book1 = await Db.ScalarAsync<BookModel>(book.Id, null);
+            Book2Model? book1 = await Db.ScalarAsync<Book2Model>(book.Id, null);
 
             var engine = DbManager.GetDatabaseEngine(DbSchema_Mysql);
 
             var connectionString = DbManager.GetConnectionString(DbSchema_Mysql, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_bookmodel set Name='Update_xxx' where Id = {book1!.Id}"));
+                new EngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1!.Id}"));
 
             int rt2 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_bookmodel set Name='Update_xxx' where Id = {book1.Id}"));
+                new EngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1.Id}"));
 
             int rt3 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_bookmodel set Name='Update_xxx' where Id = {book1.Id}"));
+                new EngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1.Id}"));
 
             Assert.AreEqual(rt, rt2, rt3);
         }
@@ -241,8 +241,8 @@ namespace HB.FullStack.DatabaseTests.MySQL
             long timestamp = TimeUtil.Timestamp;
 
             string sql = @$"
-update tb_guid_bookmodel set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0 and Timestamp={timestamp};
-select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0;
+update tb_Guid_Book set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0 and Timestamp={timestamp};
+select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0;
 ";
             var engine = DbManager.GetDatabaseEngine(DbSchema_Mysql);
 
@@ -723,7 +723,7 @@ select count(1) from tb_guid_bookmodel where Id = uuid_to_bin('08da5bcd-e2e5-9f4
             {
                 await mySqlConnection.OpenAsync().ConfigureAwait(false);
 
-                using MySqlCommand command0 = new MySqlCommand("select * from tb_guid_bookmodel limit 5000", mySqlConnection);
+                using MySqlCommand command0 = new MySqlCommand("select * from tb_Guid_Book limit 5000", mySqlConnection);
 
                 var reader = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 

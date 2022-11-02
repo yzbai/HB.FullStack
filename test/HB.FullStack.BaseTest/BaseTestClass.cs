@@ -1,6 +1,7 @@
 ﻿global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using static HB.FullStack.BaseTest.BaseTestClass;
 global using HB.FullStack.BaseTest;
+global using static HB.FullStack.BaseTest.ApiConstants;
 
 using HB.FullStack.Database;
 
@@ -21,6 +22,8 @@ using HB.FullStack.EventBus.Abstractions;
 using HB.FullStack.EventBus;
 using HB.Infrastructure.Redis.EventBus;
 using Microsoft.Extensions.Options;
+using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Common.Test;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
 
@@ -83,6 +86,14 @@ namespace HB.FullStack.BaseTest
 
         #endregion
 
+        #region Client
+
+        public static IApiClient ApiClient { get; set; } = null!;
+
+        public static IPreferenceProvider PreferenceProvider { get; set; } = null!;
+
+        #endregion
+
 
         [AssemblyInitialize]
         public static async Task BaseAssemblyInit(TestContext _)
@@ -96,11 +107,7 @@ namespace HB.FullStack.BaseTest
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
             //初始化 DbSchema_Mysql
-            string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
-
-            var mysqlEngine = DbManager.GetDatabaseEngine(DbSchema_Mysql);
-
-            await mysqlEngine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(DbSchema_Mysql, true), new EngineCommand(sql));
+            await DropSysInfoTableFirstForTest();
 
             await Db.InitializeAsync(DbSchema_Mysql, null, null, null).ConfigureAwait(false);
 
@@ -135,11 +142,29 @@ namespace HB.FullStack.BaseTest
             #endregion
 
             #region EventBus
-            
+
             EventBus = ServiceProvider.GetRequiredService<IEventBus>();
             EventSchemas = ServiceProvider.GetRequiredService<IOptions<RedisEventBusOptions>>().Value.EventBusSettings.EventSchemas;
 
             #endregion
+
+            #region Client
+
+            ApiClient = ServiceProvider.GetRequiredService<IApiClient>();
+
+            PreferenceProvider = ServiceProvider.GetRequiredService<IPreferenceProvider>();
+
+            #endregion
+
+        }
+
+        private static async Task DropSysInfoTableFirstForTest()
+        {
+            string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
+
+            var mysqlEngine = DbManager.GetDatabaseEngine(DbSchema_Mysql);
+
+            await mysqlEngine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(DbSchema_Mysql, true), new EngineCommand(sql));
         }
 
         [AssemblyCleanup]
@@ -147,7 +172,10 @@ namespace HB.FullStack.BaseTest
         {
             SqliteConnection.ClearAllPools();
 
-            File.Delete(SqliteDbFileName);
+            if (SqliteDbFileName.IsNotNullOrEmpty())
+            {
+                File.Delete(SqliteDbFileName);
+            }
 
             RedisConnection.Close();
         }
@@ -165,6 +193,11 @@ namespace HB.FullStack.BaseTest
 
             Configuration = configurationBuilder.Build();
 
+
+            DatabaseOptions dbOptions = new DatabaseOptions();
+
+            Configuration.GetSection("Database").Bind(dbOptions);
+
             IServiceCollection services = new ServiceCollection();
 
             services
@@ -180,13 +213,33 @@ namespace HB.FullStack.BaseTest
                 .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
                 .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
                 .AddMemoryLock()
-                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"));
+                .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"))
+                .AddSingleton<IPreferenceProvider, PreferenceProviderStub>()
+                .AddApiClient(options =>
+                {
+                    options.HttpClientTimeout = TimeSpan.FromSeconds(100);
+
+                    options.SiteSettings.Add(new SiteSetting
+                    {
+                        SiteName = ApiEndpointName,
+                        Version = ApiVersion,
+                        BaseUrl = new Uri($"http://localhost:{Port}/api/"),
+                        Endpoints = new List<ResEndpoint> { }
+                    });
+                }); 
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             Globals.Logger = serviceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             return serviceProvider;
+        }
+
+        public static TestHttpServer StartHttpServer(params TestRequestHandler[] handlers)
+        {
+            TestHttpServer httpServer = new TestHttpServer(Port, new List<TestRequestHandler>(handlers));
+
+            return httpServer;
         }
     }
 }

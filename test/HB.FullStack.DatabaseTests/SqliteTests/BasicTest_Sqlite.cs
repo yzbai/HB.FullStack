@@ -115,17 +115,17 @@ namespace HB.FullStack.DatabaseTests.SQLite
             var connectionString = DbManager.GetConnectionString(DbSchema_Sqlite, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_BookModel set Name='Update_xxx' where Id = '{book.Id}'"));
+                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt == 1);
 
             int rt2 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_BookModel set Name='Update_xxx' where Id = '{book.Id}'"));
+                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt2 == 1);
 
             int rt3 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_BookModel set Name='Update_xxx' where Id = '{book.Id}'"));
+                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt3 == 1);
         }
@@ -621,13 +621,13 @@ namespace HB.FullStack.DatabaseTests.SQLite
             long id = new Random().NextInt64(long.MaxValue);
             long timestamp = TimeUtil.Timestamp;
 
-            string insertCommandText = $"insert into tb_publishermodel(`Name`, `Id`, `Timestamp`) values('FSFSF', '{id}', {timestamp})";
+            string insertCommandText = $"insert into tb_publisher(`Name`, `Id`, `Timestamp`) values('FSFSF', '{id}', {timestamp})";
 
             using SqliteCommand insertCommand = new SqliteCommand(insertCommandText, conn);
 
             insertCommand.ExecuteScalar();
 
-            string commandText = $"update `tb_publishermodel` set  `Name`='{new Random().NextDouble()}', `Timestamp`={timestamp} WHERE `Id`='{id}' ;";
+            string commandText = $"update `tb_publisher` set  `Name`='{new Random().NextDouble()}', `Timestamp`={timestamp} WHERE `Id`='{id}' ;";
 
             using SqliteCommand mySqlCommand1 = new SqliteCommand(commandText, conn);
 
