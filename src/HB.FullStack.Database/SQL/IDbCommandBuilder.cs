@@ -47,7 +47,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 如果tb_sys_info不存在则创建
         /// </summary>
-        EngineCommand CreateSystemVersionSetCommand(EngineType engineType, string databaseName, int version);
+        EngineCommand CreateSystemVersionSetCommand(EngineType engineType, string dbSchema, int version);
         EngineCommand CreateTableCreateCommand(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength);
         EngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new();
 

@@ -215,19 +215,17 @@ namespace System
             return services;
         }
 
-        public static IServiceCollection AddFullStackInitialization(this IServiceCollection services, IEnumerable<DbInitializeContext>? dbInitializeContexts)
+        public static IServiceCollection AddWebApiInitialization(this IServiceCollection services, Action<InitializationContext>? initAction)
         {
             InitializationContext context = new InitializationContext();
 
-            if (dbInitializeContexts != null)
-            {
-                context.DbInitializeContexts = dbInitializeContexts;
-            }
+            initAction?.Invoke(context);
 
             services.AddSingleton(context);
             services.AddHostedService<InitializationHostedService>();
 
             return services;
         }
+
     }
 }

@@ -12,9 +12,9 @@ namespace HB.FullStack.Database
     public class DefaultTransaction : ITransaction
     {
         private readonly IDbModelDefFactory _modelDefFactory;
-        private readonly IDbManager _dbManager;
+        private readonly IDbSettingManager _dbManager;
 
-        public DefaultTransaction(IDbModelDefFactory modelDefFactory, IDbManager dbManager)
+        public DefaultTransaction(IDbModelDefFactory modelDefFactory, IDbSettingManager dbManager)
         {
             _modelDefFactory = modelDefFactory;
             _dbManager = dbManager;

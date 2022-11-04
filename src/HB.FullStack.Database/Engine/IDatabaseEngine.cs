@@ -14,21 +14,9 @@ namespace HB.FullStack.Database.Engine
     /// </summary>
     public interface IDatabaseEngine
     {
-        #region 管理功能
-
-        //DbSetting DatabaseSettings { get; }
-
         EngineType EngineType { get; }
 
-        //string FirstDefaultDatabaseName { get; }
-
-        //IEnumerable<string> DatabaseNames { get; }
-
-        #endregion 管理功能
-
-
         #region Command执行功能
-
         
         Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, EngineCommand engineCommand);
 

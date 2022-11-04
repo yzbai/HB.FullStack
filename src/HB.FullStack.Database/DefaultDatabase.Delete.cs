@@ -33,15 +33,15 @@ namespace HB.FullStack.Database
                     modelDef,
                     id,
                     lastUser,
-                    trulyDelete ?? DbManager.GetDefaultTrulyDelete(modelDef.DbSchema),
+                    trulyDelete ?? DbSettingManager.GetDefaultTrulyDelete(modelDef.DbSchema),
                     oldTimestamp,
                     newTimestamp);
 
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -115,14 +115,14 @@ namespace HB.FullStack.Database
                     oldTimestamps,
                     newTimestamps,
                     lastUser,
-                    trulyDeleted ?? DbManager.GetDefaultTrulyDelete(modelDef.DbSchema),
+                    trulyDeleted ?? DbSettingManager.GetDefaultTrulyDelete(modelDef.DbSchema),
                     transContext == null);
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -203,13 +203,13 @@ namespace HB.FullStack.Database
                     modelDef,
                     where,
                     lastUser,
-                    trulyDelete ?? DbManager.GetDefaultTrulyDelete(modelDef.DbSchema));
+                    trulyDelete ?? DbSettingManager.GetDefaultTrulyDelete(modelDef.DbSchema));
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 _ = transactionContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {

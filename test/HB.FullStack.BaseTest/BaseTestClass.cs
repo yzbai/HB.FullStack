@@ -1,6 +1,5 @@
 ﻿global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using static HB.FullStack.BaseTest.BaseTestClass;
-global using HB.FullStack.BaseTest;
 global using static HB.FullStack.BaseTest.ApiConstants;
 
 using HB.FullStack.Database;
@@ -9,10 +8,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Lock.Distributed;
@@ -26,8 +21,6 @@ using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Test;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
-
-
 
 namespace HB.FullStack.BaseTest
 {
@@ -45,7 +38,7 @@ namespace HB.FullStack.BaseTest
 
         public static IDatabase Db { get; set; } = null!;
 
-        public static IDbManager DbManager { get; set; } = null!;
+        public static IDbSettingManager DbSettingManager { get; set; } = null!;
 
         public static ITransaction Trans { get; set; } = null!;
 
@@ -103,7 +96,7 @@ namespace HB.FullStack.BaseTest
             #region Db
 
             Db = ServiceProvider.GetRequiredService<IDatabase>();
-            DbManager = ServiceProvider.GetRequiredService<IDbManager>();
+            DbSettingManager = ServiceProvider.GetRequiredService<IDbSettingManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
             //初始化 DbSchema_Mysql
@@ -162,9 +155,9 @@ namespace HB.FullStack.BaseTest
         {
             string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
 
-            var mysqlEngine = DbManager.GetDatabaseEngine(DbSchema_Mysql);
+            var mysqlEngine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            await mysqlEngine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(DbSchema_Mysql, true), new EngineCommand(sql));
+            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new EngineCommand(sql));
         }
 
         [AssemblyCleanup]

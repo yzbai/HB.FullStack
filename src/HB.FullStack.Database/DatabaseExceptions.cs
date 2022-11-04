@@ -104,33 +104,33 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception TableCreateError(int version, string? databaseName, string cause, Exception? innerException = null)
+        internal static Exception TableCreateError(int version, string? dbSchema, string cause, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(ErrorCodes.DatabaseTableCreateError, nameof(TableCreateError), innerException, null);
 
             exception.Data["DatabaseVersion"] = version;
-            exception.Data["DatabaseName"] = databaseName;
+            exception.Data["DbSchema"] = dbSchema;
             exception.Data["Cause"] = cause;
 
             return exception;
         }
 
-        internal static Exception DbSettingError(int version, string? databaseName, string cause, Exception? innerException = null)
+        internal static Exception DbSettingError(int version, string? dbSchema, string cause, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(ErrorCodes.DbSettingError, nameof(DbSettingError), innerException, null);
 
             exception.Data["DatabaseVersion"] = version;
-            exception.Data["DatabaseName"] = databaseName;
+            exception.Data["DbSchema"] = dbSchema;
             exception.Data["Cause"] = cause;
 
             return exception;
         }
 
-        internal static Exception MigrateError(string? databaseName, string cause, Exception? innerException = null)
+        internal static Exception MigrateError(string? dbSchema, string cause, Exception? innerException = null)
         {
             DatabaseException exception = new DatabaseException(ErrorCodes.MigrateError, nameof(MigrateError), innerException, null);
 
-            exception.Data["DatabaseName"] = databaseName;
+            exception.Data["DbSchema"] = dbSchema;
             exception.Data["Cause"] = cause;
 
             return exception;
@@ -393,12 +393,11 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception DbSettingError(string? dbName, string? dbKind, string cause)
+        internal static Exception DbSettingError(string? dbSchema, string cause)
         {
             DatabaseException exception = new DatabaseException(ErrorCodes.DbSettingError, cause, null, null);
 
-            exception.Data["DbKind"] = dbKind;
-            exception.Data["DbName"] = dbName;
+            exception.Data["DbSchema"] = dbSchema;
 
             return exception;
         }
@@ -410,7 +409,6 @@ namespace HB.FullStack.Database
             ex.Data["DbSchema"] = dbSchema;
             ex.Data["TableName"] = tableName;
 
-            //TODO: 对所有的DbName和DbKind进行清理
             return ex;
         }
     }

@@ -17,18 +17,15 @@ namespace HB.FullStack.Database
     /// </summary>
     public class Migration
     {
-        //public string? DbName { get; set; }
-        //public string? DbKind { get; set; }
-
         public string DbSchema { get; set; }
 
         public int OldVersion { get; set; }
         public int NewVersion { get; set; }
         public string? SqlStatement { get; set; }
 
-        public Func<IDatabaseEngine, IDbTransaction, Task>? ModifyFunc { get; private set; }
+        public Func<IDatabase, TransactionContext, Task>? ModifyFunc { get; private set; }
 
-        public Migration(string dbSchema, int oldVersion, int newVersion, string? sql = null, Func<IDatabaseEngine, IDbTransaction, Task>? func = null)
+        public Migration(string dbSchema, int oldVersion, int newVersion, string? sql = null, Func<IDatabase, TransactionContext, Task>? func = null)
         {
             if (oldVersion < 0)
             {

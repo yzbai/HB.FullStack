@@ -15,7 +15,7 @@ namespace HB.FullStack.Database
         private readonly IDictionary<string, string> _sysDict = new Dictionary<string, string>();
 
         /// <summary>
-        /// DatabaseName
+        /// DatabaseSchema
         /// </summary>
 
         [NotNull, DisallowNull]
@@ -28,7 +28,7 @@ namespace HB.FullStack.Database
                     return value;
                 }
 
-                throw DatabaseExceptions.SystemInfoError(cause: "no DatabaseName key in SystemInfoTable");
+                throw DatabaseExceptions.SystemInfoError(cause: "no DatabaseSchema key in SystemInfoTable");
             }
             private set
             {

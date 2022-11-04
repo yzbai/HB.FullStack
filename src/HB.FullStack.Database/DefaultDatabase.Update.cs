@@ -39,11 +39,11 @@ namespace HB.FullStack.Database
 
                 EngineCommand command = DbCommandBuilder.CreateUpdateCommand(modelDef, item, oldTimestamp);
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -126,11 +126,11 @@ namespace HB.FullStack.Database
 
                 var command = DbCommandBuilder.CreateBatchUpdateCommand(modelDef, items, oldTimestamps, transContext == null);
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -216,11 +216,11 @@ namespace HB.FullStack.Database
                     newTimestamp: newTimestamp ?? TimeUtil.Timestamp,
                     lastUser: lastUser);
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -280,11 +280,11 @@ namespace HB.FullStack.Database
                     newTimestamp ?? TimeUtil.Timestamp,
                     lastUser);
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 int matchedRows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false); ;
+                    : await engine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false); ;
 
                 if (matchedRows == 1)
                 {
@@ -359,11 +359,11 @@ namespace HB.FullStack.Database
                     lastUser,
                     transactionContext == null);
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 using var reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -424,11 +424,11 @@ namespace HB.FullStack.Database
                     lastUser,
                     transactionContext == null);
 
-                var engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
                 using var reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false); ;
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false); ;
 
                 int count = 0;
 

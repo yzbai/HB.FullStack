@@ -51,7 +51,7 @@ namespace HB.FullStack.Database
             whereCondition ??= Where<TWhere>();
             whereCondition.And($"{whereDef.DbTableReservedName}.{whereDef.DeletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{selectDef.DeletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{fromDef.DeletedPropertyReservedName}=0");
 
-            IDatabaseEngine engine = DbManager.GetDatabaseEngine(selectDef.EngineType);
+            IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(selectDef.EngineType);
 
             try
             {
@@ -60,7 +60,7 @@ namespace HB.FullStack.Database
 
                 using IDataReader reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(fromDef.DbSchema, false), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(fromDef.DbSchema, false), command).ConfigureAwait(false);
 
                 return reader.ToDbModels<TSelect>(ModelDefFactory, selectDef);
             }
@@ -80,12 +80,12 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
                 EngineCommand command = DbCommandBuilder.CreateRetrieveCommand(modelDef, fromCondition, whereCondition);
 
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(modelDef.DbSchema, false), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, false), command).ConfigureAwait(false);
 
                 return reader.ToDbModels<T>(ModelDefFactory, modelDef);
             }
@@ -105,12 +105,12 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(modelDef.EngineType);
+                IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
                 EngineCommand command = DbCommandBuilder.CreateCountCommand(fromCondition, whereCondition);
 
                 object? countObj = transContext != null
                     ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandScalarAsync(DbManager.GetConnectionString(modelDef.DbSchema, false), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandScalarAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, false), command).ConfigureAwait(false);
                 return System.Convert.ToInt32(countObj, Globals.Culture);
             }
             catch (Exception ex) when (ex is not DatabaseException)
@@ -274,12 +274,12 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDatabaseEngine engine = DbManager.GetDatabaseEngine(sourceModelDef.EngineType);
+                IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(sourceModelDef.EngineType);
 
                 var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition, sourceModelDef, targetModelDef);
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(sourceModelDef.DbSchema, false), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(sourceModelDef.DbSchema, false), command).ConfigureAwait(false);
 
                 return reader.ToDbModels<TSource, TTarget>(ModelDefFactory, sourceModelDef, targetModelDef);
             }
@@ -351,11 +351,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                var engine = DbManager.GetDatabaseEngine(sourceModelDef.EngineType);
+                var engine = DbSettingManager.GetDatabaseEngine(sourceModelDef.EngineType);
                 var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(DbManager.GetConnectionString(sourceModelDef.DbSchema, false), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(sourceModelDef.DbSchema, false), command).ConfigureAwait(false);
 
                 return reader.ToDbModels<TSource, TTarget1, TTarget2>(ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
             }

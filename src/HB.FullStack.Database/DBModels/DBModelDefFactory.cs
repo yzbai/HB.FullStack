@@ -57,8 +57,6 @@ namespace HB.FullStack.Database.DbModels
                     //来自Attribute
                     if (dbModelAttribute != null)
                     {
-                        //resultSetting.DbName = dbModelAttribute.DbName ?? resultSetting.DbName;
-                        //resultSetting.DbKind = dbModelAttribute.DbKind ?? resultSetting.DbKind;
                         resultSetting.DbSchema = dbModelAttribute.DbSchema ?? resultSetting.DbSchema;
                         resultSetting.TableName = dbModelAttribute.TableName ?? resultSetting.TableName;
                         resultSetting.ReadOnly = dbModelAttribute.ReadOnly ?? resultSetting.ReadOnly;
@@ -67,8 +65,6 @@ namespace HB.FullStack.Database.DbModels
                     //来自Options
                     if (optionSettings.TryGetValue(type.FullName!, out DbModelSetting? optionSetting))
                     {
-                        //resultSetting.DbName = optionSetting.DbName ?? resultSetting.DbName;
-                        //resultSetting.DbKind = optionSetting.DbKind ?? resultSetting.DbKind;
                         resultSetting.DbSchema = optionSetting.DbSchema ?? resultSetting.DbSchema;
                         resultSetting.TableName = optionSetting.TableName ?? resultSetting.TableName;
                         resultSetting.ReadOnly = optionSetting.ReadOnly ?? resultSetting.ReadOnly;
@@ -77,8 +73,6 @@ namespace HB.FullStack.Database.DbModels
                     //做最后的检查，有可能两者都没有定义, 默认使用第一个
                     if (resultSetting.DbSchema.IsNullOrEmpty())
                     {
-                        //resultSetting.DbName = _options.DbSettings[0].DbName;
-                        //resultSetting.DbKind = _options.DbSettings[0].DbKind;
                         resultSetting.DbSchema = _options.DbSettings[0].DbSchema;
                     }
 
@@ -116,8 +110,6 @@ namespace HB.FullStack.Database.DbModels
                     ModelFullName = modelType.FullName!,
                     ModelType = modelType,
 
-                    //DbName = dbModelSetting.DbName,
-                    //DbKind = dbModelSetting.DbKind,
                     DbSchema = dbModelSetting.DbSchema,
                     EngineType = dbSetting.EngineType,
 

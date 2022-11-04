@@ -12,21 +12,26 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Database
 {
-    /// <summary>
-    /// DBA
-    /// 管理数据库本身，ConnectionString，Engine，Options等等
-    /// </summary>
-    public interface IDbManager
+    public interface IDbSettingManager
     {
         #region Settings
 
+        DbSetting GetDbSetting(string dbSchema);
+
         int GetVarcharDefaultLength(DbSchema dbSchema);
+
         int GetMaxBatchNumber(DbSchema dbSchema);
+
         bool GetDefaultTrulyDelete(DbSchema dbSchema);
 
         #endregion
 
         #region ConnectionString
+
+        /// <summary>
+        /// 如果从Options中得不到ConnectionStrings，那么就接受这些设置.保证Options中的是最后的。
+        /// </summary>
+        void SetConnectionStringIfNeed(string dbSchema, string? connectionString, IList<string>? slaveConnectionStrings);
 
         ConnectionString GetConnectionString(DbSchema dbSchema, bool userMaster);
 
@@ -39,8 +44,5 @@ namespace HB.FullStack.Database
         IDatabaseEngine GetDatabaseEngine(EngineType engineType);
 
         #endregion
-
-
-        Task<bool> InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
     }
 }

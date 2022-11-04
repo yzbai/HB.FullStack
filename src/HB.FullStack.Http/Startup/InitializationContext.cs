@@ -7,7 +7,7 @@ namespace System
 {
     public class InitializationContext
     {
-        public IEnumerable<DbInitializeContext> DbInitializeContexts { get; set; } = new List<DbInitializeContext>();
+        public IList<DbInitializeContext> DbInitializeContexts { get; set; } = new List<DbInitializeContext>();
     }
 
     public class DbInitializeContext

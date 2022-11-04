@@ -37,8 +37,8 @@ namespace HB.FullStack.Database
     public class DbSetting
     {
         /// <summary>
-        /// 为了实现数据库切换，比如不同用户登录，使用不同数据库
-        /// 动态数据库
+        /// 不具体指定某一个数据，而是指定某种数据库Schema。
+        /// 具体的某一个数据库由ConnectionString来指定
         /// </summary>
         public string DbSchema { get; set; } = null!;
 
@@ -52,8 +52,9 @@ namespace HB.FullStack.Database
         /// </summary>
         public int Version { get; set; }
 
-        //TODO: 确保useAffectedRows=false
+        
         /// <summary>
+        /// 具体指定某一 个数据库
         /// 可能在初始化才确定
         /// </summary>
         public ConnectionString? ConnectionString { get; set; }
@@ -89,13 +90,6 @@ namespace HB.FullStack.Database
     {
         [DisallowNull, NotNull]
         public string ModelFullName { get; set; } = null!;
-
-        ///// <summary>
-        ///// 有DbName按DbName为准，没有按DbKind来
-        ///// </summary>
-        //public string? DbName { get; set; }
-
-        //public string? DbKind { get; set; }
 
         public DbSchema DbSchema { get; set; } = null!;
 
