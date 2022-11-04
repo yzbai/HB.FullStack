@@ -49,12 +49,12 @@ namespace HB.Infrastructure.IdGen
             }
             catch (SequenceOverflowException ex)
             {
-                GlobalSettings.Logger.LogCritical(ex, $"Id生成器不够用，每秒数量溢出，恭喜，恭喜。");
+                Globals.Logger.LogCritical(ex, $"Id生成器不够用，每秒数量溢出，恭喜，恭喜。");
                 return GetId();
             }
             catch (InvalidSystemClockException ex)
             {
-                GlobalSettings.Logger.LogCritical(ex, $"发生时间回拨");
+                Globals.Logger.LogCritical(ex, $"发生时间回拨");
                 Thread.Sleep(5);
                 return GetId();
             }

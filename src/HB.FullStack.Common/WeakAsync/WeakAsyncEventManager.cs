@@ -8,58 +8,56 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Common
 {
     /// <summary>
-    /// 加入的任务，会并发执行，不会按顺序执行
+    /// 先加入的任务先执行，但无法确保完成的先后顺序
     /// </summary>
     public class WeakAsyncEventManager
     {
         private readonly Dictionary<string, List<DelegateWrapper>> _delegateWrapperDict = new Dictionary<string, List<DelegateWrapper>>();
 
-        public void Add<TSender, TEventArgs>(AsyncEventHandler<TSender, TEventArgs> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class where TEventArgs : class
+        public void Add<TSender, TEventArgs>(Func<TSender, TEventArgs, Task> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class where TEventArgs : class
         {
             WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
-        public void Add<TSender>(AsyncEventHandler<TSender> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
+        public void Add<TSender>(Func<TSender, object, Task> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
         {
             WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
-        public void Add(AsyncEventHandler handlerDelegate, [CallerMemberName] string eventName = "")
+        public void Add(Func<object, object,Task> handlerDelegate, [CallerMemberName] string eventName = "")
         {
             WeakAsyncEventManagerExecutor.Add(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
-        public void Remove<TSender, TEventArgs>(AsyncEventHandler<TSender, TEventArgs> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class where TEventArgs : class
+        public void Remove<TSender, TEventArgs>(Func<TSender, TEventArgs, Task> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class where TEventArgs : class
         {
             WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
-        public void Remove<TSender>(AsyncEventHandler<TSender> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
+        public void Remove<TSender>(Func<TSender, object, Task> handlerDelegate, [CallerMemberName] string eventName = "") where TSender : class
         {
             WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
-        public void Remove(AsyncEventHandler handlerDelegate, [CallerMemberName] string eventName = "")
+        public void Remove(Func<object, object, Task> handlerDelegate, [CallerMemberName] string eventName = "")
         {
             WeakAsyncEventManagerExecutor.Remove(eventName, handlerDelegate.Target, handlerDelegate.Method, _delegateWrapperDict);
         }
 
-#pragma warning disable CA1030 // Use events where appropriate
         public Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs) where TSender : class where TEventArgs : class
         {
-            return WeakAsyncEventManagerExecutor.RaiseEventAsync<TSender, TEventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
+            return WeakAsyncEventManagerExecutor.RaiseEventAsync(eventName, sender, eventArgs, _delegateWrapperDict);
         }
 
-        public Task RaiseEventAsync<TSender>(string eventName, TSender sender, EventArgs eventArgs) where TSender : class
+        public Task RaiseEventAsync<TSender>(string eventName, TSender sender, object eventArgs) where TSender : class
         {
-            return WeakAsyncEventManagerExecutor.RaiseEventAsync<TSender, EventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
+            return WeakAsyncEventManagerExecutor.RaiseEventAsync(eventName, sender, eventArgs, _delegateWrapperDict);
         }
 
-        public Task RaiseEventAsync(string eventName, object sender, EventArgs eventArgs)
+        public Task RaiseEventAsync(string eventName, object sender, object eventArgs)
         {
-            return WeakAsyncEventManagerExecutor.RaiseEventAsync<object, EventArgs>(eventName, sender, eventArgs, _delegateWrapperDict);
+            return WeakAsyncEventManagerExecutor.RaiseEventAsync(eventName, sender, eventArgs, _delegateWrapperDict);
         }
-#pragma warning restore CA1030 // Use events where appropriate
     }
 
 

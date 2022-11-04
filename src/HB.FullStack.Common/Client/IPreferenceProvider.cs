@@ -19,9 +19,13 @@ namespace System
 
         DeviceInfos DeviceInfos { get; }
 
+        bool IsIntroducedYet { get; set; }
+
         bool IsLogined();
 
-        void OnTokenReceived(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken);
+        void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken);
+
+        void Logout();
 
         void OnTokenRefreshFailed();
     }

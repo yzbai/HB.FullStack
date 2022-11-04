@@ -32,7 +32,7 @@ namespace HB.FullStack.Client.Maui.Figures
                 int col = i / 3;
 
                 // Format string differently based on row
-                texts[i] = values[i].ToString(row == 2 ? "F0" : (col == 2 ? PerspectiveFormat : "F2"), GlobalSettings.Culture);
+                texts[i] = values[i].ToString(row == 2 ? "F0" : (col == 2 ? PerspectiveFormat : "F2"), Globals.Culture);
 
                 // Measure string with a '-' even if one is not present
                 bool isNegative = texts[i][0] == '-';

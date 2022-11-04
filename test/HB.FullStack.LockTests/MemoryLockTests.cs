@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.BaseTest;
 using HB.FullStack.Lock.Memory;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -62,14 +63,14 @@ namespace HB.FullStack.LockTests
                     resources,
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(60));
-            GlobalSettings.Logger?.LogInformation("Entering lock");
+            Globals.Logger?.LogInformation("Entering lock");
             if (@lock.IsAcquired)
             {
                 locksAcquired.Add(1);
             }
             await Task.Delay(4000).ConfigureAwait(false);
 
-            GlobalSettings.Logger?.LogInformation("Leaving lock");
+            Globals.Logger?.LogInformation("Leaving lock");
         }
 
         [TestMethod]
@@ -79,13 +80,13 @@ namespace HB.FullStack.LockTests
 
             using (var firstLock = MemoryLockManager.Lock("Test", resources, TimeSpan.FromSeconds(30)))
             {
-                GlobalSettings.Logger?.LogInformation("TestSequentialLocks  :  First Enter");
+                Globals.Logger?.LogInformation("TestSequentialLocks  :  First Enter");
 
                 Assert.IsTrue(firstLock.IsAcquired);
             }
 
             using var secondLock = MemoryLockManager.Lock("Test", resources, TimeSpan.FromSeconds(30));
-            GlobalSettings.Logger?.LogInformation("TestSequentialLocks  :  Second Enter");
+            Globals.Logger?.LogInformation("TestSequentialLocks  :  Second Enter");
 
             Assert.IsTrue(secondLock.IsAcquired);
         }

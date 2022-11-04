@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Database.DbModels;
+using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
@@ -19,10 +20,9 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
-
             TruncateLastUser(ref lastUser);
 
             long oldTimestamp = -1;
@@ -40,9 +40,13 @@ namespace HB.FullStack.Database
                     serverModel.LastUser = lastUser;
                 }
 
-                var command = DbCommandBuilder.CreateAddCommand(EngineType, modelDef, item);
+                IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
 
-                object? rt = await _databaseEngine.ExecuteCommandScalarAsync(transContext?.Transaction, modelDef.DatabaseName!, command, true).ConfigureAwait(false);
+                var command = DbCommandBuilder.CreateAddCommand(modelDef, item);
+
+                object? rt = transContext != null
+                    ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandScalarAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 if (modelDef.IsIdAutoIncrement)
                 {
@@ -78,27 +82,24 @@ namespace HB.FullStack.Database
             }
         }
 
+
+
         /// <summary>
         /// BatchAddAsync，反应Version变化
         /// </summary>
         public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
-            if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
-            {
-                throw DatabaseExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
-            }
-
-            ThrowIf.NotValid(items, nameof(items));
-
-            if (!items.Any())
+            if (items.IsNullOrEmpty())
             {
                 return new List<object>();
             }
 
+            ThrowIf.NotValid(items, nameof(items));
+
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
-
+            ThrowIfTooMuchItems(items, lastUser, modelDef);
             TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();
@@ -106,18 +107,18 @@ namespace HB.FullStack.Database
 
             try
             {
+                IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
+
                 //Prepare
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
                 IList<object> newIds = new List<object>();
 
-                var command = DbCommandBuilder.CreateBatchAddCommand(EngineType, modelDef, items, transContext == null);
+                var command = DbCommandBuilder.CreateBatchAddCommand(modelDef, items, transContext == null);
 
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext?.Transaction,
-                    modelDef.DatabaseName!,
-                    command,
-                    true).ConfigureAwait(false);
+                using var reader = transContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command);
 
                 if (modelDef.IsIdAutoIncrement)
                 {
@@ -130,7 +131,7 @@ namespace HB.FullStack.Database
 
                     foreach (var item in items)
                     {
-                        ((ILongId)item).Id = System.Convert.ToInt64(newIds[num++], GlobalSettings.Culture);
+                        ((ILongId)item).Id = System.Convert.ToInt64(newIds[num++], Globals.Culture);
                     }
                 }
                 else if (modelDef.IsIdGuid)
@@ -171,5 +172,12 @@ namespace HB.FullStack.Database
 
         }
 
+        private void ThrowIfTooMuchItems<TObj>(IEnumerable<TObj> items, string lastUser, DbModelDef modelDef)
+        {
+            if (DbSettingManager.GetMaxBatchNumber(modelDef.DbSchema) < items.Count())
+            {
+                throw DatabaseExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
+            }
+        }
     }
 }

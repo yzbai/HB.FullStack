@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Client.Network;
 using HB.FullStack.Client.Offline;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Api;
@@ -26,9 +25,10 @@ namespace HB.FullStack.Client
     public abstract class BaseRepo
     {
         protected IPreferenceProvider PreferenceProvider { get; }
-        protected StatusManager StatusManager { get; }
 
         protected IApiClient ApiClient { get; }
+
+        protected IStatusManager StatusManager { get; }
 
         protected string LastUser => PreferenceProvider.UserId?.ToString() ?? "NotLogined";
 
@@ -40,34 +40,6 @@ namespace HB.FullStack.Client
             }
         }
 
-        //protected bool IsInternetConnected(bool throwIfNot = true)
-        //{
-        //    bool isInternetConnected = StatusManager.IsInternet();
-
-        //    if (throwIfNot && !isInternetConnected)
-        //    {
-        //        throw ClientExceptions.NoInternet("没有联网，且不允许离线");
-        //    }
-
-        //    return isInternetConnected;
-        //}
-
-        protected void EnsureInternetConnected()
-        {
-            if (!StatusManager.IsInternet())
-            {
-                throw ClientExceptions.NoInternet("没有联网");
-            }
-        }
-
-        protected void EnsureNotSyncing()
-        {
-            if (StatusManager.NeedSyncAfterReconnected)
-            {
-                throw ClientExceptions.OperationInvalidCauseofSyncingAfterReconnected();
-            }
-        }
-
         protected static void EnsureApiNotReturnNull([ValidatedNotNull][NotNull] object? obj, string modelName)
         {
             if (obj == null)
@@ -76,18 +48,18 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, StatusManager connectivityManager)
+        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, IStatusManager statusManager)
         {
             ApiClient = apiClient;
             PreferenceProvider = userPreferenceProvider;
-            StatusManager = connectivityManager;
+            StatusManager = statusManager;
         }
     }
 
     public abstract class BaseRepo<TModel> : BaseRepo where TModel : ClientDbModel, new()
     {
         private readonly ILogger _logger;
-        private readonly IOfflineChangeManager _offlineChangeManager;
+        private readonly IOfflineManager _offlineChangeManager;
         private readonly DbModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
@@ -98,9 +70,9 @@ namespace HB.FullStack.Client
             ILogger logger,
             IDatabase database,
             IApiClient apiClient,
-            IOfflineChangeManager offlineChangeManager,
-            IPreferenceProvider userPreferenceProvider,
-            StatusManager statusManager) : base(apiClient, userPreferenceProvider, statusManager)
+            IOfflineManager offlineChangeManager,
+            IPreferenceProvider preferenceProvider,
+            IStatusManager statusManager) : base(apiClient, preferenceProvider, statusManager)
         {
             _logger = logger;
             _modelDef = database.ModelDefFactory.GetDef<TModel>()!;
@@ -147,7 +119,7 @@ namespace HB.FullStack.Client
             RepoGetMode getMode,
             IfUseLocalData<TModel>? ifUseLocalData = null)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
@@ -170,7 +142,7 @@ namespace HB.FullStack.Client
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
@@ -194,7 +166,7 @@ namespace HB.FullStack.Client
             RepoGetMode getMode,
             IfUseLocalData<TModel>? ifUseLocalData = null)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> models = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
@@ -210,7 +182,7 @@ namespace HB.FullStack.Client
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
         {
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
@@ -247,19 +219,19 @@ namespace HB.FullStack.Client
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!StatusManager.IsInternet())
+            if (StatusManager.IsNetworkDown())
             {
                 if (ClientModelDef.AllowOfflineRead)
                 {
                     _logger.LogDebug("未联网，允许离线读， 使用离线数据, Type:{Type}", typeof(TModel).Name);
 
-                    StatusManager.OnOfflineDataReaded();
+                    //StatusManager.OnOfflineDataReaded();
 
                     return localModels;
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                    throw ClientExceptions.NoInternet();
                 }
             }
 
@@ -304,33 +276,33 @@ namespace HB.FullStack.Client
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
-            EnsureNotSyncing();
+
+            //等待同步完，包括处理完冲突
+            StatusManager.WaitUntilSynced();
 
             try
             {
-                //正常
-                if (StatusManager.IsInternet())
+                if (StatusManager.IsNetworkDown())
+                {
+                    if (ClientModelDef.AllowOfflineAdd)
+                    {
+                        //Offline History
+                        await _offlineChangeManager.RecordOfflineAddAsync(models, transactionContext).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        throw ClientExceptions.NoInternet();
+                    }
+                }
+                else
                 {
                     //Remote
                     //TODO: 罗列处理可能的异常：1， 存在重复；
                     await AddToRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                }
 
-                    //Local
-                    await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
-                }
-                //离线写
-                else if (ClientModelDef.AllowOfflineAdd)
-                {
-                    //Offline History
-                    await _offlineChangeManager.RecordOfflineAddAsync(models, transactionContext).ConfigureAwait(false);
-
-                    //Local
-                    await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
-                }
-                else
-                {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
-                }
+                //Local
+                await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
             {
@@ -347,23 +319,26 @@ namespace HB.FullStack.Client
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             List<ChangedPack> changedPacks = models.Select(m => m.GetChangedPack()).ToList();
 
             try
             {
-                if (StatusManager.IsInternet())
+                if (StatusManager.IsNetworkDown())
                 {
-                    await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
-                }
-                else if (ClientModelDef.AllowOfflineUpdate)
-                {
-                    await _offlineChangeManager.RecordOfflineUpdateAsync<TModel>(changedPacks, transactionContext).ConfigureAwait(false);
+                    if (ClientModelDef.AllowOfflineUpdate)
+                    {
+                        await _offlineChangeManager.RecordOfflineUpdateAsync<TModel>(changedPacks, transactionContext).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        throw ClientExceptions.NoInternet();
+                    }
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                    await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
                 }
 
                 await Database.BatchUpdatePropertiesAsync<TModel>(changedPacks, LastUser, transactionContext).ConfigureAwait(false);
@@ -378,26 +353,29 @@ namespace HB.FullStack.Client
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
-            EnsureNotSyncing();
+            StatusManager.WaitUntilSynced();
 
             try
             {
-                if (StatusManager.IsInternet())
+                if (StatusManager.IsNetworkDown())
                 {
-                    await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
+                    if (ClientModelDef.AllowOfflineDelete)
+                    {
+                        await _offlineChangeManager.RecordOfflineDeleteAsync(models, transactionContext).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        throw ClientExceptions.NoInternet();
+                    }
 
-                    await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
-                }
-                else if (ClientModelDef.AllowOfflineDelete)
-                {
-                    await _offlineChangeManager.RecordOfflineDeleteAsync(models, transactionContext).ConfigureAwait(false);
-
-                    await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
                 }
                 else
                 {
-                    throw ClientExceptions.NoInternet("没有联网，且不允许离线");
+                    await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
+
                 }
+
+                await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {

@@ -515,7 +515,7 @@ namespace HB.FullStack.Identity
         private static bool PassowrdCheck(User user, string password)
         {
             string passwordHash = SecurityUtil.EncryptPwdWithSalt(password, user.SecurityStamp);
-            return passwordHash.Equals(user.PasswordHash, GlobalSettings.Comparison);
+            return passwordHash.Equals(user.PasswordHash, Globals.Comparison);
         }
 
         /// <summary>

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using HB.FullStack.Client.Network;
 using HB.FullStack.Client.Offline;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
@@ -34,7 +32,7 @@ namespace HB.FullStack.Client.Maui.File
             IDatabase database,
             IApiClient apiClient,
             IPreferenceProvider preferenceProvider,
-            IOfflineChangeManager historyManager,
+            IOfflineManager historyManager,
             StatusManager connectivityManager)
             : base(logger, database, apiClient, historyManager, preferenceProvider, connectivityManager)
         {
@@ -100,7 +98,7 @@ namespace HB.FullStack.Client.Maui.File
 
             if (permission.IsUserPrivate)
             {
-                placeHolderValue = UserPreferences.UserId?.ToString();
+                placeHolderValue = PreferenceProvider.UserId?.ToString();
             }
 
             if (permission.ContainsPlaceHoder && placeHolderValue.IsNullOrEmpty())

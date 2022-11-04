@@ -64,7 +64,7 @@ namespace HB.FullStack.Client.Maui.Controls
 
                     Label label = new Label
                     {
-                        Text = day.ToString(GlobalSettings.Culture),
+                        Text = day.ToString(Globals.Culture),
                         Margin = new Thickness(0),
                         Padding = new Thickness(0),
                         VerticalOptions = new LayoutOptions(LayoutAlignment.Center, false),

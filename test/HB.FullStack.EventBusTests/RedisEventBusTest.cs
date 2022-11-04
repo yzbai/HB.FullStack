@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack;
+using HB.FullStack.BaseTest;
 using HB.FullStack.EventBus.Abstractions;
 
 using Microsoft.Extensions.DependencyInjection;

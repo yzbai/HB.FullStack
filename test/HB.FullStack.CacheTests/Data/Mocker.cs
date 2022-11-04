@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using HB.FullStack.BaseTest.Data.Sqlites;
+
 namespace HB.FullStack.CacheTests
 {
     public static class Mocker
@@ -38,24 +40,24 @@ namespace HB.FullStack.CacheTests
             return books;
         }
 
-        public static IList<BookModel> GetBooks(int? count = null)
-        {
-            List<BookModel> books = new List<BookModel>();
+        //public static IList<BookModel> GetBooks(int? count = null)
+        //{
+        //    List<BookModel> books = new List<BookModel>();
 
-            int length = count == null ? 50 : count.Value;
+        //    int length = count == null ? 50 : count.Value;
 
-            for (int i = 0; i < length; ++i)
-            {
-                books.Add(new BookModel
-                {
-                    //Guid = SecurityUtil.CreateUniqueToken(),
-                    Name = "Book" + i.ToString(),
-                    Price = _random.NextDouble()
-                });
-            }
+        //    for (int i = 0; i < length; ++i)
+        //    {
+        //        books.Add(new BookModel
+        //        {
+        //            //Guid = SecurityUtil.CreateUniqueToken(),
+        //            Name = "Book" + i.ToString(),
+        //            Price = _random.NextDouble()
+        //        });
+        //    }
 
-            return books;
-        }
+        //    return books;
+        //}
 
         public static IList<Guid_BookModel> Guid_GetBooks(int? count = null)
         {

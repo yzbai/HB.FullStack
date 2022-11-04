@@ -20,23 +20,18 @@ using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
+    /// <summary>
+    /// 对外提供数据库操作
+    /// </summary>
     public interface IDatabase : IDatabaseWriter, IDatabaseReader
     {
         /// <summary>
+        /// 有几个DbSchema，就初始化几次
         /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
-        Task<bool> InitializeAsync(IEnumerable<Migration>? migrations = null);
+        /// 
+        Task<bool> InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
 
-        EngineType EngineType { get; }
-
-        IEnumerable<string> DatabaseNames { get; }
-
-        public int VarcharDefaultLength { get; }
-
-        internal IDatabaseEngine DatabaseEngine { get; }
-
-        internal IDbModelDefFactory ModelDefFactory { get; }
-
-        internal IDbCommandBuilder DbCommandBuilder { get; }
+        IDbModelDefFactory ModelDefFactory { get; }
     }
 }

@@ -50,7 +50,7 @@ namespace HB.FullStack.Client.Maui.Figures
 
             IsReady = true;
 
-            GlobalSettings.Logger.LogDebug("SkGif已经加载完毕");
+            Globals.Logger.LogDebug("SkGif已经加载完毕");
         }
 
         public SKBitmap GetBitmap(long elapsedMilliseconds)
@@ -68,7 +68,7 @@ namespace HB.FullStack.Client.Maui.Figures
                 }
             }
 
-            //GlobalSettings.Logger.LogDebug("SKGif 获取 第 {frame} frame 图像", frame);
+            //Globals.Logger.LogDebug("SKGif 获取 第 {frame} frame 图像", frame);
 
             return _bitmaps![frame];
         }

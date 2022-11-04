@@ -40,7 +40,7 @@ namespace HB.FullStack.Identity
             };
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
         {
             if (sender is IEnumerable<UserRole> userRoles)
             {

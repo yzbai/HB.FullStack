@@ -2,11 +2,18 @@ using System.Collections;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 
+using HB.FullStack.Database;
+
 namespace TestProject1
 {
     [TestClass]
     public class UnitTest1
     {
+        [TestMethod]
+        public void Test_ConnectionString()
+        {
+        }
+
         [TestMethod]
         public void TestMethod1()
         {

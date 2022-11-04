@@ -98,7 +98,7 @@ namespace System
         public Time24Hour(string timeString)
         {
 #if NETSTANDARD2_1 || NET5_0_OR_GREATER
-            if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(':', GlobalSettings.Comparison))
+            if (string.IsNullOrEmpty(timeString) || timeString.Length < 3 || !timeString.Contains(':', Globals.Comparison))
             {
                 throw new ArgumentException("Time24Hour初始化时间字符串格式不对", nameof(timeString));
             }
@@ -122,14 +122,14 @@ namespace System
 
             if (parts.Length == 2)
             {
-                hour = Convert.ToInt32(parts[0], GlobalSettings.Culture);
-                minute = Convert.ToInt32(parts[1], GlobalSettings.Culture);
+                hour = Convert.ToInt32(parts[0], Globals.Culture);
+                minute = Convert.ToInt32(parts[1], Globals.Culture);
             }
             else if (parts.Length == 3)
             {
-                day = Convert.ToInt32(parts[0], GlobalSettings.Culture);
-                hour = Convert.ToInt32(parts[1], GlobalSettings.Culture);
-                minute = Convert.ToInt32(parts[2], GlobalSettings.Culture);
+                day = Convert.ToInt32(parts[0], Globals.Culture);
+                hour = Convert.ToInt32(parts[1], Globals.Culture);
+                minute = Convert.ToInt32(parts[2], Globals.Culture);
             }
 
             _hour = 0;

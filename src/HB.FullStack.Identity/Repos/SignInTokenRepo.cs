@@ -30,7 +30,7 @@ namespace HB.FullStack.Identity
             return DbReader.ScalarAsync<SignInToken>(signInTokenId, transactionContext);
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangedEventArgs args) => Task.CompletedTask;
+        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args) => Task.CompletedTask;
 
         //public Task<SignInToken?> GetByConditionAsync(Guid signInTokenId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
         //{

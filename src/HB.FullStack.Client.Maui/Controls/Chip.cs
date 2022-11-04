@@ -310,7 +310,7 @@ namespace HB.FullStack.Client.Maui.Controls
                     {
                         if (view is Chip chip)
                         {
-                            if (GroupName!.Equals(chip.GroupName, GlobalSettings.Comparison))
+                            if (GroupName!.Equals(chip.GroupName, Globals.Comparison))
                             {
                                 chip.IsSelected = false;
                                 RefreshVisualState();

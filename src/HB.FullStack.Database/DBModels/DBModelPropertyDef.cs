@@ -3,6 +3,7 @@ using System.Reflection;
 
 using HB.FullStack.Common.Models;
 using HB.FullStack.Database.Convert;
+using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.DbModels
 {
@@ -14,8 +15,6 @@ namespace HB.FullStack.Database.DbModels
         #region Common ModelPropertyDef
 
         public DbModelDef ModelDef { get; set; } = null!;
-
-
 
         public Type? NullableUnderlyingType { get; set; }
 

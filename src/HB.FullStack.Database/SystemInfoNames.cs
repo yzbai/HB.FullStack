@@ -8,6 +8,6 @@ namespace HB.FullStack.Database
 
         public const string VERSION = "Version";
 
-        public const string DATABASE_NAME = "DatabaseName";
+        public const string DATABASE_SCHEMA = "DatabaseSchema";
     }
 }

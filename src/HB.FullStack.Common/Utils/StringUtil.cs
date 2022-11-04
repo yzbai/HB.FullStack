@@ -46,7 +46,7 @@ namespace System
 
             foreach (byte b in bytes)
             {
-                hex.AppendFormat(GlobalSettings.Culture, "{0:x2}", b);
+                hex.AppendFormat(Globals.Culture, "{0:x2}", b);
             }
 
             return hex.ToString();
@@ -160,7 +160,7 @@ namespace System
         {
             foreach (string? word in words)
             {
-                bool isEqual = str == null ? word == null : str.Equals(word, GlobalSettings.Comparison);
+                bool isEqual = str == null ? word == null : str.Equals(word, Globals.Comparison);
 
                 if (isEqual)
                 {
@@ -240,14 +240,14 @@ namespace System
 
         public static string RemoveSuffix(this string str, string suffix)
         {
-            return str.EndsWith(suffix, GlobalSettings.Comparison)
+            return str.EndsWith(suffix, Globals.Comparison)
                 ? str.Substring(0, str.Length - suffix.Length)
                 : str;
         }
 
         public static int ToInt32(this string str)
         {
-            return Convert.ToInt32(str, GlobalSettings.Culture); ;
+            return Convert.ToInt32(str, Globals.Culture); ;
         }
 
         public static string Append(this string? str, string toAppend, char seprator)

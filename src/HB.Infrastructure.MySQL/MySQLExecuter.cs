@@ -28,9 +28,9 @@ namespace HB.Infrastructure.MySQL
                 dbCommand).ConfigureAwait(false);
         }
 
-        public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, MySqlCommand dbCommand)
+        public static async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectString, MySqlCommand dbCommand)
         {
-            MySqlConnection conn = new MySqlConnection(connectString);
+            MySqlConnection conn = new MySqlConnection(connectString.ToString());
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
@@ -78,9 +78,9 @@ namespace HB.Infrastructure.MySQL
 
         #region Command Scalar
 
-        public static async Task<object?> ExecuteCommandScalarAsync(string connectString, MySqlCommand dbCommand)
+        public static async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectString, MySqlCommand dbCommand)
         {
-            using MySqlConnection conn = new MySqlConnection(connectString);
+            using MySqlConnection conn = new MySqlConnection(connectString.ToString());
             return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
@@ -115,9 +115,9 @@ namespace HB.Infrastructure.MySQL
 
         #region Comand NonQuery
 
-        public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, MySqlCommand dbCommand)
+        public static async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectString, MySqlCommand dbCommand)
         {
-            using MySqlConnection conn = new MySqlConnection(connectString);
+            using MySqlConnection conn = new MySqlConnection(connectString.ToString());
 
             return await ExecuteCommandNonQueryAsync(conn, dbCommand).ConfigureAwait(false);
         }

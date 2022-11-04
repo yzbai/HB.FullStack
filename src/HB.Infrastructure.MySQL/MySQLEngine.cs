@@ -12,88 +12,19 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using MySqlConnector;
+using MySqlConnector.Logging;
 
 namespace HB.Infrastructure.MySQL
 {
     public class MySQLEngine : IDatabaseEngine
     {
-        #region 自身 & 构建
-
-        private readonly MySQLOptions _options;
-
-        private readonly ILogger _logger;
-
-        private readonly Dictionary<string, string> _connectionStringDict = new Dictionary<string, string>();
-
-        public DbCommonSettings DatabaseSettings => _options.CommonSettings;
-
         public EngineType EngineType => EngineType.MySQL;
 
-        public string FirstDefaultDatabaseName { get; private set; } = null!;
-
-        public IEnumerable<string> DatabaseNames { get; private set; }
-
-        public MySQLEngine(IOptions<MySQLOptions> options, ILoggerFactory loggerFactory, ILogger<MySQLEngine> logger)
+        public MySQLEngine(ILoggerFactory loggerFactory)
         {
-            try
-            {
-#if !DEBUG
-                MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
-#endif
-            }
-            catch (InvalidOperationException ex)
-            {
-                GlobalSettings.Logger.LogError(ex, "Connections:{@Connections}", options.Value.Connections);
-            }
-
-            _options = options.Value;
-            _logger = logger;
-
-            DatabaseNames = _options.Connections.Select(s => s.DatabaseName).ToList();
-
-            SetConnectionStrings();
-
-            _logger.LogInformation($"MySQLEngine初始化完成");
+            MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
         }
 
-        private void SetConnectionStrings()
-        {
-            foreach (DbConnectionSettings connection in _options.Connections)
-            {
-                if (FirstDefaultDatabaseName.IsNullOrEmpty())
-                {
-                    FirstDefaultDatabaseName = connection.DatabaseName;
-                }
-
-                if (connection.IsMaster)
-                {
-                    _connectionStringDict[connection.DatabaseName + "_1"] = connection.ConnectionString;
-
-                    if (!_connectionStringDict.ContainsKey(connection.DatabaseName + "_0"))
-                    {
-                        _connectionStringDict[connection.DatabaseName + "_0"] = connection.ConnectionString;
-                    }
-                }
-                else
-                {
-                    _connectionStringDict[connection.DatabaseName + "_0"] = connection.ConnectionString;
-                }
-            }
-        }
-
-        private string GetConnectionString(string dbName, bool isMaster)
-        {
-            if (isMaster)
-            {
-                return _connectionStringDict[dbName + "_1"];
-            }
-
-            return _connectionStringDict[dbName + "_0"];
-        }
-
-        #endregion 自身 & 构建
-
-        [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
         private static MySqlCommand CreateTextCommand(EngineCommand engineCommand)
         {
             MySqlCommand command = new MySqlCommand(engineCommand.CommandText)
@@ -116,56 +47,54 @@ namespace HB.Infrastructure.MySQL
 
         #region Command 能力
 
-        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
-
-            if (trans == null)
-            {
-                return await MySQLExecuter.ExecuteCommandNonQueryAsync(GetConnectionString(dbName, true), command).ConfigureAwait(false);
-            }
-            else
-            {
-                return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
-            }
+            return await MySQLExecuter.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
         }
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction trans, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (trans == null)
-            {
-                return await MySQLExecuter.ExecuteCommandReaderAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
-            }
-            else
-            {
-                return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
-            }
+            return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
         }
 
-        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction? trans, string dbName, EngineCommand engineCommand, bool useMaster = false)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectionString, EngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
-            if (trans == null)
-            {
-                return await MySQLExecuter.ExecuteCommandScalarAsync(GetConnectionString(dbName, useMaster), command).ConfigureAwait(false);
-            }
-            else
-            {
-                return await MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
-            }
+            return await MySQLExecuter.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+        }
+
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, EngineCommand engineCommand)
+        {
+            using MySqlCommand command = CreateTextCommand(engineCommand);
+
+            return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
+        }
+
+        public async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectionString, EngineCommand engineCommand)
+        {
+            using MySqlCommand command = CreateTextCommand(engineCommand);
+
+            return await MySQLExecuter.ExecuteCommandScalarAsync(connectionString, command).ConfigureAwait(false);
+        }
+
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction trans, EngineCommand engineCommand)
+        {
+            using MySqlCommand command = CreateTextCommand(engineCommand);
+
+            return await MySQLExecuter.ExecuteCommandScalarAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
         }
 
         #endregion Command 能力
 
         #region 事务
 
-        [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        public async Task<IDbTransaction> BeginTransactionAsync(string dbName, IsolationLevel? isolationLevel = null)
+        public async Task<IDbTransaction> BeginTransactionAsync(ConnectionString connectionString, IsolationLevel? isolationLevel = null)
         {
-            MySqlConnection conn = new MySqlConnection(GetConnectionString(dbName, true));
+            MySqlConnection conn = new MySqlConnection(connectionString.ToString());
             await conn.OpenAsync().ConfigureAwait(false);
 
             return await conn.BeginTransactionAsync(isolationLevel ?? IsolationLevel.RepeatableRead).ConfigureAwait(false);

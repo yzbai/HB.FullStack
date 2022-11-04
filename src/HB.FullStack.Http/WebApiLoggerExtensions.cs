@@ -19,13 +19,15 @@ namespace HB.FullStack.WebApi
 
         public static void LogStarup(this ILogger logger)
         {
-            logger.LogInformation("启动 MyColorfulTime.Server.MainApi, 环境: {AspNetCoreEnvironment}, MachineId:{MachineId}",
-                EnvironmentUtil.AspNetCoreEnvironment, EnvironmentUtil.MachineId);
+            logger.LogInformation("启动 {Application}, 环境: {AspNetCoreEnvironment}, MachineId:{MachineId}", 
+                EnvironmentUtil.ApplicationName,
+                EnvironmentUtil.AspNetCoreEnvironment, 
+                EnvironmentUtil.MachineId);
         }
 
         public static void LogCriticalShutDown(this ILogger logger, Exception ex)
         {
-            logger.LogCritical(ex, "MyColorfulTime.MainApi 因为没有处理的异常，现在关闭!!!!!!!!!!!!!!!!!!!!!.");
+            logger.LogCritical(ex, "{Application} 因为没有处理的异常，现在关闭!!!!!!!!!!!!!!!!!!!!!.", EnvironmentUtil.ApplicationName);
         }
     }
 }

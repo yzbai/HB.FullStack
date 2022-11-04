@@ -7,11 +7,11 @@ namespace System
 {
     public static partial class WebApiExceptions
     {
-        public static Exception DatabaseInitLockError(IEnumerable<string> databases)
+        public static Exception DatabaseInitLockError(string dbSchema)
         {
             WebApiException exception = new WebApiException(ErrorCodes.DatabaseInitLockError, nameof(DatabaseInitLockError));
 
-            exception.Data["Databases"] = databases;
+            exception.Data["DbSchema"] = dbSchema;
 
             return exception;
         }

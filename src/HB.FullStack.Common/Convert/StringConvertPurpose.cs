@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Common.Convert
+﻿namespace System
 {
     public enum StringConvertPurpose
     {

@@ -46,7 +46,7 @@ internal static class DiagnosticDescriptors
     public static readonly DiagnosticDescriptor InvalidTrackPropertyError = new DiagnosticDescriptor(
        id: "PT0004",
        title: "Invalid generated property declaration",
-       messageFormat: "The field {0}.{1} cannot be used to generate an trackproperty property, as it should be value-type or string, or inherit INotifyPropertyChanging and INotifyPropertyChanged",
+       messageFormat: "The field {0}.{1} cannot be used to generate an trackproperty property, as it should be value-type or string or record or all properties init only",
        category: typeof(TrackPropertyGenerator).FullName,
        defaultSeverity: DiagnosticSeverity.Error,
        isEnabledByDefault: true,

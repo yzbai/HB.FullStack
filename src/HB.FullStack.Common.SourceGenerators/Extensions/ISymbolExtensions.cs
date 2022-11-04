@@ -45,6 +45,20 @@ internal static class ISymbolExtensions
         return symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == name;
     }
 
+    public static SymbolDisplayFormat FullyQualifiedWithoutGenericParameterFormat { get; } =
+            new SymbolDisplayFormat(
+                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included,
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                genericsOptions: SymbolDisplayGenericsOptions.None,
+                miscellaneousOptions:
+                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+
+    public static bool HasFullyQualifiedNameWithoutGenericType(this ISymbol symbol, string name)
+    {
+        return symbol.ToDisplayString(FullyQualifiedWithoutGenericParameterFormat) == name;
+    }
+
     /// <summary>
     /// Checks whether or not a given symbol has an attribute with the specified full name.
     /// </summary>

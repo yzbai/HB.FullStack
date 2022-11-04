@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -10,29 +11,40 @@ namespace HB.FullStack.Database
 {
     public class DefaultTransaction : ITransaction
     {
-        private readonly IDatabaseEngine _databaseEngine;
         private readonly IDbModelDefFactory _modelDefFactory;
+        private readonly IDbSettingManager _dbManager;
 
-        public DefaultTransaction(IDatabaseEngine datbaseEngine, IDbModelDefFactory modelDefFactory)
+        public DefaultTransaction(IDbModelDefFactory modelDefFactory, IDbSettingManager dbManager)
         {
-            _databaseEngine = datbaseEngine;
             _modelDefFactory = modelDefFactory;
+            _dbManager = dbManager;
         }
 
         #region 事务
 
-        public async Task<TransactionContext> BeginTransactionAsync(string databaseName, IsolationLevel? isolationLevel = null)
+        public async Task<TransactionContext> BeginTransactionAsync(string dbSchema, IsolationLevel? isolationLevel = null)
         {
-            IDbTransaction dbTransaction = await _databaseEngine.BeginTransactionAsync(databaseName, isolationLevel).ConfigureAwait(false);
+            IDatabaseEngine engine = _dbManager.GetDatabaseEngine(dbSchema);
+            var connectionString = _dbManager.GetConnectionString(dbSchema, true);
 
-            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this);
+            IDbTransaction dbTransaction = await engine.BeginTransactionAsync(connectionString, isolationLevel).ConfigureAwait(false);
+
+            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, engine);
         }
 
-        public Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DbModel
+        public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DbModel
         {
-            DbModelDef modelDef = _modelDefFactory.GetDef<T>()!;
+            DbModelDef? modelDef = _modelDefFactory.GetDef<T>();
 
-            return BeginTransactionAsync(modelDef.DatabaseName!, isolationLevel);
+            ThrowIf.Null(modelDef, $"{typeof(T).FullName} 没有 DbModelDef");
+
+            IDatabaseEngine engine = _dbManager.GetDatabaseEngine(modelDef.EngineType);
+            var connectionString = _dbManager.GetConnectionString(modelDef.DbSchema, true);
+
+
+            IDbTransaction dbTransaction = await engine.BeginTransactionAsync(connectionString, isolationLevel).ConfigureAwait(false);
+
+            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, engine);
         }
 
         public async Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)
@@ -56,7 +68,7 @@ namespace HB.FullStack.Database
             {
                 IDbConnection? conn = context.Transaction.Connection;
 
-                await _databaseEngine.CommitAsync(context.Transaction).ConfigureAwait(false);
+                await context.DatabaseEngine.CommitAsync(context.Transaction).ConfigureAwait(false);
                 //context.Transaction.Commit();
 
                 context.Transaction.Dispose();
@@ -96,7 +108,7 @@ namespace HB.FullStack.Database
             {
                 IDbConnection? conn = context.Transaction.Connection;
 
-                await _databaseEngine.RollbackAsync(context.Transaction).ConfigureAwait(false);
+                await context.DatabaseEngine.RollbackAsync(context.Transaction).ConfigureAwait(false);
                 //context.Transaction.Rollback();
 
                 context.Transaction.Dispose();

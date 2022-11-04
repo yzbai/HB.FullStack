@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Reflection;
 
@@ -12,33 +13,63 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
     public class PropertyTrackableObjectTests
     {
         [TestMethod()]
-        public void GetChangedPropertiesTest()
+        public void GetChangedPropertiesTest1()
         {
+            string rightJson = "[{\"PropertyName\":\"Name\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"InnerRecord\",\"PropertyPropertyName\":null,\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"Immutables\",\"PropertyPropertyName\":null,\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]}]";
+
             TestObject testObject = new TestObject();
-            ActionOnTestObject(testObject);
+            ActionOnTestObject1(testObject);
 
             var changes = testObject.GetChangedProperties();
 
             string json = SerializeUtil.ToJson(changes);
 
-            string rightJson = "[{\"PropertyName\":\"Name\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"InnerCls\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":{\"InnerName\":\"InnerTestName\"}},{\"PropertyName\":\"TestCollection\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":[\"x\"]}]";
+            Assert.AreEqual(json, rightJson);
+        }
+
+        [TestMethod()]
+        public void GetChangedPropertiesTest2()
+        {
+            string rightJson = "[{\"PropertyName\":\"Name\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"InnerRecord\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"Immutables\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":[\"x\",\"y\"]}]";
+
+            TestObject testObject = new TestObject();
+            ActionOnTestObject2(testObject);
+
+            var changes = testObject.GetChangedProperties();
+
+            string json = SerializeUtil.ToJson(changes);
+
 
             Assert.AreEqual(json, rightJson);
         }
 
-        private static void ActionOnTestObject(TestObject testObject)
+        private static void ActionOnTestObject1(TestObject testObject)
         {
+            testObject.InnerRecord = new InnerTestRecord(null);
+            testObject.Immutables = ImmutableList.Create("x");
+
             testObject.StartTrack();
 
             testObject.Name = "TestName";
 
-            testObject.InnerCls = new InnerTestObject();
-            testObject.InnerCls.InnerName = "InnerTestName";
+            testObject.InnerRecord = testObject.InnerRecord with { InnerName = "InnerTestRecord" };
+            testObject.Immutables = testObject.Immutables.Add("y");
+            
+        }
 
-            testObject.TestCollection = new ObservableCollection2<string>
-            {
-                "x"
-            };
+        private static void ActionOnTestObject2(TestObject testObject)
+        {
+
+            testObject.StartTrack();
+
+            testObject.Name = "TestName";
+
+            testObject.InnerRecord = new InnerTestRecord(null);
+
+            testObject.InnerRecord = testObject.InnerRecord with { InnerName = "InnerTestRecord" };
+
+            testObject.Immutables = ImmutableList.Create("x");
+            testObject.Immutables = testObject.Immutables.Add("y");
         }
 
         [TestMethod]
@@ -53,8 +84,9 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         public void TestCppAddtionalProperties()
         {
             TestObject testObject = new TestObject();
-            ActionOnTestObject(testObject);
+            ActionOnTestObject1(testObject);
 
+            //TODO:continue;
         }
     }
 }

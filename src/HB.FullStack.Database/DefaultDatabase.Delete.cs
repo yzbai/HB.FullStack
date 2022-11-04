@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Database.DbModels;
+using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database
@@ -22,27 +22,26 @@ namespace HB.FullStack.Database
             bool? trulyDelete = null) where T : DbModel, new()
         {
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             ThrowIfNotWriteable(modelDef);
-
             TruncateLastUser(ref lastUser);
 
             try
             {
                 var command = DbCommandBuilder.CreateDeleteCommand(
-                    EngineType,
                     modelDef,
                     id,
                     lastUser,
-                    trulyDelete ?? _databaseSettings.DefaultTrulyDelete,
+                    trulyDelete ?? DbSettingManager.GetDefaultTrulyDelete(modelDef.DbSchema),
                     oldTimestamp,
                     newTimestamp);
 
-                long rows = await _databaseEngine.ExecuteCommandNonQueryAsync(
-                    transContext?.Transaction,
-                    modelDef.DatabaseName!,
-                    command).ConfigureAwait(false);
+                IDatabaseEngine engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
+
+                long rows = transContext != null
+                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -96,39 +95,34 @@ namespace HB.FullStack.Database
             TransactionContext? transContext,
             bool? trulyDeleted = null) where T : DbModel, new()
         {
-            if (!ids.Any())
+            if (ids.IsNullOrEmpty())
             {
                 return;
             }
 
-            if (_databaseEngine.DatabaseSettings.MaxBatchNumber < ids.Count)
-            {
-                throw DatabaseExceptions.TooManyForBatch("BatchDelete超过批量操作的最大数目", ids.Count, lastUser);
-            }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
             ThrowIfNotWriteable(modelDef);
-
+            ThrowIfTooMuchItems(ids, lastUser, modelDef);
             TruncateLastUser(ref lastUser);
 
             try
             {
                 var command = DbCommandBuilder.CreateBatchDeleteCommand(
-                    EngineType,
                     modelDef,
                     ids,
                     oldTimestamps,
                     newTimestamps,
                     lastUser,
-                    trulyDeleted ?? _databaseSettings.DefaultTrulyDelete,
+                    trulyDeleted ?? DbSettingManager.GetDefaultTrulyDelete(modelDef.DbSchema),
                     transContext == null);
 
-                using var reader = await _databaseEngine.ExecuteCommandReaderAsync(
-                    transContext?.Transaction,
-                    modelDef.DatabaseName!,
-                    command,
-                    true).ConfigureAwait(false);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
+
+                using var reader = transContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -171,18 +165,6 @@ namespace HB.FullStack.Database
 
         public Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new()
         {
-            if (!items.Any())
-            {
-                return Task.CompletedTask;
-            }
-
-            if (_databaseEngine.DatabaseSettings.MaxBatchNumber < items.Count())
-            {
-                throw DatabaseExceptions.TooManyForBatch("BatchDelete超过批量操作的最大数目", items.Count(), lastUser);
-            }
-
-            ThrowIf.NotValid(items, nameof(items));
-
             IList<object> ids = items is IEnumerable<ILongId> longIds
                 ? longIds.Select<ILongId, object>(i => i.Id).ToList()
                 : ((IEnumerable<IGuidId>)items).Select<IGuidId, object>(i => i.Id).ToList();
@@ -209,28 +191,25 @@ namespace HB.FullStack.Database
             TransactionContext? transactionContext = null,
             bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            if (!modelDef.DatabaseWriteable)
-            {
-                throw DatabaseExceptions.NotWriteable(modelDef.ModelFullName, modelDef.DatabaseName);
-            }
+            ThrowIfNotWriteable(modelDef);
 
             try
             {
                 WhereExpression<T> where = Where(whereExpr).And(t => !t.Deleted);
 
                 var command = DbCommandBuilder.CreateDeleteCommand(
-                    EngineType,
                     modelDef,
                     where,
                     lastUser,
-                    trulyDelete ?? _databaseSettings.DefaultTrulyDelete);
+                    trulyDelete ?? DbSettingManager.GetDefaultTrulyDelete(modelDef.DbSchema));
 
-                await _databaseEngine.ExecuteCommandNonQueryAsync(
-                    transactionContext?.Transaction,
-                    modelDef.DatabaseName!,
-                    command).ConfigureAwait(false);
+                var engine = DbSettingManager.GetDatabaseEngine(modelDef.EngineType);
+
+                _ = transactionContext != null
+                    ? await engine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(modelDef.DbSchema, true), command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DatabaseException)
             {

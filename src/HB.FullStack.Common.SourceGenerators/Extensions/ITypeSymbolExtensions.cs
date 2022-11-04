@@ -74,6 +74,23 @@ internal static class ITypeSymbolExtensions
         return false;
     }
 
+    public static bool HasUnderNamespace(this ITypeSymbol typeSymbol, string @namespace)
+    {
+        return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Contains(@namespace);
+    }
+    public static bool HasInterfaceWithFullyQualifiedNameWithoutGenericParameter(this ITypeSymbol typeSymbol, string name)
+    {
+        foreach (INamedTypeSymbol interfaceType in typeSymbol.AllInterfaces)
+        {
+            if (interfaceType.HasFullyQualifiedNameWithoutGenericType(name))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Checks whether or not a given <see cref="ITypeSymbol"/> has or inherits a specified attribute.
     /// </summary>

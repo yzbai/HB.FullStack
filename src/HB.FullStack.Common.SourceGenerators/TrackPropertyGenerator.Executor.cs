@@ -76,7 +76,7 @@ partial class TrackPropertyGenerator
             }
 
             // Check for special cases that are explicitly not allowed
-            if (!IsGeneratedPropertyValid(propertyName, fieldSymbol.Type))
+            if (!IsImmutableProperty(propertyName, fieldSymbol.Type))
             {
                 builder.Add(
                     DiagnosticDescriptors.InvalidTrackPropertyError,
@@ -131,30 +131,57 @@ partial class TrackPropertyGenerator
         }
 
         /// <summary>
-        /// Checks whether the generated property would be a special case that is marked as invalid.
+        /// 必须是immutable才行
         /// </summary>
         /// <param name="propertyName">The property name.</param>
         /// <param name="propertyType">The property type.</param>
         /// <returns>Whether the generated property is invalid.</returns>
-        private static bool IsGeneratedPropertyValid(string propertyName, ITypeSymbol propertyType)
+        private static bool IsImmutableProperty(string propertyName, ITypeSymbol propertyType)
         {
             // If the generated property name is called "Property" and the type is either object or it is PropertyChangedEventArgs or
             // PropertyChangingEventArgs (or a type derived from either of those two types), consider it invalid. This is needed because
             // if such a property was generated, the partial On<PROPERTY_NAME>Changing and OnPropertyChanging(PropertyChangingEventArgs)
             // methods, as well as the partial On<PROPERTY_NAME>Changed and OnPropertyChanged(PropertyChangedEventArgs) methods.
 
+            if(propertyType.IsReadOnly)
+            {
+                return true;
+            }
+
+            //1. ValueType or String
             if (propertyType.IsValueType || propertyType.SpecialType == SpecialType.System_String)
             {
                 return true;
             }
 
-            if (propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanging")
-                && propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanged"))
+            //2. Immutable Collection
+            if (propertyType.HasInterfaceWithFullyQualifiedName("global::System.Collections.IEnumerable"))
             {
-                return true;
+                return propertyType.HasUnderNamespace("System.Collections.Immutable");
+                //return propertyType.HasInterfaceWithFullyQualifiedNameWithoutGenericParameter("global::System.Collections.Generic.IReadOnlyCollection");
             }
 
-            return false;
+            //3. all properties are init-only or record
+            //TODO: 这里看不到由其他SourceGeneration生成的属性。
+            //所以考察所有属性都是init-only不成行。该考察是record
+
+            return propertyType.IsRecord;
+            //var memebers = propertyType.GetMembers();
+            //var setters = propertyType.GetMembers().Where(m => m is IMethodSymbol mm && mm.MethodKind == MethodKind.PropertySet);
+
+
+            //if (setters.All(m => m is IMethodSymbol mm && mm.IsInitOnly))
+            //{
+            //    return true;
+            //}
+
+            //if (propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanging")
+            //    && propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanged"))
+            //{
+            //    return true;
+            //}
+
+            //return false;
         }
 
         /// <summary>

@@ -22,10 +22,10 @@ namespace HB.Infrastructure.SQLite
             return await ExecuteCommandReaderAsync(sqliteTransaction.Connection!, false, dbCommand).ConfigureAwait(false);
         }
 
-        public static async Task<IDataReader> ExecuteCommandReaderAsync(string connectString, SqliteCommand dbCommand)
+        public static async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectString, SqliteCommand dbCommand)
         {
             //这里无法用Using，因为reader要用
-            SqliteConnection conn = new SqliteConnection(connectString);
+            SqliteConnection conn = new SqliteConnection(connectString.ToString());
             return await ExecuteCommandReaderAsync(conn, true, dbCommand).ConfigureAwait(false);
         }
 
@@ -69,13 +69,13 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        #endregion Command Reader
+        #endregion
 
         #region Command Scalar
 
-        public static async Task<object?> ExecuteCommandScalarAsync(string connectString, SqliteCommand dbCommand)
+        public static async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectString, SqliteCommand dbCommand)
         {
-            using SqliteConnection conn = new SqliteConnection(connectString);
+            using SqliteConnection conn = new SqliteConnection(connectString.ToString());
             return await ExecuteCommandScalarAsync(conn, dbCommand).ConfigureAwait(false);
         }
 
@@ -104,13 +104,13 @@ namespace HB.Infrastructure.SQLite
             }
         }
 
-        #endregion Command Scalar
+        #endregion
 
         #region Comand NonQuery
 
-        public static async Task<int> ExecuteCommandNonQueryAsync(string connectString, SqliteCommand dbCommand)
+        public static async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectString, SqliteCommand dbCommand)
         {
-            using SqliteConnection conn = new SqliteConnection(connectString);
+            using SqliteConnection conn = new SqliteConnection(connectString.ToString());
 
             return await ExecuteCommandNonQueryAsync(conn, dbCommand).ConfigureAwait(false);
         }

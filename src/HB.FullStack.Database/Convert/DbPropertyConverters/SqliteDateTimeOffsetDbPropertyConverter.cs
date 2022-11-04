@@ -21,7 +21,7 @@ namespace HB.FullStack.Database.Convert
 
         public object DbFieldValueToPropertyValue(object dbValue, Type propertyType)
         {
-            return DateTimeOffset.Parse(dbValue.ToString()!, GlobalSettings.Culture);
+            return DateTimeOffset.Parse(dbValue.ToString()!, Globals.Culture);
         }
     }
 }

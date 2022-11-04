@@ -4,8 +4,10 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceRegister
     {
-        public static IServiceCollection AddFullStackCommon(this IServiceCollection services)
+        public static IServiceCollection AddModelDefFactory(this IServiceCollection services)
         {
+            services.AddOptions();
+
             services.AddSingleton<IModelDefFactory, ModelDefFactory>();
 
             services.AddSingleton<IModelDefProvider, PlainModelDefProvider>();

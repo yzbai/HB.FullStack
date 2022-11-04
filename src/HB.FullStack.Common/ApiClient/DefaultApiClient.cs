@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
+using AsyncAwaitBestPractices;
 
 using HB.FullStack.Common.Api;
 
@@ -15,9 +18,10 @@ namespace HB.FullStack.Common.ApiClient
     /// <summary>
     /// 保持单例复用
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD110:Observe result of async calls", Justification = "<Pending>")]
     public partial class DefaultApiClient : IApiClient
     {
-        private readonly WeakAsyncEventManager _asyncEventManager = new WeakAsyncEventManager();
+        //private readonly WeakEventManager _eventManager = new WeakEventManager();
 
         private readonly ApiClientOptions _options;
 
@@ -53,53 +57,62 @@ namespace HB.FullStack.Common.ApiClient
             {
                 _apiKeys = _options.ApiKeys.ToDictionary(item => item.Name, item => item.Key);
             }
+        }
 
-            void RangeEndpoints()
+        public void RangeEndpoints()
+        {
+            //From Attribute
+            IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
+
+            foreach (Type resType in resTypes)
             {
-                AddResEndpointFromAssemblyToResEndpoints();
+                ResEndpoint endpoint = new ResEndpoint(resType.Name);
+                endpoint.SiteSetting = _options.SiteSettings.First(); //TODO: 有待商榷
 
-                foreach (var siteSetting in _options.SiteSettings)
+                ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
+
+                if (attr != null)
                 {
-                    foreach (var endpoint in siteSetting.Endpoints)
-                    {
-                        endpoint.SiteSetting = siteSetting;
+                    endpoint.ResName = attr.ResName ?? endpoint.ResName;
+                    endpoint.Type = attr.Type ?? endpoint.Type;
+                    endpoint.ControllerOrPlainUrl = attr.ControllerOrPlainUrl ?? endpoint.ControllerOrPlainUrl;
+                    endpoint.DefaultReadAuth = attr.DefaultReadAuth ?? endpoint.DefaultReadAuth;
+                    endpoint.DefaultWriteAuth = attr.DefaultWriteAuth ?? endpoint.DefaultWriteAuth;
+                }
 
-                        _resEndpoints[endpoint.ResName] = endpoint;
+                _resEndpoints[endpoint.ResName] = endpoint;
+            }
 
-                        //if (!_resEndpoints.TryAdd(endpoint.ResName, endpoint))
-                        //{
-                        //    throw CommonExceptions.ApiClientInnerError("Multiple ResBinding Defined!", null, new { ResBinding = endpoint });
-                        //}
+            //From SiteSettings
+            foreach (var siteSetting in _options.SiteSettings)
+            {
+                foreach (var endpoint in siteSetting.Endpoints)
+                {
+                    endpoint.SiteSetting = siteSetting;
 
-                        //endpoint.SiteSetting = siteSetting;
-                    }
+                    //may override attribute of res
+                    _resEndpoints[endpoint.ResName] = endpoint;
                 }
             }
         }
 
-        partial void AddResEndpointFromAssemblyToResEndpoints();
+        #region Events
 
-        public event AsyncEventHandler<ApiRequest, ApiEventArgs> Requesting
-        {
-            add => _asyncEventManager.Add(value);
-            remove => _asyncEventManager.Remove(value);
-        }
-
-        public event AsyncEventHandler<object, ApiEventArgs> Responsed
-        {
-            add => _asyncEventManager.Add(value);
-            remove => _asyncEventManager.Remove(value);
-        }
+        public event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
+        public event Func<object?, ApiEventArgs, Task>? Responsed;
 
         private Task OnRequestingAsync(ApiRequest apiRequest, ApiEventArgs apiEventArgs)
         {
-            return _asyncEventManager.RaiseEventAsync(nameof(Requesting), apiRequest, apiEventArgs);
+            return Requesting?.Invoke(apiRequest, apiEventArgs) ?? Task.CompletedTask;
         }
 
         private Task OnResponsedAsync(object? responsedObj, ApiEventArgs apiEventArgs)
         {
-            return _asyncEventManager.RaiseEventAsync(nameof(Responsed), responsedObj, apiEventArgs);
+            return Responsed?.Invoke(responsedObj, apiEventArgs) ?? Task.CompletedTask;
         }
+
+        #endregion
+
         public Task SendAsync(ApiRequest request, CancellationToken cancellationToken) => GetAsync<EmptyApiResource>(request, cancellationToken);
 
         public Task SendAsync(ApiRequest request) => SendAsync(request, CancellationToken.None);

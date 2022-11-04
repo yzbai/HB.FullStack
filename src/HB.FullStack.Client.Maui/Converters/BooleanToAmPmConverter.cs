@@ -22,7 +22,7 @@ namespace HB.FullStack.Client.Maui.Converters
         {
             string? text = value?.ToString();
 
-            return "上午".Equals(text, GlobalSettings.Comparison);
+            return "上午".Equals(text, Globals.Comparison);
         }
     }
 }

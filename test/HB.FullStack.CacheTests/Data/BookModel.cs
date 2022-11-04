@@ -1,72 +1,78 @@
-﻿using System;
+﻿//global using static HB.FullStack.BaseTest.BaseTestClass;
+//using System;
 
-using HB.FullStack.Database.DbModels;
+//using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.CacheTests
-{
-    [CacheModel]
-    public class BookModel : TimestampFlackIdDbModel
-    {
-        [DbModelProperty]
-        public string Name { get; set; } = default!;
+//namespace HB.FullStack.CacheTests
+//{
+//    [DbModel(DbSchema_Sqlite)]
+//    [CacheModel]
+//    public class BookModel : TimestampFlackIdDbModel
+//    {
+//        [DbModelProperty]
+//        public string Name { get; set; } = default!;
 
-        [DbModelProperty]
-        public double Price { get; set; } = default!;
-    }
+//        [DbModelProperty]
+//        public double Price { get; set; } = default!;
+//    }
 
-    [CacheModel]
-    public class Guid_BookModel : TimestampGuidDbModel
-    {
-        [DbModelProperty]
-        public string Name { get; set; } = default!;
+//    [DbModel(DbSchema_Sqlite)]
+//    [CacheModel]
+//    public class Guid_BookModel : TimestampGuidDbModel
+//    {
+//        [DbModelProperty]
+//        public string Name { get; set; } = default!;
 
-        [DbModelProperty]
-        public double Price { get; set; } = default!;
-    }
+//        [DbModelProperty]
+//        public double Price { get; set; } = default!;
+//    }
 
-    [CacheModel]
-    public class Book : TimestampFlackIdDbModel
-    {
-        [DbModelProperty]
-        [CacheModelAltKey]
-        public string Name { get; set; } = null!;
+//    [DbModel(DbSchema_Sqlite)]
+//    [CacheModel]
+//    public class Book : TimestampFlackIdDbModel
+//    {
+//        [DbModelProperty]
+//        [CacheModelAltKey]
+//        public string Name { get; set; } = null!;
 
-        [DbModelProperty]
-        [CacheModelAltKey]
-        public long BookID { get; set; }
+//        [DbModelProperty]
+//        [CacheModelAltKey]
+//        public long BookID { get; set; }
 
-        [DbModelProperty]
-        public string? Publisher { get; set; }
+//        [DbModelProperty]
+//        public string? Publisher { get; set; }
 
-        [DbModelProperty]
-        public double Price { get; set; }
-    }
+//        [DbModelProperty]
+//        public double Price { get; set; }
+//    }
 
-    [CacheModel]
-    public class BookModel_Client : TimestampFlackIdDbModel
-    {
-        [DbModelProperty(NeedIndex = true)]
-        public string Name { get; set; } = default!;
+//    [DbModel(DbSchema_Sqlite)]
+//    [CacheModel]
+//    public class BookModel_Client : TimestampFlackIdDbModel
+//    {
+//        [DbModelProperty(NeedIndex = true)]
+//        public string Name { get; set; } = default!;
 
-        [DbModelProperty]
-        public double Price { get; set; } = default!;
-    }
+//        [DbModelProperty]
+//        public double Price { get; set; } = default!;
+//    }
 
-    [CacheModel]
-    public class Book_Client : TimestampFlackIdDbModel
-    {
-        [CacheModelAltKey]
-        [DbModelProperty]
-        public string Name { get; set; } = null!;
+//    [DbModel(DbSchema_Sqlite)]
+//    [CacheModel]
+//    public class Book_Client : TimestampFlackIdDbModel
+//    {
+//        [CacheModelAltKey]
+//        [DbModelProperty]
+//        public string Name { get; set; } = null!;
 
-        [DbModelProperty]
-        [CacheModelAltKey]
-        public long BookID { get; set; }
+//        [DbModelProperty]
+//        [CacheModelAltKey]
+//        public long BookID { get; set; }
 
-        [DbModelProperty]
-        public string? Publisher { get; set; }
+//        [DbModelProperty]
+//        public string? Publisher { get; set; }
 
-        [DbModelProperty]
-        public double Price { get; set; }
-    }
-}
+//        [DbModelProperty]
+//        public double Price { get; set; }
+//    }
+//}

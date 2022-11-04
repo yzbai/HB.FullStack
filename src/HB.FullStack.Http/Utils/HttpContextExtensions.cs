@@ -35,7 +35,7 @@ namespace System
             {
                 foreach (KeyValuePair<string, string> item in request.Cookies)
                 {
-                    parameters.Add(item.Key, item.Value.ToString(GlobalSettings.Culture));
+                    parameters.Add(item.Key, item.Value.ToString(Globals.Culture));
                 }
             }
 
@@ -82,7 +82,7 @@ namespace System
 
         public static Uri MakeToHttpsRawUri(this HttpRequest request)
         {
-            string url = request.GetEncodedUrl().Replace(request.Scheme, "https", GlobalSettings.Comparison);
+            string url = request.GetEncodedUrl().Replace(request.Scheme, "https", Globals.Comparison);
 
             return new Uri(url);
         }
@@ -127,7 +127,7 @@ namespace System
                     string rawValues = values.ToString();   // writes out as Csv when there are multiple.
 
                     if (!string.IsNullOrEmpty(rawValues))
-                        return (T)Convert.ChangeType(values.ToString(), typeof(T), GlobalSettings.Culture);
+                        return (T)Convert.ChangeType(values.ToString(), typeof(T), Globals.Culture);
                 }
                 return default;
             }

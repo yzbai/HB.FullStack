@@ -229,7 +229,7 @@ namespace System
         [return: MaybeNull]
         public static string? NotEqual(string? a, string? b, string paramName)
         {
-            if (a == null && b != null || a != null && !a.Equals(b, GlobalSettings.Comparison))
+            if (a == null && b != null || a != null && !a.Equals(b, Globals.Comparison))
             {
                 throw new ArgumentException($"Parameter:{paramName}");
             }
@@ -250,7 +250,7 @@ namespace System
 
     public static class ThrowIfExtensions
     {
-        public static T ThrowIfNull<T>([ValidatedNotNull][NotNull] this T? o, string paramName) where T : class
+        public static T ThrowIfNull<T>([ValidatedNotNull][NotNull] this T? o, string? paramName) where T : class
         {
             if (o == null)
                 throw new ArgumentNullException($"Parameter:{paramName}");
@@ -309,7 +309,7 @@ namespace System
         [return: MaybeNull]
         public static string? ThrowIfNotEqual(this string? a, string? b, string paramName)
         {
-            if (a == null && b != null || a != null && !a.Equals(b, GlobalSettings.Comparison))
+            if (a == null && b != null || a != null && !a.Equals(b, Globals.Comparison))
             {
                 throw new ArgumentException($"Parameter:{paramName}");
             }

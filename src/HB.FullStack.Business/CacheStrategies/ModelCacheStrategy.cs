@@ -164,7 +164,7 @@ namespace HB.FullStack.Repository.CacheStrategies
         private static void OnException(Exception ex)
         {
             //TODO: 是否要停用缓存？停机等等。
-            GlobalSettings.Logger.LogCritical(ex, "ModelCacheStrategy 中缓存Update或者Invalidate出错，Cache中可能出现脏数据/旧数据.请重建缓存或其他操作");
+            Globals.Logger.LogCritical(ex, "ModelCacheStrategy 中缓存Update或者Invalidate出错，Cache中可能出现脏数据/旧数据.请重建缓存或其他操作");
         }
     }
 }

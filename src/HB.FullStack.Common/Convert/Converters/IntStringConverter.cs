@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.Convert.Converters
         {
             if (str.IsNullOrEmpty()) return null;
 
-            return int.Parse(str, GlobalSettings.Culture);
+            return int.Parse(str, Globals.Culture);
         }
 
         public string? ConvertToString(object? obj, StringConvertPurpose purpose)

@@ -37,7 +37,7 @@ namespace System.Net.Http
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                GlobalSettings.Logger?.LogHttpResponseDeSerializeJsonError(jsonString, (int)responseMessage.StatusCode, responseMessage.ReasonPhrase, responseMessage?.RequestMessage?.RequestUri, ex);
+                Globals.Logger?.LogHttpResponseDeSerializeJsonError(jsonString, (int)responseMessage.StatusCode, responseMessage.ReasonPhrase, responseMessage?.RequestMessage?.RequestUri, ex);
                 return (false, null);
             }
         }
