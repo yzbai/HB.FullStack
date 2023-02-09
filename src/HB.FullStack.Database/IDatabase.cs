@@ -7,9 +7,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.Engine;
 
 [assembly: InternalsVisibleTo("HB.FullStack.Client")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
@@ -23,14 +21,13 @@ namespace HB.FullStack.Database
     /// <summary>
     /// 对外提供数据库操作
     /// </summary>
-    public interface IDatabase : IDatabaseWriter, IDatabaseReader
+    public interface IDatabase : IDbWriter, IDbReader
     {
         /// <summary>
         /// 有几个DbSchema，就初始化几次
         /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
-        /// 
-        Task<bool> InitializeAsync(DbSchema dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
+        Task<bool> InitializeAsync(string dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
 
         IDbModelDefFactory ModelDefFactory { get; }
     }

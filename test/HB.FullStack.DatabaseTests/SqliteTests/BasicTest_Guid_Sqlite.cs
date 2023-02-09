@@ -36,7 +36,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 await Db.AddAsync(book, "tester", null);
             }
-            catch (DatabaseException e)
+            catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
@@ -49,7 +49,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 await Db.AddAsync(publisherModel, "", null);
             }
-            catch (DatabaseException e)
+            catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
@@ -67,7 +67,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 await Db.BatchAddAsync(books, "tester", null);
             }
-            catch (DatabaseException e)
+            catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
@@ -113,7 +113,7 @@ select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
 ";
 
             var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Sqlite);
-            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(DbSchema_Sqlite, true), new EngineCommand(sql));
+            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(DbSchema_Sqlite, true), new DbEngineCommand(sql));
 
             List<string?> rt = new List<string?>();
 
@@ -522,7 +522,7 @@ select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.EngineType.SQLite);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.DbEngineType.SQLite);
 
                         if (value != null)
                         {

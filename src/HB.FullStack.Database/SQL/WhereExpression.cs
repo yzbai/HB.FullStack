@@ -139,7 +139,7 @@ namespace HB.FullStack.Database.SQL
         /// <returns></returns>
         //TODO:  �����������������һ��sql����ע�����
 
-        private string SqlFormat(EngineType engineType, string sqlText, params object[] sqlParams)
+        private string SqlFormat(DbEngineType engineType, string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
 
@@ -554,7 +554,7 @@ namespace HB.FullStack.Database.SQL
                 {
                     if (!_tModelDef.ContainsProperty(orderName))
                     {
-                        throw DatabaseExceptions.NoSuchProperty(_tModelDef.ModelFullName, orderName);
+                        throw DbExceptions.NoSuchProperty(_tModelDef.ModelFullName, orderName);
                     }
 
                     orderBuilder.Append(SqlHelper.GetQuoted(orderName));

@@ -54,7 +54,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
             }
-            catch (DatabaseException ex)
+            catch (DbException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
@@ -86,7 +86,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 await Db.UpdateAsync(book2, "tester", null);
             }
-            catch (DatabaseException ex)
+            catch (DbException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
@@ -115,17 +115,17 @@ namespace HB.FullStack.DatabaseTests.SQLite
             var connectionString = DbSettingManager.GetConnectionString(DbSchema_Sqlite, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
+                new DbEngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt == 1);
 
             int rt2 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
+                new DbEngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt2 == 1);
 
             int rt3 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
+                new DbEngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt3 == 1);
         }
@@ -559,7 +559,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.EngineType.SQLite);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.DbEngineType.SQLite);
 
                         if (value != null)
                         {

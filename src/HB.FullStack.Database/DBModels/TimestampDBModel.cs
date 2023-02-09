@@ -43,22 +43,22 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimestampLongIdDbModel : TimestampDbModel, ILongId
     {
-        [DbModelProperty(0)]
+        [DbField(0)]
         public abstract long Id { get; set; }
     }
 
     public abstract class TimestampAutoIncrementIdDbModel : TimestampLongIdDbModel, IAutoIncrementId
     {
-        [AutoIncrementPrimaryKey]
-        [DbModelProperty(0)]
+        [DbAutoIncrementPrimaryKey]
+        [DbField(0)]
         [CacheModelKey]
         public override long Id { get; set; } = -1;
     }
 
     public abstract class TimestampFlackIdDbModel : TimestampLongIdDbModel
     {
-        [PrimaryKey]
-        [DbModelProperty(0)]
+        [DbPrimaryKey]
+        [DbField(0)]
         [CacheModelKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
@@ -66,9 +66,9 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimestampGuidDbModel : TimestampDbModel, IGuidId
     {
-        [DbModelProperty(0)]
+        [DbField(0)]
         [NoEmptyGuid]
-        [PrimaryKey]
+        [DbPrimaryKey]
         [CacheModelKey]
         public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
 

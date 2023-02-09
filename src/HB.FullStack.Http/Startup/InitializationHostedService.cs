@@ -38,7 +38,7 @@ namespace HB.FullStack.WebApi.Startup
         {
             foreach (var dbContext in _context.DbInitializeContexts)
             {
-                bool haveMigrationExecuted = await InitializeDatabaseAsync(dbContext.DbSchema, dbContext.Migrations).ConfigureAwait(false);
+                bool haveMigrationExecuted = await InitializeDatabaseAsync(dbContext.DbSchemaName, dbContext.Migrations).ConfigureAwait(false);
 
                 if (haveMigrationExecuted)
                 {
@@ -58,12 +58,12 @@ namespace HB.FullStack.WebApi.Startup
         /// <summary>
         /// 返回是否有Migration被执行
         /// </summary>
-        public async Task<bool> InitializeDatabaseAsync(string dbSchema, IEnumerable<Migration>? migrations)
+        public async Task<bool> InitializeDatabaseAsync(string dbSchemaName, IEnumerable<Migration>? migrations)
         {
-            Globals.Logger.LogDebug("开始初始化数据库:{DbSchema}", dbSchema);
+            Globals.Logger.LogDebug("开始初始化数据库:{DbSchemaName}", dbSchemaName);
 
             IDistributedLock distributedLock = await _lockManager.LockAsync(
-                resource: dbSchema,
+                resource: dbSchemaName,
                 expiryTime: TimeSpan.FromMinutes(5),
                 waitTime: TimeSpan.FromMinutes(10)).ConfigureAwait(false);
 
@@ -71,12 +71,12 @@ namespace HB.FullStack.WebApi.Startup
             {
                 if (!distributedLock.IsAcquired)
                 {
-                    throw WebApiExceptions.DatabaseInitLockError(dbSchema);
+                    throw WebApiExceptions.DatabaseInitLockError(dbSchemaName);
                 }
 
-                Globals.Logger.LogDebug("获取了初始化数据库的锁:{DbSchema}", dbSchema);
+                Globals.Logger.LogDebug("获取了初始化数据库的锁:{DbSchemaName}", dbSchemaName);
 
-                return await _database.InitializeAsync(dbSchema, null, null, migrations).ConfigureAwait(false);
+                return await _database.InitializeAsync(dbSchemaName, null, null, migrations).ConfigureAwait(false);
             }
             finally
             {

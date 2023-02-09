@@ -7,11 +7,11 @@ namespace System
 {
     public static partial class WebApiExceptions
     {
-        public static Exception DatabaseInitLockError(string dbSchema)
+        public static Exception DatabaseInitLockError(string dbSchemaName)
         {
             WebApiException exception = new WebApiException(ErrorCodes.DatabaseInitLockError, nameof(DatabaseInitLockError));
 
-            exception.Data["DbSchema"] = dbSchema;
+            exception.Data["DbSchemaName"] = dbSchemaName;
 
             return exception;
         }
@@ -33,7 +33,7 @@ namespace System
 
         public static Exception ChangedPropertyPackError(string cause, ChangedPackDto? changedPropertyPack, string? modelFullName)
         {
-            DatabaseException ex = new DatabaseException(ErrorCodes.ChangedPackError, cause, null, null);
+            DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 
             ex.Data["ModelFullName"] = modelFullName;
             ex.Data["PropertyNames"] = changedPropertyPack?.ChangedProperties.Select(c => c.PropertyName).ToJoinedString(",");

@@ -16,7 +16,7 @@ namespace HB.FullStack.Repository.CacheStrategies
     public static class CachedCollectionItemCacheStrategy
     {
         public static async Task<TResult?> GetUsingCacheAsideAsync<TResult>(
-            CachedCollectionItem<TResult> cacheCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve,
+            CachedCollectionItem<TResult> cacheCollectionItem, Func<IDbReader, Task<TResult>> dbRetrieve,
             ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
             where TResult : class
         {

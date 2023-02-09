@@ -174,7 +174,7 @@
         public static ErrorCode MapperError = new ErrorCode(nameof(MapperError), "");
         public static ErrorCode SqlError = new ErrorCode(nameof(SqlError), "");
         public static ErrorCode DatabaseTableCreateError = new ErrorCode(nameof(DatabaseTableCreateError), "");
-        public static ErrorCode DbSettingError= new ErrorCode(nameof(DbSettingError), "");
+        public static ErrorCode DbConfigError= new ErrorCode(nameof(DbConfigError), "");
 
         public static ErrorCode MigrateError = new ErrorCode(nameof(MigrateError), "");
         public static ErrorCode FoundTooMuch = new ErrorCode(nameof(FoundTooMuch), "");

@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
+using System.Linq;
 
 using HB.FullStack.Database;
 
@@ -72,9 +75,9 @@ namespace TestProject1
 
             string? str = guidConvertor.ConvertToString(guid);
 
-            Guid? guid2 = (Guid?)guidConvertor.ConvertFromString(str);
+            Guid? guid2 = (Guid?)guidConvertor.ConvertFromString(str!);
 
-            Assert.AreEqual(guid, guid2.Value);
+            Assert.AreEqual(guid, guid2!.Value);
         }
 
     }

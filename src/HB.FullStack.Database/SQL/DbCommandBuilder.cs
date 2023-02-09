@@ -9,6 +9,7 @@ using System.Text;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Implements;
 using HB.FullStack.Database.SQL;
 
 using Microsoft;
@@ -61,7 +62,7 @@ namespace HB.FullStack.Database
 
             static string GetCommandTextCacheKey(SqlType textType, DbModelDef[] modelDefs, IEnumerable<string>? propertyNames, bool addOrUpdateReturnModel)
             {
-                StringBuilder builder = new StringBuilder(modelDefs[0].DbSchema);
+                StringBuilder builder = new StringBuilder(modelDefs[0].DbSchemaName);
 
                 foreach (DbModelDef modelDef in modelDefs)
                 {
@@ -114,19 +115,19 @@ namespace HB.FullStack.Database
 
         #region 查询
 
-        public EngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
+        public DbEngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : DbModel, new()
         {
             return AssembleRetrieveCommand(GetCachedSql(SqlType.SelectModel, new DbModelDef[] { modelDef }), fromCondition, whereCondition);
         }
 
-        public EngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
+        public DbEngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : DbModel, new()
         {
             return AssembleRetrieveCommand("SELECT COUNT(1) ", fromCondition, whereCondition);
         }
 
-        public EngineCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
+        public DbEngineCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
             where T1 : DbModel, new()
             where T2 : DbModel, new()
         {
@@ -136,7 +137,7 @@ namespace HB.FullStack.Database
                 whereCondition);
         }
 
-        public EngineCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
+        public DbEngineCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
             where T1 : DbModel, new()
             where T2 : DbModel, new()
             where T3 : DbModel, new()
@@ -147,7 +148,7 @@ namespace HB.FullStack.Database
                 whereCondition);
         }
 
-        public EngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params DbModelDef[] returnModelDefs)
+        public DbEngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params DbModelDef[] returnModelDefs)
             where TSelect : DbModel, new()
             where TFrom : DbModel, new()
             where TWhere : DbModel, new()
@@ -158,7 +159,7 @@ namespace HB.FullStack.Database
                 whereCondition);
         }
 
-        private EngineCommand AssembleRetrieveCommand<TFrom, TWhere>(string selectText, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition)
+        private DbEngineCommand AssembleRetrieveCommand<TFrom, TWhere>(string selectText, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition)
             where TFrom : DbModel, new()
             where TWhere : DbModel, new()
         {
@@ -177,21 +178,21 @@ namespace HB.FullStack.Database
                 parameters.AddRange(whereCondition.GetParameters());
             }
 
-            return new EngineCommand(sql, parameters);
+            return new DbEngineCommand(sql, parameters);
         }
 
         #endregion
 
         #region 更改 - Add
 
-        public EngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : DbModel, new()
+        public DbEngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : DbModel, new()
         {
-            return new EngineCommand(
+            return new DbEngineCommand(
                 GetCachedSql(SqlType.AddModel, new DbModelDef[] { modelDef }),
                 model.ToDbParameters(modelDef, _modelDefFactory));
         }
 
-        public EngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new()
+        public DbEngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new()
         {
             //TODO: 在不需要返回Id的DatabaseModel中，使用如下句式：
             //insert into user_info （user_id,user_name,status,years）values （123,‘你好’,1,15）,(456,“你好”,2,16)；
@@ -206,7 +207,7 @@ namespace HB.FullStack.Database
 
             bool isIdAutoIncrement = modelDef.IsIdAutoIncrement;
 
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             foreach (T model in models)
             {
@@ -250,14 +251,14 @@ namespace HB.FullStack.Database
                 commandTextBuilder.Append(SqlHelper.Transaction_Commit(engineType));
             }
 
-            return new EngineCommand(commandTextBuilder.ToString(), parameters);
+            return new DbEngineCommand(commandTextBuilder.ToString(), parameters);
         }
 
         #endregion
 
         #region 更改 - Update
 
-        public EngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new()
+        public DbEngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new()
         {
             var paramters = model.ToDbParameters(modelDef, _modelDefFactory);
 
@@ -267,12 +268,12 @@ namespace HB.FullStack.Database
                 paramters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
             }
 
-            return new EngineCommand(
+            return new DbEngineCommand(
                 GetCachedSql(SqlType.UpdateModel, new DbModelDef[] { modelDef }),
                 paramters);
         }
 
-        public EngineCommand CreateBatchUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DbModel, new()
+        public DbEngineCommand CreateBatchUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : DbModel, new()
         {
             ThrowIf.Empty(models, nameof(models));
 
@@ -281,7 +282,7 @@ namespace HB.FullStack.Database
                 ThrowIf.NotEqual(models.Count(), oldTimestamps.Count, nameof(models), nameof(oldTimestamps));
             }
 
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             StringBuilder innerBuilder = new StringBuilder();
             string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
@@ -322,14 +323,14 @@ namespace HB.FullStack.Database
                                     {SqlHelper.TempTable_Drop(tempTableName, engineType)}
                                     {may_trans_commit}";
 
-            return new EngineCommand(commandText, parameters);
+            return new DbEngineCommand(commandText, parameters);
         }
 
         #endregion
 
         #region 更改 - UpdateProperties
 
-        public EngineCommand CreateUpdatePropertiesCommand(
+        public DbEngineCommand CreateUpdatePropertiesCommand(
             DbModelDef modelDef,
             object id,
             IList<string> propertyNames,
@@ -338,7 +339,7 @@ namespace HB.FullStack.Database
             long? newTimestamp,
             string lastUser)
         {
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             IList<string> curPropertyNames = new List<string>(propertyNames);
             IList<object?> curPropertyValues = new List<object?>(propertyValues);
@@ -351,7 +352,7 @@ namespace HB.FullStack.Database
 
             if (modelDef.IsTimestampDBModel && !(oldTimestamp.HasValue && newTimestamp.HasValue))
             {
-                throw DatabaseExceptions.TimestampNotExists(engineType: engineType, modelDef: modelDef, propertyNames: curPropertyNames);
+                throw DbExceptions.TimestampNotExists(engineType: engineType, modelDef: modelDef, propertyNames: curPropertyNames);
             }
 
             if (newTimestamp.HasValue)
@@ -369,12 +370,12 @@ namespace HB.FullStack.Database
                     oldTimestamp.Value));
             }
 
-            return new EngineCommand(
+            return new DbEngineCommand(
                 GetCachedSql(SqlType.UpdateProperties, new DbModelDef[] { modelDef }, curPropertyNames),
                 parameters);
         }
 
-        public EngineCommand CreateBatchUpdatePropertiesCommand(
+        public DbEngineCommand CreateBatchUpdatePropertiesCommand(
             DbModelDef modelDef,
             IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)> modelChanges,
             string lastUser,
@@ -382,7 +383,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.Empty(modelChanges, nameof(modelChanges));
 
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             StringBuilder innerBuilder = new StringBuilder();
             string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
@@ -405,7 +406,7 @@ namespace HB.FullStack.Database
 
                 if (modelDef.IsTimestampDBModel && !(oldTimestamp.HasValue && newTimestamp.HasValue))
                 {
-                    throw DatabaseExceptions.TimestampNotExists(engineType, modelDef, curPropertyNames);
+                    throw DbExceptions.TimestampNotExists(engineType, modelDef, curPropertyNames);
                 }
 
                 if (newTimestamp.HasValue)
@@ -453,10 +454,10 @@ namespace HB.FullStack.Database
                                     {SqlHelper.TempTable_Drop(tempTableName, engineType)}
                                     {may_trans_commit}";
 
-            return new EngineCommand(commandText, totalParameters);
+            return new DbEngineCommand(commandText, totalParameters);
         }
 
-        public EngineCommand CreateUpdatePropertiesUsingOldNewCompareCommand(
+        public DbEngineCommand CreateUpdatePropertiesUsingOldNewCompareCommand(
             DbModelDef modelDef,
             object id,
             IList<string> propertyNames,
@@ -490,10 +491,10 @@ namespace HB.FullStack.Database
             //使用propertyNames而不是curPropertyNames
             string sql = GetCachedSql(SqlType.UpdatePropertiesUsingOldNewCompare, new DbModelDef[] { modelDef }, propertyNames);
 
-            return new EngineCommand(sql, parameters);
+            return new DbEngineCommand(sql, parameters);
         }
 
-        public EngineCommand CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
+        public DbEngineCommand CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
             DbModelDef modelDef,
             IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long newTimestamp)> modelChanges,
             string lastUser,
@@ -501,7 +502,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.Empty(modelChanges, nameof(modelChanges));
 
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             StringBuilder innerBuilder = new StringBuilder();
             string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
@@ -568,7 +569,7 @@ namespace HB.FullStack.Database
                                     {SqlHelper.TempTable_Drop(tempTableName, engineType)}
                                     {may_trans_commit}";
 
-            return new EngineCommand(commandText, totalParameters);
+            return new DbEngineCommand(commandText, totalParameters);
         }
 
         #endregion
@@ -578,10 +579,10 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update. 且Version不变,不增长
         /// </summary>
-        public EngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : DbModel, new()
+        public DbEngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : DbModel, new()
         {
             //只在客户端开放，因为不检查Version就update. 且Version不变,不增长
-            return new EngineCommand(
+            return new DbEngineCommand(
                 GetCachedSql(SqlType.AddOrUpdateModel, new DbModelDef[] { modelDef }, null, returnModel),
                 model.ToDbParameters(modelDef, _modelDefFactory));
         }
@@ -589,11 +590,11 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update，并且无法更新models
         /// </summary>
-        public EngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new()
+        public DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, bool needTrans) where T : DbModel, new()
         {
             ThrowIf.Empty(models, nameof(models));
 
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             StringBuilder innerBuilder = new StringBuilder();
             //string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
@@ -629,14 +630,14 @@ namespace HB.FullStack.Database
                 commandTextBuilder.Append(SqlHelper.Transaction_Commit(engineType));
             }
 
-            return new EngineCommand(commandTextBuilder.ToString(), parameters);
+            return new DbEngineCommand(commandTextBuilder.ToString(), parameters);
         }
 
         #endregion
 
         #region 更改 - Delete
 
-        public EngineCommand CreateDeleteCommand(
+        public DbEngineCommand CreateDeleteCommand(
             DbModelDef modelDef,
             object id,
             string lastUser,
@@ -644,7 +645,7 @@ namespace HB.FullStack.Database
             long? oldTimestamp,
             long? newTimestamp)
         {
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             if (!trulyDeleted)
             {
@@ -663,7 +664,7 @@ namespace HB.FullStack.Database
 
             if (modelDef.IsTimestampDBModel && !oldTimestamp.HasValue)
             {
-                throw DatabaseExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
+                throw DbExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
             }
 
             if (oldTimestamp.HasValue)
@@ -676,10 +677,10 @@ namespace HB.FullStack.Database
 
             IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues);
 
-            return new EngineCommand(sql, parameters);
+            return new DbEngineCommand(sql, parameters);
         }
 
-        public EngineCommand CreateDeleteCommand<T>(
+        public DbEngineCommand CreateDeleteCommand<T>(
             DbModelDef modelDef,
             WhereExpression<T> whereExpression,
             string lastUser,
@@ -700,15 +701,15 @@ namespace HB.FullStack.Database
 
                 string sql = GetCachedSql(SqlType.UpdateDeletedFields, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
 
-                return new EngineCommand(sql, parameters);
+                return new DbEngineCommand(sql, parameters);
             }
 
             string deleteSql = GetCachedSql(SqlType.Delete, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
 
-            return new EngineCommand(deleteSql, parameters);
+            return new DbEngineCommand(deleteSql, parameters);
         }
 
-        public EngineCommand CreateBatchDeleteCommand(
+        public DbEngineCommand CreateBatchDeleteCommand(
             DbModelDef modelDef,
             IList<object> ids,
             IList<long?> oldTimestamps,
@@ -719,7 +720,7 @@ namespace HB.FullStack.Database
         {
             int count = ids.Count;
 
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             if (!trulyDeleted)
             {
@@ -747,7 +748,7 @@ namespace HB.FullStack.Database
 
                 if (modelDef.IsTimestampDBModel && !oldTimestamps[i].HasValue)
                 {
-                    throw DatabaseExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
+                    throw DbExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
                 }
 
                 if (oldTimestamps[i].HasValue)
@@ -782,21 +783,21 @@ namespace HB.FullStack.Database
                                     {SqlHelper.TempTable_Drop(tempTableName, engineType)}
                                     {may_trans_commit}";
 
-            return new EngineCommand(commandText, totalParameters);
+            return new DbEngineCommand(commandText, totalParameters);
         }
 
         #endregion
 
         #region Management
 
-        public EngineCommand CreateTableCreateCommand(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength)
+        public DbEngineCommand CreateTableCreateCommand(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength, int maxVarcharFieldLength, int maxMediumTextFieldLength)
         {
-            string sql = SqlHelper.GetTableCreateSql(modelDef, addDropStatement, varcharDefaultLength);
+            string sql = SqlHelper.GetTableCreateSql(modelDef, addDropStatement, varcharDefaultLength, maxVarcharFieldLength, maxMediumTextFieldLength);
 
-            return new EngineCommand(sql);
+            return new DbEngineCommand(sql);
         }
 
-        public EngineCommand CreateIsTableExistCommand(EngineType engineType, string tableName)
+        public DbEngineCommand CreateIsTableExistCommand(DbEngineType engineType, string tableName)
         {
             string sql = SqlHelper.GetIsTableExistSql(engineType);
 
@@ -804,17 +805,17 @@ namespace HB.FullStack.Database
                 new KeyValuePair<string, object>("@tableName", tableName )
             };
 
-            return new EngineCommand(sql, parameters);
+            return new DbEngineCommand(sql, parameters);
         }
 
-        public EngineCommand CreateSystemInfoRetrieveCommand(EngineType engineType)
+        public DbEngineCommand CreateSystemInfoRetrieveCommand(DbEngineType engineType)
         {
             string sql = SqlHelper.GetSystemInfoRetrieveSql(engineType);
 
-            return new EngineCommand(sql);
+            return new DbEngineCommand(sql);
         }
 
-        public EngineCommand CreateSystemVersionSetCommand(EngineType engineType, string dbSchema, int version)
+        public DbEngineCommand CreateSystemVersionSetCommand(DbEngineType engineType, string dbSchemaName, int version)
         {
             string sql;
             List<KeyValuePair<string, object>> parameters;
@@ -823,7 +824,7 @@ namespace HB.FullStack.Database
             {
                 sql = SqlHelper.GetSystemInfoCreateSql(engineType);
 
-                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>($"@{SystemInfoNames.DATABASE_SCHEMA}", dbSchema) };
+                parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>($"@{SystemInfoNames.DATABASE_SCHEMA}", dbSchemaName) };
             }
             else
             {
@@ -832,7 +833,7 @@ namespace HB.FullStack.Database
                 parameters = new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>($"@{SystemInfoNames.VERSION}", version) };
             }
 
-            return new EngineCommand(sql, parameters);
+            return new DbEngineCommand(sql, parameters);
         }
 
         #endregion Management

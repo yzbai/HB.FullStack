@@ -38,7 +38,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 await Db.AddAsync(book, "tester", null);
             }
-            catch (DatabaseException e)
+            catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
@@ -51,7 +51,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 await Db.AddAsync(publisherModel, "", null);
             }
-            catch (DatabaseException e)
+            catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
@@ -69,7 +69,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 await Db.BatchAddAsync(books, "tester", null);
             }
-            catch (DatabaseException e)
+            catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
@@ -107,7 +107,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
             }
-            catch (DatabaseException ex)
+            catch (DbException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
@@ -150,7 +150,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
             }
-            catch (DatabaseException ex)
+            catch (DbException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
@@ -181,7 +181,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 book2!.Name = "Update book2";
                 await Db.UpdateAsync(book2, "tester", null);
             }
-            catch (DatabaseException ex)
+            catch (DbException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
@@ -215,13 +215,13 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var connectionString = DbSettingManager.GetConnectionString(DbSchema_Mysql, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1!.Id}"));
+                new DbEngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1!.Id}"));
 
             int rt2 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1.Id}"));
+                new DbEngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1.Id}"));
 
             int rt3 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1.Id}"));
+                new DbEngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1.Id}"));
 
             Assert.AreEqual(rt, rt2, rt3);
         }
@@ -246,7 +246,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 ";
             var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new EngineCommand(sql));
+            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
 
             List<string?> rt = new List<string?>();
 
@@ -500,7 +500,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         /// Test_9_UpdateLastTimeTestAsync
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="DatabaseException">Ignore.</exception>
+        /// <exception cref="DbException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [TestMethod]
         public async Task Guid_Test_09_UpdateLastTimeTestAsync()
@@ -755,7 +755,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(r[i], property, EngineType.MySQL);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(r[i], property, DbEngineType.MySQL);
 
                         if (value != null)
                         {
@@ -813,7 +813,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, 1);
 
-            AssertEqual(emit_results, reflect_results, EngineType.MySQL);
+            AssertEqual(emit_results, reflect_results, DbEngineType.MySQL);
 
             //PublisherModel2
 
@@ -823,7 +823,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, 1);
 
-            AssertEqual(emit_results2, reflect_results2, EngineType.MySQL);
+            AssertEqual(emit_results2, reflect_results2, DbEngineType.MySQL);
 
             //PublisherModel3
 
@@ -833,7 +833,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, 1);
 
-            AssertEqual(emit_results3, reflect_results3, EngineType.MySQL);
+            AssertEqual(emit_results3, reflect_results3, DbEngineType.MySQL);
         }
 
         [TestMethod]
@@ -864,7 +864,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
             Console.WriteLine($"Reflection: {stopwatch.ElapsedMilliseconds}");
         }
 
-        private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, EngineType engineType)
+        private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, DbEngineType engineType)
         {
             var dict = results.ToDictionary(kv => kv.Key);
 

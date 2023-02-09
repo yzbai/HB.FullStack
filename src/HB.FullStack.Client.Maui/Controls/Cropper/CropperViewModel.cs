@@ -39,11 +39,6 @@ namespace HB.FullStack.Client.Maui.Controls.Cropper
 
         public ObservableRangeCollection<SKFigure> Figures { get; } = new ObservableRangeCollection<SKFigure>();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="imageFullPath">本地原始图片路径</param>
-        /// <param name="croppedImageFullPath">剪切后的存储位置</param>
         public CropperViewModel(
             ILogger<CropperViewModel> logger,
             IPreferenceProvider referenceProvider,

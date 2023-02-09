@@ -39,7 +39,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
                     return;
                 }
 
-                string captchaJson = captcha.First();
+                string? captchaJson = captcha.First();
 
                 TCaptchaResult? result = SerializeUtil.FromJson<TCaptchaResult>(captchaJson);
 

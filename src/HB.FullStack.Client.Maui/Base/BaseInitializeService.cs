@@ -41,7 +41,7 @@ namespace HB.FullStack.Client.Maui.Base
 
             JoinableTasks.JoinableTaskFactory.Run(() =>
 
-
+                database.InitializeAsync(
 
                 database.InitializeAsync(_migrations).ContinueWith(task =>
                 {

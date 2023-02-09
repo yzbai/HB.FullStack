@@ -12,11 +12,11 @@ namespace HB.FullStack.Identity.Models
     public class UserRole : TimelessFlackIdDbModel
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User), false)]
+        [DbForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
         [NoEmptyGuid]
-        [ForeignKey(typeof(Role), false)]
+        [DbForeignKey(typeof(Role), false)]
         public Guid RoleId { get; set; }
 
         public UserRole() { }

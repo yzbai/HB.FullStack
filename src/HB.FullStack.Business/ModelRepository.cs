@@ -37,11 +37,11 @@ namespace HB.FullStack.Repository
 
         private IDatabase Database { get; }
 
-        protected IDatabaseReader DbReader => Database;
+        protected IDbReader DbReader => Database;
 
         private IMemoryLockManager MemoryLockManager { get; }
 
-        protected ModelRepository(ILogger logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        protected ModelRepository(ILogger logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
         {
             Logger = logger;
             Cache = cache;
@@ -390,7 +390,7 @@ namespace HB.FullStack.Repository
 
         #region Model Cache Strategy
 
-        protected async Task<TMainDBModel?> GetUsingCacheAsideAsync(string keyName, object keyValue, Func<IDatabaseReader, Task<TMainDBModel?>> dbRetrieve)
+        protected async Task<TMainDBModel?> GetUsingCacheAsideAsync(string keyName, object keyValue, Func<IDbReader, Task<TMainDBModel?>> dbRetrieve)
         {
             IEnumerable<TMainDBModel>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<TMainDBModel>(
                 keyName,
@@ -422,7 +422,7 @@ namespace HB.FullStack.Repository
             return results.ElementAt(0);
         }
 
-        protected Task<IEnumerable<TMainDBModel>> GetUsingCacheAsideAsync(string keyName, IEnumerable keyValues, Func<IDatabaseReader, Task<IEnumerable<TMainDBModel>>> dbRetrieve)
+        protected Task<IEnumerable<TMainDBModel>> GetUsingCacheAsideAsync(string keyName, IEnumerable keyValues, Func<IDbReader, Task<IEnumerable<TMainDBModel>>> dbRetrieve)
         {
             return ModelCacheStrategy.GetUsingCacheAsideAsync(keyName, keyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
@@ -431,12 +431,12 @@ namespace HB.FullStack.Repository
 
         #region Timestamp Cache Strategy
 
-        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : TimestampDbModel
+        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDbReader, Task<TResult>> dbRetrieve) where TResult : TimestampDbModel
         {
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : TimestampDbModel
+        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDbReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : TimestampDbModel
         {
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
@@ -455,12 +455,12 @@ namespace HB.FullStack.Repository
 
         #region Collection Cache Strategy
 
-        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<TResult> cachedCollectionItem, Func<IDatabaseReader, Task<TResult>> dbRetrieve) where TResult : class
+        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<TResult> cachedCollectionItem, Func<IDbReader, Task<TResult>> dbRetrieve) where TResult : class
         {
             return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<IEnumerable<TResult>> cachedCollectionItem, Func<IDatabaseReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<IEnumerable<TResult>> cachedCollectionItem, Func<IDbReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
         {
             return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }

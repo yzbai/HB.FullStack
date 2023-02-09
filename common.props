@@ -1,5 +1,9 @@
 <Project>
 	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
+	
+	<PropertyGroup>
 		<VersionSuffix>$(VersionSuffix)</VersionSuffix>
 		<Version>2.0.3</Version>
 		<Version Condition=" '$(VersionSuffix)' != '' ">$(Version)-$(VersionSuffix)</Version>

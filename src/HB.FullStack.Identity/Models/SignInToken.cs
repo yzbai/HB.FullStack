@@ -8,11 +8,11 @@ namespace HB.FullStack.Identity.Models
     public class SignInToken : TimestampGuidDbModel
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User), false)]
+        [DbForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
         [Required]
-        [DbModelProperty(NotNull = true, NeedIndex = true)]
+        [DbField(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
         public DateTimeOffset? ExpireAt { get; set; }
@@ -24,13 +24,13 @@ namespace HB.FullStack.Identity.Models
         #region Device
 
         [Required]
-        [DbModelProperty(NotNull = true, NeedIndex = true)]
+        [DbField(NotNull = true, NeedIndex = true)]
         public string DeviceId { get; set; } = default!;
 
-        [DbModelProperty(NotNull = true)]
+        [DbField(NotNull = true)]
         public string DeviceVersion { get; set; } = default!;
 
-        [DbModelProperty(NotNull = true)]
+        [DbField(NotNull = true)]
         public string DeviceIp { get; set; } = default!;
 
         #endregion

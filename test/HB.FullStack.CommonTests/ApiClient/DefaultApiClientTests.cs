@@ -1,4 +1,5 @@
 ﻿global using static HB.FullStack.BaseTest.ApiConstants;
+
 using System;
 using System.IO;
 using System.Net.Http;
@@ -41,11 +42,11 @@ namespace HB.FullStack.CommonTests.ApiClient
                     using StreamReader streamReader = new StreamReader(request.InputStream);
                     string requestJson = streamReader.ReadToEnd();
 
-                    GetBookByNameRequest getBookByNameRequest = SerializeUtil.FromJson<GetBookByNameRequest>(requestJson);
+                    GetBookByNameRequest? getBookByNameRequest = SerializeUtil.FromJson<GetBookByNameRequest>(requestJson);
 
                     //Assert.IsNull(getBookByNameRequest.RequestBuilder);
 
-                    BookRes res = new BookRes { Title = "T", Name = getBookByNameRequest.Name, Price = 12.123 };
+                    BookRes res = new BookRes { Title = "T", Name = getBookByNameRequest!.Name!, Price = 12.123 };
 
                     response.ContentType = "application/json";
 
@@ -55,7 +56,7 @@ namespace HB.FullStack.CommonTests.ApiClient
                     streamWriter.Write(json);
                 }));
 
-            BookRes bookRes = await ApiClient.GetAsync<BookRes>(new GetBookByNameRequest("TestBook"));
+            BookRes? bookRes = await ApiClient.GetAsync<BookRes>(new GetBookByNameRequest("TestBook"));
 
             Assert.IsNotNull(bookRes);
         }
@@ -69,7 +70,7 @@ namespace HB.FullStack.CommonTests.ApiClient
 
     public class GetBookByNameRequest : GetRequest<BookRes>
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonConstructor]
         public GetBookByNameRequest() { }

@@ -12,7 +12,7 @@ namespace System
 
     public class DbInitializeContext
     {
-        public string DbSchema { get; set; } = null!;
+        public string DbSchemaName { get; set; } = null!;
 
         public IEnumerable<Migration>? Migrations { get; set; }
 

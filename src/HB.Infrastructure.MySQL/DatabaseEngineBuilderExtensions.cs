@@ -1,19 +1,13 @@
-﻿using HB.FullStack.Database;
-using HB.FullStack.Database.Engine;
-using HB.Infrastructure.MySQL;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-using System;
+﻿using HB.Infrastructure.MySQL;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class DatabaseEngineBuilderExtensions
     {
-        public static IDatabaseEngineBuilder AddMySQL(this IDatabaseEngineBuilder builder)
+        public static IDbEngineBuilder AddMySQL(this IDbEngineBuilder builder)
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IDatabaseEngine, MySQLEngine>());
+
+            builder.AddDatabaseEngine<MySQLEngine>();
 
             return builder;
         }

@@ -26,12 +26,12 @@ namespace HB.FullStack.Database.DbModels
 
         #endregion
 
-        public DbSchema DbSchema { get; set; } = null!; 
+        public string DbSchemaName { get; set; } = null!; 
 
         /// <summary>
         /// 属于那种数据库
         /// </summary>
-        public EngineType EngineType { get; set; }
+        public DbEngineType EngineType { get; set; }
 
         /// <summary>
         /// 数据库表名

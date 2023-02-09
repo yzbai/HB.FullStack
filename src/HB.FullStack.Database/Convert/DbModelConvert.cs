@@ -100,7 +100,7 @@ namespace HB.FullStack.Database.Convert
 
             static string GetKey(DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull)
             {
-                return $"{modelDef.DbSchema}_{modelDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
+                return $"{modelDef.DbSchemaName}_{modelDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
             }
         }
 
@@ -112,11 +112,11 @@ namespace HB.FullStack.Database.Convert
         {
             if (model is TimestampDbModel serverModel && serverModel.Timestamp <= 0)
             {
-                throw DatabaseExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DbExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(modelDef.FieldCount);
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
@@ -135,7 +135,7 @@ namespace HB.FullStack.Database.Convert
         {
             if (model is TimestampDbModel serverModel && serverModel.Timestamp <= 0)
             {
-                throw DatabaseExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DbExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef);
@@ -153,7 +153,7 @@ namespace HB.FullStack.Database.Convert
 
             static string GetKey(DbModelDef modelDef)
             {
-                return $"{modelDef.DbSchema}_{modelDef.TableName}_ModelToParameters";
+                return $"{modelDef.DbSchemaName}_{modelDef.TableName}_ModelToParameters";
             }
         }
 
@@ -166,15 +166,15 @@ namespace HB.FullStack.Database.Convert
         {
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(propertyValues.Count);
 
-            EngineType engineType = modelDef.EngineType;
+            DbEngineType engineType = modelDef.EngineType;
 
             foreach (KeyValuePair<string, object?> kv in propertyValues)
             {
                 DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(kv.Key);
 
-                if (propertyDef == null)
+                    if (propertyDef == null)
                 {
-                    throw DatabaseExceptions.PropertyNotFound(modelDef.ModelFullName, kv.Key);
+                    throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, kv.Key);
                 }
 
                 parameters.Add(new KeyValuePair<string, object>(
@@ -197,7 +197,7 @@ namespace HB.FullStack.Database.Convert
 
             static string GetKey(DbModelDef modelDef, IList<string> names)
             {
-                return $"{modelDef.DbSchema}_{modelDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
+                return $"{modelDef.DbSchemaName}_{modelDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
             }
         }
 

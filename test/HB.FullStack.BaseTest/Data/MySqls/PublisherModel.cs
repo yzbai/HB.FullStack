@@ -1,208 +1,207 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using HB.FullStack.Database;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class PublisherModel3 : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public int Integer { get; set; } = 999;
 
-        [DbModelProperty]
+        [DbField]
         public float Float { get; set; } = 1.9877f;
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = "Name";
 
-        [DbModelProperty]
+        [DbField]
         public string Name2 { get; set; } = "Name2";
 
-        [DbModelProperty]
+        [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_PublisherModel3 : TimestampGuidDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public int Integer { get; set; } = 999;
 
-        [DbModelProperty]
+        [DbField]
         public float Float { get; set; } = 1.9877f;
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = "Name";
 
-        [DbModelProperty]
+        [DbField]
         public string Name2 { get; set; } = "Name2";
 
-        [DbModelProperty]
+        [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class PublisherModel2 : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public int Integer { get; set; } = 999;
 
-        [DbModelProperty]
+        [DbField]
         public float Float { get; set; } = 1.9877f;
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public string? Name2 { get; set; } = "Name2";
 
-        [DbModelProperty]
+        [DbField]
         public string? Name3 { get; set; } //= "xxxx";
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType Type { get; set; } = PublisherType.Big;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type2 { get; set; } = PublisherType.Small;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type3 { get; set; } //= PublisherType.Online;
 
-        [DbModelProperty]
+        [DbField]
         public int? Number { get; set; } = 12121221;
 
-        [DbModelProperty]
+        [DbField]
         public int? Number1 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? DDD { get; set; }// = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_PublisherModel2 : TimestampGuidDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public int Integer { get; set; } = 999;
 
-        [DbModelProperty]
+        [DbField]
         public float Float { get; set; } = 1.9877f;
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public string? Name2 { get; set; } = "Name2";
 
-        [DbModelProperty]
+        [DbField]
         public string? Name3 { get; set; } //= "xxxx";
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType Type { get; set; } = PublisherType.Big;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type2 { get; set; } = PublisherType.Small;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type3 { get; set; } //= PublisherType.Online;
 
-        [DbModelProperty]
+        [DbField]
         public int? Number { get; set; } = 12121221;
 
-        [DbModelProperty]
+        [DbField]
         public int? Number1 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? DDD { get; set; }// = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class PublisherModel : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(MaxLength = DbSchema. MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType Type { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number1 { get; set; } = 111;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type3 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name3 { get; set; } = "xxxx";
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? DDD { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_PublisherModel : TimestampGuidDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(MaxLength = DbSchema.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType Type { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number1 { get; set; } = 111;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type3 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name3 { get; set; } = "xxxx";
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? DDD { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 
@@ -219,145 +218,145 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         public string Mobile { get; set; } = default!;
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class PublisherModel3_Client : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public int Integer { get; set; } = 999;
 
-        [DbModelProperty]
+        [DbField]
         public float Float { get; set; } = 1.9877f;
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = "Name";
 
-        [DbModelProperty]
+        [DbField]
         public string Name2 { get; set; } = "Name2";
 
-        [DbModelProperty]
+        [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class PublisherModel2_Client : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public int Integer { get; set; } = 999;
 
-        [DbModelProperty]
+        [DbField]
         public float Float { get; set; } = 1.9877f;
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public string? Name2 { get; set; } = "Name2";
 
-        [DbModelProperty]
+        [DbField]
         public string? Name3 { get; set; } //= "xxxx";
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType Type { get; set; } = PublisherType.Big;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type2 { get; set; } = PublisherType.Small;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type3 { get; set; } //= PublisherType.Online;
 
-        [DbModelProperty]
+        [DbField]
         public int? Number { get; set; } = 12121221;
 
-        [DbModelProperty]
+        [DbField]
         public int? Number1 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? DDD { get; set; }// = new DateTimeOffset(2021, 11, 11, 11, 11, 11, TimeSpan.Zero);
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class PublisherModel_Client : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(MaxLength = DbSchema.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType Type { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number1 { get; set; } = 111;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type3 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name3 { get; set; } = "xxxx";
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? DDD { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_PublisherModel_Client : TimestampGuidDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IList<string> Books { get; set; } = default!;
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, Author> BookAuthors { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = DefaultLengthConventions.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(MaxLength = DbSchema.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
         public IDictionary<string, string> BookNames { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType Type { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public int? Number1 { get; set; } = 111;
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public PublisherType? Type3 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name2 { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Name3 { get; set; } = "xxxx";
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? DDD { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 }

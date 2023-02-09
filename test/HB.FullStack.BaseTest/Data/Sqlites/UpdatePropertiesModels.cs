@@ -12,10 +12,10 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.Sqlites
 {
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     public record InnerModel(string? InnerName);
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     [PropertyTrackableObject]
     public partial class UPTimestampModel : TimestampGuidDbModel
     {
@@ -26,12 +26,12 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         private int? _age;
 
         [TrackProperty]
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         private InnerModel? _innerModel;
 
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     [PropertyTrackableObject]
     public partial class UPTimelessModel : TimelessGuidDbModel
     {
@@ -42,7 +42,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         private int? _age;
 
         [TrackProperty]
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         private InnerModel? _innerModel;
     }
 }

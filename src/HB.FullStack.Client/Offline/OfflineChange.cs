@@ -21,7 +21,7 @@ namespace HB.FullStack.Client.Offline
 
         //public string? BusinessCatalog { get; set; }
 
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public ChangedPackDto? ChangedPackDto { get; set; }
 
         //public string? DeletedObjectJson { get; set; }

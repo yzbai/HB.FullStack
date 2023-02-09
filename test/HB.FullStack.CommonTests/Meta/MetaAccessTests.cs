@@ -48,7 +48,7 @@ namespace HB.FullStack.Common.Meta.Tests
 
             PropertyValue[] values = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(obj);
 
-            Assert.IsTrue(values[0].PropertyName == nameof(MetaAccessObj.Name) && values[0].Value.ToString() == "TestName");
+            Assert.IsTrue(values[0].PropertyName == nameof(MetaAccessObj.Name) && values[0].Value!.ToString() == "TestName");
 
             Assert.IsTrue(values[1].PropertyName == nameof(MetaAccessObj.Keys) && values[1].Value is IList<string> list && list.Count == 2 && list[0] == "1" && list[1] == "2");
         }
@@ -64,7 +64,7 @@ namespace HB.FullStack.Common.Meta.Tests
 
             PropertyValue[] values = func(obj);
 
-            Assert.IsTrue(values[0].PropertyName == nameof(MetaAccessObj.Name) && values[0].Value.ToString() == "TestName");
+            Assert.IsTrue(values[0].PropertyName == nameof(MetaAccessObj.Name) && values[0].Value!.ToString() == "TestName");
 
             Assert.IsTrue(values[1].PropertyName == nameof(MetaAccessObj.Keys) && values[1].Value is IList<string> list && list.Count == 2 && list[0] == "1" && list[1] == "2");
         }

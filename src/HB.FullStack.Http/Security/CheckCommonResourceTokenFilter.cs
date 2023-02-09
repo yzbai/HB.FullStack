@@ -45,7 +45,7 @@ namespace HB.FullStack.WebApi.Filters
                             return;
                         }
 
-                        string crt = token.First();
+                        string? crt = token.First();
 
                         if (!_commonResTokenService.TryCheckToken(crt, out string? _))
                         {

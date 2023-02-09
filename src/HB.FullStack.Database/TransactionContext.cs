@@ -15,9 +15,9 @@ namespace HB.FullStack.Database
 
         public TransactionStatus Status { get; set; }
 
-        public IDatabaseEngine DatabaseEngine { get; }
+        public IDbEngine DatabaseEngine { get; }
 
-        public TransactionContext(IDbTransaction transaction, TransactionStatus status, ITransaction transactionManager, IDatabaseEngine databaseEngine)
+        public TransactionContext(IDbTransaction transaction, TransactionStatus status, ITransaction transactionManager, IDbEngine databaseEngine)
         {
             DatabaseEngine = databaseEngine;
             _transactionManager = transactionManager;

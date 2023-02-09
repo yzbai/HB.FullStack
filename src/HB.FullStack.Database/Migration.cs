@@ -1,4 +1,8 @@
-﻿
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
 using System;
 using System.Collections.Generic;
@@ -17,27 +21,26 @@ namespace HB.FullStack.Database
     /// </summary>
     public class Migration
     {
-        public string DbSchema { get; set; }
-
+        public string DbSchemaName { get; set; }
         public int OldVersion { get; set; }
         public int NewVersion { get; set; }
         public string? SqlStatement { get; set; }
 
         public Func<IDatabase, TransactionContext, Task>? ModifyFunc { get; private set; }
 
-        public Migration(string dbSchema, int oldVersion, int newVersion, string? sql = null, Func<IDatabase, TransactionContext, Task>? func = null)
+        public Migration(string dbSchemaName, int oldVersion, int newVersion, string? sql = null, Func<IDatabase, TransactionContext, Task>? func = null)
         {
             if (oldVersion < 0)
             {
-                throw DatabaseExceptions.MigrateError(dbSchema, "oldVersion < 0");
+                throw DbExceptions.MigrateError(dbSchemaName, "oldVersion < 0");
             }
 
             if (newVersion != oldVersion + 1)
             {
-                throw DatabaseExceptions.MigrateError(dbSchema, "newVersion != oldVersoin + 1 ");
+                throw DbExceptions.MigrateError(dbSchemaName, "newVersion != oldVersoin + 1 ");
             }
 
-            DbSchema = dbSchema;
+            DbSchemaName = dbSchemaName;
             OldVersion = oldVersion;
             NewVersion = newVersion;
             SqlStatement = sql;

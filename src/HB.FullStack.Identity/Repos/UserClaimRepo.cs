@@ -16,7 +16,7 @@ namespace HB.FullStack.Identity
     public class UserClaimRepo : ModelRepository<UserClaim>
     {
 
-        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)

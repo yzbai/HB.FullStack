@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\common.props" />
-  <PropertyGroup>
-	  <TargetFramework>net6.0</TargetFramework>
-	
-  </PropertyGroup>
+ 
 
   <ItemGroup>
 	<ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />

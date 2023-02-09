@@ -8,13 +8,13 @@ namespace HB.FullStack.Identity.Models
     public class UserClaim : TimestampGuidDbModel
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User), false)]
+        [DbForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
-        [DbModelProperty(NotNull = true)]
+        [DbField(NotNull = true)]
         public string ClaimType { get; set; } = default!;
 
-        [DbModelProperty(MaxLength = LengthConventions.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
+        [DbField(MaxLength = LengthConventions.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
         public string ClaimValue { get; set; } = default!;
 
         public bool AddToJwt { get; set; }

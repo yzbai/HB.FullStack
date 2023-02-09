@@ -2,6 +2,8 @@
 global using static HB.FullStack.BaseTest.BaseTestClass;
 global using static HB.FullStack.BaseTest.ApiConstants;
 
+global using System;
+
 using HB.FullStack.Database;
 
 using Microsoft.Data.Sqlite;
@@ -19,6 +21,11 @@ using HB.Infrastructure.Redis.EventBus;
 using Microsoft.Extensions.Options;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Test;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.IO;
+using HB.FullStack.Database.Implements;
+using HB.FullStack.Database.Config;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
 
@@ -38,7 +45,7 @@ namespace HB.FullStack.BaseTest
 
         public static IDatabase Db { get; set; } = null!;
 
-        public static IDbSettingManager DbSettingManager { get; set; } = null!;
+        public static IDbSchemaManager DbSettingManager { get; set; } = null!;
 
         public static ITransaction Trans { get; set; } = null!;
 
@@ -96,7 +103,7 @@ namespace HB.FullStack.BaseTest
             #region Db
 
             Db = ServiceProvider.GetRequiredService<IDatabase>();
-            DbSettingManager = ServiceProvider.GetRequiredService<IDbSettingManager>();
+            DbSettingManager = ServiceProvider.GetRequiredService<IDbSchemaManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
             //初始化 DbSchema_Mysql
@@ -115,9 +122,9 @@ namespace HB.FullStack.BaseTest
             #region Cache
 
             Cache = ServiceProvider.GetRequiredService<ICache>();
-            RedisConnection = StackExchange.Redis.ConnectionMultiplexer.Connect(Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
+            RedisConnection = StackExchange.Redis.ConnectionMultiplexer.Connect(Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]!);
             RedisDbNumber = Convert.ToInt32(Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
-            ApplicationName = Configuration["RedisCache:ApplicationName"];
+            ApplicationName = Configuration["RedisCache:ApplicationName"]!;
 
             #endregion
 
@@ -157,7 +164,7 @@ namespace HB.FullStack.BaseTest
 
             var mysqlEngine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new EngineCommand(sql));
+            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
         }
 
         [AssemblyCleanup]
@@ -187,7 +194,7 @@ namespace HB.FullStack.BaseTest
             Configuration = configurationBuilder.Build();
 
 
-            DatabaseOptions dbOptions = new DatabaseOptions();
+            DbOptions dbOptions = new DbOptions();
 
             Configuration.GetSection("Database").Bind(dbOptions);
 

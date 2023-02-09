@@ -11,6 +11,9 @@ namespace HB.FullStack.Common.PropertyTrackable
 
         void EndTrack();
 
+        /// <summary>
+        /// 清除记录
+        /// </summary>
         void Clear();
 
         IList<ChangedProperty> GetChangedProperties(bool mergeMultipleChanged = true);

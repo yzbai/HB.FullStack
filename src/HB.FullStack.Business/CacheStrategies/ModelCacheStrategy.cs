@@ -22,7 +22,7 @@ namespace HB.FullStack.Repository.CacheStrategies
         public static async Task<IEnumerable<TModel>> GetUsingCacheAsideAsync<TModel>(
             string keyName,
             IEnumerable keyValues,
-            Func<IDatabaseReader, Task<IEnumerable<TModel>>> dbRetrieve,
+            Func<IDbReader, Task<IEnumerable<TModel>>> dbRetrieve,
             IDatabase database,
             ICache cache,
             IMemoryLockManager memoryLockManager,

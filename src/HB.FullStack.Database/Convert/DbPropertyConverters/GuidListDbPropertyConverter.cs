@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.Convert
                 return guids.ToJoinedString(",");
             }
 
-            throw DatabaseExceptions.TypeConverterError("使用LongIdListTypeConverter的，必须可赋值为IEnumerable<Guid>", propertyType.FullName);
+            throw DbExceptions.TypeConverterError("使用LongIdListTypeConverter的，必须可赋值为IEnumerable<Guid>", propertyType.FullName);
         }
     }
 }

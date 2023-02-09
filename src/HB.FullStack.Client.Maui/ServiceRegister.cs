@@ -12,12 +12,10 @@ using HB.FullStack.Client.Maui.Controls.Popups;
 using HB.FullStack.Client.Maui.File;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Database;
-using HB.Infrastructure.SQLite;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Maui.Devices;
-using Microsoft.Maui.Hosting;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
 
@@ -25,11 +23,12 @@ namespace Microsoft.Maui.Hosting
 {
     public static class FullStackMauiServiceRegister
     {
-        public static MauiAppBuilder UseFullStack(
+        public static MauiAppBuilder UseFullStackClient(
             this MauiAppBuilder builder,
             Action<FileManagerOptions> fileManagerOptionConfig,
             Action<IdGenSettings> idGenConfig,
-            Action<SQLiteOptions> sqliteConfig,
+           
+            Action<DbOptions> databaseConfig,
             Action<ApiClientOptions> apiClientConfig,
             IEnumerable<Migration>? migrations,
             string tCaptchaAppId)
@@ -41,7 +40,7 @@ namespace Microsoft.Maui.Hosting
 
             //Basic
             services.AddIdGen(idGenConfig);
-            services.AddSQLite(sqliteConfig);
+            services.AddDatabase(databaseConfig, databaseEngineBuilder => databaseEngineBuilder.AddSQLite());
             services.AddApiClient(apiClientConfig);
 
             //HB.FullStack.Client

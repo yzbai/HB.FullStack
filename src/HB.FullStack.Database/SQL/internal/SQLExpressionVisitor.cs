@@ -243,7 +243,7 @@ namespace HB.FullStack.Database.SQL
 
                 DbModelDef modelDef = _modelDefFactory.GetDef(modelType)!;
                 DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(m.Member.Name)
-                    ?? throw DatabaseExceptions.ModelError(modelDef.ModelFullName, m.Member.Name, "Lack property definition");
+                    ?? throw DbExceptions.ModelError(modelDef.ModelFullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
 
@@ -567,9 +567,9 @@ namespace HB.FullStack.Database.SQL
             if (m.Method.Name == "StartsWith")
             {
                 //TODO: Mysql,其他数据库可能需要重写
-                if (context.EngineType != Engine.EngineType.MySQL)
+                if (context.EngineType != Engine.DbEngineType.MySQL)
                 {
-                    throw DatabaseExceptions.NotSupportYet("目前仅支持StarWith的MySql数据库版本", context.EngineType);
+                    throw DbExceptions.NotSupportYet("目前仅支持StarWith的MySql数据库版本", context.EngineType);
                 }
 
                 List<object> args0 = VisitExpressionList(m.Arguments, context);
@@ -590,7 +590,7 @@ namespace HB.FullStack.Database.SQL
                     paramPlaceholder));
             }
 
-            throw DatabaseExceptions.NotSupportYet("暂时还不支持其他操作", context.EngineType);
+            throw DbExceptions.NotSupportYet("暂时还不支持其他操作", context.EngineType);
 
             //List<object> args = VisitExpressionList(m.Arguments, context);
             //object quotedColName = Visit(m.Object, context);
