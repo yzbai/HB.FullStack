@@ -40,11 +40,11 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception MySQLExecuterError(string? commandText, string? cause, string? sqlState, Exception? innerException = null)
+        internal static Exception MySQLExecuterError(string? commandText, string? engineInnerCode, string? sqlState, Exception? innerException = null)
         {
             DbException exception = new DbException(ErrorCodes.DbEngineExecuterError, nameof(MySQLExecuterError), innerException, null);
 
-            exception.Data["Cause"] = cause;
+            exception.Data["EngineInnerCode"] = engineInnerCode;
             exception.Data["CommandText"] = commandText;
             exception.Data["SqlState"] = sqlState;
             exception.ComeFromEngine = true;
@@ -408,6 +408,13 @@ namespace HB.FullStack.Database
 
             ex.Data["DbSchemaName"] = dbSchemaName;
             ex.Data["TableName"] = tableName;
+
+            return ex;
+        }
+
+        internal static Exception DataTooLong(Exception innerEx)
+        {
+            DbException ex = new DbException(ErrorCodes.DbDataTooLong, innerEx.Message, innerEx, null);
 
             return ex;
         }

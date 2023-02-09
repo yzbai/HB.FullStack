@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace HB.FullStack.Common.SourceGenerators.PropertyTrackable
 {
     [Generator(LanguageNames.CSharp)]
+
     public class PropertyTrackableObjectGenerator : TransitiveMembersGenerator<object?>
     {
         public PropertyTrackableObjectGenerator() : base("global::HB.FullStack.Common.PropertyTrackable.PropertyTrackableObjectAttribute") { }

@@ -236,8 +236,6 @@ namespace HB.FullStack.Client.Maui
 
         public UserStatus UserStatus => throw new NotImplementedException();
 
-        public event Func<Task>? Logined;
-        public event Func<Task>? Logouted;
 
         public void ReportLogouted()
         {
@@ -248,6 +246,11 @@ namespace HB.FullStack.Client.Maui
         {
             throw new NotImplementedException();
         }
+
+#pragma warning disable CS0067 // Never Used.
+        public event Func<Task>? Logined;
+        public event Func<Task>? Logouted;
+#pragma warning disable CS0067
 
         #endregion
     }

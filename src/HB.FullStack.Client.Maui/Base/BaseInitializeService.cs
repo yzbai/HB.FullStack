@@ -15,13 +15,20 @@ namespace HB.FullStack.Client.Maui.Base
 {
     public class BaseInitializeService : IMauiInitializeService
     {
+        //private IEnumerable<Migration> _migrations;
+
+        //public BaseInitializeService(IEnumerable<Migration> migrations)
+        //{
+        //    _migrations = migrations;
+        //}
+
         public void Initialize(IServiceProvider services)
         {
             InitLog(services);
 
             InitGlobalExceptions();
 
-            InitDatabase(services);
+            //InitDatabase(services);
 
             InitServices(services);
         }
@@ -33,23 +40,21 @@ namespace HB.FullStack.Client.Maui.Base
             _ = services.GetRequiredService<IOfflineManager>();
         }
 
-        private static void InitDatabase(IServiceProvider services)
-        {
-            IDatabase database = services.GetRequiredService<IDatabase>();
+        //private static void InitDatabase(IServiceProvider services)
+        //{
+        //    IDatabase database = services.GetRequiredService<IDatabase>();
 
-            //Currents.AppendingTasks.Add(
+        //    //Currents.AppendingTasks.Add(
 
-            JoinableTasks.JoinableTaskFactory.Run(() =>
+        //    JoinableTasks.JoinableTaskFactory.Run(() =>
 
-                database.InitializeAsync(
+        //        database.InitializeAsync(_migrations).ContinueWith(task =>
+        //        {
+        //            //TODO: 这里先跑一下数据库，因为，有时候，IdBarrier会莫名其妙的第一次读不到数据
+        //        }, TaskScheduler.Default));
 
-                database.InitializeAsync(_migrations).ContinueWith(task =>
-                {
-                    //TODO: 这里先跑一下数据库，因为，有时候，IdBarrier会莫名其妙的第一次读不到数据
-                }, TaskScheduler.Default));
-
-            //TODO: 使用ApiClient获取一些初始化参数，或者私密信息
-        }
+        //    //TODO: 使用ApiClient获取一些初始化参数，或者私密信息
+        //}
 
         private static void InitGlobalExceptions()
         {

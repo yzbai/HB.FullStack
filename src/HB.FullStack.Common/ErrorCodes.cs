@@ -162,7 +162,9 @@
         public static ErrorCode CacheValueNotSet = new ErrorCode(nameof(CacheValueNotSet), "");
         public static ErrorCode CachedItemTimestampNotSet = new ErrorCode(nameof(CachedItemTimestampNotSet), "");
         #endregion
-        #region
+        #region Db
+
+        public static ErrorCode DbDataTooLong = new ErrorCode(nameof(DbDataTooLong), "");
 
         public static ErrorCode DuplicateKeyEntry = new ErrorCode(nameof(DuplicateKeyEntry), "");
 

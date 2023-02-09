@@ -30,7 +30,7 @@ namespace Microsoft.Maui.Hosting
            
             Action<DbOptions> databaseConfig,
             Action<ApiClientOptions> apiClientConfig,
-            IEnumerable<Migration>? migrations,
+            //IEnumerable<Migration>? migrations,
             string tCaptchaAppId)
         {
             IServiceCollection services = builder.Services;
@@ -58,7 +58,7 @@ namespace Microsoft.Maui.Hosting
             services.AddTCaptcha(tCaptchaAppId);
 
             //Initializers
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeService>(_ => new BaseInitializeService(migrations ?? new List<Migration>())));
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeService>(_ => new BaseInitializeService(/*migrations ?? new List<Migration>()*/)));
             builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeScopedService, BaseInitalizeScopedService>());
             //builder.Services.AddTransient<IMauiInitializeService, BaseInitializeService>();
             //builder.Services.AddTransient<IMauiInitializeScopedService, BaseInitalizeScopedService>();

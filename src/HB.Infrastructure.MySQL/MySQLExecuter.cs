@@ -159,6 +159,7 @@ namespace HB.Infrastructure.MySQL
                 return mEx.ErrorCode switch
                 {
                     MySqlErrorCode.DuplicateKeyEntry => DbExceptions.DuplicateKeyError(command.CommandText, ex),
+                    MySqlErrorCode.DataTooLong => DbExceptions.DataTooLong(ex),
                     _ => DbExceptions.MySQLExecuterError(command.CommandText, mEx.ErrorCode.ToString(), mEx.SqlState, ex)
                 };
             }
