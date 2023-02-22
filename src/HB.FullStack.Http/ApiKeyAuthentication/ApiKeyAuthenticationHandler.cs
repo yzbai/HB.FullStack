@@ -13,10 +13,10 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.WebApi.ApiKeyAuthentication
 {
-    public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyOptions>
+    public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
     {
         public ApiKeyAuthenticationHandler(
-            IOptionsMonitor<ApiKeyOptions> options,
+            IOptionsMonitor<ApiKeyAuthenticationOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock) : base(options, logger, encoder, clock)

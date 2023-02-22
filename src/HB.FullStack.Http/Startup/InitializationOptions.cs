@@ -3,11 +3,15 @@
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
 
+using Microsoft.Extensions.Options;
+
 namespace System
 {
-    public class InitializationContext
+    public class InitializationOptions : IOptions<InitializationOptions>
     {
         public IList<DbInitializeContext> DbInitializeContexts { get; set; } = new List<DbInitializeContext>();
+
+        public InitializationOptions Value => this;
     }
 
     public class DbInitializeContext

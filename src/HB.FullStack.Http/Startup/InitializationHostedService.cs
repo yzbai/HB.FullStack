@@ -24,9 +24,9 @@ namespace HB.FullStack.WebApi.Startup
         private readonly IDatabase _database;
         private readonly IDistributedLockManager _lockManager;
         private readonly ICache _cache;
-        private readonly InitializationContext _context;
+        private readonly InitializationOptions _context;
 
-        public InitializationHostedService(IDatabase database, IDistributedLockManager lockManager, ICache cache, InitializationContext context)
+        public InitializationHostedService(IDatabase database, IDistributedLockManager lockManager, ICache cache, InitializationOptions context)
         {
             _database = database;
             _lockManager = lockManager;

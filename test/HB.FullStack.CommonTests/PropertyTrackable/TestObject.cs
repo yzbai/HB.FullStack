@@ -34,10 +34,21 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TrackProperty]
         private ImmutableArray<string>? _immutables2;
 
-        //[TrackProperty]
-        //private InnerModel? _innerModel;
+
+        //TODO: solve this
+        [TrackProperty]
+        private InnerModel? _innerModel;
+
+
+        //TODO: solve this
+        [TrackProperty]
+        private ObservableCollection<string>? _collection;
+
+
 
     }
+
+
 
     public partial class InnerModel : ObservableObject
     {

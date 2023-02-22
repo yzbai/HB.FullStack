@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.WebApi.ApiKeyAuthentication
 {
-    public class ApiKeyOptions : AuthenticationSchemeOptions
+    public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
     {
         private IDictionary<string, string>? _apiKeysDict;
 

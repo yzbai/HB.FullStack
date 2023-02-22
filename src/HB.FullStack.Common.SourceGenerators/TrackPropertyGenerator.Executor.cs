@@ -143,10 +143,12 @@ partial class TrackPropertyGenerator
             // if such a property was generated, the partial On<PROPERTY_NAME>Changing and OnPropertyChanging(PropertyChangingEventArgs)
             // methods, as well as the partial On<PROPERTY_NAME>Changed and OnPropertyChanged(PropertyChangedEventArgs) methods.
 
-            if(propertyType.IsReadOnly)
-            {
-                return true;
-            }
+            //if(propertyType.IsReadOnly)
+            //{
+            //    return true;
+            //}
+
+            return true;
 
             //1. ValueType or String
             if (propertyType.IsValueType || propertyType.SpecialType == SpecialType.System_String)

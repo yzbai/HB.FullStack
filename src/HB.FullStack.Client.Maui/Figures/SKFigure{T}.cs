@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace HB.FullStack.Client.Maui.Figures
 {
     public abstract class SKFigure<TDrawInfo, TData> : SKFigure
-        where TDrawInfo : FigureDrawInfo
+        where TDrawInfo : IFigureDrawInfo
         where TData : FigureData
     {
         public static BindableProperty DrawInfoProperty = BindableProperty.Create(
@@ -81,7 +81,7 @@ namespace HB.FullStack.Client.Maui.Figures
         protected abstract void CaculateOutput(out TData? newResultData);
     }
 
-    public abstract class SKDrawFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : FigureDrawInfo
+    public abstract class SKDrawFigure<TDrawInfo> : SKFigure<TDrawInfo, EmptyData> where TDrawInfo : IFigureDrawInfo
     {
         protected override void CaculateOutput(out EmptyData? newResultData)
         {
@@ -93,17 +93,8 @@ namespace HB.FullStack.Client.Maui.Figures
     {
     }
 
-    public class EmptyDrawInfo : FigureDrawInfo
+    public record EmptyDrawInfo : IFigureDrawInfo
     {
-        protected override bool EqualsCore(FigureDrawInfo other)
-        {
-            return other is EmptyDrawInfo;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(nameof(EmptyDrawInfo));
-        }
     }
 
     public class EmptyData : FigureData
