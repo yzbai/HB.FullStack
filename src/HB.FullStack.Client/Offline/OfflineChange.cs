@@ -1,6 +1,7 @@
 ﻿using System;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
@@ -22,7 +23,7 @@ namespace HB.FullStack.Client.Offline
         //public string? BusinessCatalog { get; set; }
 
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
-        public ChangedPackDto? ChangedPackDto { get; set; }
+        public PropertyChangePack? ChangePack { get; set; }
 
         //public string? DeletedObjectJson { get; set; }
 
@@ -32,7 +33,7 @@ namespace HB.FullStack.Client.Offline
     public enum OfflineChangeType
     {
         Add = 0, //根据ModelId 和 ModelFullName去数据库取
-        Update = 1,//ChangedPack
+        Update = 1,//PropertyChangePack
         UpdateProperties = 2,
         Delete = 3,//根据DeletedObjectJson
     }

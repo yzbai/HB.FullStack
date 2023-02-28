@@ -1,20 +1,28 @@
 ﻿
+/*
+ * Copy of HB.FullStack.Common.PropertyTrackable.PropertyTrackableObject
+ */
 public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrackable.IPropertyTrackableObject
 {
     public bool _startTrack = false;
 
-    private readonly global::System.Collections.Generic.List<global::HB.FullStack.Common.PropertyTrackable.ChangedProperty> _changedProperties = new global::System.Collections.Generic.List<global::HB.FullStack.Common.PropertyTrackable.ChangedProperty>();
+    private readonly global::System.Collections.Generic.List<global::HB.FullStack.Common.PropertyTrackable.PropertyChange> _changedProperties = new global::System.Collections.Generic.List<global::HB.FullStack.Common.PropertyTrackable.PropertyChange>();
 
-    private readonly global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.ChangedProperty> _updatingProperties = new global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.ChangedProperty>();
+    private readonly global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.PropertyChange> _updatingProperties = new global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.PropertyChange>();
 
     public void StartTrack()
     {
         _startTrack = true;
     }
 
-    public void EndTrack()
+    public void StopTrack()
     {
         _startTrack = false;
+    }
+
+    public void Clear()
+    {
+        _changedProperties.Clear();
     }
 
     public void Track<T>(string propertyName, T oldValue, T newValue)
@@ -24,53 +32,44 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
             return;
         }
 
-        _changedProperties.Add(new global::HB.FullStack.Common.PropertyTrackable.ChangedProperty(propertyName, oldValue, newValue));
+        _changedProperties.Add(new global::HB.FullStack.Common.PropertyTrackable.PropertyChange(propertyName, oldValue, newValue));
     }
 
-    public void TrackOldValue<T>(string propertyName, string? propertyPropertyName, T oldValue)
+    public void TrackOldValue<T>(string propertyName, T oldValue)
     {
         if (!_startTrack)
         {
             return;
         }
 
-        string key = propertyName + propertyPropertyName;
-
-        if (_updatingProperties.ContainsKey(key))
+        if (_updatingProperties.ContainsKey(propertyName))
         {
             throw new global::System.InvalidOperationException("ITrackPropertyChangedReentrancyNotAllowed");
         }
 
-        _updatingProperties[key] = new global::HB.FullStack.Common.PropertyTrackable.ChangedProperty(propertyName, oldValue, null, propertyPropertyName);
+        _updatingProperties[propertyName] = new global::HB.FullStack.Common.PropertyTrackable.PropertyChange(propertyName, oldValue, null);
     }
 
-    public void TrackNewValue<T>(string propertyName, string? propertyPropertyName, T newValue)
+    public void TrackNewValue<T>(string propertyName, T newValue)
     {
         if (!_startTrack)
         {
             return;
         }
 
-        string key = propertyName + propertyPropertyName;
-
-        if (!_updatingProperties.TryGetValue(key, out global::HB.FullStack.Common.PropertyTrackable.ChangedProperty? updatingProperty))
+        if (!_updatingProperties.TryGetValue(propertyName, out global::HB.FullStack.Common.PropertyTrackable.PropertyChange? updatingProperty))
         {
             throw new global::System.InvalidOperationException("ITrackPropertyChangedNoOldValueTracked");
         }
 
-        updatingProperty.NewValue = newValue;
+        updatingProperty.NewValue = global::System.SerializeUtil.ToJsonElement(newValue);
 
-        _updatingProperties.Remove(key);
+        _updatingProperties.Remove(propertyName);
 
         _changedProperties.Add(updatingProperty);
     }
 
-    public void Clear()
-    {
-        _changedProperties.Clear();
-    }
-
-    public global::System.Collections.Generic.IList<global::HB.FullStack.Common.PropertyTrackable.ChangedProperty> GetChangedProperties(bool mergeMultipleChanged = true)
+    public global::System.Collections.Generic.IList<global::HB.FullStack.Common.PropertyTrackable.PropertyChange> GetPropertyChanges(bool mergeMultipleChanged = true)
     {
         //TODO: 需要考虑锁吗?
 
@@ -79,17 +78,17 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
             return _changedProperties;
         }
 
-        global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.ChangedProperty> dict = new global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.ChangedProperty>();
+        global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.PropertyChange> dict = new global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.PropertyChange>();
 
-        foreach (global::HB.FullStack.Common.PropertyTrackable.ChangedProperty curProperty in _changedProperties)
+        foreach (global::HB.FullStack.Common.PropertyTrackable.PropertyChange curProperty in _changedProperties)
         {
-            if (dict.TryGetValue(curProperty.PropertyName, out global::HB.FullStack.Common.PropertyTrackable.ChangedProperty? storedProperty))
+            if (dict.TryGetValue(curProperty.PropertyName, out global::HB.FullStack.Common.PropertyTrackable.PropertyChange? storedProperty))
             {
                 storedProperty.NewValue = curProperty.NewValue;
             }
             else
             {
-                dict.Add(curProperty.PropertyName, curProperty);
+                dict.Add(curProperty.PropertyName, new global::HB.FullStack.Common.PropertyTrackable.PropertyChange(curProperty));
             }
         }
 

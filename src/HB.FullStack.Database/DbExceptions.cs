@@ -376,12 +376,12 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception ChangedPropertyPackError(string cause, ChangedPack? changedPropertyPack, string? modelFullName)
+        internal static Exception ChangedPropertyPackError(string cause, PropertyChangePack? changePack, string? modelFullName)
         {
             DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 
             ex.Data["ModelFullName"] = modelFullName;
-            ex.Data["PropertyNames"] = changedPropertyPack?.ChangedProperties.Select(c => c.PropertyName).ToJoinedString(",");
+            ex.Data["PropertyNames"] = changePack?.PropertyChanges.Select(c => c.PropertyName).ToJoinedString(",");
 
             return ex;
         }
@@ -416,6 +416,18 @@ namespace HB.FullStack.Database
         {
             DbException ex = new DbException(ErrorCodes.DbDataTooLong, innerEx.Message, innerEx, null);
 
+            return ex;
+        }
+
+        internal static Exception UpdateUsingTimestampListCountNotEqual()
+        {
+            DbException ex = new DbException(ErrorCodes.DbUpdateUsingTimestampError, nameof(UpdateUsingTimestampListCountNotEqual), null, null);
+            return ex;
+        }
+
+        internal static Exception UpdateUsingTimestampListEmpty()
+        {
+            DbException ex = new DbException(ErrorCodes.DbUpdateUsingTimestampError, nameof(UpdateUsingTimestampListEmpty), null, null);
             return ex;
         }
     }

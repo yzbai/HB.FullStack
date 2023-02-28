@@ -1,10 +1,11 @@
 ﻿using System;
 
+using HB.FullStack.Common.PropertyTrackable;
+
 namespace HB.FullStack.Database.DbModels
 {
     [AttributeUsage(AttributeTargets.Property)]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1813:Avoid unsealed attributes", Justification = "<Pending>")]
-    public class DbPrimaryKeyAttribute : Attribute
+    public class DbPrimaryKeyAttribute : AddtionalPropertyAttribute
     {
     }
 }

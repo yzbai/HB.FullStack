@@ -39,54 +39,17 @@ namespace HB.FullStack.Database
 
         #region Update Properties
 
-        /// <summary>
-        /// Update Fields for TimestampDbModel. Using timestamp method optimistic locking.
-        /// </summary>
-        /// <param name="timestamp">TimestampDbModel.Timestamp</param>
-        /// <param name="newTimestamp">为null时，由系统指定</param>
-        Task UpdatePropertiesAsync<T>(
-            object id,
-            IList<(string propertyName, object? propertyValue)> propertyNameValues,
-            long timestamp,
-            string lastUser,
-            TransactionContext? transContext,
-            long? newTimestamp = null) where T : TimestampDbModel, new();
+        Task UpdatePropertiesAsync<T>(UpdateUsingTimestamp updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new();
 
-        Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<(string propertyName, object? propertyValue)> properties, long oldTimestamp, long? newTimestamp)> modelChanges,
-            string lastUser,
-            TransactionContext? transactionContext) where T : TimestampDbModel, new();
+        Task BatchUpdatePropertiesAsync<T>(IList<UpdateUsingTimestamp> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new();
 
-        /// <summary>
-        /// Update Fields for DbModel. Using property value compare method optimistic locking
-        /// </summary>
-        /// <param name="propertyOldNewValues">(propertyName-oldvalue-newvalue）</param>
-        Task UpdatePropertiesAsync<T>(
-            object id,
-            IList<(string propertyName, object? oldValue, object? newValue)> propertyNameOldNewValues,
-            string lastUser,
-            TransactionContext? transContext,
-            long? newTimestamp = null) where T : DbModel, new();
+        Task UpdatePropertiesAsync<T>(UpdateUsingCompare updatePack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task BatchUpdatePropertiesAsync<T>(
-            IList<(object id, IList<(string propertyNames, object? oldPropertyValues, object? newPropertyValues)> properties, long? newTimestamp)> modelChanges,
-            string lastUser,
-            TransactionContext? transactionContext = null) where T : DbModel, new();
-        /// <summary>
-        /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
-        /// </summary>
-        Task UpdatePropertiesAsync<T>(
-            ChangedPack changedPropertyPack,
-            string lastUser,
-            TransactionContext? transContext) where T : DbModel, new();
+        Task BatchUpdatePropertiesAsync<T>(IList<UpdateUsingCompare> updatePacks, string lastUser, TransactionContext? transactionContext) where T : DbModel, new();
 
-        /// <summary>
-        /// 如果ChangedPack中包含Timestamp，也不会判断oldTimestamp是否等于数据库中的Timestamp，但会更新数据库Timestamp为newTimestamp
-        /// </summary>
-        Task BatchUpdatePropertiesAsync<T>(
-            IEnumerable<ChangedPack> changedPacks,
-            string lastUser,
-            TransactionContext? transContext) where T : DbModel, new();
+        Task UpdatePropertiesAsync<T>(PropertyChangePack changePack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+
+        Task BatchUpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changePacks, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         #endregion
 

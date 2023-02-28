@@ -125,19 +125,19 @@ namespace HB.FullStack.Repository
             remove => AsyncEventManager.Remove(value);
         }
 
-        protected virtual Task OnModelUpdatingPropertiesAsync(IEnumerable<ChangedPack> cpps)
+        protected virtual Task OnModelUpdatingPropertiesAsync(IEnumerable<PropertyChangePack> cpps)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
-        protected virtual Task OnModelUpdatedPropertiesAsync(IEnumerable<ChangedPack> cpps)
+        protected virtual Task OnModelUpdatedPropertiesAsync(IEnumerable<PropertyChangePack> cpps)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
-        protected virtual Task OnModelUpdatePropertiesFailedAsync(IEnumerable<ChangedPack> cpps)
+        protected virtual Task OnModelUpdatePropertiesFailedAsync(IEnumerable<PropertyChangePack> cpps)
         {
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
@@ -281,16 +281,16 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedAsync(models).ConfigureAwait(false);
         }
 
-        public async Task UpdateProperties<T>(ChangedPack cp, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
+        public async Task UpdateProperties<T>(PropertyChangePack cp, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
         {
             //检查必要的AddtionalProperties
             //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
 
             DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfAddtionalPropertiesLack(new ChangedPack[] { cp }, modelDef);
+            ThrowIfAddtionalPropertiesLack(new PropertyChangePack[] { cp }, modelDef);
 
-            await OnModelUpdatingPropertiesAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+            await OnModelUpdatingPropertiesAsync(new PropertyChangePack[] { cp }).ConfigureAwait(false);
 
             try
             {
@@ -298,16 +298,16 @@ namespace HB.FullStack.Repository
             }
             catch
             {
-                await OnModelUpdatePropertiesFailedAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+                await OnModelUpdatePropertiesFailedAsync(new PropertyChangePack[] { cp }).ConfigureAwait(false);
                 throw;
             }
 
-            ModelCacheStrategy.InvalidateCache<T>(new ChangedPack[] { cp }, Cache);
+            ModelCacheStrategy.InvalidateCache<T>(new PropertyChangePack[] { cp }, modelDef, Cache);
 
-            await OnModelUpdatedPropertiesAsync(new ChangedPack[] { cp }).ConfigureAwait(false);
+            await OnModelUpdatedPropertiesAsync(new PropertyChangePack[] { cp }).ConfigureAwait(false);
         }
 
-        public async Task UpdateProperties<T>(IEnumerable<ChangedPack> cps, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
+        public async Task UpdateProperties<T>(IEnumerable<PropertyChangePack> cps, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
         {
             DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
 
@@ -325,12 +325,12 @@ namespace HB.FullStack.Repository
                 throw;
             }
 
-            ModelCacheStrategy.InvalidateCache<T>(cps, Cache);
+            ModelCacheStrategy.InvalidateCache<T>(cps, modelDef, Cache);
 
             await OnModelUpdatedPropertiesAsync(cps).ConfigureAwait(false);
         }
 
-        private static void ThrowIfAddtionalPropertiesLack(IEnumerable<ChangedPack> cps, DbModelDef modelDef)
+        private static void ThrowIfAddtionalPropertiesLack(IEnumerable<PropertyChangePack> cps, DbModelDef modelDef)
         {
             foreach (var cp in cps)
             {

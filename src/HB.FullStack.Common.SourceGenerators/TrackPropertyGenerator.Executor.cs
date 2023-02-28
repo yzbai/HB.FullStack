@@ -148,7 +148,7 @@ partial class TrackPropertyGenerator
             //    return true;
             //}
 
-            return true;
+            //return true;
 
             //1. ValueType or String
             if (propertyType.IsValueType || propertyType.SpecialType == SpecialType.System_String)
@@ -156,34 +156,27 @@ partial class TrackPropertyGenerator
                 return true;
             }
 
-            //2. Immutable Collection
+            //2. record
+            if (propertyType.IsRecord)
+            {
+                return true;
+            }
+
+            //3. INotifyPropertyChanging & INotifyPropertyChanged
+            if (propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanging")
+                && propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanged"))
+            {
+                return true;
+            }
+
+            //4. Immutable Collection
             if (propertyType.HasInterfaceWithFullyQualifiedName("global::System.Collections.IEnumerable"))
             {
                 return propertyType.HasUnderNamespace("System.Collections.Immutable");
                 //return propertyType.HasInterfaceWithFullyQualifiedNameWithoutGenericParameter("global::System.Collections.Generic.IReadOnlyCollection");
             }
 
-            //3. all properties are init-only or record
-            //TODO: 这里看不到由其他SourceGeneration生成的属性。
-            //所以考察所有属性都是init-only不成行。该考察是record
-
-            return propertyType.IsRecord;
-            //var memebers = propertyType.GetMembers();
-            //var setters = propertyType.GetMembers().Where(m => m is IMethodSymbol mm && mm.MethodKind == MethodKind.PropertySet);
-
-
-            //if (setters.All(m => m is IMethodSymbol mm && mm.IsInitOnly))
-            //{
-            //    return true;
-            //}
-
-            //if (propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanging")
-            //    && propertyType.HasInterfaceWithFullyQualifiedName("global::System.ComponentModel.INotifyPropertyChanged"))
-            //{
-            //    return true;
-            //}
-
-            //return false;
+            return false;
         }
 
         /// <summary>
@@ -376,7 +369,7 @@ partial class TrackPropertyGenerator
                 InvocationExpression(IdentifierName("TrackOldValue"))
                 .AddArgumentListArguments(
                     Argument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal($"{propertyInfo.PropertyName}"))),
-                    Argument(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("e"), IdentifierName("PropertyName"))),
+                    //Argument(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("e"), IdentifierName("PropertyName"))),
                     Argument(IdentifierName($"{propertyInfo.FieldName}"))
                     )));
 
@@ -407,7 +400,7 @@ partial class TrackPropertyGenerator
                 InvocationExpression(IdentifierName("TrackNewValue"))
                 .AddArgumentListArguments(
                     Argument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal($"{propertyInfo.PropertyName}"))),
-                    Argument(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("e"), IdentifierName("PropertyName"))),
+                    //Argument(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("e"), IdentifierName("PropertyName"))),
                     Argument(IdentifierName($"{propertyInfo.FieldName}"))
                     )));
 

@@ -51,38 +51,13 @@ namespace HB.FullStack.Database
         DbEngineCommand CreateTableCreateCommand(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength, int maxVarcharFieldLength, int maxMediumTextFieldLength);
         DbEngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new();
 
-        DbEngineCommand CreateUpdatePropertiesCommand(
-            DbModelDef modelDef,
-            object id,
-            IList<string> propertyNames,
-            IList<object?> propertyValues,
-            long? oldTimestamp,
-            long? newTimestamp,
-            string lastUser);
+        DbEngineCommand CreateUpdatePropertiesCommand(DbModelDef modelDef, UpdateUsingTimestamp updatePack, string lastUser);
 
-        DbEngineCommand CreateBatchUpdatePropertiesCommand(
-            DbModelDef modelDef,
-            IList<(object id, IList<string> propertyNames, IList<object?> propertyValues, long? oldTimestamp, long? newTimestamp)> modelChanges,
-            string lastUser,
-            bool needTrans);
+        DbEngineCommand CreateBatchUpdatePropertiesCommand(DbModelDef modelDef, IList<UpdateUsingTimestamp> updatePacks, string lastUser, bool needTrans);
 
-        /// <summary>
-        /// 新旧值版本的乐观锁
-        /// </summary>
-        DbEngineCommand CreateUpdatePropertiesUsingOldNewCompareCommand(
-            DbModelDef modelDef,
-            object id,
-            IList<string> propertyNames,
-            IList<object?> oldPropertyValues,
-            IList<object?> newPropertyValues,
-            long newTimestamp,
-            string lastUser);
+        DbEngineCommand CreateUpdatePropertiesUsingCompareCommand(DbModelDef modelDef, UpdateUsingCompare updatePack, string lastUser);
 
-        DbEngineCommand CreateBatchUpdatePropertiesUsingOldNewCompareCommand(
-            DbModelDef modelDef,
-            IList<(object id, IList<string> propertyNames, IList<object?> oldPropertyValues, IList<object?> newPropertyValues, long newTimestamp)> modelChanges,
-            string lastUser,
-            bool needTrans);
+        DbEngineCommand CreateBatchUpdatePropertiesUsingCompareCommand(DbModelDef modelDef, IList<UpdateUsingCompare> updatePacks, string lastUser, bool needTrans);
 
         DbEngineCommand CreateDeleteCommand(
             DbModelDef modelDef,

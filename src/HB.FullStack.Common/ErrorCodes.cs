@@ -164,6 +164,7 @@
         #endregion
         #region Db
 
+        public static ErrorCode DbUpdateUsingTimestampError = new ErrorCode(nameof(DbUpdateUsingTimestampError), "");
         public static ErrorCode DbDataTooLong = new ErrorCode(nameof(DbDataTooLong), "");
 
         public static ErrorCode DuplicateKeyEntry = new ErrorCode(nameof(DuplicateKeyEntry), "");
@@ -176,7 +177,7 @@
         public static ErrorCode MapperError = new ErrorCode(nameof(MapperError), "");
         public static ErrorCode SqlError = new ErrorCode(nameof(SqlError), "");
         public static ErrorCode DatabaseTableCreateError = new ErrorCode(nameof(DatabaseTableCreateError), "");
-        public static ErrorCode DbConfigError= new ErrorCode(nameof(DbConfigError), "");
+        public static ErrorCode DbConfigError = new ErrorCode(nameof(DbConfigError), "");
 
         public static ErrorCode MigrateError = new ErrorCode(nameof(MigrateError), "");
         public static ErrorCode FoundTooMuch = new ErrorCode(nameof(FoundTooMuch), "");

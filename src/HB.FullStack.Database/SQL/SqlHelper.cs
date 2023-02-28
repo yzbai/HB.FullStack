@@ -204,7 +204,7 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 使用新旧值比较乐观锁的update-fields.field粒度
         /// </summary>
-        public static string CreateUpdatePropertiesUsingOldNewCompareSql(DbModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
+        public static string CreateUpdatePropertiesUsingCompareSql(DbModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
         {
             DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
             DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(DbModel.Deleted))!;

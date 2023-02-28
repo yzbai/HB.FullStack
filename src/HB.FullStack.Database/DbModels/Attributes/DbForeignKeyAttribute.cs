@@ -1,6 +1,6 @@
-﻿
+﻿using System;
 
-using System;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Database.DbModels
 {
@@ -8,7 +8,7 @@ namespace HB.FullStack.Database.DbModels
     /// 标识字段为外键
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public sealed class DbForeignKeyAttribute : Attribute
+    public sealed class DbForeignKeyAttribute : AddtionalPropertyAttribute
     {
         /// <summary>
         ///

@@ -56,7 +56,7 @@ namespace HB.FullStack.Client.Offline
             await _database.BatchAddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
         }
 
-        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<ChangedPack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
         {
             DbModelDef? modelDef = _modelDefFactory.GetDef<TModel>(ModelKind.Db) as DbModelDef;
 
@@ -70,9 +70,9 @@ namespace HB.FullStack.Client.Offline
                 {
                     Type = OfflineChangeType.UpdateProperties,
                     Status = OfflineChangeStatus.Pending,
-                    ModelId = (Guid)changedPack.Id!,
+                    ModelId = SerializeUtil.To<Guid>( changedPack.AddtionalProperties["Id"])!,
                     ModelFullName = modelDef.ModelFullName,
-                    ChangedPackDto = changedPack.ToDto()
+                    ChangePack = changedPack
                 };
 
 

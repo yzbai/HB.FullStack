@@ -38,9 +38,9 @@ namespace HB.FullStack.Identity
 
                     await InvalidCachedRolesByUserId(roleIdList).ConfigureAwait(false);
                 }
-                else if (sender is IEnumerable<ChangedPack> cpps)
+                else if (sender is IEnumerable<PropertyChangePack> cpps)
                 {
-                    IEnumerable<Guid> roleIdList = cpps.Select(cpp => (Guid)cpp.Id!);
+                    IEnumerable<Guid> roleIdList = cpps.Select(cpp => SerializeUtil.To<Guid>(cpp.AddtionalProperties[nameof(Role.Id)])!);
 
                     await InvalidCachedRolesByUserId(roleIdList).ConfigureAwait(false);
                 }

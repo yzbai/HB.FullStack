@@ -33,12 +33,15 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             //update-fields
 
-            List<(string, object?)> toUpdate = new List<(string, object?)>();
+            var updatePack = new UpdateUsingTimestamp
+            {
+                Id = book.Id,
+                OldTimestamp = book.Timestamp,
+                PropertyNames = new List<string> { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
+                NewPropertyValues = new List<object?> { 123456.789, "TTTTTXXXXTTTTT" }
+            };
 
-            toUpdate.Add((nameof(Guid_BookModel.Price), 123456.789));
-            toUpdate.Add((nameof(Guid_BookModel.Name), "TTTTTXXXXTTTTT"));
-
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -52,7 +55,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //应该抛出冲突异常
             try
             {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DbException ex)
             {

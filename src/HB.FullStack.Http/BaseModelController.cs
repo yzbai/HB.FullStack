@@ -60,45 +60,5 @@ namespace HB.FullStack.WebApi
 
             return Ok();
         }
-
-        protected ChangedPack ConvertToChangedPack(ChangedPackDto cpt)
-        {
-            //Id
-            ChangedPack cp = new ChangedPack { Id = cpt.Id };
-
-            //ChangedProperties
-            foreach (ChangedPropertyDto propertyDto in cpt.ChangedProperties)
-            {
-                ModelPropertyDef? propertyDef = ModelDef.GetPropertyDef(propertyDto.PropertyName);
-
-                if (propertyDef == null)
-                {
-                    throw WebApiExceptions.ChangedPropertyPackError($"包含不属于当前Model的属性:{propertyDto.PropertyName}", cpt, ModelDef.ModelFullName);
-                }
-
-                cp.ChangedProperties.Add(
-                    new ChangedProperty(
-                        propertyDto.PropertyName,
-                        SerializeUtil.FromJsonElement(propertyDef.Type, propertyDto.OldValue),
-                        SerializeUtil.FromJsonElement(propertyDef.Type, propertyDto.NewValue)));
-            }
-
-            //AddtionalProperties
-            foreach (KeyValuePair<string, JsonElement> addtionalDto in cpt.AddtionalProperties)
-            {
-                ModelPropertyDef? propertyDef = ModelDef.GetPropertyDef(addtionalDto.Key);
-
-                if (propertyDef == null)
-                {
-                    throw WebApiExceptions.ChangedPropertyPackError($"包含不属于当前Model的属性:{addtionalDto.Key}", cpt, ModelDef.ModelFullName);
-                }
-
-                cp.AddAddtionalProperty(
-                    addtionalDto.Key,
-                    SerializeUtil.FromJsonElement(propertyDef.Type, addtionalDto.Value));
-            }
-
-            return cp;
-        }
     }
 }

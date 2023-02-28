@@ -104,7 +104,7 @@ namespace HB.FullStack.Client
 
         protected abstract Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
-        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<ChangedPack> changedPacks);
+        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> changedPacks);
 
         protected abstract Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
@@ -312,16 +312,13 @@ namespace HB.FullStack.Client
             }
         }
 
-        /// <summary>
-        /// 操作Model部分
-        /// </summary>
         public async Task UpdateAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
             StatusManager.WaitUntilSynced();
 
-            List<ChangedPack> changedPacks = models.Select(m => m.GetChangedPack()).ToList();
+            List<PropertyChangePack> changedPacks = models.Select(m => m.GetChangePack()).ToList();
 
             try
             {

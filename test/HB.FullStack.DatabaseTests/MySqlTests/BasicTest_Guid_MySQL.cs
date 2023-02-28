@@ -8,8 +8,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using ClassLibrary1;
-
-using HB.FullStack.BaseTest;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
@@ -86,12 +84,15 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             //update-fields
 
-            List<(string, object?)> toUpdate = new List<(string, object?)>();
+            UpdateUsingTimestamp updatePack = new UpdateUsingTimestamp
+            {
+                Id = book.Id,
+                OldTimestamp = book.Timestamp,
+                PropertyNames = new string[] { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
+                NewPropertyValues = new object?[] { 123456.789, "TTTTTXXXXTTTTT" }
+            };
 
-            toUpdate.Add((nameof(Guid_BookModel.Price), 123456.789));
-            toUpdate.Add((nameof(Guid_BookModel.Name), "TTTTTXXXXTTTTT"));
-
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -105,7 +106,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             //应该抛出冲突异常
             try
             {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DbException ex)
             {
@@ -129,12 +130,15 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             //update-fields
 
-            List<(string, object?, object?)> toUpdate = new List<(string, object?, object?)>();
+            UpdateUsingCompare updatePack = new UpdateUsingCompare
+            {
+                Id = book.Id,
+                PropertyNames = new string[] { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
+                OldPropertyValues = new object?[] { book.Price, book.Name },
+                NewPropertyValues = new object?[] { 123456.789, "TTTTTXXXXTTTTT" }
+            };
 
-            toUpdate.Add((nameof(Guid_BookModel.Price), book.Price, 123456.789));
-            toUpdate.Add((nameof(Guid_BookModel.Name), book.Name, "TTTTTXXXXTTTTT"));
-
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -148,7 +152,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             //应该抛出冲突异常
             try
             {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DbException ex)
             {

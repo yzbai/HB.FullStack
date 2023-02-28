@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
@@ -154,11 +155,24 @@ namespace HB.FullStack.Repository.CacheStrategies
             cache.RemoveModelAsync(model).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache<T>(IEnumerable<ChangedPack> cps, ICache cache)
+        public static void InvalidateCache<T>(IEnumerable<PropertyChangePack> cps, DbModelDef modelDef, ICache cache)
         {
-            ThrowIf.NotValid<ChangedPack>(cps, nameof(cps));
+            List<object> ids = new List<object>();
 
-            cache.RemoveModelByIdsAsync<T>(cps.Select(cp => cp.Id!).ToList()).SafeFireAndForget(OnException);
+            foreach (var cp in cps)
+            {
+                if (cp.AddtionalProperties.TryGetValue(nameof(ILongId.Id), out JsonElement idElement))
+                {
+                    object? id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, idElement);
+
+                    if (id != null)
+                    {
+                        ids.Add(id);
+                    }
+                }
+            }
+
+            cache.RemoveModelByIdsAsync<T>(ids).SafeFireAndForget(OnException);
         }
 
         private static void OnException(Exception ex)

@@ -2,6 +2,7 @@
 using System.Linq;
 
 using HB.FullStack.Common.Api;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace System
 {
@@ -31,12 +32,12 @@ namespace System
             return new WebApiException(ErrorCodes.UploadError, cause, innerEx, context);
         }
 
-        public static Exception ChangedPropertyPackError(string cause, ChangedPackDto? changedPropertyPack, string? modelFullName)
+        public static Exception ChangedPropertyPackError(string cause, PropertyChangePack? changePack, string? modelFullName)
         {
             DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 
             ex.Data["ModelFullName"] = modelFullName;
-            ex.Data["PropertyNames"] = changedPropertyPack?.ChangedProperties.Select(c => c.PropertyName).ToJoinedString(",");
+            ex.Data["PropertyNames"] = changePack?.PropertyChanges.Select(c => c.PropertyName).ToJoinedString(",");
 
             return ex;
         }

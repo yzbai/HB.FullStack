@@ -5,6 +5,8 @@ using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using HandlebarsDotNet.Collections;
+
 using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.CommonTests.PropertyTrackable
@@ -12,45 +14,43 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
     [PropertyTrackableObject]
     public partial class TestObject
     {
+        [AddtionalProperty]
+        public string Id { get; set; } = "This is a Id";
+
+        //String
         [TrackProperty]
         private string? _name;
 
-        //[TrackProperty]
-        //private ObservableCollection2<string>? _testCollection;
-
-        //[TrackProperty]
-        //public InnerTestObject? _innerCls;
-
+        //Value Type
         [TrackProperty]
-        public InnerTestRecord? _innerRecord;
+        private int _age;
 
+        //Record
         [TrackProperty]
-        [AddtionalProperty]
-        private string _forwordAttributeName = "This is a Addtional";
+        public TestRecord? _testRecord;
 
+
+        //ImmutableCollection
         [TrackProperty]
-        private ImmutableList<string>? _immutables;
+        private ImmutableList<string>? _immutableList;
 
+        //ImmutableCollection
         [TrackProperty]
-        private ImmutableArray<string>? _immutables2;
+        private ImmutableArray<string>? _immutableArray;
 
 
-        //TODO: solve this
+        //Observable class
         [TrackProperty]
-        private InnerModel? _innerModel;
+        private ObservableInner? _observableInner;
 
-
-        //TODO: solve this
+        //Observable Collection
         [TrackProperty]
-        private ObservableCollection<string>? _collection;
-
-
-
+        private ObservableCollection2<string>? _observableCollection2;
     }
 
+    public record TestRecord(string? InnerName);
 
-
-    public partial class InnerModel : ObservableObject
+    public partial class ObservableInner : ObservableObject
     {
         [ObservableProperty]
         private string? _innerName;

@@ -66,7 +66,7 @@ namespace HB.FullStack.Client.Maui.File
             throw new NotImplementedException();
         }
 
-        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<ChangedPack> changedPacks)
+        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> changedPacks)
         {
             throw new NotImplementedException();
         }

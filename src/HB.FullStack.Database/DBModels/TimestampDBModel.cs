@@ -20,7 +20,6 @@ namespace HB.FullStack.Database.DbModels
         /// 就把Timestamp看作Version就行
         /// </summary>
         /// 
-
         private long _timestamp = TimeUtil.Timestamp;
 
         [Range(638000651894004864, long.MaxValue)]
