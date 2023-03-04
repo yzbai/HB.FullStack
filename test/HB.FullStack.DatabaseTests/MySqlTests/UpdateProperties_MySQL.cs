@@ -24,8 +24,8 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 {
                     Name = SecurityUtil.CreateRandomString(5),
                     Age = SecurityUtil.GetRandomInteger(0, 100),
-                    InnerModel = new InnerModel(SecurityUtil.CreateRandomString(10))
-
+                    InnerModel = new InnerModel(SecurityUtil.CreateRandomString(10)),
+                    InnerModel2 = new InnerModel2 { InnerName = "nxxx" }
                 };
             }
 
@@ -35,8 +35,8 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 {
                     Name = SecurityUtil.CreateRandomString(5),
                     Age = SecurityUtil.GetRandomInteger(0, 100),
-                    InnerModel = new InnerModel(SecurityUtil.CreateRandomString(10))
-
+                    InnerModel = new InnerModel(SecurityUtil.CreateRandomString(10)),
+                    InnerModel2 = new InnerModel2 { InnerName = "nxxx" }
                 };
             }
 
@@ -76,7 +76,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdateUsingTimestamp updatePack = new UpdateUsingTimestamp
+            UpdatePackTimestamp updatePack = new UpdatePackTimestamp
             {
                 Id = model.Id,
                 OldTimestamp = model.Timestamp,
@@ -99,9 +99,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_Batch_UpdateProperties_Timestamp()
         {
             var models = Mocker.MockTimestampList(3);
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
-            var updatePacks = new List<UpdateUsingTimestamp>();
+            var updatePacks = new List<UpdatePackTimestamp>();
 
             foreach (var model in models)
             {
@@ -111,7 +111,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
                 long newTimestamp = TimeUtil.Timestamp;
 
-                updatePacks.Add(new UpdateUsingTimestamp
+                updatePacks.Add(new UpdatePackTimestamp
                 {
                     Id = model.Id,
                     OldTimestamp = model.Timestamp,
@@ -123,7 +123,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 model.Timestamp = newTimestamp;
             }
 
-            await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", null);
+            await Db.UpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", null);
 
             var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), null);
 
@@ -142,7 +142,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdateUsingCompare updatePack = new UpdateUsingCompare
+            UpdatePackTimeless updatePack = new UpdatePackTimeless
             {
                 Id = model.Id,
                 NewTimestamp = newTimestamp,
@@ -175,7 +175,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdateUsingCompare updatePack = new UpdateUsingCompare
+            UpdatePackTimeless updatePack = new UpdatePackTimeless
             {
                 Id = model.Id,
                 NewTimestamp = newTimestamp,
@@ -199,9 +199,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_Batch_UpdateProperties_Compare()
         {
             var models = Mocker.MockTimestampList(3);
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
-            var updatePacks = new List<UpdateUsingCompare>();
+            var updatePacks = new List<UpdatePackTimeless>();
 
             foreach (var model in models)
             {
@@ -210,13 +210,13 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 InnerModel? newInnerModel = null;
                 long newTimestamp = TimeUtil.Timestamp;
 
-                var updatePack = new UpdateUsingCompare
+                var updatePack = new UpdatePackTimeless
                 {
                     Id = model.Id,
                     NewTimestamp = newTimestamp,
                     PropertyNames = new string[] { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },
-                    OldPropertyValues = new object?[] { model.Name, model.Age, model.InnerModel},
-                    NewPropertyValues = new object?[] { newName, newAge, newInnerModel},
+                    OldPropertyValues = new object?[] { model.Name, model.Age, model.InnerModel },
+                    NewPropertyValues = new object?[] { newName, newAge, newInnerModel },
                 };
 
                 updatePacks.Add(updatePack);
@@ -227,7 +227,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 model.Timestamp = newTimestamp;
             }
 
-            await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", null);
+            await Db.UpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", null);
 
             var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), null);
 
@@ -245,7 +245,8 @@ namespace HB.FullStack.DatabaseTests.MySQL
             model.Name = "ChangedName";
             model.Age = 999;
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
-            //model.InnerModel = new InnerModel { InnerName = "ChangedName_InnerName" };
+            model.InnerModel2 ??= new InnerModel2();
+            model.InnerModel2.InnerName = "Changed_InnerModel2_Name";
 
             PropertyChangePack cp = model.GetChangePack();
 
@@ -260,20 +261,37 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_UpdateProperties_Cps_Timestamp()
         {
             var model = Mocker.MockTimestampModel();
+            long timestamp1 = model.Timestamp;
+
             await Db.AddAsync(model, "", null);
+
+            long timestamp2 = model.Timestamp;
+
+            //born vs. added
+            Assert.AreNotEqual(timestamp1, timestamp2);
 
             model.StartTrack();
 
             model.Name = "ChangedName";
             model.Age = 999;
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
-            model.Timestamp = TimeUtil.Timestamp;
+            //model.Timestamp = TimeUtil.Timestamp;
+            model.InnerModel2 ??= new InnerModel2();
+            model.InnerModel2.InnerName = "Changed_InnerModel2_Name";
 
-            PropertyChangePack cp = model.GetChangePack();
+            //自动更新Timestamp
+            PropertyChangePack cp = model.GetChangePack(mergeMultipleChanges: true, updateTimestamp: true);
+
+            long timestamp3 = model.Timestamp;
+            
+            //changed
+            Assert.AreNotEqual(timestamp2, timestamp3);
 
             await Db.UpdatePropertiesAsync<UPTimestampModel>(cp, "", null);
 
             var rt = await Db.ScalarAsync<UPTimestampModel>(model.Id, null);
+
+            Assert.AreEqual(rt!.Timestamp, timestamp3);
 
             Assert.AreEqual(SerializeUtil.ToJson(model), SerializeUtil.ToJson(rt));
         }
@@ -282,7 +300,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_Batch_UpdateProperties_Cps_Timeless()
         {
             var models = Mocker.MockTimelessList(3);
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
             var cps = new List<PropertyChangePack>();
 
@@ -297,7 +315,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 cps.Add(model.GetChangePack());
             }
 
-            await Db.BatchUpdatePropertiesAsync<UPTimelessModel>(cps, "", null);
+            await Db.UpdatePropertiesAsync<UPTimelessModel>(cps, "", null);
 
             var rts = await Db.RetrieveAsync<UPTimelessModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), null);
 
@@ -308,7 +326,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_Batch_UpdateProperties_Cps_TimestampAsync()
         {
             var models = Mocker.MockTimestampList(3);
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
             var cps = new List<PropertyChangePack>();
 
@@ -324,7 +342,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 cps.Add(model.GetChangePack());
             }
 
-            await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(cps, "", null);
+            await Db.UpdatePropertiesAsync<UPTimestampModel>(cps, "", null);
 
             var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), null);
 

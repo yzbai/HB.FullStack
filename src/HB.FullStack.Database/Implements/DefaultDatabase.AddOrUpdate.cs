@@ -17,9 +17,8 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
 
-            ThrowIfNotWriteable(modelDef);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -40,7 +39,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new()
+        public async Task AddOrUpdateByIdAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -49,10 +48,9 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
 
-            ThrowIfNotWriteable(modelDef);
-            ThrowIfTooMuchItems(items, lastUser, modelDef);
+            ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
             //TruncateLastUser(ref lastUser);
 
             foreach (var item in items)

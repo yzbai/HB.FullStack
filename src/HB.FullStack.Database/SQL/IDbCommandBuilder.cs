@@ -51,13 +51,13 @@ namespace HB.FullStack.Database
         DbEngineCommand CreateTableCreateCommand(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength, int maxVarcharFieldLength, int maxMediumTextFieldLength);
         DbEngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : DbModel, new();
 
-        DbEngineCommand CreateUpdatePropertiesCommand(DbModelDef modelDef, UpdateUsingTimestamp updatePack, string lastUser);
+        DbEngineCommand CreateUpdatePropertiesTimestampCommand(DbModelDef modelDef, UpdatePackTimestamp updatePack, string lastUser);
 
-        DbEngineCommand CreateBatchUpdatePropertiesCommand(DbModelDef modelDef, IList<UpdateUsingTimestamp> updatePacks, string lastUser, bool needTrans);
+        DbEngineCommand CreateBatchUpdatePropertiesTimestampCommand(DbModelDef modelDef, IList<UpdatePackTimestamp> updatePacks, string lastUser, bool needTrans);
 
-        DbEngineCommand CreateUpdatePropertiesUsingCompareCommand(DbModelDef modelDef, UpdateUsingCompare updatePack, string lastUser);
+        DbEngineCommand CreateUpdatePropertiesTimelessCommand(DbModelDef modelDef, UpdatePackTimeless updatePack, string lastUser);
 
-        DbEngineCommand CreateBatchUpdatePropertiesUsingCompareCommand(DbModelDef modelDef, IList<UpdateUsingCompare> updatePacks, string lastUser, bool needTrans);
+        DbEngineCommand CreateBatchUpdatePropertiesTimelessCommand(DbModelDef modelDef, IList<UpdatePackTimeless> updatePacks, string lastUser, bool needTrans);
 
         DbEngineCommand CreateDeleteCommand(
             DbModelDef modelDef,

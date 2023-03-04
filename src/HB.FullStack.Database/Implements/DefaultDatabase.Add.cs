@@ -14,15 +14,16 @@ namespace HB.FullStack.Database
     partial class DefaultDatabase
     {
         /// <summary>
-        /// 增加,并且item被重新赋值，反应Version变化
+        /// 增加,并且item被重新赋值，如有Timestamp，那么会被重新赋值当前最新的。
         /// </summary>
         public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
+            
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()
+                .ThrowIfNull(typeof(T).FullName)
+                .ThrowIfNotWriteable();
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
-
-            ThrowIfNotWriteable(modelDef);
             //TruncateLastUser(ref lastUser);
 
             long oldTimestamp = -1;
@@ -82,12 +83,10 @@ namespace HB.FullStack.Database
             }
         }
 
-
-
         /// <summary>
-        /// BatchAddAsync，反应Version变化
+        /// AddAsync，反应Version变化
         /// </summary>
-        public async Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task<IEnumerable<object>> AddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             if (items.IsNullOrEmpty())
             {
@@ -96,10 +95,9 @@ namespace HB.FullStack.Database
 
             ThrowIf.NotValid(items, nameof(items));
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
 
-            ThrowIfNotWriteable(modelDef);
-            ThrowIfTooMuchItems(items, lastUser, modelDef);
+            ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
             //TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();
@@ -172,7 +170,7 @@ namespace HB.FullStack.Database
 
         }
 
-        private void ThrowIfTooMuchItems<TObj>(IEnumerable<TObj> items, string lastUser, DbModelDef modelDef)
+        private void ThrowIfExceedMaxBatchNumber<TObj>(IEnumerable<TObj> items, string lastUser, DbModelDef modelDef)
         {
             if (_dbSchemaManager.GetDbSchema(modelDef.DbSchemaName).MaxBatchNumber < items.Count())
             {

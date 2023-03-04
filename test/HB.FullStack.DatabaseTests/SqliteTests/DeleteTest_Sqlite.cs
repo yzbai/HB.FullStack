@@ -121,11 +121,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             try
             {
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
                 var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
 
-                await Db.BatchDeleteAsync<DeleteTimelessModel>(ids, trans, "", trulyDelete);
+                await Db.DeleteAsync<DeleteTimelessModel>(ids, trans, "", trulyDelete);
 
                 var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), trans);
 
@@ -150,13 +150,13 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 var models = Mocker.MockTimestampList(3);
 
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
                 var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
 
                 List<long?> timestamps = models.Select<DeleteTimestampModel, long?>(m => m.Timestamp).ToList();
 
-                await Db.BatchDeleteAsync<DeleteTimestampModel>(ids, timestamps, "", trans, trulyDelete);
+                await Db.DeleteAsync<DeleteTimestampModel>(ids, timestamps, "", trans, trulyDelete);
 
                 var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), trans);
 
@@ -179,11 +179,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 var models = Mocker.MockTimestampList(3);
 
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
                 var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
 
-                await Db.BatchDeleteAsync<DeleteTimestampModel>(models, "", trans, trulyDelete);
+                await Db.DeleteAsync<DeleteTimestampModel>(models, "", trans, trulyDelete);
 
                 var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), trans);
 
@@ -207,11 +207,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 var models = Mocker.MockTimelessList(3);
 
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
                 var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
 
-                await Db.BatchDeleteAsync<DeleteTimelessModel>(models, "", trans, trulyDelete);
+                await Db.DeleteAsync<DeleteTimelessModel>(models, "", trans, trulyDelete);
 
                 var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), trans);
 

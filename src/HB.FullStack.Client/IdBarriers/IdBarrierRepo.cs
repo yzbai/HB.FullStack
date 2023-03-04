@@ -37,7 +37,7 @@ namespace HB.FullStack.XamarinForms.IdBarriers
                 idBarriers.Add(idBarrier);
             }
 
-            await _database.BatchAddAsync(idBarriers, "", transactionContext).ConfigureAwait(false);
+            await _database.AddAsync(idBarriers, "", transactionContext).ConfigureAwait(false);
         }
 
         

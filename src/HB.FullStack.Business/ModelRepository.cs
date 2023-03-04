@@ -223,7 +223,7 @@ namespace HB.FullStack.Repository
 
             try
             {
-                results = await Database.BatchAddAsync<T>(models, lastUser, transContext).ConfigureAwait(false);
+                results = await Database.AddAsync<T>(models, lastUser, transContext).ConfigureAwait(false);
             }
             catch
             {
@@ -241,7 +241,7 @@ namespace HB.FullStack.Repository
 
         #region Update
 
-        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new()
         {
             await OnModelUpdatingAsync(new T[] { model }).ConfigureAwait(false);
 
@@ -261,13 +261,13 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
-        public async Task UpdateAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task UpdateAsync<T>(IEnumerable<T> models, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new()
         {
             await OnModelUpdatingAsync(models).ConfigureAwait(false);
 
             try
             {
-                await Database.BatchUpdateAsync<T>(models, lastUser, transContext).ConfigureAwait(false);
+                await Database.UpdateAsync<T>(models, lastUser, transContext).ConfigureAwait(false);
             }
             catch
             {
@@ -317,7 +317,7 @@ namespace HB.FullStack.Repository
 
             try
             {
-                await Database.BatchUpdatePropertiesAsync<T>(cps, lastUser, transactionContext).ConfigureAwait(false);
+                await Database.UpdatePropertiesAsync<T>(cps, lastUser, transactionContext).ConfigureAwait(false);
             }
             catch
             {
@@ -371,7 +371,7 @@ namespace HB.FullStack.Repository
 
             try
             {
-                await Database.BatchDeleteAsync(models, lastUser, transContext).ConfigureAwait(false);
+                await Database.DeleteAsync(models, lastUser, transContext).ConfigureAwait(false);
             }
             catch
             {

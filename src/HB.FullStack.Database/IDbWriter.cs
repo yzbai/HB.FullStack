@@ -20,36 +20,61 @@ namespace HB.FullStack.Database
 
         Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task<IEnumerable<object>> BatchAddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task<IEnumerable<object>> AddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         #endregion
 
         #region Update
 
         /// <summary>
-        /// Update Entire Model. 
-        /// Using timestamp method optimistic locking if a TimestampDbModel.
-        /// Otherwise, maybe have data conflict.
+        /// Update.
+        /// If item is IPropertyTrackableObject, will use <see cref="UpdatePropertiesAsync{T}(PropertyChangePack, string, TransactionContext?)"/> Underneath.
+        /// If item is TimestampDBModel, will use Timestamp to solve conflict.
+        /// If item is TimelessDBModel, will just update, ignore conflict.
         /// </summary>
         Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        /// <summary>
+        /// Update.
+        /// If item is IPropertyTrackableObject, will use <see cref="UpdatePropertiesAsync{T}(IEnumerable{PropertyChangePack}, string, TransactionContext?)"/> Underneath.
+        /// If item is TimestampDBModel, will use Timestamp to solve conflict.
+        /// If item is TimelessDBModel, will just update, ignore conflict.
+        /// </summary>
+        Task UpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         #endregion
 
         #region Update Properties
 
-        Task UpdatePropertiesAsync<T>(UpdateUsingTimestamp updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new();
+        /// <summary>
+        /// Update TimestampDbModel while using Timestamp method to solve conflict.
+        /// </summary>
+        Task UpdatePropertiesAsync<T>(UpdatePackTimestamp updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new();
 
-        Task BatchUpdatePropertiesAsync<T>(IList<UpdateUsingTimestamp> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new();
+        /// <summary>
+        /// Update TimestampDbModels while using Timestamp method to solve conflict.
+        /// </summary>
+        Task UpdatePropertiesAsync<T>(IList<UpdatePackTimestamp> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new();
 
-        Task UpdatePropertiesAsync<T>(UpdateUsingCompare updatePack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        /// <summary>
+        /// Update TimelessDbModel while using old new value compare method to solve conflict.
+        /// </summary>
+        Task UpdatePropertiesAsync<T>(UpdatePackTimeless updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new();
 
-        Task BatchUpdatePropertiesAsync<T>(IList<UpdateUsingCompare> updatePacks, string lastUser, TransactionContext? transactionContext) where T : DbModel, new();
+        /// <summary>
+        /// Update TimelessDbModel while using old new value compare method to solve conflict.
+        /// </summary>
+        Task UpdatePropertiesAsync<T>(IList<UpdatePackTimeless> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimelessDbModel, new();
 
+        /// <summary>
+        /// Update DbModel using PropertyChangePack, auto decide conflict solve method.
+        /// </summary>
         Task UpdatePropertiesAsync<T>(PropertyChangePack changePack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
-        Task BatchUpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changePacks, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        /// <summary>
+        /// Update DbModels using PropertyChangePack, auto decide conflict solve method.
+        /// </summary>
+        Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changePacks, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         #endregion
 
@@ -58,27 +83,22 @@ namespace HB.FullStack.Database
         /// <summary>
         /// UpdateDeletedFields DbModel. Using timestamp method optimistic locking if a TimestampDbModel
         /// </summary>
-        Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool? trulyDelete = null)
-            where T : DbModel, new();
+        Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new();
 
-        Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext, bool? trulyDelete = null)
-            where T : TimestampDbModel, new();
+        Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : TimestampDbModel, new();
 
-        Task DeleteAsync<T>(object id, TransactionContext? transContext, string lastUser, bool? trulyDelete = null)
-            where T : TimelessDbModel, new();
+        Task DeleteAsync<T>(object id, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new();
 
         /// <summary>
         /// UpdateDeletedFields TimelessDbModel without conflict check
         /// </summary>
-        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext? transactionContext = null, bool? trulyDelete = null)
-            where T : TimelessDbModel, new();
+        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext? transactionContext = null, bool? trulyDelete = null) where T : TimelessDbModel, new();
 
-        Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new();
+        Task DeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new();
 
-        Task BatchDeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new();
+        Task DeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new();
 
-        Task BatchDeleteAsync<T>(IList<object> ids,
-            IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : TimestampDbModel, new();
+        Task DeleteAsync<T>(IList<object> ids, IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : TimestampDbModel, new();
 
         #endregion
 
@@ -86,7 +106,7 @@ namespace HB.FullStack.Database
 
         Task AddOrUpdateByIdAsync<T>(T item, string lastUser, TransactionContext? transContext = null) where T : TimelessDbModel, new();
 
-        Task BatchAddOrUpdateByIdAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new();
+        Task AddOrUpdateByIdAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new();
 
         #endregion
     }

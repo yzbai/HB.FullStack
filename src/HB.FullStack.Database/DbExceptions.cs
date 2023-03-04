@@ -430,5 +430,16 @@ namespace HB.FullStack.Database
             DbException ex = new DbException(ErrorCodes.DbUpdateUsingTimestampError, nameof(UpdateUsingTimestampListEmpty), null, null);
             return ex;
         }
+
+        internal static Exception UpdatePropertiesMethodWrong(string cause, IEnumerable<string> propertyNames, DbModelDef modelDef)
+        {
+            DbException ex = new DbException(ErrorCodes.DbUpdatePropertiesError, cause, null, null);
+
+            ex.Data["DbSchemaName"] = modelDef.DbSchemaName;
+            ex.Data["DbModelName"] = modelDef.ModelFullName;
+            ex.Data["PropertyNames"] = propertyNames.ToJoinedString(",");
+
+            return ex;
+        }
     }
 }

@@ -61,11 +61,11 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var books = Mocker.Guid_GetBooks(2);
 
-            await Db.BatchAddAsync(books, "tester", null);
+            await Db.AddAsync(books, "tester", null);
 
             try
             {
-                await Db.BatchAddAsync(books, "tester", null);
+                await Db.AddAsync(books, "tester", null);
             }
             catch (DbException e)
             {
@@ -84,7 +84,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             //update-fields
 
-            UpdateUsingTimestamp updatePack = new UpdateUsingTimestamp
+            UpdatePackTimestamp updatePack = new UpdatePackTimestamp
             {
                 Id = book.Id,
                 OldTimestamp = book.Timestamp,
@@ -124,13 +124,13 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_Update_Fields_By_Compare_OldNewValues()
         {
             //Add
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_BookModel_Timeless book = Mocker.Guid_GetBooks_Timeless(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
             //update-fields
 
-            UpdateUsingCompare updatePack = new UpdateUsingCompare
+            UpdatePackTimeless updatePack = new UpdatePackTimeless
             {
                 Id = book.Id,
                 PropertyNames = new string[] { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
@@ -138,21 +138,21 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 NewPropertyValues = new object?[] { 123456.789, "TTTTTXXXXTTTTT" }
             };
 
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel_Timeless>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
-            Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
+            Guid_BookModel_Timeless? updatedBook = await Db.ScalarAsync<Guid_BookModel_Timeless>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
 
             Assert.IsTrue(updatedBook.Price == 123456.789);
             Assert.IsTrue(updatedBook.Name == "TTTTTXXXXTTTTT");
             Assert.IsTrue(updatedBook.LastUser == "UPDATE_FIELDS_VERSION");
-            Assert.IsTrue(updatedBook.Timestamp > book.Timestamp);
+            //Assert.IsTrue(updatedBook.Timestamp > book.Timestamp);
 
             //应该抛出冲突异常
             try
             {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel_Timeless>(updatePack, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DbException ex)
             {
@@ -274,7 +274,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -313,7 +313,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
                 };
                 }
 
-                await Db.BatchUpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
+                await Db.UpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transContext).ConfigureAwait(false);
 
@@ -340,7 +340,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
                 if (lst.Count != 0)
                 {
-                    await Db.BatchDeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
+                    await Db.DeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
                 }
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
@@ -474,19 +474,19 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             try
             {
-                await Db.BatchAddAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items, "xx", trans).ConfigureAwait(false);
 
                 var results = await Db.RetrieveAsync<Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items, "xx", trans).ConfigureAwait(false);
 
                 var items2 = Mocker.Guid_GetPublishers();
 
-                await Db.BatchAddAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 results = await Db.RetrieveAsync<Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
@@ -563,7 +563,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -593,7 +593,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -625,7 +625,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -704,7 +704,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             try
             {
-                await Db.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+                await Db.AddAsync(books, "x", trans).ConfigureAwait(false);
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
             catch

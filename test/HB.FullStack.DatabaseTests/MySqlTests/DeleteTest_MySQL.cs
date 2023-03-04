@@ -115,11 +115,11 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var models = Mocker.MockTimelessList(3);
 
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
             var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
 
-            await Db.BatchDeleteAsync<DeleteTimelessModel>(ids, null, "", trulyDelete);
+            await Db.DeleteAsync<DeleteTimelessModel>(ids, null, "", trulyDelete);
 
             var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), null);
 
@@ -133,13 +133,13 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var models = Mocker.MockTimestampList(3);
 
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
             var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
 
             List<long?> timestamps = models.Select<DeleteTimestampModel, long?>(m => m.Timestamp).ToList();
 
-            await Db.BatchDeleteAsync<DeleteTimestampModel>(ids, timestamps, "", null, trulyDelete);
+            await Db.DeleteAsync<DeleteTimestampModel>(ids, timestamps, "", null, trulyDelete);
 
             var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), null);
 
@@ -153,11 +153,11 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var models = Mocker.MockTimestampList(3);
 
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
             var ids = models.Select<DeleteTimestampModel, object>(m => m.Id).ToList();
 
-            await Db.BatchDeleteAsync<DeleteTimestampModel>(models, "", null, trulyDelete);
+            await Db.DeleteAsync<DeleteTimestampModel>(models, "", null, trulyDelete);
 
             var rts = await Db.RetrieveAsync<DeleteTimestampModel>(m => SqlStatement.In(m.Id, false, ids), null);
 
@@ -171,11 +171,11 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var models = Mocker.MockTimelessList(3);
 
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
             var ids = models.Select<DeleteTimelessModel, object>(m => m.Id).ToList();
 
-            await Db.BatchDeleteAsync<DeleteTimelessModel>(models, "", null, trulyDelete);
+            await Db.DeleteAsync<DeleteTimelessModel>(models, "", null, trulyDelete);
 
             var rts = await Db.RetrieveAsync<DeleteTimelessModel>(m => SqlStatement.In(m.Id, false, ids), null);
 

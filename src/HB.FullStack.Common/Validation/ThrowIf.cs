@@ -1,6 +1,4 @@
-﻿
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -250,6 +248,17 @@ namespace System
 
     public static class ThrowIfExtensions
     {
+        [return: NotNull]
+        public static T ThrowIfNotValid<T>(this T o, string paramName) where T : ValidatableObject
+        {
+            if (!o.IsValid())
+            {
+                throw new ArgumentException($"不合法的实例. Parameter:{paramName}");
+            }
+
+            return o;
+        }
+
         public static T ThrowIfNull<T>([ValidatedNotNull][NotNull] this T? o, string? paramName) where T : class
         {
             if (o == null)

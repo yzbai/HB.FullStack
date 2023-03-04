@@ -35,7 +35,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             try
             {
-                //await Db.BatchAddAsync(lst, "Tests", trans).ConfigureAwait(false);
+                //await Db.AddAsync(lst, "Tests", trans).ConfigureAwait(false);
 
                 foreach (var item in lst)
                 {

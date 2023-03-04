@@ -14,7 +14,6 @@ namespace HB.FullStack.Client.ClientModels
         /// 1. Update
         /// 2. Get from network
         /// </summary>
-
         [TrackProperty]
         private DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
 

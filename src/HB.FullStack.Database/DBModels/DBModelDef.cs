@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 using HB.FullStack.Common.Models;
 using HB.FullStack.Database.Engine;
@@ -26,7 +28,7 @@ namespace HB.FullStack.Database.DbModels
 
         #endregion
 
-        public string DbSchemaName { get; set; } = null!; 
+        public string DbSchemaName { get; set; } = null!;
 
         /// <summary>
         /// 属于那种数据库
@@ -92,5 +94,18 @@ namespace HB.FullStack.Database.DbModels
 
 
         public override ModelPropertyDef? GetPropertyDef(string propertyName) => GetDbPropertyDef(propertyName);
+    }
+
+    public static class DbModelDefExtensions
+    {
+        public static DbModelDef ThrowIfNotWriteable(this DbModelDef modelDef)
+        {
+            if (!modelDef.DbWriteable)
+            {
+                throw DbExceptions.NotWriteable(type: modelDef.ModelFullName, database: modelDef.DbSchemaName);
+            }
+
+            return modelDef;
+        }
     }
 }

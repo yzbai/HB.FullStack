@@ -73,7 +73,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdateUsingTimestamp updatePack = new UpdateUsingTimestamp
+            UpdatePackTimestamp updatePack = new UpdatePackTimestamp
             {
                 Id = model.Id,
                 OldTimestamp = model.Timestamp,
@@ -97,9 +97,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
         {
             var models = Mocker.MockTimestampList(3);
 
-            await Db.BatchAddAsync(models, "", null);
+            await Db.AddAsync(models, "", null);
 
-            var updatePacks = new List<UpdateUsingTimestamp>();
+            var updatePacks = new List<UpdatePackTimestamp>();
 
             foreach (var model in models)
             {
@@ -109,7 +109,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                 long newTimestamp = TimeUtil.Timestamp;
 
-                updatePacks.Add(new UpdateUsingTimestamp
+                updatePacks.Add(new UpdatePackTimestamp
                 {
                     Id = model.Id,
                     OldTimestamp = model.Timestamp,
@@ -121,7 +121,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 model.Timestamp = newTimestamp;
             }
 
-            await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", null);
+            await Db.UpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", null);
 
             var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), null);
 
@@ -140,7 +140,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdateUsingCompare updatePack = new UpdateUsingCompare
+            UpdatePackTimeless updatePack = new UpdatePackTimeless
             {
                 Id = model.Id,
                 NewTimestamp = newTimestamp,
@@ -171,7 +171,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdateUsingCompare updatePack = new UpdateUsingCompare
+            UpdatePackTimeless updatePack = new UpdatePackTimeless
             {
                 Id = model.Id,
                 NewTimestamp = newTimestamp,
@@ -197,9 +197,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
             try
             {
                 var models = Mocker.MockTimestampList(3);
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
-                List<UpdateUsingCompare> updatePacks = new List<UpdateUsingCompare>();
+                List<UpdatePackTimeless> updatePacks = new List<UpdatePackTimeless>();
 
                 foreach (var model in models)
                 {
@@ -208,7 +208,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     InnerModel? newInnerModel = null;
                     long newTimestamp = TimeUtil.Timestamp;
 
-                    var updatePack = new UpdateUsingCompare { 
+                    var updatePack = new UpdatePackTimeless { 
                         Id = model.Id,
                         NewTimestamp = newTimestamp,
                         PropertyNames = new List<string> { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel)},
@@ -224,7 +224,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     model.Timestamp = newTimestamp;
                 }
 
-                await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", trans);
+                await Db.UpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", trans);
 
                 var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), trans);
 
@@ -289,7 +289,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             try
             {
                 var models = Mocker.MockTimelessList(3);
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
                 var cps = new List<PropertyChangePack>();
 
@@ -304,7 +304,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     cps.Add(model.GetChangePack());
                 }
 
-                await Db.BatchUpdatePropertiesAsync<UPTimelessModel>(cps, "", trans);
+                await Db.UpdatePropertiesAsync<UPTimelessModel>(cps, "", trans);
 
                 var rts = await Db.RetrieveAsync<UPTimelessModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), trans);
 
@@ -325,7 +325,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             try
             {
                 var models = Mocker.MockTimestampList(3);
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
                 var cps = new List<PropertyChangePack>();
 
@@ -341,7 +341,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     cps.Add(model.GetChangePack());
                 }
 
-                await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(cps, "", trans);
+                await Db.UpdatePropertiesAsync<UPTimestampModel>(cps, "", trans);
 
                 var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), trans);
 

@@ -5,6 +5,7 @@ using System.Reflection;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.SQL;
@@ -133,6 +134,7 @@ namespace HB.FullStack.Database.DbModels
                     Kind = ModelKind.Db,
                     ModelFullName = modelType.FullName!,
                     ModelType = modelType,
+                    IsPropertyTrackable = modelType.IsAssignableTo(typeof(IPropertyTrackableObject)),
 
                     DbSchemaName = dbSchema.Name,
                     EngineType = dbSchema.EngineType,

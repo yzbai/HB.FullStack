@@ -11,16 +11,22 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
-    //TODO: 添加对newTimestamp的检查
     partial class DefaultDatabase
     {
         public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
+            if (item is IPropertyTrackableObject trackableObject)
+            {
+                PropertyChangePack changePack = trackableObject.GetPropertyChanges();
+
+                await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
+
+                return;
+            }
+
             ThrowIf.NotValid(item, nameof(item));
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
-
-            ThrowIfNotWriteable(modelDef);
             //TruncateLastUser(ref lastUser);
 
             long oldTimestamp = -1;
@@ -97,7 +103,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task BatchUpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             if (items.IsNullOrEmpty())
             {
@@ -110,12 +116,21 @@ namespace HB.FullStack.Database
                 return;
             }
 
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+
+            if (modelDef.IsPropertyTrackable)
+            {
+                await UpdatePropertiesAsync<T>(
+                    items.Select(t => ((IPropertyTrackableObject)t).GetPropertyChanges()).ToList(), 
+                    lastUser, 
+                    transContext).ConfigureAwait(false);
+
+                return;
+            }
+
             ThrowIf.NotValid(items, nameof(items));
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
-
-            ThrowIfTooMuchItems(items, lastUser, modelDef);
-            ThrowIfNotWriteable(modelDef);
+            ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
             //TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();

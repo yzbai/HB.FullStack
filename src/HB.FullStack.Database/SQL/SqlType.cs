@@ -8,8 +8,8 @@ namespace HB.FullStack.Database.SQL
         AddModel,
 
         UpdateModel,
-        UpdateProperties,
-        UpdatePropertiesUsingOldNewCompare,
+        UpdatePropertiesTimestamp,
+        UpdatePropertiesTimeless,
         UpdateDeletedFields,
 
         Delete,

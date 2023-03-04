@@ -4,13 +4,15 @@ namespace HB.FullStack.Common.PropertyTrackable
 {
     public interface IPropertyTrackableObject
     {
+        IList<PropertyChange> Changes { get; }
+
         void StartTrack();
 
         void StopTrack();
 
         void Clear();
 
-        IList<PropertyChange> GetPropertyChanges(bool mergeMultipleChanges = true);
+        PropertyChangePack GetPropertyChanges(bool mergeMultipleChanges = true);
 
         void Track<T>(string propertyName, T oldValue, T newValue);
 

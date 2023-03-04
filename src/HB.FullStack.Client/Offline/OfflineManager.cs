@@ -53,7 +53,7 @@ namespace HB.FullStack.Client.Offline
                 offlineHistories.Add(offlineChange);
             }
 
-            await _database.BatchAddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
+            await _database.AddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
         }
 
         public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
@@ -79,7 +79,7 @@ namespace HB.FullStack.Client.Offline
                 offlineHistories.Add(offlineChange);
             }
 
-            await _database.BatchAddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
+            await _database.AddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
         }
 
         public async Task<bool> HasOfflineDataAsync()

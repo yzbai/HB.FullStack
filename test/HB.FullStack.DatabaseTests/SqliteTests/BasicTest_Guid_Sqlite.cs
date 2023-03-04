@@ -61,11 +61,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
         {
             var books = Mocker.Guid_GetBooks(2);
 
-            await Db.BatchAddAsync(books, "tester", null);
+            await Db.AddAsync(books, "tester", null);
 
             try
             {
-                await Db.BatchAddAsync(books, "tester", null);
+                await Db.AddAsync(books, "tester", null);
             }
             catch (DbException e)
             {
@@ -83,7 +83,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -151,7 +151,7 @@ select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
                 };
                 }
 
-                await Db.BatchUpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
+                await Db.UpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transContext).ConfigureAwait(false);
             }
@@ -174,7 +174,7 @@ select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
 
                 if (lst.Count != 0)
                 {
-                    await Db.BatchDeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
+                    await Db.DeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
                 }
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
@@ -310,19 +310,19 @@ select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
 
             try
             {
-                await Db.BatchAddAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items, "xx", trans).ConfigureAwait(false);
 
                 IEnumerable<Guid_PublisherModel_Client>? results = await Db.RetrieveAsync<Guid_PublisherModel_Client>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items, "xx", trans).ConfigureAwait(false);
 
                 List<Guid_PublisherModel_Client>? items2 = Mocker.Guid_GetPublishers_Client();
 
-                await Db.BatchAddAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 results = await Db.RetrieveAsync<Guid_PublisherModel_Client>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
@@ -449,7 +449,7 @@ select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
             {
                 //await Db.AddAsync<Book2Model>(books[0], "", trans);
 
-                await Db.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+                await Db.AddAsync(books, "x", trans).ConfigureAwait(false);
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
             catch
@@ -559,7 +559,7 @@ select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }

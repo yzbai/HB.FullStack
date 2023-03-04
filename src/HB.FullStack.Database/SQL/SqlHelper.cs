@@ -194,7 +194,7 @@ namespace HB.FullStack.Database.SQL
             if (modelDef.IsTimestampDBModel)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
-                //TODO: 这里可能有些问题，只能保证updateVersion比之前Version大一
+                
                 where.Append(Invariant($" AND {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
             }
 

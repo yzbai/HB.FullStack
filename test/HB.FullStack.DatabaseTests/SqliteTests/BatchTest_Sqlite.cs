@@ -17,7 +17,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //Timeless
             var timelessLst = Mocker.GetAutoIdBTTimelesses(10);
 
-            await Db.BatchAddAsync(timelessLst, "Tester", null);
+            await Db.AddAsync(timelessLst, "Tester", null);
 
             long count = await Db.CountAsync<AutoIdBTTimeless>(null);
 
@@ -30,7 +30,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //Timeless
             var timelessLst = Mocker.GetAutoIdBTTimelesses(10);
 
-            await Db.BatchAddAsync(timelessLst, "Tester", null);
+            await Db.AddAsync(timelessLst, "Tester", null);
 
             foreach (AutoIdBTTimeless t in timelessLst)
             {
@@ -51,7 +51,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //Timeless
             var lst = Mocker.GetAutoIdBTTimestamps(10);
 
-            await Db.BatchAddAsync(lst, "Tester", null);
+            await Db.AddAsync(lst, "Tester", null);
 
             long count = await Db.CountAsync<AutoIdBTTimestamp>(null);
 
@@ -64,7 +64,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //Timeless
             var lst = Mocker.GetAutoIdBTTimestamps(10);
 
-            await Db.BatchAddAsync(lst, "Tester", null);
+            await Db.AddAsync(lst, "Tester", null);
 
             foreach (var t in lst)
             {
@@ -72,7 +72,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 t.Age = 100;
             }
 
-            await Db.BatchUpdateAsync(lst, "dd", null);
+            await Db.UpdateAsync(lst, "dd", null);
 
             var rt = await Db.ScalarAsync<AutoIdBTTimestamp>(lst[0].Id, null);
 

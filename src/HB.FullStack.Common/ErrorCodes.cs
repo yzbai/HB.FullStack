@@ -164,6 +164,9 @@
         #endregion
         #region Db
 
+
+        public static ErrorCode DbUpdatePropertiesError { get; set; } = new ErrorCode(nameof(DbUpdatePropertiesError), "");
+
         public static ErrorCode DbUpdateUsingTimestampError = new ErrorCode(nameof(DbUpdateUsingTimestampError), "");
         public static ErrorCode DbDataTooLong = new ErrorCode(nameof(DbDataTooLong), "");
 

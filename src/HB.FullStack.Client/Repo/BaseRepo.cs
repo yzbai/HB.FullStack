@@ -302,7 +302,7 @@ namespace HB.FullStack.Client
                 }
 
                 //Local
-                await Database.BatchAddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
+                await Database.AddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
             {
@@ -318,7 +318,7 @@ namespace HB.FullStack.Client
             ThrowIf.NotValid(models, nameof(models));
             StatusManager.WaitUntilSynced();
 
-            List<PropertyChangePack> changedPacks = models.Select(m => m.GetChangePack()).ToList();
+            IList<PropertyChangePack> changedPacks = models.Select(m => m.GetPropertyChanges()).ToList();
 
             try
             {
@@ -338,7 +338,7 @@ namespace HB.FullStack.Client
                     await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
                 }
 
-                await Database.BatchUpdatePropertiesAsync<TModel>(changedPacks, LastUser, transactionContext).ConfigureAwait(false);
+                await Database.UpdatePropertiesAsync<TModel>(changedPacks, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {
@@ -372,7 +372,7 @@ namespace HB.FullStack.Client
 
                 }
 
-                await Database.BatchDeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
+                await Database.DeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {

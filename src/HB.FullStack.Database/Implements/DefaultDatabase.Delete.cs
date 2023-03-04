@@ -22,9 +22,8 @@ namespace HB.FullStack.Database
             TransactionContext? transContext,
             bool? trulyDelete = null) where T : DbModel, new()
         {
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
 
-            ThrowIfNotWriteable(modelDef);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -101,10 +100,9 @@ namespace HB.FullStack.Database
             }
 
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
 
-            ThrowIfNotWriteable(modelDef);
-            ThrowIfTooMuchItems(ids, lastUser, modelDef);
+            ThrowIfExceedMaxBatchNumber(ids, lastUser, modelDef);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -148,7 +146,7 @@ namespace HB.FullStack.Database
                 throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(ids), ex);
             }
         }
-        public Task BatchDeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new()
+        public Task DeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
             long?[] oldTimestamps = new long?[ids.Count];
             long?[] newTimestamps = new long?[ids.Count];
@@ -156,14 +154,14 @@ namespace HB.FullStack.Database
             return BatchDeleteCoreAsync<T>(ids, oldTimestamps, newTimestamps, lastUser, transContext, trulyDelete);
         }
 
-        public Task BatchDeleteAsync<T>(IList<object> ids, IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : TimestampDbModel, new()
+        public Task DeleteAsync<T>(IList<object> ids, IList<long?> timestamps, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : TimestampDbModel, new()
         {
             IList<long?> newTimestamps = Enumerable.Repeat<long?>(TimeUtil.Timestamp, ids.Count).ToList();
 
             return BatchDeleteCoreAsync<T>(ids, timestamps, newTimestamps, lastUser, transContext, trulyDelete);
         }
 
-        public Task BatchDeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new()
+        public Task DeleteAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new()
         {
             IList<object> ids = items is IEnumerable<ILongId> longIds
                 ? longIds.Select<ILongId, object>(i => i.Id).ToList()
@@ -191,9 +189,7 @@ namespace HB.FullStack.Database
             TransactionContext? transactionContext = null,
             bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
-
-            ThrowIfNotWriteable(modelDef);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
 
             try
             {

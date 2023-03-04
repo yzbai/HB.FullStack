@@ -378,16 +378,6 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void ThrowIfNotWriteable(DbModelDef modelDef)
-        {
-            if (!modelDef.DbWriteable)
-            {
-                throw DbExceptions.NotWriteable(type: modelDef.ModelFullName, database: modelDef.DbSchemaName);
-            }
-        }
-
-        
-
         #endregion
 
     }
