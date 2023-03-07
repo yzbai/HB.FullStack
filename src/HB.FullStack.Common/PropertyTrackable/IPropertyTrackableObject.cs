@@ -6,6 +6,7 @@ namespace HB.FullStack.Common.PropertyTrackable
     {
         IList<PropertyChange> Changes { get; }
 
+        //TODO: 是否需要自动StartTrack，比如刚从Db拿到手
         void StartTrack();
 
         void StopTrack();

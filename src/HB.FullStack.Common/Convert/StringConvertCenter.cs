@@ -5,6 +5,7 @@ using HB.FullStack.Common.Convert.Converters;
 
 namespace HB.FullStack.Common.Convert
 {
+    //TODO:查看是否使用TypeConverter代替
     public static class StringConvertCenter
     {
 

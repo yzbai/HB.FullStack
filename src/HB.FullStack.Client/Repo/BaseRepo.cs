@@ -20,7 +20,7 @@ using Microsoft.VisualStudio.Threading;
 
 namespace HB.FullStack.Client
 {
-    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : DbModel;
+    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : ClientDbModel;
 
     public abstract class BaseRepo
     {

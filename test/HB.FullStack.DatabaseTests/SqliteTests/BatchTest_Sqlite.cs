@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HB.FullStack.BaseTest.Data.Sqlites;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,7 +29,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
         public async Task Batch_Update_AutoIdTimeless_Test()
         {
             //Timeless
-            var timelessLst = Mocker.GetAutoIdBTTimelesses(10);
+            IList<AutoIdBTTimeless> timelessLst = Mocker.GetAutoIdBTTimelesses(10);
 
             await Db.AddAsync(timelessLst, "Tester", null);
 
@@ -38,7 +39,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 t.Age = 100;
             }
 
-            await Db.BatchUpdateAsync(timelessLst, "dd", null);
+            await Db.UpdateAsync(timelessLst, "dd", null);
 
             var rt = await Db.ScalarAsync<AutoIdBTTimeless>(timelessLst[0].Id, null);
 
