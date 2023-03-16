@@ -35,14 +35,14 @@ namespace HB.FullStack.Client.Maui
 
         public bool IsIntroducedYet { get => UserPreferences.IsIntroducedYet; set => UserPreferences.IsIntroducedYet = value; }
 
-        public void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
+        public void OnLogined(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
         {
             UserPreferences.Login(userId, userCreateTime, mobile, email, loginName, accessToken, refreshToken);
 
             _statusManager.ReportLogined();
         }
 
-        public void Logout()
+        public void OnLogouted()
         {
             UserPreferences.Logout();
 

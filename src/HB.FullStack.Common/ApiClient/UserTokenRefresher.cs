@@ -114,7 +114,7 @@ namespace HB.FullStack.Common.ApiClient
 
         private static void OnRefreshSucceed(UserTokenRes res, IPreferenceProvider preferenceProvider)
         {
-            preferenceProvider.Login(
+            preferenceProvider.OnLogined(
                 res.UserId,
                 res.CreatedTime,
                 res.Mobile,

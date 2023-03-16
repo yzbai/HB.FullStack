@@ -23,9 +23,9 @@ namespace System
 
         bool IsLogined();
 
-        void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken);
+        void OnLogined(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken);
 
-        void Logout();
+        void OnLogouted();
 
         void OnTokenRefreshFailed();
     }

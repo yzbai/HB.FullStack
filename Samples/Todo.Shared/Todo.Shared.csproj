@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
+    <ProjectReference Include="..\..\src\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+    <ProjectReference Include="..\..\src\HB.FullStack.Database\HB.FullStack.Database.csproj" />
+  </ItemGroup>
+
+</Project>

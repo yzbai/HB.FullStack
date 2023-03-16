@@ -43,13 +43,13 @@ namespace HB.FullStack.BaseTest
 
         public bool IsIntroducedYet { get; set; }
 
-        public void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
+        public void OnLogined(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
         {
             AccessToken = accessToken;
             RefreshToken = refreshToken;
         }
 
-        public void Logout()
+        public void OnLogouted()
         {
             AccessToken = null;
             RefreshToken = null;

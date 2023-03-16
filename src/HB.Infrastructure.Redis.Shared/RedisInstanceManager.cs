@@ -212,7 +212,7 @@ namespace HB.Infrastructure.Redis.Shared
             if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer? connection))
             {
                 connection.Dispose();
-                _connectionDict.TryRemove(setting.InstanceName, out ConnectionMultiplexer _);
+                _connectionDict.TryRemove(setting.InstanceName, out ConnectionMultiplexer? _);
             }
         }
 
@@ -221,7 +221,7 @@ namespace HB.Infrastructure.Redis.Shared
             foreach (var kv in _connectionDict)
             {
                 kv.Value?.Dispose();
-                _connectionDict.TryRemove(kv.Key, out ConnectionMultiplexer _);
+                _connectionDict.TryRemove(kv.Key, out ConnectionMultiplexer? _);
             }
 
             _connectionDict = new ConcurrentDictionary<string, ConnectionMultiplexer>();
