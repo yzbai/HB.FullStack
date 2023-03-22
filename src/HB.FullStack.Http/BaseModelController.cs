@@ -40,25 +40,25 @@ namespace HB.FullStack.WebApi
             }
         }
 
-        [HttpGet]
-        public virtual IActionResult Get(
-            [FromQuery] string[]? ids,
-            [FromQuery] int? page,
-            [FromQuery] int? perPage,
-            [FromQuery] string? orderBys,
-            [FromQuery] string[]? resIncludes,
-            [FromQuery] string[]? wherePropertyNames,
-            [FromQuery] string?[]? wherePropertyValues
-            //[FromQuery] string?[]? whereOperator
-            )
-        {
-            //settings: allowId? allowIds? allow page? maxPerPage? allowIncludes? includesWhat? allowPropertyFilter?
+        //[HttpGet]
+        //public virtual IActionResult Get(
+        //    [FromQuery] string[]? ids,
+        //    [FromQuery] int? page,
+        //    [FromQuery] int? perPage,
+        //    [FromQuery] string? orderBys,
+        //    [FromQuery] string[]? resIncludes,
+        //    [FromQuery] string[]? wherePropertyNames,
+        //    [FromQuery] string?[]? wherePropertyValues
+        //    //[FromQuery] string?[]? whereOperator
+        //    )
+        //{
+        //    //settings: allowId? allowIds? allow page? maxPerPage? allowIncludes? includesWhat? allowPropertyFilter?
 
-            //deal with ids & orderBys & includes & propertyFilters
+        //    //deal with ids & orderBys & includes & propertyFilters
 
-            //deal with page & perPage & orderBys & inclues & propertyFilters
+        //    //deal with page & perPage & orderBys & inclues & propertyFilters
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
     }
 }

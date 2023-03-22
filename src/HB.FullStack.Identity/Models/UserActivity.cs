@@ -9,8 +9,8 @@ namespace HB.FullStack.Identity.Models
         [DbForeignKey(typeof(User), false)]
         public Guid? UserId { get; set; }
 
-        [DbForeignKey(typeof(SignInToken), false)]
-        public Guid? SignInTokenId { get; set; }
+        [DbForeignKey(typeof(SignInCredential), false)]
+        public Guid? SignInCredentialId { get; set; }
 
         public string? Ip { get; set; }
 

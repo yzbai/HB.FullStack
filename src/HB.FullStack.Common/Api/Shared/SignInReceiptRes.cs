@@ -6,9 +6,9 @@ using HB.FullStack.Common.Api;
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
-    /// 可能存在多个Endpoint，即不同的Endpoint使用不同站点的UserToken
+    /// 可能存在多个Endpoint，即不同的Endpoint使用不同站点的SignInReceipt
     /// </summary>
-    public class UserTokenRes : ApiResource
+    public class SignInReceiptRes : ApiResource
     {
         [NoEmptyGuid]
         public Guid UserId { get; set; }

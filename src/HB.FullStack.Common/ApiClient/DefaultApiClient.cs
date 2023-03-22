@@ -33,24 +33,24 @@ namespace HB.FullStack.Common.ApiClient
 
         private readonly IDictionary<string, ResEndpoint> _resEndpoints = new Dictionary<string, ResEndpoint>();
 
-        public IPreferenceProvider UserTokenProvider { get; }
+        public IPreferenceProvider SignInReceiptProvider { get; }
 
-        public ResEndpoint? UserTokenResEndpoint { get; private set; }
+        public ResEndpoint? SignInReceiptResEndpoint { get; private set; }
 
         public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider tokenProvider)
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;
-            UserTokenProvider = tokenProvider;
+            SignInReceiptProvider = tokenProvider;
 
             RangeApiKeys();
             RangeEndpoints();
 
             GlobalApiClientAccessor.ApiClient = this;
 
-            if (_resEndpoints.TryGetValue(nameof(UserTokenRes), out ResEndpoint? userTokenResEndpoint))
+            if (_resEndpoints.TryGetValue(nameof(SignInReceiptRes), out ResEndpoint? signInReceiptResEndpoint))
             {
-                UserTokenResEndpoint = userTokenResEndpoint;
+                SignInReceiptResEndpoint = signInReceiptResEndpoint;
             }
 
             void RangeApiKeys()
@@ -164,7 +164,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await this.RefreshUserTokenAsync().ConfigureAwait(false);
+                    bool refreshSuccessed = await this.RefreshSignInReceiptAsync().ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
@@ -188,8 +188,8 @@ namespace HB.FullStack.Common.ApiClient
 
         private void ConfigureRequestBuilder(HttpRequestMessageBuilder requestBuilder)
         {
-            requestBuilder.SetDeviceId(UserTokenProvider.DeviceId);
-            requestBuilder.SetDeviceVersion(UserTokenProvider.DeviceVersion);
+            requestBuilder.SetClientId(SignInReceiptProvider.ClientId);
+            requestBuilder.SetClientVersion(SignInReceiptProvider.ClientVersion);
 
             ApiRequestAuth auth = requestBuilder.Request.Auth!;
 
@@ -213,12 +213,12 @@ namespace HB.FullStack.Common.ApiClient
                     }
 
                 case ApiAuthType.Jwt:
-                    if (UserTokenProvider.AccessToken.IsNullOrEmpty())
+                    if (SignInReceiptProvider.AccessToken.IsNullOrEmpty())
                     {
                         throw CommonExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
                     }
 
-                    requestBuilder.SetJwt(UserTokenProvider.AccessToken);
+                    requestBuilder.SetJwt(SignInReceiptProvider.AccessToken);
                     break;
 
                 default:

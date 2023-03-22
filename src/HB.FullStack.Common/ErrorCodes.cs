@@ -49,7 +49,7 @@
         public static ErrorCode ModelValidationError = new ErrorCode(nameof(ModelValidationError), "");
         public static ErrorCode ApiNotAvailable = new ErrorCode(nameof(ApiNotAvailable), "");
         public static ErrorCode ApiErrorUnkownFormat = new ErrorCode(nameof(ApiErrorUnkownFormat), "");
-        public static ErrorCode ApiSmsCodeInvalid = new ErrorCode(nameof(ApiSmsCodeInvalid), "短信验证码错误。");
+        public static ErrorCode InvalidSmsCode = new ErrorCode(nameof(InvalidSmsCode), "短信验证码错误。");
         public static ErrorCode SmsServiceError = new ErrorCode(nameof(SmsServiceError), "");
         public static ErrorCode CommonResourceTokenNeeded = new ErrorCode(nameof(CommonResourceTokenNeeded), "");
         public static ErrorCode CommonResourceTokenError = new ErrorCode(nameof(CommonResourceTokenError), "");
@@ -100,14 +100,15 @@
 
         public static ErrorCode LackParent2ResIdAttribute = new ErrorCode(nameof(LackParent2ResIdAttribute), "因为制定了Parent2ResName，但缺少Parent2ResIdAttribute");
 
-        #region
+        #region Identity
         //TODO: 客户端应该针对于这些Authorize类的Error进行相应处理
 
-        public static ErrorCode AuthorizationNotFound = new ErrorCode(nameof(AuthorizationNotFound), "");
+        public static ErrorCode IdentityDisallowRegisterByLoginName { get; set; } = new ErrorCode(nameof(IdentityDisallowRegisterByLoginName), "");
+        public static ErrorCode IdentityUserNotExists = new ErrorCode(nameof(IdentityUserNotExists), "");
         public static ErrorCode AuthorizationPasswordWrong = new ErrorCode(nameof(AuthorizationPasswordWrong), "");
-        public static ErrorCode AccessTokenRefreshing = new ErrorCode(nameof(AccessTokenRefreshing), "同一设备正在Refreshing");
+        public static ErrorCode SignInReceiptRefreshConcurrentError = new ErrorCode(nameof(SignInReceiptRefreshConcurrentError), "同一设备正在Refreshing");
         public static ErrorCode RefreshAccessTokenError = new ErrorCode(nameof(RefreshAccessTokenError), "");
-        public static ErrorCode AuthorizationInvalideDeviceId = new ErrorCode(nameof(AuthorizationInvalideDeviceId), "");
+        public static ErrorCode AuthorizationInvalideClientId = new ErrorCode(nameof(AuthorizationInvalideClientId), "");
         public static ErrorCode AuthorizationInvalideUserId = new ErrorCode(nameof(AuthorizationInvalideUserId), "");
         public static ErrorCode AuthorizationUserSecurityStampChanged = new ErrorCode(nameof(AuthorizationUserSecurityStampChanged), "");
         public static ErrorCode AuthorizationRefreshTokenExpired = new ErrorCode(nameof(AuthorizationRefreshTokenExpired), "");
@@ -247,6 +248,7 @@
         public static ErrorCode JwtEncryptionCertNotFound { get; set; } = new ErrorCode(nameof(JwtEncryptionCertNotFound), "");
         public static ErrorCode StartupError { get; set; } = new ErrorCode(nameof(StartupError), "");
         public static ErrorCode DatabaseInitLockError { get; set; } = new ErrorCode(nameof(DatabaseInitLockError), "");
+        
 
         //public static ErrorCode ExceptionHandlerPathFeatureNull = new ErrorCode(nameof(ExceptionHandlerPathFeatureNull), "");
 

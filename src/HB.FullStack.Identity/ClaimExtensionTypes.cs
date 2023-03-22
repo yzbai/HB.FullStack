@@ -4,7 +4,7 @@
     {
         //public const string ROLE = ClaimsIdentity.DefaultRoleClaimType;
 
-        public const string SIGN_IN_TOKEN_ID = "HB.SignInTokenId";
+        public const string SIGN_IN_CREDENTIAL_ID = "HB.SignInCredentialId";
 
 
         public const string SECURITY_STAMP = "HB.SecurityStamp";
@@ -14,7 +14,7 @@
         public const string USER_ID = "HB.UserId";
 
 
-        public const string DEVICE_ID = "HB.DeviceId";
+        public const string CLIENT_ID = "HB.ClientId";
 
         public const string API_KEY_NAME = "HB.ApiKeyName";
 

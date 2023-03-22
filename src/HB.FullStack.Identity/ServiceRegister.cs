@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<UserClaimRepo>();
             services.AddSingleton<RoleRepo>();
             services.AddSingleton<LoginControlRepo>();
-            services.AddSingleton<SignInTokenRepo>();
+            services.AddSingleton<SignInCredentialRepo>();
             services.AddSingleton<UserActivityRepo>();
 
             //public interface

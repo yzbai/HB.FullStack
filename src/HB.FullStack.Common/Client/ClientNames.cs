@@ -10,8 +10,8 @@ namespace System
         //public const string ACCESS_TOKEN = "AccessToken";
         //public const string REFRESH_TOKEN = "RefreshToken";
 
-        public const string DEVICE_ID = "DeviceId";
-        public const string DEVICE_VERSION = "DeviceVersion";
+        public const string CLIENT_ID = "ClientId";
+        public const string CLIENT_VERSION = "ClientVersion";
         //public const string DEVICE_INFOS = "DeviceInfos";
         //public const string DEVICE_ADDRESS = "DeviceAddress";
 

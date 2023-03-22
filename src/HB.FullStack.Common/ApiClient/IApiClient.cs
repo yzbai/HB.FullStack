@@ -8,9 +8,9 @@ namespace HB.FullStack.Common.ApiClient
 {
     public interface IApiClient
     {
-        IPreferenceProvider UserTokenProvider { get; }
+        IPreferenceProvider SignInReceiptProvider { get; }
 
-        ResEndpoint? UserTokenResEndpoint { get; }
+        ResEndpoint? SignInReceiptResEndpoint { get; }
 
         event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
 

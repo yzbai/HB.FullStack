@@ -2,43 +2,40 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
+using HB.FullStack.Identity.Context;
 
 namespace HB.FullStack.Identity
 {
-    public class SignInContext : ValidatableObject
+    public abstract class SignInContext : ValidatableObject, IHasAudience
     {
-        //public HttpContext HttpContext { get; set; }
-
-        public SignInType SignInType { get; set; }
-
-        [LoginName]
-        public string? LoginName { get; set; }
-
-        [Password]
-        public string? Password { get; set; }
-
-        [Mobile]
-        public string? Mobile { get; set; }
+        /// <summary>
+        /// Sign to where
+        /// </summary>
+        [Required]
+        public string Audience { get; set; } = default!;
 
         public bool RememberMe { get; set; }
 
-        [Required]
-        public string DeviceId { get; set; } = default!;
+        public SignInExclusivity Exclusivity { get; set; } = SignInExclusivity.None;
 
-        public DeviceInfos DeviceInfos { get; set; } = default!;
+        [ValidatedObject(CanBeNull = false)]
+        public ClientInfos ClientInfos { get; set; }
 
-        [Required]
-        public string DeviceVersion { get; set; } = default!;
+        [ValidatedObject(CanBeNull = false)]
+        public DeviceInfos DeviceInfos { get; set; }
 
-        [Required]
-        public string DeviceIp { get; set; } = default!;
-
-        /// <summary>
-        /// Audience
-        /// </summary>
-        [Required]
-        public string SignToWhere { get; set; } = default!;
-
-        public LogOffType LogOffType { get; set; } = LogOffType.None;
+        public SignInContext(
+            string audience, 
+            bool rememberMe, 
+            SignInExclusivity exclusivity, 
+            ClientInfos clientInfos,
+            DeviceInfos deviceInfos)
+        {
+            Audience = audience;
+            RememberMe = rememberMe;
+            Exclusivity = exclusivity;
+            ClientInfos = clientInfos;
+            DeviceInfos = deviceInfos;
+        }
     }
 }

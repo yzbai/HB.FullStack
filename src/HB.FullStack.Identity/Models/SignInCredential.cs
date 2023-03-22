@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Identity.Models
 {
-    public class SignInToken : TimestampGuidDbModel
+    public class SignInCredential : TimestampGuidDbModel
     {
         [NoEmptyGuid]
         [DbForeignKey(typeof(User), false)]
@@ -21,17 +21,17 @@ namespace HB.FullStack.Identity.Models
 
         public bool Blacked { get; set; }
 
-        #region Device
+        #region Client
 
         [Required]
         [DbField(NotNull = true, NeedIndex = true)]
-        public string DeviceId { get; set; } = default!;
+        public string ClientId { get; set; } = default!;
 
         [DbField(NotNull = true)]
-        public string DeviceVersion { get; set; } = default!;
+        public string ClientVersion { get; set; } = default!;
 
         [DbField(NotNull = true)]
-        public string DeviceIp { get; set; } = default!;
+        public string ClientIp { get; set; } = default!;
 
         #endregion
 
@@ -57,17 +57,17 @@ namespace HB.FullStack.Identity.Models
 
         #endregion
 
-        public SignInToken()
+        public SignInCredential()
         {
         }
 
-        public SignInToken(
+        public SignInCredential(
             Guid userId,
             string refreshToken,
             DateTimeOffset? expireAt,
-            string deviceId,
-            string deviceVersion,
-            string deviceIp,
+            string clientId,
+            string clientVersion,
+            string clientIp,
             string deviceName,
             string deviceModel,
             string deviceOSVersion,
@@ -79,9 +79,9 @@ namespace HB.FullStack.Identity.Models
             RefreshToken = refreshToken;
             ExpireAt = expireAt;
 
-            DeviceId = deviceId;
-            DeviceVersion = deviceVersion;
-            DeviceIp = deviceIp;
+            ClientId = clientId;
+            ClientVersion = clientVersion;
+            ClientIp = clientIp;
 
             DeviceName = deviceName;
             DeviceModel = deviceModel;

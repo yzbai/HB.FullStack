@@ -11,13 +11,13 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public class UserTokenRefreshHttpClientHandler : HttpClientHandler
+    public class SignInReceiptRefreshHttpClientHandler : HttpClientHandler
     {
         private readonly IApiClient _apiClient;
         private readonly IPreferenceProvider _tokenProvider;
         private readonly ApiClientOptions _options;
 
-        public UserTokenRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
+        public SignInReceiptRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
         {
             _apiClient = apiClient;
             _tokenProvider = tokenProvider;
@@ -57,7 +57,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    await UserTokenRefresher.RefreshUserTokenAsync(_apiClient).ConfigureAwait(false);
+                    await SignInReceiptRefresher.RefreshSignInReceiptAsync(_apiClient).ConfigureAwait(false);
 
                     return responseMessage;
                 }
@@ -78,7 +78,7 @@ namespace HB.FullStack.Common.ApiClient
 
             //Query
             request.RequestUri = request.RequestUri?.ToString()
-                    .AddQuery(ClientNames.DEVICE_ID, tokenProvider.DeviceId)
+                    .AddQuery(ClientNames.CLIENT_ID, tokenProvider.ClientId)
                     .AddNoiseQuery()
                     .ToUri();
         }

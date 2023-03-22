@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IApiClient, DefaultApiClient>();
 
             //HttpClientHandler会随着HttpClient Dispose 而Dispose
-            services.AddTransient<UserTokenRefreshHttpClientHandler>();
+            services.AddTransient<SignInReceiptRefreshHttpClientHandler>();
         }
     }
 }

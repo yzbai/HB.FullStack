@@ -38,10 +38,15 @@ namespace System
         //    //return Convert.ToBase64String(md5Bytes);
         //}
 
+        [ThreadStatic]
+        private static SHA256? _sha256;
+
+        public static SHA256 Sha256 => _sha256 ??= SHA256.Create();
+
         public static string GetHash(string item)
         {
-            using SHA256 sha256Obj = SHA256.Create();
-            byte[] hashBytes = sha256Obj.ComputeHash(Encoding.UTF8.GetBytes(item));
+            //using SHA256 sha256Obj = SHA256.Create();
+            byte[] hashBytes = Sha256.ComputeHash(Encoding.UTF8.GetBytes(item));
 
             return Convert.ToBase64String(hashBytes);
         }
@@ -53,15 +58,15 @@ namespace System
 
         public static string GetHash<T>([DisallowNull] T item) where T : class
         {
-            using SHA256 sha256Obj = SHA256.Create();
-            byte[] result = sha256Obj.ComputeHash(SerializeUtil.Serialize(item));
+            //using SHA256 sha256Obj = SHA256.Create();
+            byte[] result = Sha256.ComputeHash(SerializeUtil.Serialize(item));
 
             return Convert.ToBase64String(result);
         }
 
-        public static string EncryptPwdWithSalt(string pwd, string salt)
+        public static string EncryptPasswordWithSalt(string password, string salt)
         {
-            return GetHash(pwd + salt);
+            return GetHash(password + salt);
         }
 
         public static string CreateUniqueToken()

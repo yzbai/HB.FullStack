@@ -188,21 +188,21 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static Task OnJwtTokenValidatedAsync(TokenValidatedContext c)
         {
-            //验证Body 中的DeviceId 与 JWT 中的DeviceId 是否一致
-            string? jwtDeviceId = c.Principal?.GetDeviceId();
+            //验证Body 中的ClientId 与 JWT 中的ClientId 是否一致
+            string? jwtClientId = c.Principal?.GetClientId();
 
-            string? requestDeviceId = c.HttpContext.Request.GetHeaderValueAs<string>(ClientNames.DEVICE_ID);
+            string? requestClientId = c.HttpContext.Request.GetHeaderValueAs<string>(ClientNames.CLIENT_ID);
 
-            requestDeviceId ??= c.HttpContext.Request.GetValue(ClientNames.DEVICE_ID);
+            requestClientId ??= c.HttpContext.Request.GetValue(ClientNames.CLIENT_ID);
 
-            if (!string.IsNullOrWhiteSpace(jwtDeviceId) && jwtDeviceId.Equals(requestDeviceId, Globals.ComparisonIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(jwtClientId) && jwtClientId.Equals(requestClientId, Globals.ComparisonIgnoreCase))
             {
                 return Task.CompletedTask;
             }
 
-            c.Fail("Token DeviceId do not match Request DeviceId");
+            c.Fail("Token ClientId do not match Request ClientId");
 
-            Log.Warning($"DeviceId:{requestDeviceId} do not match Request DeviceId : {jwtDeviceId}");
+            Log.Warning($"ClientId:{requestClientId} do not match Request ClientId : {jwtClientId}");
 
             return Task.CompletedTask;
         }

@@ -8,7 +8,7 @@ namespace HB.FullStack.Common.Api
         /// 将PropertyValue转换成字符串
         /// </summary>
         [RequestBody]
-        public PropertyChangePack ? RequestData { get; set; }
+        public PropertyChangePack? RequestData { get; set; }
 
         public PatchRequest() : base(typeof(T).Name, ApiMethod.UpdateProperties, null, null) { }
     }

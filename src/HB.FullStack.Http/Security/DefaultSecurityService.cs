@@ -24,10 +24,10 @@ namespace HB.FullStack.WebApi.Security
         public Task<bool> NeedPublicResourceTokenAsync(ApiRequest? apiRequest)
         {
             //TODO:其他安全检测
-            //1， 频率. DeviceId, IP. 根据频率来决定客户端要不要弹出防水墙
-            //2， 历史登录比较 Mobile和DeviceId绑定。Address
+            //1， 频率. ClientId, IP. 根据频率来决定客户端要不要弹出防水墙
+            //2， 历史登录比较 Mobile和ClientId绑定。Address
 
-            //检查从某IP，DeviceId，Mobile发来的请求是否需要防水墙。
+            //检查从某IP，ClientId，Mobile发来的请求是否需要防水墙。
             //需要的话，查看request.PublicResourceToken. 没有的话，返回ErrorCode.API_NEED_PUBLIC_RESOURCE_TOKEN
 
             //可以根据不同的ApiRequest类型来判断

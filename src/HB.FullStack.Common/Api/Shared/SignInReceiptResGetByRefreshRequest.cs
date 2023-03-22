@@ -5,7 +5,7 @@ using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.Api
 {
-    public class UserTokenResGetByRefreshRequest : ApiRequest
+    public class SignInReceiptResGetByRefreshRequest : ApiRequest
     {
         [RequestQuery]
         [NoEmptyGuid]
@@ -21,30 +21,30 @@ namespace HB.FullStack.Common.Api
 
         [RequestQuery]
         [Required]
-        public string DeviceId { get; set; } = null!;
+        public string ClientId { get; set; } = null!;
 
         [RequestQuery]
         [Required]
-        public string DeviceVersion { get; set; } = null!;
+        public string ClientVersion { get; set; } = null!;
 
         [RequestQuery]
         [Required]
         public DeviceInfos DeviceInfos { get; set; } = null!;
 
-        public UserTokenResGetByRefreshRequest(
+        public SignInReceiptResGetByRefreshRequest(
             Guid userId,
             string accessToken,
             string refreshToken,
-            string deviceId,
-            string deviceVersion,
+            string clientId,
+            string clientVersion,
             DeviceInfos deviceInfos)
-            : base(nameof(UserTokenRes), ApiMethod.Get, ApiRequestAuth.NONE, "ByRefresh")
+            : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, "ByRefresh")
         {
             UserId = userId;
             AccessToken = accessToken;
             RefreshToken = refreshToken;
-            DeviceId = deviceId;
-            DeviceVersion = deviceVersion;
+            ClientId = clientId;
+            ClientVersion = clientVersion;
             DeviceInfos = deviceInfos;
         }
     }

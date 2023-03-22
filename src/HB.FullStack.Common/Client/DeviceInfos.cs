@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using HB.FullStack.Common;
+
 namespace System
 {
-    public class DeviceInfos
+    public class DeviceInfos : ValidatableObject
     {
         [Required]
         public string Name { get; set; } = null!;

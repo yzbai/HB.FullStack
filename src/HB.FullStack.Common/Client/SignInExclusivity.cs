@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public enum LogOffType
+    public enum SignInExclusivity
     {
         None,
         LogOffAllOthers,

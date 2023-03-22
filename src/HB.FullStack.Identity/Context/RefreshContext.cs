@@ -8,15 +8,23 @@ namespace HB.FullStack.Identity
     public class RefreshContext : ValidatableObject
     {
         [Required]
-        public string AccessToken { get; set; } = default!;
+        public string AccessToken { get; set; }
 
         [Required]
-        public string RefreshToken { get; set; } = default!;
+        public string RefreshToken { get; set; }
+        
+        [ValidatedObject(CanBeNull = false)]        
+        public ClientInfos ClientInfos { get; set; }
 
-        [Required]
-        public string DeviceId { get; set; } = default!;
-        public DeviceInfos DeviceInfos { get; set; } = default!;
-        public string DeviceVersion { get; set; } = default!;
-        //public string DeviceAddress { get; set; } = default!;
+        [ValidatedObject(CanBeNull = false)]
+        public DeviceInfos DeviceInfos { get; set; }
+
+        public RefreshContext(string accessToken, string refreshToken, ClientInfos clientInfos, DeviceInfos deviceInfos)
+        {
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
+            ClientInfos = clientInfos;
+            DeviceInfos = deviceInfos;
+        }
     }
 }

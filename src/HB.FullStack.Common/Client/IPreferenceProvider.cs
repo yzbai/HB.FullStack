@@ -13,9 +13,9 @@ namespace System
 
         string? RefreshToken { get; set; }
 
-        string DeviceId { get; }
+        string ClientId { get; }
 
-        string DeviceVersion { get; }
+        string ClientVersion { get; }
 
         DeviceInfos DeviceInfos { get; }
 

@@ -67,7 +67,7 @@ namespace HB.FullStack.Identity.Models
             LoginName = loginName;
             Mobile = mobile;
             Email = email;
-            PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, SecurityStamp);
+            PasswordHash = password == null ? null : SecurityUtil.EncryptPasswordWithSalt(password, SecurityStamp);
             MobileConfirmed = mobileConfirmed;
             EmailConfirmed = emailConfirmed;
         }

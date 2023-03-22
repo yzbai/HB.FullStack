@@ -41,15 +41,17 @@ namespace HB.FullStack.Database.DbModels
                 ? ReflectionUtil.GetAllTypeByCondition(typeCondition)
                 : ReflectionUtil.GetAllTypeByCondition(_options.DbModelAssemblies, typeCondition);
 
-            IDictionary<Type, DbTableSchemaEx> typeSchemaDict = FlatDbTableSchemas(allModelTypes);
-
-            ConstructDbModelDefs(allModelTypes, typeSchemaDict);
+            //从Options中获取
+            ConstructDbTableSchemaFromOptions(allModelTypes, out Dictionary<Type, DbTableSchemaEx> typeSchemaDictFromOptions);
+            //从程序中获取
+            ConstructDbModelDefFromProgramming(allModelTypes, typeSchemaDictFromOptions);
 
             CheckDbModelDefs();
 
-            IDictionary<Type, DbTableSchemaEx> FlatDbTableSchemas(IEnumerable<Type> allModelTypes)
+            void ConstructDbTableSchemaFromOptions(IEnumerable<Type> allModelTypes, out Dictionary<Type, DbTableSchemaEx> typeSchemaDictFromOptions)
             {
-                IDictionary<Type, DbTableSchemaEx> resultTypeTableDict = new Dictionary<Type, DbTableSchemaEx>();
+                typeSchemaDictFromOptions = new Dictionary<Type, DbTableSchemaEx>();
+
                 IDictionary<string, DbTableSchemaEx> typeTableFromOptionsDict = new Dictionary<string, DbTableSchemaEx>();
 
                 foreach (DbSchema schema in _options.DbSchemas)
@@ -108,26 +110,26 @@ namespace HB.FullStack.Database.DbModels
                         resultTableSchema.TableName = resultTableSchema.TableName.RemoveSuffix(resultDbSchema.TableNameSuffixToRemove);
                     }
 
-                    resultTypeTableDict.Add(type, new DbTableSchemaEx { DbSchema = resultDbSchema, TableSchema = resultTableSchema });
+                    typeSchemaDictFromOptions.Add(type, new DbTableSchemaEx { DbSchema = resultDbSchema, TableSchema = resultTableSchema });
                 }
 
-                return resultTypeTableDict;
+                //return resultTypeTableDict;
             }
 
-            void ConstructDbModelDefs(IEnumerable<Type> types, IDictionary<Type, DbTableSchemaEx> typeTableSchemaDict)
+            void ConstructDbModelDefFromProgramming(IEnumerable<Type> types, IDictionary<Type, DbTableSchemaEx> typeTableSchemaDictFromOptions)
             {
                 foreach (Type type in types)
                 {
-                    if (!typeTableSchemaDict!.TryGetValue(type, out DbTableSchemaEx? dbTableSchemaEx))
+                    if (!typeTableSchemaDictFromOptions!.TryGetValue(type, out DbTableSchemaEx? dbTableSchemaExFromOptions))
                     {
                         throw DbExceptions.ModelError(type: type.FullName, "", cause: "不是Model，或者没有DatabaseModelAttribute.");
                     }
 
-                    _dbModelDefs[type] = CreateModelDef(type, dbTableSchemaEx.TableSchema, dbTableSchemaEx.DbSchema);
+                    _dbModelDefs[type] = CreateModelDef(type, dbTableSchemaExFromOptions.TableSchema, dbTableSchemaExFromOptions.DbSchema);
                 }
             }
 
-            static DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchema, DbSchema dbSchema)
+            static DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchemaFromOptons, DbSchema dbSchemaFromOptions)
             {
                 DbModelDef modelDef = new DbModelDef
                 {
@@ -136,17 +138,17 @@ namespace HB.FullStack.Database.DbModels
                     ModelType = modelType,
                     IsPropertyTrackable = modelType.IsAssignableTo(typeof(IPropertyTrackableObject)),
 
-                    DbSchemaName = dbSchema.Name,
-                    EngineType = dbSchema.EngineType,
+                    DbSchemaName = dbSchemaFromOptions.Name,
+                    EngineType = dbSchemaFromOptions.EngineType,
 
-                    TableName = tableSchema.TableName,
+                    TableName = tableSchemaFromOptons.TableName,
 
                     IsTimestampDBModel = typeof(TimestampDbModel).IsAssignableFrom(modelType),
                     IsIdAutoIncrement = typeof(IAutoIncrementId).IsAssignableFrom(modelType),
                     IsIdGuid = typeof(IGuidId).IsAssignableFrom(modelType),
                     IsIdLong = typeof(ILongId).IsAssignableFrom(modelType),
 
-                    DbWriteable = !(tableSchema.ReadOnly!.Value)
+                    DbWriteable = !(tableSchemaFromOptons.ReadOnly!.Value)
                 };
 
                 //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
@@ -169,12 +171,12 @@ namespace HB.FullStack.Database.DbModels
 
                         if (propertyInfo.Name == nameof(TimestampDbModel.LastUser))
                         {
-                            fieldAttribute.MaxLength = dbSchema.MaxLastUserFieldLength;
+                            fieldAttribute.MaxLength = dbSchemaFromOptions.MaxLastUserFieldLength;
                         }
                     }
 
-                    DbFieldSchema? fieldSchema = tableSchema.Fields.FirstOrDefault(f => f.FieldName == propertyInfo.Name);
-                    DbModelPropertyDef propertyDef = CreatePropertyDef(modelDef, propertyInfo, fieldAttribute, fieldSchema, dbSchema);
+                    DbFieldSchema? fieldSchemaFromOptions = tableSchemaFromOptons.Fields.FirstOrDefault(f => f.FieldName == propertyInfo.Name);
+                    DbModelPropertyDef propertyDef = CreatePropertyDef(modelDef, propertyInfo, fieldAttribute, fieldSchemaFromOptions, dbSchemaFromOptions);
 
                     modelDef.FieldCount++;
 
@@ -190,7 +192,7 @@ namespace HB.FullStack.Database.DbModels
                 return modelDef;
             }
 
-            static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchema, DbSchema dbSchema)
+            static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
             {
                 DbModelPropertyDef propertyDef = new DbModelPropertyDef
                 {
@@ -206,11 +208,11 @@ namespace HB.FullStack.Database.DbModels
                 propertyDef.GetMethod = propertyInfo.GetGetterMethod(modelDef.ModelType)
                     ?? throw DbExceptions.ModelError(type: modelDef.ModelFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
 
-                propertyDef.IsIndexNeeded = fieldSchema?.NeedIndex ?? fieldAttribute.NeedIndex;
-                propertyDef.IsNullable = !(fieldSchema?.NotNull ?? fieldAttribute.NotNull);
-                propertyDef.IsUnique = fieldSchema?.Unique ?? fieldAttribute.Unique;
-                propertyDef.DbMaxLength = fieldSchema?.MaxLength ?? (fieldAttribute.MaxLength > 0 ? (int?)fieldAttribute.MaxLength : null);
-                propertyDef.IsLengthFixed = fieldSchema?.FixedLength ?? fieldAttribute.FixedLength;
+                propertyDef.IsIndexNeeded = fieldSchemaFromOptions?.NeedIndex ?? fieldAttribute.NeedIndex;
+                propertyDef.IsNullable = !(fieldSchemaFromOptions?.NotNull ?? fieldAttribute.NotNull);
+                propertyDef.IsUnique = fieldSchemaFromOptions?.Unique ?? fieldAttribute.Unique;
+                propertyDef.DbMaxLength = fieldSchemaFromOptions?.MaxLength ?? (fieldAttribute.MaxLength > 0 ? (int?)fieldAttribute.MaxLength : null);
+                propertyDef.IsLengthFixed = fieldSchemaFromOptions?.FixedLength ?? fieldAttribute.FixedLength;
 
                 propertyDef.DbReservedName = SqlHelper.GetReserved(propertyDef.Name, dbSchema.EngineType);
                 propertyDef.DbParameterizedName = SqlHelper.GetParameterized(propertyDef.Name);

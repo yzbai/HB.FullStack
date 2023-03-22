@@ -5,17 +5,17 @@ namespace HB.FullStack.Identity
 {
     public interface IIdentityService
     {
-        string JsonWebKeySetJson { get; }
+        string JsonWebKeySet { get; }
 
-        Task<UserToken> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
+        Task<SignInReceipt> RefreshSignInReceiptAsync(RefreshContext context, string lastUser);
 
-        Task<UserToken> SignInAsync(SignInContext context, string lastUser);
+        Task<SignInReceipt> SignInAsync(SignInContext context, string lastUser);
 
-        Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
+        Task SignOutAsync(Guid userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser);
 
-        Task SignOutAsync(Guid signInTokenId, string lastUser);
+        Task SignOutAsync(Guid signInCredentialId, string lastUser);
 
-        Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
+        //Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
 
         #region Role
 
@@ -27,7 +27,7 @@ namespace HB.FullStack.Identity
 
         #region UserActivity
 
-        Task RecordUserActivityAsync(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
+        Task RecordUserActivityAsync(Guid? signInCredentialId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
 
         #endregion
     }

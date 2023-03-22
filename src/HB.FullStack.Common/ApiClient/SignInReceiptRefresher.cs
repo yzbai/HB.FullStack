@@ -7,7 +7,7 @@ using HB.FullStack.Common.Api;
 
 namespace HB.FullStack.Common.ApiClient
 {
-    public static class UserTokenRefresher
+    public static class SignInReceiptRefresher
     {
         private static readonly MemorySimpleLocker _requestLimiter = new MemorySimpleLocker();
 
@@ -15,16 +15,16 @@ namespace HB.FullStack.Common.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        public static async Task<bool> RefreshUserTokenAsync(this IApiClient apiClient)
+        public static async Task<bool> RefreshSignInReceiptAsync(this IApiClient apiClient)
         {
-            IPreferenceProvider tokenProvider = apiClient.UserTokenProvider;
+            IPreferenceProvider tokenProvider = apiClient.SignInReceiptProvider;
 
             if (tokenProvider.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
-            ResEndpoint? resBinding = apiClient.UserTokenResEndpoint;
+            ResEndpoint? resBinding = apiClient.SignInReceiptResEndpoint;
 
             if (resBinding == null)
             {
@@ -34,7 +34,7 @@ namespace HB.FullStack.Common.ApiClient
             string accessTokenHashKey = SecurityUtil.GetHash(tokenProvider.AccessToken);
 
             //这个AccessToken不久前刷新过
-            if (!_requestLimiter.NoWaitLock(nameof(RefreshUserTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(resBinding.SiteSetting!.UserTokenRefreshIntervalSeconds)))
+            if (!_requestLimiter.NoWaitLock(nameof(RefreshSignInReceiptAsync), accessTokenHashKey, TimeSpan.FromSeconds(resBinding.SiteSetting!.SignInReceiptRefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
@@ -67,15 +67,15 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (tokenProvider.RefreshToken.IsNotNullOrEmpty())
                 {
-                    UserTokenResGetByRefreshRequest refreshRequest = new UserTokenResGetByRefreshRequest(
+                    SignInReceiptResGetByRefreshRequest refreshRequest = new SignInReceiptResGetByRefreshRequest(
                         tokenProvider.UserId!.Value,
                         tokenProvider.AccessToken,
                         tokenProvider.RefreshToken,
-                        tokenProvider.DeviceId,
-                        tokenProvider.DeviceVersion,
+                        tokenProvider.ClientId,
+                        tokenProvider.ClientVersion,
                         tokenProvider.DeviceInfos);
 
-                    UserTokenRes? res = await apiClient.GetAsync<UserTokenRes>(refreshRequest).ConfigureAwait(false);
+                    SignInReceiptRes? res = await apiClient.GetAsync<SignInReceiptRes>(refreshRequest).ConfigureAwait(false);
 
                     if (res != null)
                     {
@@ -112,7 +112,7 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        private static void OnRefreshSucceed(UserTokenRes res, IPreferenceProvider preferenceProvider)
+        private static void OnRefreshSucceed(SignInReceiptRes res, IPreferenceProvider preferenceProvider)
         {
             preferenceProvider.OnLogined(
                 res.UserId,

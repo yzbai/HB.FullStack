@@ -28,7 +28,7 @@ namespace HB.FullStack.WebApi.Filters
         {
             try
             {
-                Guid? signInTokenId = context.HttpContext?.User?.GetSignInTokenId();
+                Guid? signInCredentialId = context.HttpContext?.User?.GetSignInCredentialId();
                 Guid? userId = context.HttpContext?.User?.GetUserId();
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
@@ -61,7 +61,7 @@ namespace HB.FullStack.WebApi.Filters
                     }
                 }
 
-                _identityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode)
+                _identityService.RecordUserActivityAsync(signInCredentialId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode)
                     .SafeFireAndForget(ex =>
                     {
                         //TODO:错误处理？

@@ -29,7 +29,7 @@ namespace HB.FullStack.Common.ApiClient
 
         public Version HttpVersion { get; set; } = System.Net.HttpVersion.Version20;
 
-        public int UserTokenRefreshIntervalSeconds { get; set; } = 300;
+        public int SignInReceiptRefreshIntervalSeconds { get; set; } = 300;
 
         public string UserAgent { get; set; } = "HB.FullStack.ApiClient";
 

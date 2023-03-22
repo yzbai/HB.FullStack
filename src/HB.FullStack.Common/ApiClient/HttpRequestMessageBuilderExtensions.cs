@@ -21,14 +21,14 @@ namespace HB.FullStack.Common.ApiClient
             builder.Headers[ApiHeaderNames.XApiKey] = apiKey;
         }
 
-        public static void SetDeviceId(this HttpRequestMessageBuilder builder, string deviceId)
+        public static void SetClientId(this HttpRequestMessageBuilder builder, string clientId)
         {
-            builder.Headers[ApiHeaderNames.DEVICE_ID] = deviceId;
+            builder.Headers[ApiHeaderNames.CLIENT_ID] = clientId;
         }
 
-        public static void SetDeviceVersion(this HttpRequestMessageBuilder builder, string deviceVersion)
+        public static void SetClientVersion(this HttpRequestMessageBuilder builder, string clientVersion)
         {
-            builder.Headers[ApiHeaderNames.DEVICE_VERSION] = deviceVersion;
+            builder.Headers[ApiHeaderNames.CLIENT_VERSION] = clientVersion;
         }
 
         /// <summary>
