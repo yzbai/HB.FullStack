@@ -44,5 +44,5 @@ Model - Repo ：一对一关系，Repo中处理Cache问题，事件问题，对�
 Service : 使用多个Repo, 完成Model 到 复杂Model和Resource 的转换
 
 Api设计：
-1，url设计 https://[endpoint]/[version]/[resource]/[condition]?RandomStr=[randomStr]&Timestamp=[timestamp]&DeviceId=[deviceId]
+1，url设计 https://[endpoint]/[version]/[resource]/[condition]?RandomStr=[randomStr]&Timestamp=[timestamp]&ClientId=[clientId]
 2, 所有的参数，都放在body中，以json方式。包括Get

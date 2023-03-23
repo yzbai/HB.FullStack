@@ -98,11 +98,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TSamples", "TSamples", "{CA
 		Todo.md = Todo.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Client.Maui", "Samples\Todo.Client.Maui\Todo.Client.Maui.csproj", "{8C378182-A749-4B2C-A7D1-0403C62DCF79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Client.Maui", "Samples\Todo.Client.Maui\Todo.Client.Maui.csproj", "{8C378182-A749-4B2C-A7D1-0403C62DCF79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Shared", "Samples\Todo.Shared\Todo.Shared.csproj", "{AF7D648F-755B-4AED-87F6-A44B9AEE2ACD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Shared", "Samples\Todo.Shared\Todo.Shared.csproj", "{AF7D648F-755B-4AED-87F6-A44B9AEE2ACD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Server.Main", "Samples\Todo.Server.Main\Todo.Server.Main.csproj", "{559AB11C-0C01-41AF-833A-C748366CBEFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Server.Main", "Samples\Todo.Server.Main\Todo.Server.Main.csproj", "{559AB11C-0C01-41AF-833A-C748366CBEFB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

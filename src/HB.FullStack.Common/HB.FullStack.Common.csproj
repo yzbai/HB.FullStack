@@ -11,8 +11,8 @@
 	<ItemGroup>
 		<PackageReference Include="AsyncAwaitBestPractices" Version="6.0.6" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
-		<PackageReference Include="MessagePack" Version="2.4.59" />
-		<PackageReference Include="MessagePackAnalyzer" Version="2.4.59">
+		<PackageReference Include="MessagePack" Version="2.5.108" />
+		<PackageReference Include="MessagePackAnalyzer" Version="2.5.108">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -24,9 +24,9 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="17.0.65" />
+		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="17.0.71" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-		<PackageReference Include="System.Text.Json" Version="7.0.1" />
+		<PackageReference Include="System.Text.Json" Version="7.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />

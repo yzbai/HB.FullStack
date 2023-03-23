@@ -16,9 +16,9 @@ namespace HB.FullStack.BaseTest
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
 
-        public string DeviceId { get; } = Guid.NewGuid().ToString();
+        public string ClientId { get; } = Guid.NewGuid().ToString();
 
-        public string DeviceVersion { get; } = "1.0";
+        public string ClientVersion { get; } = "1.0";
 
         public DeviceInfos DeviceInfos { get; } = new DeviceInfos
         {

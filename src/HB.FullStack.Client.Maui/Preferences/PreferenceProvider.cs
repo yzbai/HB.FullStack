@@ -23,9 +23,9 @@ namespace HB.FullStack.Client.Maui
 
         public string? RefreshToken { get => UserPreferences.RefreshToken; set => UserPreferences.RefreshToken = value ?? ""; }
 
-        public string DeviceId { get => DevicePreferences.DeviceId; }
+        public string ClientId { get => DevicePreferences.ClientId; }
 
-        public string DeviceVersion { get => DevicePreferences.DeviceVersion; }
+        public string ClientVersion { get => DevicePreferences.ClientVersion; }
 
         public DeviceInfos DeviceInfos { get => DevicePreferences.DeviceInfos; }
 
@@ -279,37 +279,37 @@ namespace HB.FullStack.Client.Maui
         private static class DevicePreferences
         {
             private const int ADDRESS_REQUEST_INTERVAL_SECONDS = 60;
-            public const string PREFERENCE_NAME_DEVICEID = "dbuKErtT";
+            public const string PREFERENCE_NAME_CLIENTID = "dbuKErtT";
 
-            private static string? _deviceId;
-            private static string? _deviceVersion;
+            private static string? _clientId;
+            private static string? _clientVersion;
             private static DeviceInfos? _deviceInfos;
             private static string? _deviceAddress;
 
             private static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
 
-            public static string DeviceId
+            public static string ClientId
             {
                 get
                 {
-                    if (_deviceId.IsNullOrEmpty())
+                    if (_clientId.IsNullOrEmpty())
                     {
-                        string? stored = PreferenceHelper.Get(PREFERENCE_NAME_DEVICEID);
+                        string? stored = PreferenceHelper.Get(PREFERENCE_NAME_CLIENTID);
 
                         if (stored.IsNullOrEmpty())
                         {
-                            stored = CreateNewDeviceId();
-                            PreferenceHelper.Set(PREFERENCE_NAME_DEVICEID, stored);
+                            stored = CreateNewClientId();
+                            PreferenceHelper.Set(PREFERENCE_NAME_CLIENTID, stored);
                         }
 
-                        _deviceId = stored;
+                        _clientId = stored;
                     }
 
-                    return _deviceId;
+                    return _clientId;
                 }
             }
 
-            public static string CreateNewDeviceId()
+            public static string CreateNewClientId()
             {
                 return SecurityUtil.CreateUniqueToken();
             }
@@ -344,16 +344,16 @@ namespace HB.FullStack.Client.Maui
                 }
             }
 
-            public static string DeviceVersion
+            public static string ClientVersion
             {
                 get
                 {
-                    if (_deviceVersion.IsNullOrEmpty())
+                    if (_clientVersion.IsNullOrEmpty())
                     {
-                        _deviceVersion = AppInfo.VersionString;
+                        _clientVersion = AppInfo.VersionString;
                     }
 
-                    return _deviceVersion!;
+                    return _clientVersion!;
                 }
             }
 
