@@ -110,7 +110,7 @@ namespace HB.FullStack.Identity
 
         public string JsonWebKeySet => _jwtJsonWebKeySet;
 
-        public async Task<User?> RegisterAsync(RegisterContext context, string lastUser)
+        public async Task RegisterAsync(RegisterContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
             EnsureValidAudience(context);
@@ -126,7 +126,7 @@ namespace HB.FullStack.Identity
                         throw new NotImplementedException();
 
                     case RegisterByLoginName registerByLoginName:
-                        
+
                         if (!_options.SignInSettings.AllowRegisterByLoginName)
                         {
                             throw IdentityExceptions.DisallowRegisterByLoginName();
@@ -147,7 +147,7 @@ namespace HB.FullStack.Identity
 
                 await transContext.CommitAsync().ConfigureAwait(false);
 
-                return user;
+                //return user;
             }
             catch
             {
@@ -193,9 +193,9 @@ namespace HB.FullStack.Identity
                 await _signInCredentialRepo.AddAsync(signInCredential, lastUser, transactionContext).ConfigureAwait(false);
 
                 //构造 Jwt
-                string jwt = await ConstructJwtAsync(user, signInCredential, context.Audience, transactionContext).ConfigureAwait(false);
+                string accessToken = await ConstructAccessTokenAsync(user, signInCredential, context.Audience, transactionContext).ConfigureAwait(false);
 
-                SignInReceipt signInReceipt = new SignInReceipt(jwt, signInCredential.RefreshToken, user);
+                SignInReceipt signInReceipt = new SignInReceipt(accessToken, signInCredential.RefreshToken, user);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -371,7 +371,7 @@ namespace HB.FullStack.Identity
                 await _signInCredentialRepo.UpdateAsync(signInCredential, lastUser, transactionContext).ConfigureAwait(false);
 
                 // 发布新的AccessToken
-                string accessToken = await ConstructJwtAsync(user, signInCredential, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
+                string accessToken = await ConstructAccessTokenAsync(user, signInCredential, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -515,7 +515,7 @@ namespace HB.FullStack.Identity
             await _signInCredentialRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        private async Task<string> ConstructJwtAsync(User user, SignInCredential signInCredential, string audience, TransactionContext transactionContext)
+        private async Task<string> ConstructAccessTokenAsync(User user, SignInCredential signInCredential, string audience, TransactionContext transactionContext)
         {
             IEnumerable<Claim> jwtClaims = await GetClaimsAsync(user, signInCredential).ConfigureAwait(false);
 

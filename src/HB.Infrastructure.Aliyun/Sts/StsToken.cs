@@ -4,10 +4,11 @@ using System.Globalization;
 using System.Text;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.Models;
 
 namespace HB.Infrastructure.Aliyun.Sts
 {
-    public class StsToken : Model
+    public class StsToken : ValidatableObject, IModel
     {
         public string RequestId { get; set; } = null!;
 
@@ -27,5 +28,6 @@ namespace HB.Infrastructure.Aliyun.Sts
 
         public bool ReadOnly { get; set; }
 
+        public ModelKind GetKind() => ModelKind.Plain;
     }
 }

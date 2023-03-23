@@ -15,7 +15,7 @@ namespace HB.FullStack.Common.Api
 
         [RequestQuery]
         [Required]
-        public string SignToWhere { get; set; } = null!;
+        public string Audience { get; set; } = null!;
 
         [RequestQuery]
         [Required]
@@ -34,7 +34,7 @@ namespace HB.FullStack.Common.Api
         {
             Mobile = mobile;
             SmsCode = smsCode;
-            SignToWhere = signToWhere;
+            Audience = signToWhere;
             ClientId = clientId;
             ClientVersion = clientVersion;
             DeviceInfos = deviceInfos;

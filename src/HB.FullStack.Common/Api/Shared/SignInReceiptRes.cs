@@ -10,24 +10,24 @@ namespace HB.FullStack.Common.Api
     /// </summary>
     public class SignInReceiptRes : ApiResource
     {
-        [NoEmptyGuid]
         public Guid UserId { get; set; }
 
-        [Mobile]
         public string? Mobile { get; set; }
 
-        [LoginName]
         public string? LoginName { get; set; }
 
-        [EmailAddress]
         public string? Email { get; set; }
+
+        public bool EmailConfirmed { get; set; }
+
+        public bool MobileConfirmed { get; set; }
+
+        public bool TwoFactorEnabled { get; set; }
 
         public DateTimeOffset CreatedTime { get; set; }
 
-        [Required]
         public string AccessToken { get; set; } = null!;
 
-        [Required]
         public string RefreshToken { get; set; } = null!;
 
         //protected override int GetChildHashCode()

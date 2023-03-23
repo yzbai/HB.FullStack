@@ -16,7 +16,7 @@
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.todo.client.maui</ApplicationId>
-		<ApplicationIdGuid>f8bcda15-3a08-49cc-b3ab-984e90b2118e</ApplicationIdGuid>
+		<ApplicationIdGuid>a31b3db6-2f1d-45bf-af75-bc31b25defcc</ApplicationIdGuid>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

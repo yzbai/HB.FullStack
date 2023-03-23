@@ -17,7 +17,7 @@ namespace HB.FullStack.Common.Models
 
         private static ModelDef? CreateModelDef(Type type)
         {
-            if (!typeof(Model).IsAssignableFrom(type))
+            if (!typeof(IModel).IsAssignableFrom(type))
             {
                 return null;
             }

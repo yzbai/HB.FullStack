@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Common.Api;
-
 namespace HB.FullStack.Common.Api
 {
     public class SignInReceiptResGetByRefreshRequest : ApiRequest

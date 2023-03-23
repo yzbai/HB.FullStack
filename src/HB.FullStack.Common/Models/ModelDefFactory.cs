@@ -26,7 +26,7 @@ namespace HB.FullStack.Common.Models
 
         public ModelDef GetDef(Type type, ModelKind modelKind)
         {
-            if (!typeof(Model).IsAssignableFrom(type))
+            if (!typeof(IModel).IsAssignableFrom(type))
             {
                 throw CommonExceptions.CannotGetModelDefForNonModel(type);
             }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Api;
+using HB.FullStack.Identity.Context;
+
 namespace HB.FullStack.Identity
 {
     public interface IIdentityService
@@ -15,7 +18,7 @@ namespace HB.FullStack.Identity
 
         Task SignOutAsync(Guid signInCredentialId, string lastUser);
 
-        //Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
+        Task RegisterAsync(RegisterContext context, string lastUser);
 
         #region Role
 

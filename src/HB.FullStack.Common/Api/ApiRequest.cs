@@ -1,18 +1,14 @@
-﻿global using OnlyForJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-
-using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Common.Api
 {
     /// <summary>
     /// 包含构造一个Request的所有信息
     /// </summary>
-    public abstract class ApiRequest : DTO
+    public abstract class ApiRequest : ValidatableObject, IValidatableDTO
     {
         /// <summary>
         /// TODO: 防止同一个RequestID两次被处理

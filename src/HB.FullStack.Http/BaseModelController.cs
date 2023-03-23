@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HB.FullStack.WebApi
 {
-    public class BaseModelController<TModel> : BaseController where TModel : Model
+    public class BaseModelController<TModel> : BaseController where TModel : IModel
     {
         protected ModelDef ModelDef { get; }
 

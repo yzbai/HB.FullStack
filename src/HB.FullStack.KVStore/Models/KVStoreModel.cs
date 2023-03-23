@@ -6,7 +6,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.KVStore.KVStoreModels
 {
-    public abstract class KVStoreModel : Model
+    public abstract class KVStoreModel : ValidatableObject, IModel
     {
         [Required]
         [KVStoreBackupKey]
@@ -17,7 +17,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
 
         public string LastUser { get; set; } = string.Empty;
 
-        public override ModelKind GetKind() => ModelKind.KV;
+        public ModelKind GetKind() => ModelKind.KV;
 
         //public DateTimeOffset LastTime { get; set; } = TimeUtil.UtcNow;
 

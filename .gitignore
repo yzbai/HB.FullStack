@@ -3,6 +3,8 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+*.pfx
+password.*
 publish_to_local.ps1
 PublishProfiles/
 *.Development.json
