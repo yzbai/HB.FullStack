@@ -10,4 +10,16 @@
     <ProjectReference Include="..\..\src\HB.FullStack.Http\HB.FullStack.WebApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Certs\Brlite_Todo_DataProtection.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Certs\Brlite_Todo_Jwt_Content.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Certs\Brlite_Todo_Jwt_Signing.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

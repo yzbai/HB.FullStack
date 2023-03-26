@@ -102,7 +102,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Shared", "Samples\Todo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Server.Main", "Samples\Todo.Server.Main\Todo.Server.Main.csproj", "{559AB11C-0C01-41AF-833A-C748366CBEFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Client.Maui", "Samples\Todo.Client.Maui\Todo.Client.Maui.csproj", "{E331D5EE-F168-43EB-9F25-5DFF3419F535}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Client.Maui", "Samples\Todo.Client.Maui\Todo.Client.Maui.csproj", "{E331D5EE-F168-43EB-9F25-5DFF3419F535}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Server.Hub", "Samples\Todo.Server.Hub\Todo.Server.Hub.csproj", "{75D45A3B-DD28-4585-A8AD-420AC5C8697C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -256,6 +258,10 @@ Global
 		{E331D5EE-F168-43EB-9F25-5DFF3419F535}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E331D5EE-F168-43EB-9F25-5DFF3419F535}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E331D5EE-F168-43EB-9F25-5DFF3419F535}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{75D45A3B-DD28-4585-A8AD-420AC5C8697C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75D45A3B-DD28-4585-A8AD-420AC5C8697C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75D45A3B-DD28-4585-A8AD-420AC5C8697C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75D45A3B-DD28-4585-A8AD-420AC5C8697C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -298,6 +304,7 @@ Global
 		{AF7D648F-755B-4AED-87F6-A44B9AEE2ACD} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 		{559AB11C-0C01-41AF-833A-C748366CBEFB} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 		{E331D5EE-F168-43EB-9F25-5DFF3419F535} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
+		{75D45A3B-DD28-4585-A8AD-420AC5C8697C} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

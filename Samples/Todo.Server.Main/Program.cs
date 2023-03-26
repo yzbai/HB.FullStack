@@ -1,17 +1,52 @@
-var builder = WebApplication.CreateBuilder(args);
+using HB.FullStack.WebApi;
 
-// Add services to the container.
+internal class Program
+{
+    private static void Main(string[] args)
+    {
+        try
+        {
+            SerilogHelper.OpenLogs();
 
-builder.Services.AddControllers();
+            EnvironmentUtil.EnsureEnvironment();
 
-var app = builder.Build();
+            Globals.Logger.LogStarup();
 
-// Configure the HTTP request pipeline.
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+            ConfigureBuilder(builder);
 
-app.UseHttpsRedirection();
 
-app.UseAuthorization();
 
-app.MapControllers();
+            WebApplication app = builder.Build();
+            GlobalWebApplicationAccessor.Application = app;
 
-app.Run();
+            ConfigureApplication(app);
+
+            app.Run();
+        }
+        catch (Exception ex)
+        {
+            Globals.Logger.LogCriticalShutDown(ex);
+        }
+        finally
+        {
+            SerilogHelper.CloseLogs();
+        }
+    }
+
+
+    private static void ConfigureBuilder(WebApplicationBuilder builder)
+    {
+        builder.Services.AddControllers();
+    }
+
+    private static void ConfigureApplication(WebApplication app)
+    {
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+    }
+}
