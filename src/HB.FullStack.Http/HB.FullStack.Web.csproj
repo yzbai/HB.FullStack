@@ -25,6 +25,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
 		<ProjectReference Include="..\HB.FullStack.Identity\HB.FullStack.Identity.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

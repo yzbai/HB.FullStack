@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.WebApi
+namespace HB.FullStack.Web
 {
     [ApiController]
     public class GlobalExceptionController : BaseController

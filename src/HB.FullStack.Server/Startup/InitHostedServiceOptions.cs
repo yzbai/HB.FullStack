@@ -1,20 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.Options;
 
-namespace System
+namespace HB.FullStack.Server.Startup
 {
-    public class InitializationOptions : IOptions<InitializationOptions>
+    public class InitHostedServiceOptions : IOptions<InitHostedServiceOptions>
     {
-        public IList<DbInitializeContext> DbInitializeContexts { get; set; } = new List<DbInitializeContext>();
+        public IList<DbInitContext> DbInitContexts { get; set; } = new List<DbInitContext>();
 
-        public InitializationOptions Value => this;
+        public InitHostedServiceOptions Value => this;
     }
 
-    public class DbInitializeContext
+    public class DbInitContext
     {
         public string DbSchemaName { get; set; } = null!;
 

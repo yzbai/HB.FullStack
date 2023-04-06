@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common;
-using HB.FullStack.Common.Extensions;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 

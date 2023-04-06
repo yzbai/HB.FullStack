@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common.Api;
 using HB.FullStack.Identity;
 using HB.FullStack.Identity.Context;
-using HB.FullStack.WebApi;
+using HB.FullStack.Web;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

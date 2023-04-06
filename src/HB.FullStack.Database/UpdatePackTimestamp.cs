@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Common;
-using HB.FullStack.Common.Extensions;
-
 namespace HB.FullStack.Database
 {
     public class UpdatePackTimestamp

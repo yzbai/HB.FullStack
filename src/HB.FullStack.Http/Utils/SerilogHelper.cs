@@ -12,7 +12,7 @@ using Serilog.Exceptions;
 using Serilog.Extensions.Logging;
 using Serilog.Formatting.Compact;
 
-namespace HB.FullStack.WebApi
+namespace HB.FullStack.Web
 {
     public static class SerilogHelper
     {

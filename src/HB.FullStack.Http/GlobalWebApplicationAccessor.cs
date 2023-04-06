@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Builder;
 
-namespace HB.FullStack.WebApi
+namespace HB.FullStack.Web
 {
     public static class GlobalWebApplicationAccessor
     {

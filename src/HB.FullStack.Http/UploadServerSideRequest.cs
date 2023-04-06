@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
+using HB.FullStack.Common.Api;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Web
 {
 
     [ModelBinder(BinderType = typeof(FileUpdateServerSideRequestModelBinder))]

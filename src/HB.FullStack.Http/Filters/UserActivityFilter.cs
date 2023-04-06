@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.WebApi.Filters
+namespace HB.FullStack.Web.Filters
 {
     public class UserActivityFilter : IAsyncActionFilter
     {

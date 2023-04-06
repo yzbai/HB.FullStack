@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.WebApi.Middlewares
+namespace HB.FullStack.Web.Middlewares
 {
     public class RateLimitMiddleware : IMiddleware
     {

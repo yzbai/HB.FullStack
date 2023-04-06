@@ -177,5 +177,44 @@ namespace HB.FullStack.Database
                 throw DbExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
             }
         }
+
+        private static void PrepareBatchItems<T>(IEnumerable<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
+        {
+            if (!modelDef.IsTimestampDBModel)
+            {
+                return;
+            }
+
+            long timestamp = TimeUtil.Timestamp;
+
+            foreach (var item in items)
+            {
+                if (item is TimestampDbModel tsItem)
+                {
+                    oldTimestamps.Add(tsItem.Timestamp);
+                    oldLastUsers.Add(tsItem.LastUser);
+
+                    tsItem.Timestamp = timestamp;
+                    tsItem.LastUser = lastUser;
+                }
+            }
+        }
+
+        private static void RestoreBatchItems<T>(IEnumerable<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
+        {
+            if (!modelDef.IsTimestampDBModel)
+            {
+                return;
+            }
+
+            for (int i = 0; i < items.Count(); ++i)
+            {
+                if (items.ElementAt(i) is TimestampDbModel tsItem)
+                {
+                    tsItem.Timestamp = oldTimestamps[i];
+                    tsItem.LastUser = oldLastUsers[i] ?? "";
+                }
+            }
+        }
     }
 }

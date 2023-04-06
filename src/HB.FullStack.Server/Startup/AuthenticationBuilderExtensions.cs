@@ -1,6 +1,7 @@
 ﻿using HB.FullStack.Identity;
-using HB.FullStack.WebApi;
-using HB.FullStack.WebApi.ApiKeyAuthentication;
+using HB.FullStack.Server.Startup;
+using HB.FullStack.Web;
+using HB.FullStack.Web.ApiKeyAuthentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -14,9 +15,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class AuthenticationBuilderExtensions
     {
-        public static AuthenticationBuilder AddApiKeyAuthentication(this AuthenticationBuilder authenticationBuilder, Action<ApiKeyAuthenticationOptions> options)
+        public static AuthenticationBuilder AddApiKeyAuthentication(this AuthenticationBuilder authenticationBuilder, Action<ApiKeyAuthenticationOptions> configApiKeyAuthenticationOptions)
         {
-            return authenticationBuilder.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultScheme, options);
+            return authenticationBuilder.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultScheme, configApiKeyAuthenticationOptions);
         }
         public static AuthenticationBuilder AddJwtAuthentication(this AuthenticationBuilder authenticationBuilder,
             Action<JwtClientSettings> configureJwtClientSettings,

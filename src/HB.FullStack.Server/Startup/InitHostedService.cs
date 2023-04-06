@@ -12,21 +12,21 @@ using Microsoft.Extensions.Logging;
 
 using IDatabase = HB.FullStack.Database.IDatabase;
 
-namespace HB.FullStack.WebApi.Startup
+namespace HB.FullStack.Server.Startup
 {
     /// <summary>
     /// 初始化任务包括：
     /// 1， Db初始化
     /// 2， Cache清理
     /// </summary>
-    public class InitializationHostedService : IHostedService
+    public class InitHostedService : IHostedService
     {
         private readonly IDatabase _database;
         private readonly IDistributedLockManager _lockManager;
         private readonly ICache _cache;
-        private readonly InitializationOptions _context;
+        private readonly InitHostedServiceOptions _context;
 
-        public InitializationHostedService(IDatabase database, IDistributedLockManager lockManager, ICache cache, InitializationOptions context)
+        public InitHostedService(IDatabase database, IDistributedLockManager lockManager, ICache cache, InitHostedServiceOptions context)
         {
             _database = database;
             _lockManager = lockManager;
@@ -36,7 +36,7 @@ namespace HB.FullStack.WebApi.Startup
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            foreach (var dbContext in _context.DbInitializeContexts)
+            foreach (var dbContext in _context.DbInitContexts)
             {
                 bool haveMigrationExecuted = await InitializeDatabaseAsync(dbContext.DbSchemaName, dbContext.Migrations).ConfigureAwait(false);
 

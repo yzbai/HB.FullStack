@@ -9,6 +9,10 @@ using HB.FullStack.Common.Models;
 [assembly: InternalsVisibleTo("HB.FullStack.Repository")]
 namespace HB.FullStack.Common
 {
+    /// <summary>
+    /// EDM: Entity Data Model
+    /// //TODO: 考虑rename Model -> Entity
+    /// </summary>
     public interface IModel : IValidatableObject
     {
         /// <summary>

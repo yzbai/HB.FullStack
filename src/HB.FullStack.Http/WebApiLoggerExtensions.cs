@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.WebApi
+namespace HB.FullStack.Web
 {
     public static class WebApiLoggerExtensions
     {

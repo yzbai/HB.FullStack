@@ -50,7 +50,8 @@ namespace HB.FullStack.Database.DbModels
     {
         [DbAutoIncrementPrimaryKey]
         [DbField(0)]
-        [CacheModelKey]
+        [CacheModelKey] //在这里Cache与DB交汇，
+        //TODO: 思考，提取一个同一的EDM给Cache、DB、KVStore使用
         public override long Id { get; set; } = -1;
     }
 

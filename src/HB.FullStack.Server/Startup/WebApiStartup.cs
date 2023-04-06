@@ -3,22 +3,20 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-
-using HB.FullStack.WebApi;
-using HB.FullStack.WebApi.ApiKeyAuthentication;
-using HB.FullStack.WebApi.Filters;
-using HB.FullStack.WebApi.Security;
-using HB.FullStack.WebApi.Startup;
+using HB.FullStack.Web;
+using HB.FullStack.Web.Filters;
+using HB.FullStack.Web.Security;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 
@@ -27,20 +25,102 @@ using Polly;
 using Serilog;
 
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace HB.FullStack.Server.Startup
 {
-    public static class WebApiServiceRegister
+    public static class WebApiStartup
     {
-        public static IServiceCollection AddFullStackWebApi(this IServiceCollection services,
-            Action<DataProtectionSettings> dataProtectionSettingsAction,
-            Action<JwtClientSettings> jwtClientSettingsAction,
-            Action<ApiKeyAuthenticationOptions> apiKeyAuthenticationOptionsAction,
-            Action<ForwardedHeadersOptions> forwardedHeaderOptionsAction,
-            Action<InitializationOptions> initializationOptionsAction)
+        public static IConfiguration Configuration = null!;
+
+        public static void Run(string[] args, WebApiStartupSettings settings)
         {
+            try
+            {
+                //Log & Environment
+                SerilogHelper.OpenLogs();
+                EnvironmentUtil.EnsureEnvironment();
+                Globals.Logger.LogStarup();
+
+                //Builder
+                WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+                Configuration = builder.Configuration;
+
+                ConfigureBuilder(builder, settings);
+
+                //App
+                WebApplication app = builder.Build();
+                GlobalWebApplicationAccessor.Application = app;
+                ConfigureApplication(app, settings);
+
+                //Run
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Globals.Logger.LogCriticalShutDown(ex);
+            }
+            finally
+            {
+                SerilogHelper.CloseLogs();
+            }
+        }
+
+        private static void ConfigureBuilder(WebApplicationBuilder builder, WebApiStartupSettings settings)
+        {
+            builder.Host.UseSerilog();
+            
+            IServiceCollection services = builder.Services;
+
+            services.AddModelDefFactory();
+            services.AddMemoryLock();
+            services.AddIdGen(Configuration.GetSection("IdGen"));
+
+            if (settings.UseDistributedLock)
+            {
+                services.AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"));
+            }
+
+            if (settings.UseKVStore)
+            {
+                services.AddRedisKVStore(Configuration.GetSection("RedisKVStore"));
+            }
+
+            if (settings.UseCache)
+            {
+                services.AddRedisCache(Configuration.GetSection("RedisCache"));
+            }
+
+            if (settings.UseEventBus)
+            {
+                services.AddRedisEventBus(Configuration.GetSection("RedisEventBus"));
+            }
+
+            if (settings.UseDatabase)
+            {
+                services.AddDatabase(Configuration.GetSection("Database"), builder => builder.AddMySQL());
+            }
+
+            if (settings.UseIdentity)
+            {
+                services.AddIdentity(Configuration.GetSection("Identity"));
+            }
+
+            if (settings.UseCaptha)
+            {
+                services.AddTCaptha(Configuration.GetSection("TCaptha"));
+            }
+
+            if (settings.UseAliyunSms)
+            {
+                services.AddAliyunSts(Configuration.GetSection("AliyunSts"));
+                services.AddAliyunSms(Configuration.GetSection("AliyunSms"));
+            }
+
             //DataProtection
-            services.AddDataProtectionWithCertInRedis(dataProtectionSettingsAction);
+            services.AddDataProtectionWithCertInRedis(settings => Configuration.GetSection("DataProtection").Bind(settings));
 
             //Authentication
             services
@@ -49,43 +129,52 @@ namespace Microsoft.Extensions.DependencyInjection
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtAuthentication(jwtClientSettingsAction, onChallenge: OnJwtChallengeAsync,
+                .AddJwtAuthentication(
+                    configureJwtClientSettings: settings => Configuration.GetSection("JwtAuthentication").Bind(settings),
+                    onChallenge: OnJwtChallengeAsync,
                     onTokenValidated: OnJwtTokenValidatedAsync,
                     onAuthenticationFailed: OnJwtAuthenticationFailedAsync,
                     onForbidden: OnJwtForbiddenAsync,
                     onMessageReceived: OnJwtMessageReceivedAsync)
-                .AddApiKeyAuthentication(apiKeyAuthenticationOptionsAction);
+                .AddApiKeyAuthentication(options => Configuration.GetSection("ApiKeyAuthentication").Bind(options));
 
             //Authorization
-            services
-                .AddAuthorization(options =>
-                 {
-                     options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                 });
+            services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            });
 
             //Controller
             services.AddControllersWithConfiguration(addAuthentication: true);
+            services.AddSwaggerGen();
 
             //Proxy
-            services.Configure(forwardedHeaderOptionsAction);
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                //这里是加nginx服务器的ip，默认是127.0.0.1 当nginx服务器不在同一台物理服务器上时使用
+                //https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-5.0
+                //options.KnownProxies.Add(IPAddress.Parse("10.0.0.100"));
+            });
 
 
-            //HB.FullStack.WebApi Services
+            //HB.FullStack.Web Services
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
             services.AddSingleton<ICommonResourceTokenService, CommonResourceTokenService>();
             services.AddScoped<UserActivityFilter>();
             services.AddScoped<CheckCommonResourceTokenFilter>();
 
-            //Initialization
+            //InitHostedService
             services
-                .Configure(initializationOptionsAction)
-                .AddHostedService<InitializationHostedService>();
+                .Configure(settings.ConfigureInitHostedServiceOptions)
+                .AddHostedService<InitHostedService>();
 
-
-            return services;
+            //User Settings
+            settings.ConfigureServices(services);
         }
 
-        public static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
+
+        static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
         {
             DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
             action(dataProtectionSettings);
@@ -126,7 +215,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
+        static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
         {
             Assembly httpFrameworkAssembly = typeof(GlobalExceptionController).Assembly;
 
@@ -166,6 +255,72 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddEndpointsApiExplorer();
 
             return services;
+        }
+        
+        private static void ConfigureApplication(WebApplication app, WebApiStartupSettings settings)
+        {
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            //TODO: 使用RateLimiting
+
+            app
+                .UseExceptionController()
+                .UseForwardedHeaders()
+                .UseHttpMethodOverride();
+
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHsts();
+            }
+
+            app
+                .Use((httpContext, next) =>
+                {
+                    httpContext.Request.EnableBuffering();
+                    return next();
+                })
+
+                //.UseDefaultFiles()
+                .UseStaticFiles()
+
+                .UseSerilogRequestLogging()
+
+                //使用了oss,不使用本地文件系统
+                //.UseStaticFiles(new StaticFileOptions(new SharedOptions
+                //{
+                //    FileProvider = new PhysicalFileProvider(serverOptions.FileSettings.PublicPath),
+                //    RequestPath = "/Files/Public"
+                //}))
+
+                //TODO: 使用Nginx时注释掉，Behind Nginx on same machine
+                .UseOnlyHttps()
+
+                //这个很重要，不添加就会被默认加到最开头
+                .UseRouting()
+
+                .UseCors()
+                .UseAuthentication()
+                .UseAuthorization();
+
+            //使用了oss,不使用本地文件系统
+            //.UseStaticFiles(new StaticFileOptions(new SharedOptions
+            //{
+            //    FileProvider = new PhysicalFileProvider(serverOptions.FileSettings.ProtectedPath),
+            //    RequestPath = "/Files/Protected"
+            //}))
+
+            //.net 5, .net 6 add this by default
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllers();
+            //});
+
+            //.net 6
+            app.MapControllers();
         }
 
         #region Jwt Actions
