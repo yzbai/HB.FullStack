@@ -60,6 +60,14 @@ namespace Todo.Server.Main.Controllers
 
             return Ok();
         }
+
+        [AllowAnonymous]
+        [HttpGet(nameof(ExceptionTest))]
+        public IActionResult ExceptionTest()
+        {
+            throw new NotImplementedException();
+        }
+
         private static SignInReceiptRes ToRes(SignInReceipt obj)
         {
             return new SignInReceiptRes

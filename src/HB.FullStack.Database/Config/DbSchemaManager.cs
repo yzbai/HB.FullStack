@@ -72,6 +72,11 @@ namespace HB.FullStack.Database.Config
             }
         }
 
+        public IList<DbSchema> GetAllDbSchemas()
+        {
+            return _dbSchemaExDict.Values.Select(v => v.Schema).ToList();
+        }
+
         public DbSchema GetDbSchema(string dbSchemaName)
         {
             return _dbSchemaExDict[dbSchemaName].Schema;

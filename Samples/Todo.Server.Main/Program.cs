@@ -1,16 +1,10 @@
-using HB.FullStack.Web;
-using HB.FullStack.Web.Startup;
-
-using Microsoft.AspNetCore.HttpOverrides;
-
-using Serilog;
+using HB.FullStack.Server.Startup;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-        StartupSettings startupSettings = new StartupSettings(services => { }, initHostOptions => { });
-        HBFullStackStartup.RunWebApi(args, startupSettings);
+        WebApiStartup.Run(args, new WebApiStartupSettings(services => { }, initHostOptions => { }));
     }
 }
 

@@ -32,8 +32,21 @@ namespace HB.FullStack.Server.Startup
 {
     public static class WebApiStartup
     {
-        public static IConfiguration Configuration = null!;
+        private const string IdGen                = "IdGen";
+        private const string RedisLock            = "RedisLock";
+        private const string RedisKVStore         = "RedisKVStore";
+        private const string RedisCache           = "RedisCache";
+        private const string RedisEventBus        = "RedisEventBus";
+        private const string Database             = "Database";
+        private const string Identity             = "Identity";
+        private const string DataProtection       = "DataProtection";
+        private const string JwtAuthentication    = "JwtAuthentication";
+        private const string ApiKeyAuthentication = "ApiKeyAuthentication";
+        private const string TCaptha              = "TCaptha";
+        private const string AliyunSts            = "AliyunSts";
+        private const string AliyunSms            = "AliyunSms";
 
+        public static IConfiguration Configuration = null!;
         public static void Run(string[] args, WebApiStartupSettings settings)
         {
             try
@@ -71,56 +84,56 @@ namespace HB.FullStack.Server.Startup
         private static void ConfigureBuilder(WebApplicationBuilder builder, WebApiStartupSettings settings)
         {
             builder.Host.UseSerilog();
-            
+
             IServiceCollection services = builder.Services;
 
             services.AddModelDefFactory();
             services.AddMemoryLock();
-            services.AddIdGen(Configuration.GetSection("IdGen"));
+            services.AddIdGen(Configuration.GetSection(IdGen));
 
             if (settings.UseDistributedLock)
             {
-                services.AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"));
+                services.AddSingleRedisDistributedLock(Configuration.GetSection(RedisLock));
             }
 
             if (settings.UseKVStore)
             {
-                services.AddRedisKVStore(Configuration.GetSection("RedisKVStore"));
+                services.AddRedisKVStore(Configuration.GetSection(RedisKVStore));
             }
 
             if (settings.UseCache)
             {
-                services.AddRedisCache(Configuration.GetSection("RedisCache"));
+                services.AddRedisCache(Configuration.GetSection(RedisCache));
             }
 
             if (settings.UseEventBus)
             {
-                services.AddRedisEventBus(Configuration.GetSection("RedisEventBus"));
+                services.AddRedisEventBus(Configuration.GetSection(RedisEventBus));
             }
 
             if (settings.UseDatabase)
             {
-                services.AddDatabase(Configuration.GetSection("Database"), builder => builder.AddMySQL());
+                services.AddDatabase(Configuration.GetSection(Database), builder => builder.AddMySQL());
             }
 
             if (settings.UseIdentity)
             {
-                services.AddIdentity(Configuration.GetSection("Identity"));
+                services.AddIdentity(Configuration.GetSection(Identity));
             }
 
             if (settings.UseCaptha)
             {
-                services.AddTCaptha(Configuration.GetSection("TCaptha"));
+                services.AddTCaptha(Configuration.GetSection(TCaptha));
             }
 
             if (settings.UseAliyunSms)
             {
-                services.AddAliyunSts(Configuration.GetSection("AliyunSts"));
-                services.AddAliyunSms(Configuration.GetSection("AliyunSms"));
+                services.AddAliyunSts(Configuration.GetSection(AliyunSts));
+                services.AddAliyunSms(Configuration.GetSection(AliyunSms));
             }
 
             //DataProtection
-            services.AddDataProtectionWithCertInRedis(settings => Configuration.GetSection("DataProtection").Bind(settings));
+            services.AddDataProtectionWithCertInRedis(settings => Configuration.GetSection(DataProtection).Bind(settings));
 
             //Authentication
             services
@@ -130,13 +143,13 @@ namespace HB.FullStack.Server.Startup
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
                 .AddJwtAuthentication(
-                    configureJwtClientSettings: settings => Configuration.GetSection("JwtAuthentication").Bind(settings),
+                    configureJwtClientSettings: settings => Configuration.GetSection(JwtAuthentication).Bind(settings),
                     onChallenge: OnJwtChallengeAsync,
                     onTokenValidated: OnJwtTokenValidatedAsync,
                     onAuthenticationFailed: OnJwtAuthenticationFailedAsync,
                     onForbidden: OnJwtForbiddenAsync,
                     onMessageReceived: OnJwtMessageReceivedAsync)
-                .AddApiKeyAuthentication(options => Configuration.GetSection("ApiKeyAuthentication").Bind(options));
+                .AddApiKeyAuthentication(options => Configuration.GetSection(ApiKeyAuthentication).Bind(options));
 
             //Authorization
             services.AddAuthorization(options =>
@@ -256,7 +269,7 @@ namespace HB.FullStack.Server.Startup
 
             return services;
         }
-        
+
         private static void ConfigureApplication(WebApplication app, WebApiStartupSettings settings)
         {
             if (app.Environment.IsDevelopment())

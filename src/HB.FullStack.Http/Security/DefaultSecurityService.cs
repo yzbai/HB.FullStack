@@ -48,12 +48,12 @@ namespace HB.FullStack.Web.Security
             // a BOM as their content.
             if (formFile == null || formFile.Length == 0 || permittedFileSuffixes.IsNullOrEmpty())
             {
-                throw WebApiExceptions.UploadError("Upload empty file.", null, new { FileName = formFile?.FileName });
+                throw WebExceptions.UploadError("Upload empty file.", null, new { FileName = formFile?.FileName });
             }
 
             if (formFile.Length > sizeLimit)
             {
-                throw WebApiExceptions.UploadError("Upload OverSize", null, new { FileName = formFile.FileName });
+                throw WebExceptions.UploadError("Upload OverSize", null, new { FileName = formFile.FileName });
             }
 
             try
@@ -67,12 +67,12 @@ namespace HB.FullStack.Web.Security
                 // empty after removing the BOM.
                 if (memoryStream.Length == 0)
                 {
-                    throw WebApiExceptions.UploadError("Upload empty file after removing BOM.", null, new { FileName = formFile.FileName });
+                    throw WebExceptions.UploadError("Upload empty file after removing BOM.", null, new { FileName = formFile.FileName });
                 }
 
                 if (!IsValidFileExtensionAndSignature(formFile.FileName, memoryStream, permittedFileSuffixes))
                 {
-                    throw WebApiExceptions.UploadError("Upload Wrong Type Files", null, new { FileName = formFile.FileName });
+                    throw WebExceptions.UploadError("Upload Wrong Type Files", null, new { FileName = formFile.FileName });
                 }
                 else
                 {
@@ -81,7 +81,7 @@ namespace HB.FullStack.Web.Security
             }
             catch (Exception ex)
             {
-                throw WebApiExceptions.UploadError("Unkown file upload error", ex, new { FileName = formFile.FileName });
+                throw WebExceptions.UploadError("Unkown file upload error", ex, new { FileName = formFile.FileName });
             }
         }
 

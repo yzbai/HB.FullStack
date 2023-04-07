@@ -76,6 +76,6 @@ namespace System
             }
         }
 
-        public static string? ApplicationName => Assembly.GetEntryAssembly()?.FullName;
+        public static string? ApplicationName => Assembly.GetEntryAssembly()?.GetName().Name;
     }
 }

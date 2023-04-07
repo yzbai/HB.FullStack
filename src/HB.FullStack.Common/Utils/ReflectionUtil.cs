@@ -31,6 +31,9 @@ namespace System
 
         public static IEnumerable<Assembly> GetAllAssemblies()
         {
+
+            //TODO: 这里存在问题，如果是File的方式，会导致Type的HashCode不一致
+            //TODO: AppDomain不会主动加载所有的Assembly，直到用到才加载。所以一开始可能不全
             return AppDomain.CurrentDomain.GetAssemblies();
             //string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 

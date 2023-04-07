@@ -12,18 +12,10 @@ namespace HB.FullStack.Server.Startup
     {
         public IList<DbInitContext> DbInitContexts { get; set; } = new List<DbInitContext>();
 
+        public int DbInitLockWaitSeconds { get; set; } = 1 * 60;   
+
+        public int DbInitLockExpireSeconds { get; set; } = 5 * 60;
+
         public InitHostedServiceOptions Value => this;
-    }
-
-    public class DbInitContext
-    {
-        public string DbSchemaName { get; set; } = null!;
-
-        public IEnumerable<Migration>? Migrations { get; set; }
-
-        /// <summary>
-        /// 如果有Migration执行，那么执行Cache清理
-        /// </summary>
-        public Action<ICache>? CacheCleanAction { get; set; }
     }
 }

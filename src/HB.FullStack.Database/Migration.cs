@@ -5,11 +5,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.Engine;
+using HB.FullStack.Cache;
 
 namespace HB.FullStack.Database
 {
@@ -17,7 +15,7 @@ namespace HB.FullStack.Database
     /// <summary>
     /// 一个Migration代表一次升级的记录
     /// 先执行SQLStatement，再执行ModifyAction
-    /// OldVersion = 0 并且 NewVersion = 1 初始化数据
+    /// OldVersion = 0 并且 NewVersion = 1 为初始化数据
     /// </summary>
     public class Migration
     {
@@ -28,7 +26,13 @@ namespace HB.FullStack.Database
 
         public Func<IDatabase, TransactionContext, Task>? ModifyFunc { get; private set; }
 
-        public Migration(string dbSchemaName, int oldVersion, int newVersion, string? sql = null, Func<IDatabase, TransactionContext, Task>? func = null)
+        //TODO: 架构合理性考虑,是否开放事件出来
+        //TODO: clear the cache
+        //清理比如xxx开头的CacheItem,要求Cache有统一开头，且不能与KVStore冲突。所以KVStore最好与cache是不同的实例
+        public Func<Task>? CacheCleanTask { get; set; }
+
+        public Migration(string dbSchemaName, int oldVersion, int newVersion, string? sql, 
+            Func<IDatabase, TransactionContext, Task>? func, Func<Task>? cacheCleanTask)
         {
             if (oldVersion < 0)
             {
@@ -45,6 +49,7 @@ namespace HB.FullStack.Database
             NewVersion = newVersion;
             SqlStatement = sql;
             ModifyFunc = func;
+            CacheCleanTask = cacheCleanTask;
         }
     }
 }

@@ -6,20 +6,13 @@ using HB.FullStack.Common.PropertyTrackable;
 
 namespace System
 {
-    public static partial class WebApiExceptions
+    public static partial class WebExceptions
     {
-        public static Exception DatabaseInitLockError(string dbSchemaName)
-        {
-            WebApiException exception = new WebApiException(ErrorCodes.DatabaseInitLockError, nameof(DatabaseInitLockError));
-
-            exception.Data["DbSchemaName"] = dbSchemaName;
-
-            return exception;
-        }
+        
 
         public static Exception StartupError(object? value, string cause)
         {
-            WebApiException exception = new WebApiException(ErrorCodes.StartupError, nameof(StartupError));
+            WebException exception = new WebException(ErrorCodes.StartupError, nameof(StartupError));
 
             exception.Data["Value"] = value;
             exception.Data["Cause"] = cause;
@@ -29,7 +22,7 @@ namespace System
 
         public static Exception UploadError(string cause, Exception? innerEx, object? context)
         {
-            return new WebApiException(ErrorCodes.UploadError, cause, innerEx, context);
+            return new WebException(ErrorCodes.UploadError, cause, innerEx, context);
         }
 
         public static Exception ChangedPropertyPackError(string cause, PropertyChangePack? changePack, string? modelFullName)
@@ -44,7 +37,7 @@ namespace System
 
         internal static Exception ShouldSetGlobalWebApplicationAccessorAtBegining()
         {
-            WebApiException ex = new WebApiException(ErrorCodes.InnerError, nameof(ShouldSetGlobalWebApplicationAccessorAtBegining), null, null);
+            WebException ex = new WebException(ErrorCodes.InnerError, nameof(ShouldSetGlobalWebApplicationAccessorAtBegining), null, null);
 
             return ex;
         }

@@ -24,10 +24,9 @@ namespace HB.FullStack.Database
     public interface IDatabase : IDbWriter, IDbReader
     {
         /// <summary>
-        /// 有几个DbSchema，就初始化几次
         /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
-        Task<bool> InitializeAsync(string dbSchema, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations);
+        Task InitializeAsync(IList<DbInitContext> dbInitContexts);
 
         IDbModelDefFactory ModelDefFactory { get; }
     }

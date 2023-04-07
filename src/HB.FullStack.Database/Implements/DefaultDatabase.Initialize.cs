@@ -21,25 +21,29 @@ namespace HB.FullStack.Database
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task<bool> InitializeAsync(string dbSchemaName, string? connectionString, IList<string>? slaveConnectionStrings, IEnumerable<Migration>? migrations)
+        public async Task InitializeAsync(IList<DbInitContext> dbInitContexts)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
 
-            //1. 设置connectionString, 如果需要
-            _dbSchemaManager.SetConnectionString(dbSchemaName, connectionString, slaveConnectionStrings);
+            IList<DbSchema> allDbSchemas = _dbSchemaManager.GetAllDbSchemas();
 
-            DbSchema dbSchema = _dbSchemaManager.GetDbSchema(dbSchemaName);
-            IEnumerable<Migration>? curMigrations = migrations?.Where(m => m.DbSchemaName == dbSchemaName).ToList();
+            foreach (DbSchema dbSchema in allDbSchemas)
+            {
+                DbInitContext? dbInitContext = dbInitContexts.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
 
-            //2. 创建新数据, 如果需要
-            await CreateTablesIfNeed(curMigrations, dbSchema).ConfigureAwait(false);
+                //1. 设置connectionString, 如果需要
+                _dbSchemaManager.SetConnectionString(dbSchema.Name, dbInitContext?.ConnectionString, dbInitContext?.SlaveConnectionStrings);
 
-            //3. 迁移, 如果需要
-            bool haveExecutedMigration = await MigrateIfNeeded(curMigrations, dbSchema).ConfigureAwait(false);
+                IEnumerable<Migration>? curMigrations = dbInitContext?.Migrations?.Where(m => m.DbSchemaName==dbSchema.Name).ToList();
 
-            _logger.LogInformation("数据初{DbSchemaName}始化成功！, Version:{Version}", dbSchemaName, dbSchema.Version);
+                //2. 创建新数据, 如果需要
+                await CreateTablesIfNeed(curMigrations, dbSchema).ConfigureAwait(false);
 
-            return haveExecutedMigration;
+                //3. 迁移, 如果需要
+                await MigrateIfNeeded(curMigrations, dbSchema).ConfigureAwait(false);
+
+                _logger.LogInformation("数据初{DbSchemaName}始化成功！, Version:{Version}", dbSchema.Name, dbSchema.Version);
+            }
         }
 
         private async Task CreateTablesIfNeed(IEnumerable<Migration>? migrations, DbSchema dbSchema)
@@ -163,6 +167,28 @@ namespace HB.FullStack.Database
 
                 throw DbExceptions.MigrateError(dbSchema.Name, "未知Migration错误", ex);
             }
+
+            /// <summary>
+            /// 检查是否依次提供了不中断的Migration
+            /// </summary>
+            static bool IsMigrationSufficient(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
+            {
+                int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
+
+                if (curVersion!=startVersion) { return false; }
+
+                foreach (Migration migration in curOrderedMigrations)
+                {
+                    if (curVersion!=migration.OldVersion)
+                    {
+                        return false;
+                    }
+
+                    curVersion=migration.NewVersion;
+                }
+
+                return curVersion==endVersion;
+            }
         }
 
         private async Task ApplyMigration(DbSchema dbSchema, TransactionContext transContext, Migration migration)
@@ -181,30 +207,14 @@ namespace HB.FullStack.Database
                 await migration.ModifyFunc(this, transContext).ConfigureAwait(false);
             }
 
-            _logger.LogInformation("数据库Migration, {DbSchemaName}, from {OldVersion}, to {NewVersion}, {Sql}",
-                dbSchema.Name, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
-        }
-
-        /// <summary>
-        /// 检查是否依次提供了不中断的Migration
-        /// </summary>
-        private static bool IsMigrationSufficient(int startVersion, int endVersion, IEnumerable<Migration> curOrderedMigrations)
-        {
-            int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
-
-            if (curVersion != startVersion) { return false; }
-
-            foreach (Migration migration in curOrderedMigrations)
+            //TODO: 这里掺和了Cache的操作
+            if(migration.CacheCleanTask != null)
             {
-                if (curVersion != migration.OldVersion)
-                {
-                    return false;
-                }
-
-                curVersion = migration.NewVersion;
+                await migration.CacheCleanTask().ConfigureAwait(false);
             }
 
-            return curVersion == endVersion;
+            _logger.LogInformation("数据库Migration, {DbSchemaName}, from {OldVersion}, to {NewVersion}, {Sql}",
+                dbSchema.Name, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
         }
 
         #endregion

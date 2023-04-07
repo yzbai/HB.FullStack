@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Web
 {
-    public static class WebApiLoggerExtensions
+    public static class WebLoggerExtensions
     {
         private static readonly Action<ILogger, string?, string?, string?, string?, ErrorCode, Exception?> _logGlobalException = LoggerMessage.Define<string?, string?, string?, string?, ErrorCode>(
             LogLevel.Error,

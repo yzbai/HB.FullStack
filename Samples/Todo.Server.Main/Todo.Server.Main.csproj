@@ -7,15 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\HB.FullStack.Http\HB.FullStack.Web.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.DistributedLock\HB.Infrastructure.Redis.DistributedLock.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.EventBus\HB.Infrastructure.Redis.EventBus.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
+    <ProjectReference Include="..\..\src\HB.FullStack.Server\HB.FullStack.Server.csproj" />
   </ItemGroup>
 
   <ItemGroup>

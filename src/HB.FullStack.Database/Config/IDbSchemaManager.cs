@@ -15,5 +15,6 @@ namespace HB.FullStack.Database.Config
         IDbEngine GetDatabaseEngine(string dbSchemaName);
 
         IDbEngine GetDatabaseEngine(DbEngineType engineType);
+        IList<DbSchema> GetAllDbSchemas();
     }
 }

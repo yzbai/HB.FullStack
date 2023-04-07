@@ -14,7 +14,7 @@ namespace HB.FullStack.Web
             {
                 if (_application == null)
                 {
-                    throw WebApiExceptions.ShouldSetGlobalWebApplicationAccessorAtBegining();
+                    throw WebExceptions.ShouldSetGlobalWebApplicationAccessorAtBegining();
                 }
 
                 return _application;
