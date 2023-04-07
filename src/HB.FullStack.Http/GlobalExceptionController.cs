@@ -1,5 +1,7 @@
 ﻿using System;
 
+using HB.FullStack.Server;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +16,11 @@ namespace HB.FullStack.Web
 
         public GlobalExceptionController(ILogger<GlobalExceptionController> logger)
         {
-            _logger = logger;
+            _logger=logger;
         }
 
         [AllowAnonymous]
-        [HttpGet("GlobalException")]
+        [Route(WebConsts.GlobalException)]
         public IActionResult ExceptionAsync()
         {
             IExceptionHandlerPathFeature? exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();

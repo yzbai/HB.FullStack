@@ -4,6 +4,7 @@ using System;
 
 namespace HB.FullStack.Identity.Models
 {
+    //TODO: 改用KVStore
     public class UserActivity : TimestampGuidDbModel
     {
         [DbForeignKey(typeof(User), false)]

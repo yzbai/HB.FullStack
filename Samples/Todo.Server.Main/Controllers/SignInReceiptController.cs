@@ -50,19 +50,17 @@ namespace Todo.Server.Main.Controllers
             [Required] string clientVersion,
             [ValidatedObject][FromQuery] DeviceInfos deviceInfos)
         {
-            ClientInfos clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };
-            RegisterByLoginName context = new RegisterByLoginName(loginName, password, audience, clientInfos, deviceInfos);
+            ClientInfos         clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };
+            RegisterByLoginName context     = new RegisterByLoginName(loginName, password, audience, clientInfos, deviceInfos);
 
             await _identityService.RegisterAsync(context, "");
-
-
-            //TODO: 检验，上一句错误时，直接返回GlobalError
 
             return Ok();
         }
 
         [AllowAnonymous]
         [HttpGet(nameof(ExceptionTest))]
+        [HttpPost(nameof(ExceptionTest))]
         public IActionResult ExceptionTest()
         {
             throw new NotImplementedException();
@@ -72,16 +70,16 @@ namespace Todo.Server.Main.Controllers
         {
             return new SignInReceiptRes
             {
-                UserId = obj.UserId,
-                Mobile = obj.Mobile,
-                LoginName = obj.LoginName,
-                Email = obj.Email,
-                EmailConfirmed = obj.EmailConfirmed,
-                MobileConfirmed = obj.MobileConfirmed,
+                UserId           = obj.UserId,
+                Mobile           = obj.Mobile,
+                LoginName        = obj.LoginName,
+                Email            = obj.Email,
+                EmailConfirmed   = obj.EmailConfirmed,
+                MobileConfirmed  = obj.MobileConfirmed,
                 TwoFactorEnabled = obj.TwoFactorEnabled,
-                CreatedTime = obj.CreatedTime,
-                AccessToken = obj.AccessToken,
-                RefreshToken = obj.RefreshToken
+                CreatedTime      = obj.CreatedTime,
+                AccessToken      = obj.AccessToken,
+                RefreshToken     = obj.RefreshToken
             };
         }
     }

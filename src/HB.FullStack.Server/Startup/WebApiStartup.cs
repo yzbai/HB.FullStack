@@ -32,19 +32,19 @@ namespace HB.FullStack.Server.Startup
 {
     public static class WebApiStartup
     {
-        private const string IdGen                = "IdGen";
-        private const string RedisLock            = "RedisLock";
-        private const string RedisKVStore         = "RedisKVStore";
-        private const string RedisCache           = "RedisCache";
-        private const string RedisEventBus        = "RedisEventBus";
-        private const string Database             = "Database";
-        private const string Identity             = "Identity";
-        private const string DataProtection       = "DataProtection";
-        private const string JwtAuthentication    = "JwtAuthentication";
+        private const string IdGen = "IdGen";
+        private const string RedisLock = "RedisLock";
+        private const string RedisKVStore = "RedisKVStore";
+        private const string RedisCache = "RedisCache";
+        private const string RedisEventBus = "RedisEventBus";
+        private const string Database = "Database";
+        private const string Identity = "Identity";
+        private const string DataProtection = "DataProtection";
+        private const string JwtAuthentication = "JwtAuthentication";
         private const string ApiKeyAuthentication = "ApiKeyAuthentication";
-        private const string TCaptha              = "TCaptha";
-        private const string AliyunSts            = "AliyunSts";
-        private const string AliyunSms            = "AliyunSms";
+        private const string TCaptha = "TCaptha";
+        private const string AliyunSts = "AliyunSts";
+        private const string AliyunSms = "AliyunSms";
 
         public static IConfiguration Configuration = null!;
         public static void Run(string[] args, WebApiStartupSettings settings)
@@ -348,12 +348,23 @@ namespace HB.FullStack.Server.Startup
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// JWT验证失败
+        /// </summary>
         private static Task OnJwtAuthenticationFailedAsync(AuthenticationFailedContext arg)
         {
             //TODO: 说明这个AccessToken有风险，应该拒绝他的刷新。Black相应的RefreshToken
+
+
+
+
+
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// JWT成功验证，进行后续验证
+        /// </summary>
         private static Task OnJwtTokenValidatedAsync(TokenValidatedContext c)
         {
             //验证Body 中的ClientId 与 JWT 中的ClientId 是否一致
@@ -375,6 +386,9 @@ namespace HB.FullStack.Server.Startup
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// 没有提供JWT //TODO:? 验证失败后，会走这里吗
+        /// </summary>
         private static Task OnJwtChallengeAsync(JwtBearerChallengeContext c)
         {
             //c.HandleResponse();
@@ -394,6 +408,15 @@ namespace HB.FullStack.Server.Startup
             //如果采用写到Respose的body中去的，就会阻断pipeline，直接返回了，影响了ExceptionHandler的接收
 
             //TODO: 是否直接抛出异常？
+
+
+            //如果Exception没有被GlobalException捕捉，那么会来到这里，所以，不能一股脑的处理，只处理jwt相关的。
+
+            if (c.AuthenticateFailure == null)
+            {
+                return Task.CompletedTask;
+            }
+
             c.HandleResponse();
 
             c.Response.StatusCode = 401;

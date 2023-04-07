@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Api;
+using HB.FullStack.Server;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -13,7 +16,7 @@ namespace Microsoft.AspNetCore.Builder
     {
         public static IApplicationBuilder UseExceptionController(this IApplicationBuilder app)
         {
-            return app.UseExceptionHandler("/GlobalException");
+            return app.UseExceptionHandler($"/{WebConsts.GlobalException}");
         }
 
         public static IApplicationBuilder UseOnlyHttps(this IApplicationBuilder app)
@@ -22,8 +25,8 @@ namespace Microsoft.AspNetCore.Builder
              {
                  if (!context.Request.IsHttps)
                  {
-                     context.Response.StatusCode = 400;
-                     context.Response.ContentType = "application/json";
+                     context.Response.StatusCode=400;
+                     context.Response.ContentType="application/json";
                      await context.Response.WriteAsync(SerializeUtil.ToJson(ErrorCodes.HttpsRequired)).ConfigureAwait(false);
                  }
                  else

@@ -67,7 +67,8 @@ namespace HB.FullStack.Web
             {
                 loggerConfiguration
                     .MinimumLevel.Verbose()
-                    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Debug)
+                    .MinimumLevel.Override("MySqlConnector", LogEventLevel.Warning)
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
                     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning); // for use Serialog request log;
             }
             else if (EnvironmentUtil.IsStaging())
@@ -80,7 +81,7 @@ namespace HB.FullStack.Web
             else if (EnvironmentUtil.IsProduction())
             {
                 loggerConfiguration
-                    .MinimumLevel.Warning()
+                    .MinimumLevel.Information()
                     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
                     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning); // for use Serialog request log;
             }
