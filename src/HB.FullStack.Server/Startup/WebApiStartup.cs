@@ -27,6 +27,7 @@ using Serilog;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
+using HB.FullStack.Web.Controllers;
 
 namespace HB.FullStack.Server.Startup
 {
