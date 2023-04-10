@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<Import Project="..\..\CommonTest.props" />
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
 	
 	<PropertyGroup>
 		<UserSecretsId>100cd70f-4225-4f18-8818-7d9f17c55b4a</UserSecretsId>

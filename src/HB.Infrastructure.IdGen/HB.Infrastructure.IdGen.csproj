@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\common.props" />
- 
+	<Import Project="..\..\common.props" />
 
-  <ItemGroup>
-    <PackageReference Include="IdGen" Version="3.0.3" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="IdGen" Version="3.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+	</ItemGroup>
 
 </Project>

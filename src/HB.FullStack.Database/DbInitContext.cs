@@ -12,6 +12,6 @@ namespace HB.FullStack.Database
 
         public IList<Migration>? Migrations { get; set; }
 
-
+       
     }
 }

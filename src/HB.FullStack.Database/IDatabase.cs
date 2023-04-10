@@ -26,7 +26,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 必须加分布式锁进行。返回是否有Migration被执行
         /// </summary>
-        Task InitializeAsync(IList<DbInitContext> dbInitContexts);
+        Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts);
 
         IDbModelDefFactory ModelDefFactory { get; }
     }

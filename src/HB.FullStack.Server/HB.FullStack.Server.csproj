@@ -2,20 +2,24 @@
 
 	<Import Project="..\..\common.props" />
 
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
+
 	<ItemGroup>
-	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.Redis.DistributedLock\HB.Infrastructure.Redis.DistributedLock.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.Redis.EventBus\HB.Infrastructure.Redis.EventBus.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
-	  <ProjectReference Include="..\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.DistributedLock\HB.Infrastructure.Redis.DistributedLock.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.EventBus\HB.Infrastructure.Redis.EventBus.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
 	</ItemGroup>
 
 </Project>

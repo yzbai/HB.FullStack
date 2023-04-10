@@ -62,10 +62,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
-        <ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-        <ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
+      <ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
+      <ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+      <ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -95,9 +95,6 @@
         </MauiXaml>
     </ItemGroup>
 
-    <ItemGroup>
-        <EditorConfigFiles Remove="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
-        <None Include="C:\Project\First\HB.FullStack\src\HB.FullStack.Client.Maui\.editorconfig" />
-    </ItemGroup>
+    
 
 </Project>

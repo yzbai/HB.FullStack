@@ -10,7 +10,7 @@ namespace HB.FullStack.Server.Startup
 {
     public class InitHostedServiceOptions : IOptions<InitHostedServiceOptions>
     {
-        public IList<DbInitContext> DbInitContexts { get; set; } = new List<DbInitContext>();
+        public IEnumerable<DbInitContext> DbInitContexts { get; set; } = new List<DbInitContext>();
 
         public int DbInitLockWaitSeconds { get; set; } = 1 * 60;   
 

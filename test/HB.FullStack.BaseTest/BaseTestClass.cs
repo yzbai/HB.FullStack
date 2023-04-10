@@ -106,16 +106,13 @@ namespace HB.FullStack.BaseTest
             DbSettingManager = ServiceProvider.GetRequiredService<IDbSchemaManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
-            //初始化 DbSchema_Mysql
             await DropSysInfoTableFirstForTest();
 
-            await Db.InitializeAsync(DbSchema_Mysql, null, null, null).ConfigureAwait(false);
-
-            //初始化 DbSchema_Sqlite
             var SqliteDbFileName = $"s{TimeUtil.UtcNowUnixTimeSeconds}{SecurityUtil.CreateRandomString(6)}.db";
             SqliteConnectionString = $"Data Source={SqliteDbFileName}";
 
-            await Db.InitializeAsync(DbSchema_Sqlite, SqliteConnectionString, null, null).ConfigureAwait(false);
+            //这里会初始化所有数据库
+            await Db.InitializeAsync(new DbInitContext[] { new DbInitContext { DbSchemaName = DbSchema_Sqlite, ConnectionString = SqliteConnectionString } }).ConfigureAwait(false);
 
             #endregion
 
@@ -226,7 +223,7 @@ namespace HB.FullStack.BaseTest
                         BaseUrl = new Uri($"http://localhost:{Port}/api/"),
                         Endpoints = new List<ResEndpoint> { }
                     });
-                }); 
+                });
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 

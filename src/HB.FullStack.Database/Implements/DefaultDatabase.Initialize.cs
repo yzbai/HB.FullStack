@@ -21,7 +21,7 @@ namespace HB.FullStack.Database
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task InitializeAsync(IList<DbInitContext> dbInitContexts)
+        public async Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
 
@@ -29,7 +29,7 @@ namespace HB.FullStack.Database
 
             foreach (DbSchema dbSchema in allDbSchemas)
             {
-                DbInitContext? dbInitContext = dbInitContexts.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
+                DbInitContext? dbInitContext = dbInitContexts?.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
 
                 //1. 设置connectionString, 如果需要
                 _dbSchemaManager.SetConnectionString(dbSchema.Name, dbInitContext?.ConnectionString, dbInitContext?.SlaveConnectionStrings);

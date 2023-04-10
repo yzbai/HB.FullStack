@@ -1,7 +1,5 @@
 <Project>
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-	</PropertyGroup>
+	
 	
 	<PropertyGroup>
 		<VersionSuffix>$(VersionSuffix)</VersionSuffix>
