@@ -4,8 +4,6 @@ using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Identity.Models;
 
-using Microsoft.IdentityModel.Tokens;
-
 namespace HB.FullStack.Identity
 {
     public class SignInReceipt : ValidatableObject, IModel
