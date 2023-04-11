@@ -7,9 +7,7 @@ namespace HB.FullStack.Common.ApiClient
 {
     public interface IApiClient
     {
-        //IPreferenceProvider _preferenceProvider { get; }
-
-        //ResEndpoint? SignInReceiptResEndpoint { get; }
+        IPreferenceProvider PreferenceProvider { get; }
 
         event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
 

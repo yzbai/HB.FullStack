@@ -30,7 +30,7 @@ namespace HB.FullStack.Common.ApiClient
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        private readonly IPreferenceProvider _preferenceProvider;
+        public IPreferenceProvider PreferenceProvider { get; set; }
 
         private IDictionary<string, string> _apiKeys = null!;
 
@@ -40,7 +40,7 @@ namespace HB.FullStack.Common.ApiClient
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;
-            _preferenceProvider = preferenceProvider;
+            PreferenceProvider = preferenceProvider;
 
             RangeApiKeys();
             RangeResEndpoints();
@@ -172,7 +172,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await this.RefreshSignInReceiptAsync(_preferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
+                    bool refreshSuccessed = await this.RefreshSignInReceiptAsync(PreferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
@@ -196,8 +196,8 @@ namespace HB.FullStack.Common.ApiClient
 
         private void ConfigureRequestBuilder(HttpRequestMessageBuilder requestBuilder)
         {
-            requestBuilder.SetClientId(_preferenceProvider.ClientId);
-            requestBuilder.SetClientVersion(_preferenceProvider.ClientVersion);
+            requestBuilder.SetClientId(PreferenceProvider.ClientId);
+            requestBuilder.SetClientVersion(PreferenceProvider.ClientVersion);
 
             ApiRequestAuth auth = requestBuilder.Request.Auth!;
 
@@ -221,12 +221,12 @@ namespace HB.FullStack.Common.ApiClient
                 }
 
                 case ApiAuthType.Jwt:
-                    if (_preferenceProvider.AccessToken.IsNullOrEmpty())
+                    if (PreferenceProvider.AccessToken.IsNullOrEmpty())
                     {
                         throw CommonExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
                     }
 
-                    requestBuilder.SetJwt(_preferenceProvider.AccessToken);
+                    requestBuilder.SetJwt(PreferenceProvider.AccessToken);
                     break;
 
                 default:

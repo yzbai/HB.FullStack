@@ -5,7 +5,7 @@ using HB.FullStack.Common.Shared.Attributes;
 
 namespace HB.FullStack.Common.Shared.SignInReceipt
 {
-    public class SignInReceiptResGetBySmsRequest : ApiRequest
+    internal class SignInReceiptResGetBySmsRequest : ApiRequest
     {
         [RequestQuery]
         [Mobile(CanBeNull = false)]

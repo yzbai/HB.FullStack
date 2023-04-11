@@ -5,7 +5,7 @@ using HB.FullStack.Common.Shared.Attributes;
 
 namespace HB.FullStack.Common.Shared.SignInReceipt
 {
-    public class SignInReceiptResGetByRefreshRequest : ApiRequest
+    internal class SignInReceiptResGetByRefreshRequest : ApiRequest
     {
         [RequestQuery]
         [NoEmptyGuid]

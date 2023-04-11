@@ -15,16 +15,9 @@ namespace Todo.Client.ConsoleApp
 
         internal async Task RunDownAsync()
         {
-            SignInReceiptRegisterByLoginNameRequest registerRequest = new SignInReceiptRegisterByLoginNameRequest(
-                "yuzhaobai"+DateTimeOffset.Now.Ticks,
-                Program.SITE_TODO_SERVER_MAIN,
-                "Password123", 
-                _preferenceProvider.DeviceInfos);
-
-
             try
             {
-                await _apiClient.SendAsync(registerRequest);
+                await _apiClient.RegisterByLoginNameAsync("yuzhaobai" + DateTimeOffset.Now.Ticks, Program.SITE_TODO_SERVER_MAIN, "Password123");
             }
             catch (Exception ex)
             {
