@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Web.Security;
 
 using Microsoft.AspNetCore.Mvc;

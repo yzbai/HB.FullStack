@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Http;
-
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Common.ApiClient
 {

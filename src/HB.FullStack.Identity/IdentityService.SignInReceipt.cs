@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Server;
 using HB.FullStack.Database;
 using HB.FullStack.Identity.Context;
@@ -111,6 +110,8 @@ namespace HB.FullStack.Identity
 
         public async Task RegisterAsync(RegisterContext context, string lastUser)
         {
+            //TODO: RegisterContext的ClientVerson, ClientId, DeviceInfo, Ip 都没有使用到，需要考虑是否需要使用
+
             ThrowIf.NotValid(context, nameof(context));
             EnsureValidAudience(context);
 

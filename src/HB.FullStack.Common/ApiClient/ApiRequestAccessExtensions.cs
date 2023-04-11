@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-
-using HB.FullStack.Common.Api;
 using HB.FullStack.Common.Meta;
+using HB.FullStack.Common.Shared.Attributes;
 
 namespace HB.FullStack.Common.ApiClient
 {

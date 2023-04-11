@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.Maui
 {

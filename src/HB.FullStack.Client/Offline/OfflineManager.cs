@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Common.Api;
+
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;

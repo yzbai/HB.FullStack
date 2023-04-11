@@ -1,8 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared.SignInReceipt;
 using HB.FullStack.Identity;
 using HB.FullStack.Identity.Context;
 using HB.FullStack.Web.Controllers;
@@ -47,8 +46,8 @@ namespace Todo.Server.Main.Controllers
         public async Task<IActionResult> RegisterByLoginName([LoginName(CanBeNull = false)] string loginName,
             [Password(CanBeNull = false)] string password,
             [Required] string audience,
-            [Required] string clientId,
-            [Required] string clientVersion,
+            [Required] [FromHeader]string clientId,
+            [Required] [FromHeader]string clientVersion,
             [ValidatedObject][FromQuery] DeviceInfos deviceInfos)
         {
             ClientInfos         clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };

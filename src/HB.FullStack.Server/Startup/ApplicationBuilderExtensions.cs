@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Api;
+
 using HB.FullStack.Server;
 
 using Microsoft.AspNetCore.Builder;

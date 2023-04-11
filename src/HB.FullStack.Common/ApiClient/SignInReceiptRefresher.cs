@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared.SignInReceipt;
 
 namespace HB.FullStack.Common.ApiClient
 {
@@ -15,26 +15,20 @@ namespace HB.FullStack.Common.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        public static async Task<bool> RefreshSignInReceiptAsync(this IApiClient apiClient)
+        public static async Task<bool> RefreshSignInReceiptAsync(this IApiClient apiClient, IPreferenceProvider preferenceProvider, int signInReceiptRefreshIntervalSeconds)
         {
-            IPreferenceProvider tokenProvider = apiClient.SignInReceiptProvider;
-
-            if (tokenProvider.AccessToken.IsNullOrEmpty())
+            if (preferenceProvider.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
-            ResEndpoint? resBinding = apiClient.SignInReceiptResEndpoint;
-
-            if (resBinding == null)
-            {
-                return false;
-            }
-
-            string accessTokenHashKey = SecurityUtil.GetHash(tokenProvider.AccessToken);
+            string accessTokenHashKey = SecurityUtil.GetHash(preferenceProvider.AccessToken);
 
             //这个AccessToken不久前刷新过
-            if (!_requestLimiter.NoWaitLock(nameof(RefreshSignInReceiptAsync), accessTokenHashKey, TimeSpan.FromSeconds(resBinding.SiteSetting!.SignInReceiptRefreshIntervalSeconds)))
+            if (!_requestLimiter.NoWaitLock(
+                nameof(RefreshSignInReceiptAsync), 
+                accessTokenHashKey, 
+                TimeSpan.FromSeconds(signInReceiptRefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
@@ -65,15 +59,15 @@ namespace HB.FullStack.Common.ApiClient
 
             try
             {
-                if (tokenProvider.RefreshToken.IsNotNullOrEmpty())
+                if (preferenceProvider.RefreshToken.IsNotNullOrEmpty())
                 {
                     SignInReceiptResGetByRefreshRequest refreshRequest = new SignInReceiptResGetByRefreshRequest(
-                        tokenProvider.UserId!.Value,
-                        tokenProvider.AccessToken,
-                        tokenProvider.RefreshToken,
-                        tokenProvider.ClientId,
-                        tokenProvider.ClientVersion,
-                        tokenProvider.DeviceInfos);
+                        preferenceProvider.UserId!.Value,
+                        preferenceProvider.AccessToken,
+                        preferenceProvider.RefreshToken,
+                        //tokenProvider.ClientId,
+                        //tokenProvider.ClientVersion,
+                        preferenceProvider.DeviceInfos);
 
                     SignInReceiptRes? res = await apiClient.GetAsync<SignInReceiptRes>(refreshRequest).ConfigureAwait(false);
 
@@ -82,7 +76,7 @@ namespace HB.FullStack.Common.ApiClient
                         _lastRefreshResults.Clear();
                         _lastRefreshResults[accessTokenHashKey] = true;
 
-                        OnRefreshSucceed(res, tokenProvider);
+                        OnRefreshSucceed(res, preferenceProvider);
 
                         return true;
                     }
@@ -92,7 +86,7 @@ namespace HB.FullStack.Common.ApiClient
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed(tokenProvider);
+                OnRefreshFailed(preferenceProvider);
 
                 return false;
             }
@@ -102,7 +96,7 @@ namespace HB.FullStack.Common.ApiClient
                 _lastRefreshResults.Clear();
                 _lastRefreshResults[accessTokenHashKey] = false;
 
-                OnRefreshFailed(tokenProvider);
+                OnRefreshFailed(preferenceProvider);
 
                 throw;
             }

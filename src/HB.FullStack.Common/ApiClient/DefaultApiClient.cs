@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared;
+using HB.FullStack.Common.Shared.SignInReceipt;
 
 using Microsoft.Extensions.Options;
 
@@ -23,35 +24,28 @@ namespace HB.FullStack.Common.ApiClient
     {
         //private readonly WeakEventManager _eventManager = new WeakEventManager();
 
+        private readonly Type _streamType = typeof(Stream);
+
         private readonly ApiClientOptions _options;
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        private IDictionary<string, string> _apiKeys = null!;
+        private readonly IPreferenceProvider _preferenceProvider;
 
-        private readonly Type _streamType = typeof(Stream);
+        private IDictionary<string, string> _apiKeys = null!;
 
         private readonly IDictionary<string, ResEndpoint> _resEndpoints = new Dictionary<string, ResEndpoint>();
 
-        public IPreferenceProvider SignInReceiptProvider { get; }
-
-        public ResEndpoint? SignInReceiptResEndpoint { get; private set; }
-
-        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider tokenProvider)
+        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider preferenceProvider)
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;
-            SignInReceiptProvider = tokenProvider;
+            _preferenceProvider = preferenceProvider;
 
             RangeApiKeys();
-            RangeEndpoints();
+            RangeResEndpoints();
 
             GlobalApiClientAccessor.ApiClient = this;
-
-            if (_resEndpoints.TryGetValue(nameof(SignInReceiptRes), out ResEndpoint? signInReceiptResEndpoint))
-            {
-                SignInReceiptResEndpoint = signInReceiptResEndpoint;
-            }
 
             void RangeApiKeys()
             {
@@ -59,15 +53,29 @@ namespace HB.FullStack.Common.ApiClient
             }
         }
 
-        public void RangeEndpoints()
+        public void RangeResEndpoints()
         {
-            //From Attribute
+            //SignInReceiptRes
+            _options.SignInReceiptSiteSetting.SiteName ??= "SignInReceiptSite";
+
+            ResEndpoint signInReCeiptResEndpoint = new ResEndpoint(nameof(SignInReceiptRes));
+            signInReCeiptResEndpoint.SiteSetting = _options.SignInReceiptSiteSetting;
+            _resEndpoints[nameof(SignInReceiptRes)] = signInReCeiptResEndpoint;
+
+            //From Code
             IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
 
             foreach (Type resType in resTypes)
             {
+                if (resType == typeof(SignInReceiptRes))
+                {
+                    continue;
+                }
+
                 ResEndpoint endpoint = new ResEndpoint(resType.Name);
-                endpoint.SiteSetting = _options.SiteSettings.First(); //TODO: 有待商榷
+
+                //直接把第一个作为默认，如果SiteSetting中的Endpoints制定了，在后面会被覆盖
+                endpoint.SiteSetting = _options.OtherSiteSettings.FirstOrDefault();
 
                 ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
 
@@ -84,13 +92,13 @@ namespace HB.FullStack.Common.ApiClient
             }
 
             //From SiteSettings
-            foreach (var siteSetting in _options.SiteSettings)
+            foreach (SiteSetting siteSetting in _options.OtherSiteSettings)
             {
-                foreach (var endpoint in siteSetting.Endpoints)
+                foreach (ResEndpoint endpoint in siteSetting.Endpoints)
                 {
                     endpoint.SiteSetting = siteSetting;
 
-                    //may override attribute of res
+                    //override attribute of res
                     _resEndpoints[endpoint.ResName] = endpoint;
                 }
             }
@@ -129,7 +137,7 @@ namespace HB.FullStack.Common.ApiClient
 
             if (!_resEndpoints.TryGetValue(request.ResName, out ResEndpoint? resEndpoint))
             {
-                throw CommonExceptions.ApiClientInnerError($"No ResBinding for {request.ResName}.", null, null);
+                throw CommonExceptions.ApiClientInnerError($"No ResEndpoint for {request.ResName}.", null, null);
             }
 
             HttpRequestMessageBuilder requestBuilder = new HttpRequestMessageBuilder(resEndpoint, request);
@@ -164,7 +172,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await this.RefreshSignInReceiptAsync().ConfigureAwait(false);
+                    bool refreshSuccessed = await this.RefreshSignInReceiptAsync(_preferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
@@ -188,8 +196,8 @@ namespace HB.FullStack.Common.ApiClient
 
         private void ConfigureRequestBuilder(HttpRequestMessageBuilder requestBuilder)
         {
-            requestBuilder.SetClientId(SignInReceiptProvider.ClientId);
-            requestBuilder.SetClientVersion(SignInReceiptProvider.ClientVersion);
+            requestBuilder.SetClientId(_preferenceProvider.ClientId);
+            requestBuilder.SetClientVersion(_preferenceProvider.ClientVersion);
 
             ApiRequestAuth auth = requestBuilder.Request.Auth!;
 
@@ -197,28 +205,28 @@ namespace HB.FullStack.Common.ApiClient
             switch (auth.AuthType)
             {
                 case ApiAuthType.ApiKey:
+                {
+                    ThrowIf.NullOrEmpty(auth.ApiKeyName, "ApiKeyName");
+
+                    if (_apiKeys.TryGetValue(auth.ApiKeyName, out string? key))
                     {
-                        ThrowIf.NullOrEmpty(auth.ApiKeyName, "ApiKeyName");
-
-                        if (_apiKeys.TryGetValue(auth.ApiKeyName, out string? key))
-                        {
-                            requestBuilder.SetApiKey(key);
-                        }
-                        else
-                        {
-                            throw CommonExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.BuildUriString() });
-                        }
-
-                        break;
+                        requestBuilder.SetApiKey(key);
+                    }
+                    else
+                    {
+                        throw CommonExceptions.ApiAuthenticationError("缺少ApiKey", null, new { ApiKeyName = auth.ApiKeyName, RequeestUri = requestBuilder.BuildUriString() });
                     }
 
+                    break;
+                }
+
                 case ApiAuthType.Jwt:
-                    if (SignInReceiptProvider.AccessToken.IsNullOrEmpty())
+                    if (_preferenceProvider.AccessToken.IsNullOrEmpty())
                     {
                         throw CommonExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
                     }
 
-                    requestBuilder.SetJwt(SignInReceiptProvider.AccessToken);
+                    requestBuilder.SetJwt(_preferenceProvider.AccessToken);
                     break;
 
                 default:

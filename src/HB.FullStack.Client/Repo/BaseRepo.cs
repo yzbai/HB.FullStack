@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.Offline;
 using HB.FullStack.Common;
-using HB.FullStack.Common.Api;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 

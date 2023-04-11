@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Api;
+
 using HB.FullStack.Identity.Context;
 
 namespace HB.FullStack.Identity

@@ -216,7 +216,11 @@ namespace HB.FullStack.BaseTest
                 {
                     options.HttpClientTimeout = TimeSpan.FromSeconds(100);
 
-                    options.SiteSettings.Add(new SiteSetting
+                    options.SignInReceiptSiteSetting = new SiteSetting
+                    {
+                        BaseUrl = new Uri($"http://localhost:{Port}/api/")
+                    };
+                    options.OtherSiteSettings.Add(new SiteSetting
                     {
                         SiteName = ApiEndpointName,
                         Version = ApiVersion,

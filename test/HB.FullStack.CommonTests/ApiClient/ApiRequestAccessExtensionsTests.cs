@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared.Attributes;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

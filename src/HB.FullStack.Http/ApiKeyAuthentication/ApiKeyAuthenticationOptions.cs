@@ -1,8 +1,8 @@
-﻿using HB.FullStack.Common.Api;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using System.Collections.Generic;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Web.ApiKeyAuthentication
 {

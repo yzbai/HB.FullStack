@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Common.ApiClient
 {
     public interface IApiClient
     {
-        IPreferenceProvider SignInReceiptProvider { get; }
+        //IPreferenceProvider _preferenceProvider { get; }
 
-        ResEndpoint? SignInReceiptResEndpoint { get; }
+        //ResEndpoint? SignInReceiptResEndpoint { get; }
 
         event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
 

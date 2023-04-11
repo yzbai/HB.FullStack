@@ -1,54 +1,60 @@
-﻿using HB.FullStack.Common.ApiClient;
+﻿using System.Net;
+
+using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Common.Shared.SignInReceipt;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Todo.Client.ConsoleApp
 {
+
     internal class Program
     {
-        static void Main(string[] args)
+        public const string SITE_TODO_SERVER_MAIN = "Todo.Server.Main";
+        public const string SITE_TODO_SERVER_MAIN_BASE_URL = "https://localhost:7157/api/";
+
+        static async Task Main(string[] args)
         {
             ServiceCollection services = new ServiceCollection();
 
+            services.AddOptions();
 
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddDebug();
+                loggingBuilder.AddConsole();
+            });
 
-
+            Configure(services);
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             serviceProvider.GetRequiredService<IConsoleInitializeService>().Initialize();
 
-            serviceProvider.GetRequiredService<TaskExecutor>().RunDown();
+            await serviceProvider.GetRequiredService<TaskExecutor>().RunDownAsync();
 
             Console.ReadLine();
         }
-    }
 
-    internal class TaskExecutor
-    {
-        private readonly IApiClient _apiClient;
-
-        public TaskExecutor(IApiClient apiClient)
+        private static void Configure(ServiceCollection services)
         {
-            _apiClient = apiClient;
-        }
+            services.AddSingleton<IPreferenceProvider, ConsolePreferenceProvider>();
 
-        internal void RunDown()
-        {
-            //_apiClient.SendAsync()
-        }
-    }
+            services.AddApiClient(apiClientOptions =>
+            {
+                apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
 
-    internal interface IConsoleInitializeService
-    {
-        void Initialize();
-    }
+                apiClientOptions.SignInReceiptSiteSetting = new SiteSetting
+                {
+                    SiteName = "SignInReceiptSite",
+                    BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)
+                };
+            });
 
-    internal class ConsoleInitializeService : IConsoleInitializeService
-    {
-        public void Initialize()
-        {
-            
+            services.AddSingleton<IConsoleInitializeService>(new ConsoleInitializeService());
+
+            services.AddSingleton<TaskExecutor>();
         }
     }
 }

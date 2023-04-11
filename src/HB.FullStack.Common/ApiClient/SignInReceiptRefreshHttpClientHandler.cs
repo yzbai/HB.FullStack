@@ -14,13 +14,13 @@ namespace HB.FullStack.Common.ApiClient
     public class SignInReceiptRefreshHttpClientHandler : HttpClientHandler
     {
         private readonly IApiClient _apiClient;
-        private readonly IPreferenceProvider _tokenProvider;
+        private readonly IPreferenceProvider _preferenceProvider;
         private readonly ApiClientOptions _options;
 
-        public SignInReceiptRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider tokenProvider, IOptions<ApiClientOptions> options)
+        public SignInReceiptRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider preferenceProvider, IOptions<ApiClientOptions> options)
         {
             _apiClient = apiClient;
-            _tokenProvider = tokenProvider;
+            _preferenceProvider = preferenceProvider;
             _options = options.Value;
 
 #if DEBUG
@@ -41,11 +41,11 @@ namespace HB.FullStack.Common.ApiClient
 
             if (endpointSettings == null)
             {
-                Globals.Logger.LogDebug("Not found endpoint");
+                Globals.Logger.LogError($"SignInReceiptRefreshHttpClientHandler Not found endpoint for {request.RequestUri}");
                 return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
 
-            AddRequestInfo(request, _tokenProvider);
+            AddRequestInfo(request, _preferenceProvider);
 
             HttpResponseMessage responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -57,7 +57,7 @@ namespace HB.FullStack.Common.ApiClient
             {
                 if (ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    await SignInReceiptRefresher.RefreshSignInReceiptAsync(_apiClient).ConfigureAwait(false);
+                    await SignInReceiptRefresher.RefreshSignInReceiptAsync(_apiClient, _preferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
 
                     return responseMessage;
                 }
@@ -87,7 +87,7 @@ namespace HB.FullStack.Common.ApiClient
         {
             string authority = requestUri!.Authority;
 
-            return _options.SiteSettings.FirstOrDefault(endpoint =>
+            return _options.OtherSiteSettings.FirstOrDefault(endpoint =>
             {
                 return authority.StartsWith(endpoint.BaseUrl!.Authority, StringComparison.OrdinalIgnoreCase);
             });

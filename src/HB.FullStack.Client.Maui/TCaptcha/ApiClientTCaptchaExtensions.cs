@@ -4,8 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Client.Maui;
 using HB.FullStack.Client.Maui.TCaptcha;
-using HB.FullStack.Common.Api;
-
+using HB.FullStack.Common.Shared;
 using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Common.ApiClient

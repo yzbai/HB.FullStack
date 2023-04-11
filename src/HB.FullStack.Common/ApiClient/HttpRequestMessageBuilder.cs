@@ -2,8 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
-
-using HB.FullStack.Common.Api;
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Common.ApiClient
 {

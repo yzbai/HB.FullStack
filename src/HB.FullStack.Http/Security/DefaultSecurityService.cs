@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Api;
-
+using HB.FullStack.Common.Shared;
 using Microsoft.AspNetCore.Http;
 
 namespace HB.FullStack.Web.Security
