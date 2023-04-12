@@ -92,9 +92,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{44E87002-0B29-4AEB-B758-187109EFA571}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TSamples", "TSamples", "{CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}"
-	ProjectSection(SolutionItems) = preProject
-		Todo.md = Todo.md
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Shared", "Samples\Todo.Shared\Todo.Shared.csproj", "{AF7D648F-755B-4AED-87F6-A44B9AEE2ACD}"
 EndProject
@@ -114,7 +111,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.Maui", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Client.ConsoleApp", "Samples\Todo.Clients\Todo.Client.ConsoleApp\Todo.Client.ConsoleApp.csproj", "{F4523E2B-38D9-4C7E-8C4F-C3298755C06F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Client.MobileApp", "Samples\Todo.Clients\Todo.Client.MobileApp\Todo.Client.MobileApp.csproj", "{41F6F6C9-B865-4DBB-969A-7EE464BA38C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Client.MobileApp", "Samples\Todo.Clients\Todo.Client.MobileApp\Todo.Client.MobileApp.csproj", "{41F6F6C9-B865-4DBB-969A-7EE464BA38C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
