@@ -4,10 +4,10 @@ using HB.FullStack.Common.Shared.Attributes;
 
 namespace HB.FullStack.Common.Shared.SignInReceipt
 {
-    internal class SignInReceiptRegisterByLoginNameRequest : ApiRequest
+    internal class SignInReceiptResRegisterByLoginNameRequest : ApiRequest
     {
-        public SignInReceiptRegisterByLoginNameRequest(string loginName, string audience, string password, DeviceInfos deviceInfos)
-            : base(nameof(SignInReceiptRes), ApiMethod.Add, ApiRequestAuth.NONE, "RegisterByLoginName")
+        public SignInReceiptResRegisterByLoginNameRequest(string loginName, string password, string audience, DeviceInfos deviceInfos)
+            : base(nameof(SignInReceiptRes), ApiMethod.Add, ApiRequestAuth.NONE, CommonApiConditions.ByLoginName)
         {
             LoginName = loginName;
             Audience = audience;

@@ -231,7 +231,8 @@ namespace HB.FullStack.Server.Startup
 
         static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
         {
-            Assembly httpFrameworkAssembly = typeof(GlobalExceptionController).Assembly;
+            Assembly webAssembly = typeof(GlobalExceptionController).Assembly;
+            Assembly serverAssembly = typeof(WebApiStartup).Assembly;
 
             //authenticationBuilder.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
 
@@ -264,7 +265,7 @@ namespace HB.FullStack.Server.Startup
                         };
                     };
                 })
-                .PartManager.ApplicationParts.Add(new AssemblyPart(httpFrameworkAssembly));
+                .PartManager.ApplicationParts.AddRange(new AssemblyPart[] { new AssemblyPart(webAssembly), new AssemblyPart(serverAssembly) });
 
             services.AddEndpointsApiExplorer();
 

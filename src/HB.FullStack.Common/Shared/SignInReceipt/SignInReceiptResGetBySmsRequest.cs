@@ -21,24 +21,15 @@ namespace HB.FullStack.Common.Shared.SignInReceipt
 
         [RequestQuery]
         [Required]
-        public string ClientId { get; set; } = null!;
-
-        [RequestQuery]
-        [Required]
-        public string ClientVersion { get; set; } = null!;
-
-        [RequestQuery]
-        [Required]
         public DeviceInfos DeviceInfos { get; set; } = null!;
 
-        public SignInReceiptResGetBySmsRequest(string mobile, string smsCode, string signToWhere, string clientId, string clientVersion, DeviceInfos deviceInfos)
-            : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, "BySms")
+        public SignInReceiptResGetBySmsRequest(
+            string mobile, string smsCode, string signToWhere, DeviceInfos deviceInfos)
+            : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, CommonApiConditions.BySms)
         {
             Mobile = mobile;
             SmsCode = smsCode;
             Audience = signToWhere;
-            ClientId = clientId;
-            ClientVersion = clientVersion;
             DeviceInfos = deviceInfos;
         }
     }

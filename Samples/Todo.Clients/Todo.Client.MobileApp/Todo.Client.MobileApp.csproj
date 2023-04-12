@@ -58,6 +58,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\src\HB.FullStack.Client.Maui\HB.FullStack.Client.Maui.csproj" />
 	  <ProjectReference Include="..\..\..\src\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	  <ProjectReference Include="..\..\Todo.Shared\Todo.Shared.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\HB.FullStack.Client\HB.FullStack.Client.csproj" />
     <ProjectReference Include="..\..\..\src\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Todo.Shared\Todo.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -17,7 +17,15 @@ namespace Todo.Client.ConsoleApp
         {
             try
             {
-                await _apiClient.RegisterByLoginNameAsync("yuzhaobai" + DateTimeOffset.Now.Ticks, Program.SITE_TODO_SERVER_MAIN, "Password123");
+                string loginName = "yuzhaobai" + DateTimeOffset.UtcNow.Ticks;
+                string audience = Program.SITE_TODO_SERVER_MAIN;
+                string password = "Password123";    
+                
+                //Register
+                await _apiClient.RegisterByLoginNameAsync(loginName, password, audience);
+
+                //Login
+                await _apiClient.LoginByLoginNameAsync(loginName, password, audience);
             }
             catch (Exception ex)
             {
