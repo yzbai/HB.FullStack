@@ -3,7 +3,7 @@
 namespace System
 {
     /// <summary>
-    /// 客户端主要信息Provider
+    /// 客户端主要信息Provider, 用于存储和获取客户端主要信息
     /// </summary>
     public interface IPreferenceProvider
     {

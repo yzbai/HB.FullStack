@@ -25,6 +25,7 @@ namespace HB.FullStack.Common.Files
         /// </summary>
         public bool IsPathContainsPlaceHolder{ get; set; }
 
+        //TODO:考虑多个PlaceHolder
         public string? PlaceHolderName { get; set; }
     }
 }

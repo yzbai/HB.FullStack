@@ -63,7 +63,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\HB.FullStack.Client\HB.FullStack.Client.csproj" />
-      <ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
       <ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
     </ItemGroup>
@@ -78,16 +78,10 @@
         <Compile Update="Controls\TimeEditor.xaml.cs">
             <DependentUpon>%(Filename)</DependentUpon>
         </Compile>
-        <Compile Update="TCaptcha\TCaptchaPopup.cs">
-            <DependentUpon>%(Filename)</DependentUpon>
-        </Compile>
     </ItemGroup>
 
     <ItemGroup>
         <MauiXaml Update="Controls\Cropper\CropperPage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </MauiXaml>
-        <MauiXaml Update="Controls\Popups\ExceptionPopup.xaml">
             <Generator>MSBuild:Compile</Generator>
         </MauiXaml>
         <MauiXaml Update="Controls\TimeEditor.xaml">

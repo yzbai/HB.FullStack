@@ -48,7 +48,7 @@ namespace HB.FullStack.Common
             }
         }
 
-        internal static Task RaiseEventAsync<TSender, TEventArgs>(string eventName, TSender sender, TEventArgs eventArgs, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict) where TSender : class where TEventArgs : class
+        internal static Task RaiseEventAsync<TSender, TEventArgs>(bool noSenderAndEventArgs, string eventName, TSender sender, TEventArgs eventArgs, Dictionary<string, List<DelegateWrapper>> delegateWrapperDict) where TSender : class where TEventArgs : class
         {
             if (!delegateWrapperDict.TryGetValue(eventName, out List<DelegateWrapper>? wrappers))
             {
@@ -93,11 +93,11 @@ namespace HB.FullStack.Common
                         throw new InvalidOperationException("Invest this LightWeightMethod thing.");
                     }
 
-                    rtObj = dynamicMethodInfo?.Invoke(caller, new object[] { sender, eventArgs });
+                    rtObj = noSenderAndEventArgs? dynamicMethodInfo?.Invoke(caller, null) : dynamicMethodInfo?.Invoke(caller, new object[] { sender, eventArgs });
                 }
                 else
                 {
-                    rtObj = methodInfo.Invoke(caller, new object[] { sender, eventArgs });
+                    rtObj = noSenderAndEventArgs? methodInfo.Invoke(caller, null) : methodInfo.Invoke(caller, new object[] { sender, eventArgs });
                 }
 
                 if (rtObj is Task task) tasks.Add(task);

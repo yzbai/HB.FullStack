@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using HB.FullStack.Client.Services;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Shared;
 
@@ -12,9 +13,8 @@ namespace HB.FullStack.Client
         protected BaseFileRepo(
             IApiClient apiClient,
             IPreferenceProvider userPreferenceProvider,
-            SignInReceiptRefreshHttpClientHandler tokenAutoRefreshedHttpClientHandler, 
-            IStatusManager statusManager)
-            : base(apiClient, userPreferenceProvider, statusManager)
+            SignInReceiptRefreshHttpClientHandler tokenAutoRefreshedHttpClientHandler)
+            : base(apiClient, userPreferenceProvider)
         {
             AutoRefreshedHttpClientHandler = tokenAutoRefreshedHttpClientHandler;
         }

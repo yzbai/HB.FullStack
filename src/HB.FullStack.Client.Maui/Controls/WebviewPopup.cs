@@ -1,7 +1,4 @@
-﻿using System;
-
-using CommunityToolkit.Maui.Views;
-
+﻿using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Layouts;

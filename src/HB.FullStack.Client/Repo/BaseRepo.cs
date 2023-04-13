@@ -6,7 +6,8 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Client.Offline;
+using HB.FullStack.Client.Services;
+using HB.FullStack.Client.Services.Offline;
 using HB.FullStack.Common;
 using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.PropertyTrackable;
@@ -28,7 +29,7 @@ namespace HB.FullStack.Client
 
         protected IApiClient ApiClient { get; }
 
-        protected IStatusManager StatusManager { get; }
+        //protected IStatusManager StatusManager { get; }
 
         protected string LastUser => PreferenceProvider.UserId?.ToString() ?? "NotLogined";
 
@@ -48,18 +49,18 @@ namespace HB.FullStack.Client
             }
         }
 
-        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider, IStatusManager statusManager)
+        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider/*, IStatusManager statusManager*/)
         {
             ApiClient = apiClient;
             PreferenceProvider = userPreferenceProvider;
-            StatusManager = statusManager;
+            //StatusManager = statusManager;
         }
     }
 
     public abstract class BaseRepo<TModel> : BaseRepo where TModel : ClientDbModel, new()
     {
         private readonly ILogger _logger;
-        private readonly IOfflineManager _offlineChangeManager;
+        private readonly ISyncManager _offlineChangeManager;
         private readonly DbModelDef _modelDef = null!;
 
         protected IDatabase Database { get; }
@@ -70,9 +71,8 @@ namespace HB.FullStack.Client
             ILogger logger,
             IDatabase database,
             IApiClient apiClient,
-            IOfflineManager offlineChangeManager,
-            IPreferenceProvider preferenceProvider,
-            IStatusManager statusManager) : base(apiClient, preferenceProvider, statusManager)
+            ISyncManager offlineChangeManager,
+            IPreferenceProvider preferenceProvider) : base(apiClient, preferenceProvider)
         {
             _logger = logger;
             _modelDef = database.ModelDefFactory.GetDef<TModel>()!;

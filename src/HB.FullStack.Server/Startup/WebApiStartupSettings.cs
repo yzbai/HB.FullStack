@@ -23,11 +23,11 @@ namespace HB.FullStack.Server.Startup
 
         public bool UseAliyunSms { get; set; } = true;
 
-        public Action<InitHostedServiceOptions> ConfigureInitHostedServiceOptions { get; set; }
+        public Action<InitServiceOptions> ConfigureInitHostedServiceOptions { get; set; }
 
         public Action<IServiceCollection> ConfigureServices { get; set; }
 
-        public WebApiStartupSettings(Action<IServiceCollection> configureServices, Action<InitHostedServiceOptions> configureInitializationOptions)
+        public WebApiStartupSettings(Action<IServiceCollection> configureServices, Action<InitServiceOptions> configureInitializationOptions)
         {
             ConfigureServices = configureServices;
             ConfigureInitHostedServiceOptions = configureInitializationOptions;

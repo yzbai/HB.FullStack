@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Maui.Views;
-
 using Microsoft.Maui.Controls;
 
 using System;

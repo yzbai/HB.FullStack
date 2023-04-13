@@ -178,10 +178,10 @@ namespace HB.FullStack.Server.Startup
             services.AddScoped<UserActivityFilter>();
             services.AddScoped<CheckCommonResourceTokenFilter>();
 
-            //InitHostedService
+            //InitService
             services
                 .Configure(settings.ConfigureInitHostedServiceOptions)
-                .AddHostedService<InitHostedService>();
+                .AddHostedService<InitService>();
 
             //User Settings
             settings.ConfigureServices(services);
