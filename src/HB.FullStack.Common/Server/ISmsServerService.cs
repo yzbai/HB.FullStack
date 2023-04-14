@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.Server
 {
+    /// <summary>
+    /// 用于Server端调用第三方服务
+    /// </summary>
     public interface ISmsServerService
     {
         Task SendValidationCodeAsync(string mobile/*, out string code*/);

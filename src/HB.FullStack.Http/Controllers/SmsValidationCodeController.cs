@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.SmsValidation;
+using HB.FullStack.Common.Shared.Sms;
 
 using Microsoft.AspNetCore.Authorization;
 
@@ -34,7 +34,7 @@ namespace HB.FullStack.Web.Controllers
         //TODO: 将CapthaFilter 抽象出来，不能只依赖腾讯一家
         //[ServiceFilter(typeof(TCapthcaCheckFilter))]
         //#endif
-        public async Task<IActionResult> GetByMobileAsync([Mobile] string mobile)
+        public async Task<IActionResult> GetByMobileAsync([FromQuery][Mobile] string mobile)
         {
             //_smsService.SendValidationCodeAsync(mobile)
             //    .SafeFireAndForget(ex =>

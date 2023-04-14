@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Shared.SmsValidation
+namespace HB.FullStack.Common.Shared.Sms
 {
     public class SmsValidationCodeRes : ApiResource
     {
+        public int Length { get; set; }
     }
 }
