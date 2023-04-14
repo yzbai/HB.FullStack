@@ -1,7 +1,7 @@
 ﻿using Microsoft.Maui.Devices;
 using Microsoft.Maui.Graphics;
 
-namespace HB.FullStack.Client.MauiLib.Controls.Popups
+namespace HB.FullStack.Client.MauiLib.Controls
 {
     public class PopupSizeConstants
     {

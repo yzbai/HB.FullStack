@@ -1,9 +1,7 @@
 ﻿using CommunityToolkit.Maui.Views;
-using HB.FullStack.Client.Maui;
-using HB.FullStack.Client.Maui.Base;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+using HB.FullStack.Client.MauiLib;
+
 using System.Threading.Tasks;
 
 namespace Microsoft.Maui.Controls

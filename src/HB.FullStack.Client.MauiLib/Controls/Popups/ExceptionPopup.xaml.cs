@@ -1,6 +1,7 @@
 using CommunityToolkit.Maui.Views;
 
-namespace HB.FullStack.Client.Maui.Controls.Popups
+
+namespace HB.FullStack.Client.MauiLib.Controls
 {
     public partial class ExceptionPopup : Popup
     {

@@ -1,21 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using CommunityToolkit.Maui;
-using HB.FullStack.Client.Maui;
-using HB.FullStack.Client.Maui.Base;
-using HB.FullStack.Client.Maui.Controls;
-using HB.FullStack.Client.Maui.Controls.Cropper;
-using HB.FullStack.Client.Maui.Controls.Popups;
-using HB.FullStack.Client.Maui.File;
-using HB.FullStack.Client.Services;
+
+using HB.FullStack.Client.MauiLib.Controls;
+using HB.FullStack.Client.MauiLib.Services.TCaptcha;
+using HB.FullStack.Client.MauiLib.Startup;
+using HB.FullStack.Client.Services.Files;
 using HB.FullStack.Client.Services.KeyValue;
 using HB.FullStack.Client.Services.Offline;
 using HB.FullStack.Common.ApiClient;
-using HB.FullStack.Database;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Maui.Devices;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -26,6 +21,7 @@ namespace Microsoft.Maui.Hosting
     {
         public static MauiAppBuilder UseFullStackClient(
             this MauiAppBuilder builder,
+            Action<InitOptions> configureInitOptions,
             Action<FileManagerOptions> fileManagerOptionConfig,
             Action<IdGenSettings> idGenConfig,
            
@@ -53,16 +49,14 @@ namespace Microsoft.Maui.Hosting
 
             //HB.FullStack.Client.Maui
             services.AddPreferences();
+            services.AddLocalFileManager();
             services.AddFileManager(fileManagerOptionConfig);
-            services.AddSingleton<StatusManager>();
-            services.AddSingleton(typeof(IStatusManager), sp => sp.GetRequiredService<StatusManager>());
             services.AddTCaptcha(tCaptchaAppId);
 
             //Initializers
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeService>(_ => new BaseInitializeService(/*migrations ?? new List<Migration>()*/)));
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IMauiInitializeScopedService, BaseInitalizeScopedService>());
-            //builder.Services.AddTransient<IMauiInitializeService, BaseInitializeService>();
-            //builder.Services.AddTransient<IMauiInitializeScopedService, BaseInitalizeScopedService>();
+
+            services.Configure(configureInitOptions);
+            services.AddTransient<IMauiInitializeService, InitService>();
 
             //Handlers
             builder.ConfigureMauiHandlers(handlers =>

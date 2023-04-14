@@ -4,7 +4,6 @@ using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 
 using HB.FullStack.Client.MauiLib.Controls;
-using HB.FullStack.Client.MauiLib.Controls.Popups;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -130,35 +129,5 @@ namespace HB.FullStack.Client.MauiLib
 
         //public static IList<Task> AppendingTasks { get; } = new List<Task>();
     }
-
-    //public static class CurrentsExtensions
-    //{
-    //    public static async Task GoBackAsync(this Shell shell, IDictionary<string, object?>? parameters = null)
-    //    {
-    //        if (parameters == null)
-    //        {
-    //            await shell.GoToAsync("..");
-    //        }
-    //        else
-    //        {
-    //            await shell.GoToAsync("..", parameters);
-    //        }
-    //    }
-
-    //    public static Task GoBackAsync(this INavigation navigation, IDictionary<string, object?>? parameters = null) => Shell.Current.GoBackAsync(parameters);
-
-
-    //    public static async Task GoToAsync(this INavigation navigation, ShellNavigationState state, IDictionary<string, object?>? parameters = null)
-    //    {
-    //        if (parameters == null)
-    //        {
-    //            await Shell.Current.GoToAsync(state);
-    //        }
-    //        else
-    //        {
-    //            await Shell.Current.GoToAsync(state, parameters);
-    //        }
-    //    }
-    //}
 
 }

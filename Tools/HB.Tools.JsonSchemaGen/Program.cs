@@ -22,7 +22,7 @@ namespace HB.Tools.JsonSchemaGen
 
             DbOptions options = new DbOptions();
 
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
             var optionsTypes = Directory.GetFiles(path, "*.dll")
                 .Select(Assembly.LoadFile)

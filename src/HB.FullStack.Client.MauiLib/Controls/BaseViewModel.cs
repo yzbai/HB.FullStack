@@ -7,7 +7,8 @@ using AsyncAwaitBestPractices;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using HB.FullStack.Client.File;
+using HB.FullStack.Common.Files;
+
 using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Client.MauiLib.Controls

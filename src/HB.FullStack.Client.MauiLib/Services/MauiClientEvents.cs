@@ -84,9 +84,11 @@ namespace HB.FullStack.Client.MauiLib.Services
 
         #endregion
 
+#pragma warning disable CS0067 // The event 'MauiClientEvents.AppStart' is never used
         public event Func<Task>? AppStart;
         public event Func<Task>? AppResume;
         public event Func<Task>? AppSleep;
         public event Func<Task>? AppExit;
+#pragma warning restore CS0067 // The event 'MauiClientEvents.AppStart' is never used
     }
 }
