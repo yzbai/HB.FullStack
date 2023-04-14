@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Client.Services;
+using HB.FullStack.Client.Services.Offline;
 
 using Microsoft.Extensions.Logging;
 

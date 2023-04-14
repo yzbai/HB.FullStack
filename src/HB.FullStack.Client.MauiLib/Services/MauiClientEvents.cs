@@ -17,9 +17,23 @@ namespace HB.FullStack.Client.MauiLib.Services
 {
     //TODO: 测试，快速断网，然后连接，重复. 网络抖动
 
-    public class MauiNetwork : INetwork
+    public class MauiClientEvents : IClientEvents
     {
         private readonly WeakAsyncEventManager _eventManager = new WeakAsyncEventManager();
+
+        public void Initialize()
+        {
+            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+
+            OnNetworkChanged(Connectivity.Current.NetworkAccess);
+        }
+
+        public void Close()
+        {
+            Connectivity.ConnectivityChanged -= Connectivity_ConnectivityChanged;
+        }
+
+        #region Network
 
         public bool NetworkIsReady => Connectivity.Current.NetworkAccess == NetworkAccess.Internet;
 
@@ -33,23 +47,6 @@ namespace HB.FullStack.Client.MauiLib.Services
         {
             add => _eventManager.Add(value, nameof(NetworkFailed));
             remove => _eventManager.Remove(value, nameof(NetworkFailed));
-        }
-
-        public void Initialize()
-        {
-            StartNetworkMonitor();
-
-            OnNetworkChanged(Connectivity.Current.NetworkAccess);
-        }
-
-        private void StartNetworkMonitor()
-        {
-            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
-        }
-
-        private void StopNetworkMonitor()
-        {
-            Connectivity.ConnectivityChanged -= Connectivity_ConnectivityChanged;
         }
 
         private void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
@@ -75,15 +72,21 @@ namespace HB.FullStack.Client.MauiLib.Services
             }
         }
 
-
-        private async Task OnNetworkResumed()
+        public async Task OnNetworkResumed()
         {
             await _eventManager.RaiseEventAsync(nameof(NetworkResumed));
         }
 
-        private async Task OnNetworkFailed()
+        public async Task OnNetworkFailed()
         {
             await _eventManager.RaiseEventAsync(nameof(NetworkFailed));
         }
+
+        #endregion
+
+        public event Func<Task>? AppStart;
+        public event Func<Task>? AppResume;
+        public event Func<Task>? AppSleep;
+        public event Func<Task>? AppExit;
     }
 }

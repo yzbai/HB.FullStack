@@ -12,7 +12,7 @@ namespace HB.FullStack.Client.Services.Offline
         NotSynced_OfflineData,
         NotSynced_ServerPush,
         Syncing,
-        SynceFailed,//失败 
+        SynceFailed,//失败, 有网络，但Server端不接受，要求特殊处理，即用户选择保存网络端还是本地 
         Synced //成功
     }
 
@@ -25,7 +25,7 @@ namespace HB.FullStack.Client.Services.Offline
 
         event Func<Task>? Synced;
 
-        void InitializeAsync();
+        void Initialize();
 
         SyncStatus Status { get; }
 
@@ -33,7 +33,7 @@ namespace HB.FullStack.Client.Services.Offline
 
         Task ReSyncAsync();
 
-        //void WaitUntilSynced();
+        void WaitUntilNotSyncing();
 
         void EnsureSynced();
 

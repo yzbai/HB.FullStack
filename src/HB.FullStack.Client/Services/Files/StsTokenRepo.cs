@@ -32,9 +32,10 @@ namespace HB.FullStack.Client.Services.Files
             IOptions<FileManagerOptions> fileManagerOptions,
             IDatabase database,
             IApiClient apiClient,
+            IClientEvents clientEvents,
             IPreferenceProvider preferenceProvider,
-            ISyncManager historyManager)
-            : base(logger, database, apiClient, historyManager, preferenceProvider)
+            ISyncManager syncManager)
+            : base(logger, database, apiClient, syncManager, clientEvents, preferenceProvider)
         {
             _logger = logger;
             _fileManagerOptions = fileManagerOptions.Value;

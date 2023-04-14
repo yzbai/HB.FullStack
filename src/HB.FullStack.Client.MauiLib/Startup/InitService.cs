@@ -73,10 +73,10 @@ namespace HB.FullStack.Client.MauiLib.Startup
 
         private static void InitSomeServices(IServiceProvider services)
         {
-            services.GetRequiredService<INetwork>().Initialize();   
-
+            services.GetRequiredService<ISyncManager>().Initialize();
             
-            services.GetRequiredService<ISyncManager>().InitializeAsync();
+            //这个最后调用
+            services.GetRequiredService<IClientEvents>().Initialize();   
             //TODO: 检查是否会卡住UI
 
         }

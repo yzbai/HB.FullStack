@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Client.Services;
+using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
@@ -16,34 +16,82 @@ namespace HB.FullStack.Client.Services.Offline
 {
     public class SyncManager : ISyncManager
     {
-        private readonly WeakEventManager _eventManager = new WeakEventManager();
+        private readonly WeakAsyncEventManager _eventManager = new WeakAsyncEventManager();
         private readonly IDatabase _database;
         private readonly IModelDefFactory _modelDefFactory;
-        private readonly INetwork _network;
+        private readonly IClientEvents _clientEvents;
 
-        public event Func<Task>? Syncing
-        {
-            add => _eventManager.AddEventHandler(value, nameof(Syncing));
-            remove => _eventManager.RemoveEventHandler(value, nameof(Syncing));
-        }
-        public event Func<Task>? Synced
-        {
-            add=> _eventManager.AddEventHandler(value, nameof(Synced));
-            remove=> _eventManager.RemoveEventHandler(value, nameof(Synced));
-        }
+        public event Func<Task>? Syncing { add => _eventManager.Add(value, nameof(Syncing)); remove => _eventManager.Remove(value, nameof(Syncing)); }
+        public event Func<Task>? Synced { add => _eventManager.Add(value, nameof(Synced)); remove => _eventManager.Remove(value, nameof(Synced)); }
 
-        public SyncManager(IDatabase database, IModelDefFactory modelDefFactory, INetwork network)
+        public SyncManager(IDatabase database, IModelDefFactory modelDefFactory, IClientEvents clientEvents)
         {
             _database = database;
             _modelDefFactory = modelDefFactory;
-            _network = network;
-
-            _network.NetworkResumed += () => ReSyncAsync();
+            _clientEvents = clientEvents;
         }
 
-        public async Task InitializeAsync()
+        public void Initialize()
         {
-            await ReSyncAsync();
+            _clientEvents.NetworkResumed += () => ReSyncAsync();
+        }
+
+        //判断是否正在进行同步操作
+        private readonly EventWaitHandle _notSyncingWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, nameof(SyncManager));
+
+        public void WaitUntilNotSyncing()
+        {
+            _notSyncingWaitHandle.WaitOne();
+        }
+
+        public async Task ReSyncAsync()
+        {
+            if (!_clientEvents.NetworkIsReady)
+            {
+                return;
+            }
+
+            try
+            {
+                //TODO: 反复对同一个Guid进行修改，需要合并
+
+                var changes = await _database.RetrieveAllAsync<OfflineChange>(null, orderBy: nameof(OfflineChange.Id));
+
+                throw new NotImplementedException();
+
+                //处理Add
+
+
+                //处理Update
+                //处理Delete
+
+                //
+                //Status = Status.Synced;
+            }
+            catch
+            {
+                Status = SyncStatus.SynceFailed;
+            }
+
+            //TODO: 处理失败的情况
+        }
+
+        public SyncStatus Status { get; private set; }
+
+
+        
+
+        public void EnsureSynced()
+        {
+            WaitUntilNotSyncing();
+
+            if (Status != SyncStatus.Synced)
+            {
+                ReSyncAsync().SafeFireAndForget(ex =>
+                {
+                    //TODO: ex
+                });
+            }
         }
 
         #region Offline Data
@@ -106,9 +154,7 @@ namespace HB.FullStack.Client.Services.Offline
 
         private async Task<bool> HasOfflineDataAsync()
         {
-            _notSyncingWaitHandle.WaitOne();
-
-            _statusManager.WaitUntilSynced();
+            WaitUntilNotSyncing();
 
             long count = await _database.CountAsync<OfflineChange>(null).ConfigureAwait(false);
 
@@ -116,43 +162,5 @@ namespace HB.FullStack.Client.Services.Offline
         }
 
         #endregion
-
-        //判断是否正在进行同步操作
-        private readonly EventWaitHandle _notSyncingWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, nameof(SyncManager));
-
-        public async Task ReSyncAsync()
-        {
-
-            //TODO: 反复对同一个Guid进行修改，需要合并
-
-            var changes = await _database.RetrieveAllAsync<OfflineChange>(null, orderBy: nameof(OfflineChange.Id));
-
-            throw new NotImplementedException();
-
-            //处理Add
-
-
-            //处理Update
-            //处理Delete
-        }
-
-
-
-        public SyncStatus SyncStatus => throw new NotImplementedException();
-
-        public void WaitUntilSynced()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnsureSynced()
-        {
-            _notSyncingWaitHandle.WaitOne();
-
-            if (SyncStatus != SyncStatus.Synced)
-            {
-
-            }
-        }
     }
 }
