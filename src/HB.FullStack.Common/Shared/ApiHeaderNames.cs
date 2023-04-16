@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HB.FullStack.Common.Shared
+﻿namespace HB.FullStack.Common.Shared
 {
     public static class ApiHeaderNames
     {

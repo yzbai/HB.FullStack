@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Aliyun.OSS;
 using Aliyun.OSS.Common;
 using Aliyun.OSS.Common.Authentication;
-
-using HB.FullStack.Client.Services.DbLocker;
+using HB.FullStack.Client.Services.KVManager;
+using HB.FullStack.Client.Services.Sts;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Sts;
+using HB.FullStack.Common.Shared.Resources;
 using HB.Infrastructure.Aliyun.Sts;
 
 using Microsoft.AspNetCore.Mvc;

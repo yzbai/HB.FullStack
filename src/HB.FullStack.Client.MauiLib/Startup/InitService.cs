@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
+
 using HB.FullStack.Client.Services;
-using HB.FullStack.Client.Services.Offline;
+using HB.FullStack.Client.Services.Sync;
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.DependencyInjection;

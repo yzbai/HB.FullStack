@@ -1,5 +1,5 @@
 ﻿using System;
-using HB.FullStack.Common.Shared;
+using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.CommonTests.Data
 {

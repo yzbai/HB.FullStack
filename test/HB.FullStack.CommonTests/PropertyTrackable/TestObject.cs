@@ -11,6 +11,13 @@ using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.CommonTests.PropertyTrackable
 {
+
+    [PropertyTrackableObject]
+    public partial class TestTestObject
+    {
+
+    }
+
     [PropertyTrackableObject]
     public partial class TestObject
     {

@@ -1,5 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Identity.Context
 {

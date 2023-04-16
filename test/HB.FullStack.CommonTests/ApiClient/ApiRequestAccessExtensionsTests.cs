@@ -5,7 +5,7 @@ using HB.FullStack.Common.Shared.Attributes;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace HB.FullStack.Common.ApiClient.Tests
+namespace HB.FullStack.Client.ApiClient.Tests
 {
     public class TestRequestObject
     {

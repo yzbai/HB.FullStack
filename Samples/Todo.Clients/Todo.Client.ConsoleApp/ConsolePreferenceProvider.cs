@@ -1,4 +1,6 @@
-﻿namespace Todo.Client.ConsoleApp
+﻿using HB.FullStack.Common.Shared;
+
+namespace Todo.Client.ConsoleApp
 {
     class ConsolePreferenceProvider : IPreferenceProvider
     {

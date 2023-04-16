@@ -2,6 +2,7 @@
 
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.Services.Files;
+using HB.FullStack.Client.Services.Sts;
 using HB.FullStack.Common.Files;
 
 namespace Microsoft.Extensions.DependencyInjection

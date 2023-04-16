@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Sms;
+using HB.FullStack.Common.Shared.Resources;
 
 using Microsoft.AspNetCore.Authorization;
 

@@ -2,7 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Common.Models;
 using HB.FullStack.Common.Shared;
 
 using Microsoft.Maui.Controls;

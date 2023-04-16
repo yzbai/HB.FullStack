@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.SignInReceipt;
+using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Identity;
 using HB.FullStack.Identity.Context;
 using HB.FullStack.Web.Controllers;

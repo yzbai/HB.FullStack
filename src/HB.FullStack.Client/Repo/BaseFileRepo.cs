@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Net.Http;
 using HB.FullStack.Client.Services;
-using HB.FullStack.Common.ApiClient;
-using HB.FullStack.Common.Shared;
+using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Client
 {

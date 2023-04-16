@@ -28,6 +28,7 @@ using StackExchange.Redis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using HB.FullStack.Web.Controllers;
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Server.Startup
 {

@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Common.ApiClient;
+﻿using HB.FullStack.Client.ApiClient;
 
 namespace Todo.Client.ConsoleApp
 {

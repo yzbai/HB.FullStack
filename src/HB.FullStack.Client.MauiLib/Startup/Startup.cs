@@ -2,18 +2,19 @@
 
 using CommunityToolkit.Maui;
 
+using HB.FullStack.Client.MauiLib;
 using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Services.TCaptcha;
 using HB.FullStack.Client.MauiLib.Startup;
 using HB.FullStack.Client.Services.Files;
-using HB.FullStack.Client.Services.KeyValue;
-using HB.FullStack.Client.Services.Offline;
-using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Client.Services.KVManager;
+using HB.FullStack.Client.ApiClient;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Devices;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using HB.FullStack.Client;
 
 namespace Microsoft.Maui.Hosting
 {
@@ -21,13 +22,10 @@ namespace Microsoft.Maui.Hosting
     {
         public static MauiAppBuilder UseFullStackClient(
             this MauiAppBuilder builder,
-            Action<InitOptions> configureInitOptions,
-            Action<FileManagerOptions> fileManagerOptionConfig,
-            Action<IdGenSettings> idGenConfig,
-           
             Action<DbOptions> databaseConfig,
             Action<ApiClientOptions> apiClientConfig,
-            //IEnumerable<Migration>? migrations,
+            Action<FileManagerOptions> fileManagerOptionConfig,
+            Action<InitOptions> configureInitOptions,
             string tCaptchaAppId)
         {
             IServiceCollection services = builder.Services;
@@ -36,21 +34,25 @@ namespace Microsoft.Maui.Hosting
             services.AddOptions();
 
             //Basic
-            services.AddIdGen(idGenConfig);
+            services.AddIdGen(idGenOptions =>
+            {
+                idGenOptions.MachineId = 1;
+            });
             services.AddDatabase(databaseConfig, databaseEngineBuilder => databaseEngineBuilder.AddSQLite());
             services.AddApiClient(apiClientConfig);
+            services.AddSingleton<IPreferenceProvider, MauiPreferenceProvider>();
+            services.AddSmsClientService();
+
 
             //HB.FullStack.Client
-            services.AddTransient<CropperPage>();
-            services.AddTransient<CropperViewModel>();
-
             services.AddKVManager();
-            services.AddOfflineManager();
-
-            //HB.FullStack.Client.Maui
-            services.AddPreferences();
-            services.AddLocalFileManager();
+            services.AddSyncManager();
             services.AddFileManager(fileManagerOptionConfig);
+
+            //HB.FullStack.Client.MauiLib
+
+            services.AddLocalFileManager();
+
             services.AddTCaptcha(tCaptchaAppId);
 
             //Initializers
@@ -67,8 +69,10 @@ namespace Microsoft.Maui.Hosting
             //Skiasharp
             builder.UseSkiaSharp();
 
-            //controlers
+            //UIs
             services.AddSingleton<PopupSizeConstants>();
+            services.AddTransient<CropperPage>();
+            services.AddTransient<CropperViewModel>();
 
             //Essentials
             services.AddSingleton<IDeviceDisplay>(DeviceDisplay.Current);

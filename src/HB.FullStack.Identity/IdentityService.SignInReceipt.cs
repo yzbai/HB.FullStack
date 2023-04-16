@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Common.Server;
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
 using HB.FullStack.Identity.Context;
 using HB.FullStack.Identity.Models;

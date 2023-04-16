@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using HB.FullStack.Common.Shared;
+
+using HB.FullStack.Client.ApiClient;
 
 namespace HB.FullStack.Client.MauiLib
 {

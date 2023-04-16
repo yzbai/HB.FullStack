@@ -19,7 +19,7 @@ using HB.FullStack.EventBus.Abstractions;
 using HB.FullStack.EventBus;
 using HB.Infrastructure.Redis.EventBus;
 using Microsoft.Extensions.Options;
-using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.Test;
 using System.Collections.Generic;
 using System.Threading.Tasks;

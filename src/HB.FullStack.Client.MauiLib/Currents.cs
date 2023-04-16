@@ -12,6 +12,7 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Dispatching;
 
 using System;
+using System.Reflection;
 
 namespace HB.FullStack.Client.MauiLib
 {
@@ -20,6 +21,9 @@ namespace HB.FullStack.Client.MauiLib
     /// </summary>
     public static class Currents
     {
+        private const string DEBUG = nameof(DEBUG);
+        private const string RELEASE = nameof(RELEASE);
+
         //private static IConfiguration? _configuration;
         private static PopupSizeConstants? _popupSizeConstants;
 
@@ -28,13 +32,13 @@ namespace HB.FullStack.Client.MauiLib
 
         public static string Environment =>
 #if DEBUG
-    "Debug";
+    DEBUG;
 #endif
 #if RELEASE
-     "Release";
+    RELEASE;
 #endif
 
-        public static bool IsDebug => Environment == "Debug";
+        public static bool IsDebug => Environment == DEBUG;
 
         ///// <summary>
         ///// 要确保在App项目中调用

@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using HB.FullStack.Common.ApiClient;
+using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.IdGen;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Attributes;
 using HB.FullStack.Database;
 
 namespace HB.FullStack.Client.Services.IdBarriers

@@ -9,6 +9,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Utils\**" />
+	  <EmbeddedResource Remove="Utils\**" />
+	  <None Remove="Utils\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.4" />
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="7.0.4" />
 	</ItemGroup>
@@ -17,9 +23,6 @@
 		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
 		<ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
 		<ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Utils\" />
 	</ItemGroup>
 
 </Project>

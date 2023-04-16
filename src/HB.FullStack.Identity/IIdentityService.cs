@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-
-
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Identity.Context;
 
 namespace HB.FullStack.Identity

@@ -1,4 +1,5 @@
-﻿using HB.FullStack.Database.DbModels;
+﻿using HB.FullStack.Common.Shared;
+using HB.FullStack.Database.DbModels;
 
 using System;
 using System.ComponentModel.DataAnnotations;
