@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
@@ -32,7 +33,7 @@ namespace HB.FullStack.Database
         {
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable();
-
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -42,7 +43,7 @@ namespace HB.FullStack.Database
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -77,6 +78,7 @@ namespace HB.FullStack.Database
             }
 
             modelDef.ThrowIfNotWriteable();
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -87,7 +89,7 @@ namespace HB.FullStack.Database
 
                 using IDataReader reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -136,7 +138,7 @@ namespace HB.FullStack.Database
         {
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable();
-
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -146,7 +148,7 @@ namespace HB.FullStack.Database
 
                 int matchedRows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false); ;
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false); ;
 
                 if (matchedRows == 1)
                 {
@@ -181,6 +183,7 @@ namespace HB.FullStack.Database
             }
 
             modelDef.ThrowIfNotWriteable();
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -191,7 +194,7 @@ namespace HB.FullStack.Database
 
                 using IDataReader reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false); ;
+                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false); ;
 
                 int count = 0;
 

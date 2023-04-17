@@ -2,10 +2,13 @@
 using CommunityToolkit.Maui.Markup;
 
 using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Database;
 using HB.FullStack.Database.Config;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
+
+using Todo.Shared;
 
 namespace Todo.Client.MobileApp
 {
@@ -52,7 +55,15 @@ namespace Todo.Client.MobileApp
                 .UseFullStackClient(
                     dbOptions =>
                     {
-                        dbOptions.DbSchemas.Add(new DbSchema { });
+                        dbOptions.DbSchemas.Add(new DbSchema
+                        {
+
+                        });
+                        dbOptions.DbSchemas.Add(new DbSchema
+                        {
+
+                        });
+                        dbOptions.InitContexts.Add(new DbInitContext { });
                     },
                     apiClientOptions =>
                     {
@@ -71,7 +82,8 @@ namespace Todo.Client.MobileApp
                     {
                         fileManagerOptions.AliyunOssEndpoint = ALIYUN_OSS_ENDPOINT;
                         fileManagerOptions.AliyunOssBucketName = ALIYUN_OSS_BUCKET_NAME;
-                        fileManagerOptions.AliyunStsTokenRequestUrl = ALIYUN_STS_
+                        fileManagerOptions.DirectoryDescriptions = DirectorySettings.Descriptions.All;
+                        fileManagerOptions.DirectoryPermissions = DirectorySettings.DirectoryPermissions.All;
                     },
                     initOptions => { },
                     tCaptchaAppId: "xxx")

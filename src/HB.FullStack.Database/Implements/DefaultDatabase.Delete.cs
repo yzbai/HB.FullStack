@@ -23,7 +23,7 @@ namespace HB.FullStack.Database
             bool? trulyDelete = null) where T : DbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -40,7 +40,7 @@ namespace HB.FullStack.Database
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -101,7 +101,7 @@ namespace HB.FullStack.Database
 
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             ThrowIfExceedMaxBatchNumber(ids, lastUser, modelDef);
             //TruncateLastUser(ref lastUser);
 
@@ -120,7 +120,7 @@ namespace HB.FullStack.Database
 
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -190,6 +190,7 @@ namespace HB.FullStack.Database
             bool? trulyDelete = null) where T : TimelessDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
             try
             {
@@ -205,7 +206,7 @@ namespace HB.FullStack.Database
 
                 _ = transactionContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DbException)
             {

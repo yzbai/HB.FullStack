@@ -24,9 +24,10 @@ namespace HB.FullStack.Database
     public interface IDatabase : IDbWriter, IDbReader
     {
         /// <summary>
-        /// 必须加分布式锁进行。返回是否有Migration被执行
+        /// Server端必须加分布式锁进行。
+        /// 可多次反复执行，或者推迟执行
         /// </summary>
-        Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts);
+        Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts = null);
 
         IDbModelDefFactory ModelDefFactory { get; }
     }

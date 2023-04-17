@@ -20,8 +20,6 @@ namespace HB.FullStack.Client.Services.Files
 
         public string AliyunOssBucketName { get; set; } = null!;
 
-        public string AliyunStsTokenRequestUrl { get; set; } = null!;
-
         #endregion
 
         #region Directory

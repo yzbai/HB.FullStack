@@ -14,6 +14,9 @@ namespace HB.FullStack.Database
 {
     partial class DefaultDatabase
     {
+
+        //TODO: 思考要不要加一个waithandler，只能不在初始化中才能进行操作?
+
         #region Initialize
 
         /// <summary>
@@ -21,40 +24,55 @@ namespace HB.FullStack.Database
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts)
+        public async Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts = null)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
+
+            List<DbInitContext> allDbInitContexts = new List<DbInitContext>();
+
+            allDbInitContexts.AddRange(_options.InitContexts);
+
+            if (dbInitContexts != null)
+            {
+                allDbInitContexts.AddRange(dbInitContexts);
+            }
 
             IList<DbSchema> allDbSchemas = _dbSchemaManager.GetAllDbSchemas();
 
             foreach (DbSchema dbSchema in allDbSchemas)
             {
-                DbInitContext? dbInitContext = dbInitContexts?.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
+                DbInitContext? dbInitContext = allDbInitContexts.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
 
                 //1. 设置connectionString, 如果需要
                 _dbSchemaManager.SetConnectionString(dbSchema.Name, dbInitContext?.ConnectionString, dbInitContext?.SlaveConnectionStrings);
 
-                IEnumerable<Migration>? curMigrations = dbInitContext?.Migrations?.Where(m => m.DbSchemaName==dbSchema.Name).ToList();
+                ConnectionString? connectionString = _dbSchemaManager.GetConnectionString(dbSchema.Name, true);
+
+                if (connectionString == null)
+                {
+                    continue;
+                }
+
+                IEnumerable<Migration>? curMigrations = dbInitContext?.Migrations?.Where(m => m.DbSchemaName == dbSchema.Name).ToList();
 
                 //2. 创建新数据, 如果需要
-                await CreateTablesIfNeed(curMigrations, dbSchema).ConfigureAwait(false);
+                await CreateTablesIfNeed(curMigrations, dbSchema, connectionString).ConfigureAwait(false);
 
                 //3. 迁移, 如果需要
-                await MigrateIfNeeded(curMigrations, dbSchema).ConfigureAwait(false);
+                await MigrateIfNeeded(curMigrations, dbSchema, connectionString).ConfigureAwait(false);
 
                 _logger.LogInformation("数据初{DbSchemaName}始化成功！, Version:{Version}", dbSchema.Name, dbSchema.Version);
             }
         }
 
-        private async Task CreateTablesIfNeed(IEnumerable<Migration>? migrations, DbSchema dbSchema)
+        private async Task CreateTablesIfNeed(IEnumerable<Migration>? migrations, DbSchema dbSchema, ConnectionString connectionString)
         {
             if (!dbSchema.AutomaticCreateTable)
             {
                 return;
             }
 
-            var engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
-            var connectionString = _dbSchemaManager.GetConnectionString(dbSchema.Name, true);
+            Engine.IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
 
             var transContext = await Transaction.BeginTransactionAsync(dbSchema.Name).ConfigureAwait(false);
 
@@ -103,7 +121,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task<bool> MigrateIfNeeded(IEnumerable<Migration>? migrations, DbSchema dbSchema)
+        private async Task<bool> MigrateIfNeeded(IEnumerable<Migration>? migrations, DbSchema dbSchema, ConnectionString connectionString)
         {
             if (migrations.IsNullOrEmpty())
             {
@@ -117,8 +135,7 @@ namespace HB.FullStack.Database
 
             bool haveExecutedMigration = false;
 
-            var engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
-            ConnectionString connectionString = _dbSchemaManager.GetConnectionString(dbSchema.Name, true);
+            Engine.IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
 
             //TODO: 这里没有对slave库进行操作
             var transContext = await Transaction.BeginTransactionAsync(dbSchema.Name, System.Data.IsolationLevel.Serializable);
@@ -175,19 +192,19 @@ namespace HB.FullStack.Database
             {
                 int curVersion = curOrderedMigrations.ElementAt(0).OldVersion;
 
-                if (curVersion!=startVersion) { return false; }
+                if (curVersion != startVersion) { return false; }
 
                 foreach (Migration migration in curOrderedMigrations)
                 {
-                    if (curVersion!=migration.OldVersion)
+                    if (curVersion != migration.OldVersion)
                     {
                         return false;
                     }
 
-                    curVersion=migration.NewVersion;
+                    curVersion = migration.NewVersion;
                 }
 
-                return curVersion==endVersion;
+                return curVersion == endVersion;
             }
         }
 
@@ -208,7 +225,7 @@ namespace HB.FullStack.Database
             }
 
             //TODO: 这里掺和了Cache的操作
-            if(migration.CacheCleanTask != null)
+            if (migration.CacheCleanTask != null)
             {
                 await migration.CacheCleanTask().ConfigureAwait(false);
             }

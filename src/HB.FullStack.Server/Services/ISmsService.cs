@@ -6,7 +6,7 @@ namespace HB.FullStack.Server.Services
     /// <summary>
     /// 用于Server端调用第三方服务
     /// </summary>
-    public interface ISmsServerService
+    public interface ISmsService
     {
         Task SendValidationCodeAsync(string mobile/*, out string code*/);
 

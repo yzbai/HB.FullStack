@@ -10,11 +10,11 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Client.Services.Sms
 {
-    public class SmsClientService : ISmsClientService
+    public class SmsService : ISmsService
     {
         private readonly IApiClient _apiClient;
 
-        public SmsClientService(IApiClient apiClient)
+        public SmsService(IApiClient apiClient)
         {
             _apiClient = apiClient;
         }

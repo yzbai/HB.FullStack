@@ -53,51 +53,62 @@ namespace HB.FullStack.Client.ApiClient
 
         public void RangeResEndpoints()
         {
-            //SignInReceiptRes
-            _options.SignInReceiptSiteSetting.SiteName ??= "SignInReceiptSite";
+            AddResEndpointsFromCode();
+            AddResEndpointsFromSignInReceiptSite();
+            AddResEndpointFromOtherSites();
 
-            ResEndpoint signInReCeiptResEndpoint = new ResEndpoint(nameof(SignInReceiptRes));
-            signInReCeiptResEndpoint.SiteSetting = _options.SignInReceiptSiteSetting;
-            _resEndpoints[nameof(SignInReceiptRes)] = signInReCeiptResEndpoint;
-
-            //From Code
-            IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
-
-            foreach (Type resType in resTypes)
+            void AddResEndpointsFromCode()
             {
-                if (resType == typeof(SignInReceiptRes))
+                IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
+
+                foreach (Type resType in resTypes)
                 {
-                    continue;
+                    ResEndpoint endpoint = new ResEndpoint(resType.Name);
+
+                    //直接把SignInReceiptSite作为默认
+                    endpoint.SiteSetting = _options.SignInReceiptSiteSetting;
+
+                    ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
+
+                    if (attr != null)
+                    {
+                        endpoint.ResName = attr.ResName ?? endpoint.ResName;
+                        endpoint.Type = attr.Type ?? endpoint.Type;
+                        endpoint.ControllerOrPlainUrl = attr.ControllerOrPlainUrl ?? endpoint.ControllerOrPlainUrl;
+                        endpoint.DefaultReadAuth = attr.DefaultReadAuth ?? endpoint.DefaultReadAuth;
+                        endpoint.DefaultWriteAuth = attr.DefaultWriteAuth ?? endpoint.DefaultWriteAuth;
+                    }
+
+                    _resEndpoints[endpoint.ResName] = endpoint;
                 }
-
-                ResEndpoint endpoint = new ResEndpoint(resType.Name);
-
-                //直接把第一个作为默认，如果SiteSetting中的Endpoints制定了，在后面会被覆盖
-                endpoint.SiteSetting = _options.OtherSiteSettings.FirstOrDefault();
-
-                ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
-
-                if (attr != null)
-                {
-                    endpoint.ResName = attr.ResName ?? endpoint.ResName;
-                    endpoint.Type = attr.Type ?? endpoint.Type;
-                    endpoint.ControllerOrPlainUrl = attr.ControllerOrPlainUrl ?? endpoint.ControllerOrPlainUrl;
-                    endpoint.DefaultReadAuth = attr.DefaultReadAuth ?? endpoint.DefaultReadAuth;
-                    endpoint.DefaultWriteAuth = attr.DefaultWriteAuth ?? endpoint.DefaultWriteAuth;
-                }
-
-                _resEndpoints[endpoint.ResName] = endpoint;
             }
 
-            //From SiteSettings
-            foreach (SiteSetting siteSetting in _options.OtherSiteSettings)
+            void AddResEndpointsFromSignInReceiptSite()
             {
-                foreach (ResEndpoint endpoint in siteSetting.Endpoints)
-                {
-                    endpoint.SiteSetting = siteSetting;
+                _options.SignInReceiptSiteSetting.SiteName ??= "SignInReceiptSite";
 
-                    //override attribute of res
+                foreach (ResEndpoint endpoint in _options.SignInReceiptSiteSetting.Endpoints)
+                {
+                    endpoint.SiteSetting = _options.SignInReceiptSiteSetting;
                     _resEndpoints[endpoint.ResName] = endpoint;
+                }
+
+                ResEndpoint signInReCeiptResEndpoint = new ResEndpoint(nameof(SignInReceiptRes));
+                signInReCeiptResEndpoint.SiteSetting = _options.SignInReceiptSiteSetting;
+                _resEndpoints[nameof(SignInReceiptRes)] = signInReCeiptResEndpoint;
+            }
+
+            void AddResEndpointFromOtherSites()
+            {
+                foreach (SiteSetting siteSetting in _options.OtherSiteSettings)
+                {
+                    foreach (ResEndpoint endpoint in siteSetting.Endpoints)
+                    {
+                        endpoint.SiteSetting = siteSetting;
+
+                        //override attribute of res
+                        _resEndpoints[endpoint.ResName] = endpoint;
+                    }
                 }
             }
         }

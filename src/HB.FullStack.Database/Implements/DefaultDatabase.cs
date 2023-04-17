@@ -9,7 +9,9 @@ using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Implements;
 using HB.FullStack.Database.SQL;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Database
 {
@@ -25,6 +27,7 @@ namespace HB.FullStack.Database
     internal sealed partial class DefaultDatabase : IDatabase
     {
         private readonly ILogger _logger;
+        private readonly DbOptions _options;
 
         private IDbSchemaManager _dbSchemaManager { get; }
 
@@ -36,12 +39,14 @@ namespace HB.FullStack.Database
 
         public DefaultDatabase(
             ILogger<DefaultDatabase> logger,
+            IOptions<DbOptions> options,
             IDbSchemaManager dbSchemaManager,
             IDbModelDefFactory modelDefFactory,
             IDbCommandBuilder commandBuilder,
             ITransaction transaction)
         {
             _logger = logger;
+            _options = options.Value;
             _dbSchemaManager = dbSchemaManager;
 
             ModelDefFactory = modelDefFactory;

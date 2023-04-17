@@ -5,15 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
-
-using HB.FullStack.Client.Services;
 using HB.FullStack.Common;
 
 using Microsoft.Maui.Networking;
 
 using static Microsoft.Maui.ApplicationModel.Permissions;
 
-namespace HB.FullStack.Client.MauiLib.Services
+namespace HB.FullStack.Client.MauiLib
 {
     //TODO: 测试，快速断网，然后连接，重复. 网络抖动
 

@@ -19,10 +19,10 @@ namespace HB.FullStack.Server.WebLib.Controllers
     public class SignInReceiptController : BaseModelController<SignInReceipt>
     {
         private readonly ILogger<SignInReceiptController> _logger;
-        private readonly ISmsServerService _smsService;
+        private readonly ISmsService _smsService;
         private readonly IIdentityService _identityService;
 
-        public SignInReceiptController(ILogger<SignInReceiptController> logger, ISmsServerService smsService, IIdentityService identityService)
+        public SignInReceiptController(ILogger<SignInReceiptController> logger, ISmsService smsService, IIdentityService identityService)
         {
             _logger = logger;
             _smsService = smsService;

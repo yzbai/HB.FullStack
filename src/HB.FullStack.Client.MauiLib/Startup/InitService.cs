@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
-
-using HB.FullStack.Client.Services;
 using HB.FullStack.Client.Services.Sync;
 using HB.FullStack.Database;
 
@@ -19,8 +17,8 @@ namespace HB.FullStack.Client.MauiLib.Startup
     {
         public InitOptions Value => this;
 
-        public IEnumerable<DbInitContext> DbInitContexts { get; set; } = new List<DbInitContext>();
     }
+
     public class InitService : IMauiInitializeService
     {
         private readonly InitOptions _options;
@@ -34,35 +32,9 @@ namespace HB.FullStack.Client.MauiLib.Startup
         {
             InitLog(services);
 
-            InitGlobalExceptions();
-
-            InitDatabase(services.GetRequiredService<IDatabase>());
+            InitService.InitDatabase(services.GetRequiredService<IDatabase>());
 
             InitSomeServices(services);
-        }
-
-        private static void InitGlobalExceptions()
-        {
-            TaskScheduler.UnobservedTaskException += (sender, e) =>
-            {
-                //TODO: 上报
-
-                Globals.Logger.LogError(e.Exception, $"发现没有处理的UnobservedTaskException。Sender: {sender?.GetType().FullName}");
-
-                Currents.ShowToast("抱歉，发生了错误");
-
-                e.SetObserved();
-            };
-
-            SafeFireAndForgetExtensions.SetDefaultExceptionHandling(ex =>
-            {
-                //TODO:上报
-
-                Globals.Logger.LogError(ex, "使用了SafeFireAndForget的默认异常处理");
-
-
-                Currents.ShowToast("抱歉，发生了错误");
-            });
         }
 
         private static void InitLog(IServiceProvider services)
@@ -80,13 +52,13 @@ namespace HB.FullStack.Client.MauiLib.Startup
 
         }
 
-        private void InitDatabase(IDatabase database)
+        private static void InitDatabase(IDatabase database)
         {
             JoinableTasks.JoinableTaskFactory.Run(async () =>
             {
                 try
                 {
-                    await database.InitializeAsync(_options.DbInitContexts);
+                    await database.InitializeAsync();
                 }
                 catch(Exception ex)
                 {

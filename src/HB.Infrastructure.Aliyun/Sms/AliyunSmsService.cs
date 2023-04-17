@@ -18,7 +18,7 @@ using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsService : ISmsServerService
+    public class AliyunSmsService : ISmsService
     {
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;

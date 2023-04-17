@@ -16,9 +16,9 @@ namespace HB.FullStack.Server.WebLib.Controllers
     public class SmsValidationCodeController : BaseController
     {
         private readonly ILogger _logger;
-        private readonly ISmsServerService _smsService;
+        private readonly ISmsService _smsService;
 
-        public SmsValidationCodeController(ILogger<SmsValidationCodeController> logger, ISmsServerService aliyunSmsService)
+        public SmsValidationCodeController(ILogger<SmsValidationCodeController> logger, ISmsService aliyunSmsService)
         {
             _logger = logger;
             _smsService = aliyunSmsService;

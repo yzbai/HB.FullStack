@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
@@ -18,7 +19,7 @@ namespace HB.FullStack.Database
             ThrowIf.NotValid(item, nameof(item));
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
-
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             //TruncateLastUser(ref lastUser);
 
             try
@@ -31,7 +32,7 @@ namespace HB.FullStack.Database
 
                 _ = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -49,6 +50,7 @@ namespace HB.FullStack.Database
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
             //TruncateLastUser(ref lastUser);
@@ -66,7 +68,7 @@ namespace HB.FullStack.Database
 
                 _ = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DbException)
             {

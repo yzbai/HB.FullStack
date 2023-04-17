@@ -1,7 +1,5 @@
-﻿using System.Net;
-
+﻿using HB.FullStack.Client;
 using HB.FullStack.Client.ApiClient;
-using HB.FullStack.Common.Shared.SignInReceipt;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

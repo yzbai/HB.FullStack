@@ -98,20 +98,18 @@ namespace HB.FullStack.Database.Config
             }
         }
 
-        public ConnectionString GetConnectionString(string dbSchemaName, bool useMaster)
+        public ConnectionString? GetConnectionString(string dbSchemaName, bool useMaster)
         {
             DbSchemaEx unit = _dbSchemaExDict[dbSchemaName];
 
-            return useMaster
-                ? unit.Schema.ConnectionString.ThrowIfNull($"{dbSchemaName} 没有ConnectionString")
-                : GetSlaveConnectionString(unit);
+            return useMaster ? unit.Schema.ConnectionString : GetSlaveConnectionString(unit);
 
-            static ConnectionString GetSlaveConnectionString(DbSchemaEx dbUnit)
+            static ConnectionString? GetSlaveConnectionString(DbSchemaEx dbUnit)
             {
                 //这里采取平均轮训的方法
                 if (dbUnit.SlaveCount == 0)
                 {
-                    return dbUnit.Schema.ConnectionString.ThrowIfNull($"{dbUnit.Schema.Name} 没有ConnectionString");
+                    return dbUnit.Schema.ConnectionString;
                 }
 
                 return dbUnit.Schema.SlaveConnectionStrings![dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];

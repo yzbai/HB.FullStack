@@ -3,7 +3,7 @@ using HB.FullStack.Common.Shared.Resources;
 
 namespace HB.FullStack.Client.Services.Sms
 {
-    public interface ISmsClientService
+    public interface ISmsService
     {
         Task<SmsValidationCodeRes?> RequestVCodeAsync(string mobile);
     }

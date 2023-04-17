@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
@@ -23,6 +24,8 @@ namespace HB.FullStack.Database
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()
                 .ThrowIfNull(typeof(T).FullName)
                 .ThrowIfNotWriteable();
+
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
             //TruncateLastUser(ref lastUser);
 
@@ -47,7 +50,7 @@ namespace HB.FullStack.Database
 
                 object? rt = transContext != null
                     ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandScalarAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandScalarAsync(connectionString, command).ConfigureAwait(false);
 
                 if (modelDef.IsIdAutoIncrement)
                 {
@@ -96,6 +99,7 @@ namespace HB.FullStack.Database
             ThrowIf.NotValid(items, nameof(items));
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
             //TruncateLastUser(ref lastUser);
@@ -116,7 +120,7 @@ namespace HB.FullStack.Database
 
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command);
+                    : await engine.ExecuteCommandReaderAsync(connectionString, command);
 
                 if (modelDef.IsIdAutoIncrement)
                 {

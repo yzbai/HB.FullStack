@@ -25,7 +25,7 @@ namespace HB.FullStack.Server.Identity
         private readonly ILogger _logger;
         private readonly ITransaction _transaction;
         private readonly IDistributedLockManager _lockManager;
-        private readonly ISmsServerService _smsServerService;
+        private readonly ISmsService _smsServerService;
 
         private readonly UserRepo _userRepo;
         private readonly SignInCredentialRepo _signInCredentialRepo;
@@ -47,7 +47,7 @@ namespace HB.FullStack.Server.Identity
             ILogger<IdentityService> logger,
             ITransaction transaction,
             IDistributedLockManager lockManager,
-            ISmsServerService smsServerService,
+            ISmsService smsServerService,
             UserRepo userRepo,
             SignInCredentialRepo signInCredentialRepo,
             UserClaimRepo userClaimRepo,

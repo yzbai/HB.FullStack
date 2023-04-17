@@ -14,6 +14,9 @@ using Microsoft.Maui.Devices;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using HB.FullStack.Client;
+using AsyncAwaitBestPractices;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Maui.Hosting
 {
@@ -27,35 +30,37 @@ namespace Microsoft.Maui.Hosting
             Action<InitOptions> configureInitOptions,
             string tCaptchaAppId)
         {
+            SetGlobalException();
+
             IServiceCollection services = builder.Services;
 
             //Options
             services.AddOptions();
 
-            //Basic
+            //Core
             services.AddIdGen(idGenOptions =>
             {
                 idGenOptions.MachineId = 1;
             });
             services.AddDatabase(databaseConfig, databaseEngineBuilder => databaseEngineBuilder.AddSQLite());
-            services.AddApiClient(apiClientConfig);
-            services.AddSingleton<IPreferenceProvider, MauiPreferenceProvider>();
-            services.AddSmsClientService();
 
 
             //HB.FullStack.Client
+            services.AddSingleton<IPreferenceProvider, MauiPreferenceProvider>();
+            services.AddSingleton<IClientEvents, MauiClientEvents>();
+            services.AddApiClient(apiClientConfig);
+            services.AddFileManager(fileManagerOptionConfig);
             services.AddKVManager();
             services.AddSyncManager();
-            services.AddFileManager(fileManagerOptionConfig);
+            services.AddSmsClientService();
+
 
             //HB.FullStack.Client.MauiLib
 
             services.AddLocalFileManager();
-
             services.AddTCaptcha(tCaptchaAppId);
 
             //Initializers
-
             services.Configure(configureInitOptions);
             services.AddTransient<IMauiInitializeService, InitService>();
 
@@ -78,6 +83,30 @@ namespace Microsoft.Maui.Hosting
             services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
 
             return builder;
+        }
+
+        private static void SetGlobalException()
+        {
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                //TODO: 上报
+
+                Globals.Logger?.LogError(e.Exception, $"发现没有处理的UnobservedTaskException。Sender: {sender?.GetType().FullName}");
+
+                Currents.ShowToast("抱歉，发生了错误");
+
+                e.SetObserved();
+            };
+
+            SafeFireAndForgetExtensions.SetDefaultExceptionHandling(ex =>
+            {
+                //TODO:上报
+
+                Globals.Logger?.LogError(ex, "使用了SafeFireAndForget的默认异常处理");
+
+
+                Currents.ShowToast("抱歉，发生了错误");
+            });
         }
     }
 }

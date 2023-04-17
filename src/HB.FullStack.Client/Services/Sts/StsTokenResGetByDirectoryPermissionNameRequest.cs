@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
 
 namespace HB.FullStack.Client.Services.Sts
@@ -18,7 +19,7 @@ namespace HB.FullStack.Client.Services.Sts
         public bool ReadOnly { get; set; }
 
         public StsTokenResGetByDirectoryPermissionNameRequest(string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly)
-            : base(nameof(StsTokenRes), ApiMethod.Get, null, "ByDirectoryPermissionName")
+            : base(nameof(StsTokenRes), ApiMethod.Get, null, SharedNames.Conditions.ByDirectoryPermissionName)
         {
             DirectoryPermissionName = directoryPermissionName;
             RegexPlaceHolderValue = regexPlaceHolderValue;

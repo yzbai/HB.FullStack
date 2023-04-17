@@ -24,8 +24,8 @@ namespace HB.FullStack.Database.Implements
 
         public async Task<TransactionContext> BeginTransactionAsync(string dbSchemaName, IsolationLevel? isolationLevel = null)
         {
+            ConnectionString connectionString = _dbManager.GetRequiredConnectionString(dbSchemaName, true);
             IDbEngine engine = _dbManager.GetDatabaseEngine(dbSchemaName);
-            var connectionString = _dbManager.GetConnectionString(dbSchemaName, true);
 
             IDbTransaction dbTransaction = await engine.BeginTransactionAsync(connectionString, isolationLevel).ConfigureAwait(false);
 
@@ -38,8 +38,8 @@ namespace HB.FullStack.Database.Implements
 
             ThrowIf.Null(modelDef, $"{typeof(T).FullName} 没有 DbModelDef");
 
+            ConnectionString connectionString = _dbManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
             IDbEngine engine = _dbManager.GetDatabaseEngine(modelDef.EngineType);
-            var connectionString = _dbManager.GetConnectionString(modelDef.DbSchemaName, true);
 
 
             IDbTransaction dbTransaction = await engine.BeginTransactionAsync(connectionString, isolationLevel).ConfigureAwait(false);

@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ClientModels;
-using HB.FullStack.Client.Services;
 using HB.FullStack.Client.Services.Sync;
 using HB.FullStack.Common;
 using HB.FullStack.Client.ApiClient;
@@ -131,8 +130,6 @@ namespace HB.FullStack.Client
             RepoGetMode getMode,
             IfUseLocalData<TModel>? ifUseLocalData = null)
         {
-            _syncManager.WaitUntilNotSyncing();
-
             IEnumerable<TModel> models = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
 
             return models.FirstOrDefault();

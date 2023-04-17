@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
@@ -23,6 +24,7 @@ namespace HB.FullStack.Database
 
             ThrowIf.NotValid(item, nameof(item));
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
             //TruncateLastUser(ref lastUser);
 
@@ -47,7 +49,7 @@ namespace HB.FullStack.Database
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -115,6 +117,8 @@ namespace HB.FullStack.Database
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
 
+            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+
             if (modelDef.IsPropertyTrackable)
             {
                 await UpdatePropertiesAsync<T>(
@@ -137,13 +141,13 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
-                var command = DbCommandBuilder.CreateBatchUpdateCommand(modelDef, items, oldTimestamps, transContext == null);
+                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdateCommand(modelDef, items, oldTimestamps, transContext == null);
 
-                var engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                Engine.IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
 
                 using var reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(_dbSchemaManager.GetConnectionString(modelDef.DbSchemaName, true), command).ConfigureAwait(false);
+                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
 
                 int count = 0;
 

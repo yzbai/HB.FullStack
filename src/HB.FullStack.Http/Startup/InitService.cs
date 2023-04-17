@@ -61,7 +61,7 @@ namespace HB.FullStack.Server.WebLib.Startup
 
                 Globals.Logger.LogInformation("获取了初始化数据库的锁");
 
-                await _database.InitializeAsync(_options.DbInitContexts).ConfigureAwait(false);
+                await _database.InitializeAsync().ConfigureAwait(false);
             }
             finally
             {
