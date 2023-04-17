@@ -3,9 +3,9 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using HB.FullStack.Web;
-using HB.FullStack.Web.Filters;
-using HB.FullStack.Web.Security;
+using HB.FullStack.Server.WebLib;
+using HB.FullStack.Server.WebLib.Filters;
+using HB.FullStack.Server.WebLib.Security;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -27,10 +27,10 @@ using Serilog;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using HB.FullStack.Web.Controllers;
+using HB.FullStack.Server.WebLib.Controllers;
 using HB.FullStack.Common.Shared;
 
-namespace HB.FullStack.Server.Startup
+namespace HB.FullStack.Server.WebLib.Startup
 {
     public static class WebApiStartup
     {
@@ -173,10 +173,11 @@ namespace HB.FullStack.Server.Startup
             });
 
 
-            //HB.FullStack.Web Services
+            //HB.FullStack.Server.WebLib Services
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
             services.AddSingleton<ICommonResourceTokenService, CommonResourceTokenService>();
             services.AddScoped<UserActivityFilter>();
+            services.AddScoped<CapthcaCheckFilter>();
             services.AddScoped<CheckCommonResourceTokenFilter>();
 
             //InitService
@@ -373,9 +374,9 @@ namespace HB.FullStack.Server.Startup
             //验证Body 中的ClientId 与 JWT 中的ClientId 是否一致
             string? jwtClientId = c.Principal?.GetClientId();
 
-            string? requestClientId = c.HttpContext.Request.GetHeaderValueAs<string>(ClientNames.CLIENT_ID);
+            string? requestClientId = c.HttpContext.Request.GetHeaderValueAs<string>(SharedNames.Client.CLIENT_ID);
 
-            requestClientId ??= c.HttpContext.Request.GetValue(ClientNames.CLIENT_ID);
+            requestClientId ??= c.HttpContext.Request.GetValue(SharedNames.Client.CLIENT_ID);
 
             if (!string.IsNullOrWhiteSpace(jwtClientId) && jwtClientId.Equals(requestClientId, Globals.ComparisonIgnoreCase))
             {

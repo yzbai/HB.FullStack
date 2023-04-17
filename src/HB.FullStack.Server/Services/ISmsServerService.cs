@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Server
+namespace HB.FullStack.Server.Services
 {
     /// <summary>
     /// 用于Server端调用第三方服务

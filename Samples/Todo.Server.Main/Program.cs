@@ -1,4 +1,4 @@
-using HB.FullStack.Server.Startup;
+using HB.FullStack.Server.WebLib.Startup;
 
 internal class Program
 {

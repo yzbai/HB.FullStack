@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<Import Project="..\..\common.props" />
 
@@ -7,19 +7,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	  <ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
+	  <ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" />
+	  <ProjectReference Include="..\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+	  <ProjectReference Include="..\HB.FullStack.Database\HB.FullStack.Database.csproj" />
+	  <ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
+	  <ProjectReference Include="..\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
+	  <ProjectReference Include="..\HB.FullStack.KVStore\HB.FullStack.KVStore.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.Redis.DistributedLock\HB.Infrastructure.Redis.DistributedLock.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.Redis.EventBus\HB.Infrastructure.Redis.EventBus.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
-		<ProjectReference Include="..\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
-	</ItemGroup>
+
+
 
 </Project>

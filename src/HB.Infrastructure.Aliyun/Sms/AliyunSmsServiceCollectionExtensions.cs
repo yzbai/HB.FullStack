@@ -1,5 +1,5 @@
 ﻿using System;
-using HB.FullStack.Common.Server;
+using HB.FullStack.Server.Services;
 using HB.Infrastructure.Aliyun.Sms;
 using Microsoft.Extensions.Configuration;
 

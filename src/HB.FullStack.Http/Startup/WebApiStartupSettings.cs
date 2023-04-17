@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HB.FullStack.Server.Startup
+namespace HB.FullStack.Server.WebLib.Startup
 {
     public class WebApiStartupSettings
     {

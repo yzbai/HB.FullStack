@@ -2,7 +2,7 @@
 using HB.FullStack.Common.Shared;
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class RefreshContext : ValidatableObject
     {

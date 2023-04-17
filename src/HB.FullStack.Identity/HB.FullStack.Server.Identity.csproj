@@ -13,9 +13,8 @@
 	</ItemGroup>
 
 
-
 	<ItemGroup>
-		<ProjectReference Include="..\HB.FullStack.Business\HB.FullStack.Repository.csproj" />
+	  <ProjectReference Include="..\HB.FullStack.Server\HB.FullStack.Server.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Identity;
+using HB.FullStack.Server.Identity;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace HB.FullStack.Web.Controllers
+namespace HB.FullStack.Server.WebLib.Controllers
 {
     [Route(".well-known/openid-configuration")]
     [ApiController]

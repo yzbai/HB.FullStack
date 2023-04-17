@@ -17,7 +17,7 @@ It can help you maximising the gainings of using many same interface, like Model
 |HB.FullStack.Lock| [![Nuget](https://img.shields.io/nuget/v/HB.FullStack.Lock?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.FullStack.Lock/)|Des|
 |HB.FullStack.EventBus| [![Nuget](https://img.shields.io/nuget/v/HB.FullStack.EventBus?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.FullStack.EventBus/)|Des|
 |HB.FullStack.Repository| [![Nuget](https://img.shields.io/nuget/v/HB.FullStack.Repository?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.FullStack.Repository/)|Des|
-|HB.FullStack.Identity| [![Nuget](https://img.shields.io/nuget/v/HB.FullStack.Identity?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.FullStack.Identity/)|Des|
+|HB.FullStack.Server.Identity| [![Nuget](https://img.shields.io/nuget/v/HB.FullStack.Server.Identity?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.FullStack.Server.Identity/)|Des|
 |HB.FullStack.Server| [![Nuget](https://img.shields.io/nuget/v/HB.FullStack.Server?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.FullStack.Server/)|Des|
 |HB.Infrastructure.MySQL| [![Nuget](https://img.shields.io/nuget/v/HB.Infrastructure.MySQL?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.Infrastructure.MySQL/)|Des|
 |HB.Infrastructure.SQLite| [![Nuget](https://img.shields.io/nuget/v/HB.Infrastructure.IdGen?style=flat-square&logo=nuget)](https://www.nuget.org/packages/HB.Infrastructure.SQLite/)|Des|

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Shared.Resources;
 
-namespace HB.FullStack.Common.Server
+namespace HB.FullStack.Server.Services
 {
     public interface IStsTokenService
     {

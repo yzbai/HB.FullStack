@@ -1,6 +1,6 @@
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     public class Role : TimestampGuidDbModel
     {

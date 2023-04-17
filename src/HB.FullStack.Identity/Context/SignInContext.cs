@@ -2,9 +2,9 @@
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Identity.Context;
+using HB.FullStack.Server.Identity.Context;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public abstract class SignInContext : ValidatableObject, IHasAudience
     {

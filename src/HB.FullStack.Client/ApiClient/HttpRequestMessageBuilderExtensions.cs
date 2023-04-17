@@ -11,22 +11,22 @@ namespace HB.FullStack.Client.ApiClient
     {
         public static void SetJwt(this HttpRequestMessageBuilder builder, string jwt)
         {
-            builder.Headers[ApiHeaderNames.Authorization] = $"{builder.SiteSetting.Challenge} {jwt}";
+            builder.Headers[SharedNames.ApiHeaders.Authorization] = $"{builder.SiteSetting.Challenge} {jwt}";
         }
 
         public static void SetApiKey(this HttpRequestMessageBuilder builder, string apiKey)
         {
-            builder.Headers[ApiHeaderNames.XApiKey] = apiKey;
+            builder.Headers[SharedNames.ApiHeaders.XApiKey] = apiKey;
         }
 
         public static void SetClientId(this HttpRequestMessageBuilder builder, string clientId)
         {
-            builder.Headers[ApiHeaderNames.CLIENT_ID] = clientId;
+            builder.Headers[SharedNames.ApiHeaders.CLIENT_ID] = clientId;
         }
 
         public static void SetClientVersion(this HttpRequestMessageBuilder builder, string clientVersion)
         {
-            builder.Headers[ApiHeaderNames.CLIENT_VERSION] = clientVersion;
+            builder.Headers[SharedNames.ApiHeaders.CLIENT_VERSION] = clientVersion;
         }
 
         /// <summary>

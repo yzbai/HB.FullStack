@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 using IDatabase = HB.FullStack.Database.IDatabase;
 
-namespace HB.FullStack.Server.Startup
+namespace HB.FullStack.Server.WebLib.Startup
 {
     /// <summary>
     /// 初始化任务包括：

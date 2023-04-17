@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common.Shared;
 
-namespace HB.FullStack.Identity.Context
+namespace HB.FullStack.Server.Identity.Context
 {
     public class RegisterBySms : RegisterContext, IBySmsCode
     {

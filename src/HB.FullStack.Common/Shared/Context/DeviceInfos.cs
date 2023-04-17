@@ -4,6 +4,17 @@ using HB.FullStack.Common;
 
 namespace HB.FullStack.Common.Shared
 {
+    public enum DeviceIdiom
+    {
+        Unknown,
+        Phone,
+        Tablet,
+        Desktop,
+        TV,
+        Watch,
+        Web
+    }
+
     public class DeviceInfos : ValidatableObject
     {
         [Required]

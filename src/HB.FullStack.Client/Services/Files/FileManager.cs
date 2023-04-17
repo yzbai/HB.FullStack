@@ -61,7 +61,7 @@ namespace HB.FullStack.Client.Services.Files
                 throw ClientExceptions.AliyunStsTokenReturnNull();
             }
 
-            //TODO: 可以进一步抽象，把OssProvider做出来
+            //TODO: 可以进一步抽象，把OssProvider做出来,或者独立出HB.FullStack.Client.FileManager.Aliyun
 
             IOss oss = _ossPool.Get();
 

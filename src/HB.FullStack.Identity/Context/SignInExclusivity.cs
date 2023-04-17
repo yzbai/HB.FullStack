@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Common.Shared
+﻿namespace HB.FullStack.Server.Identity.Context
 {
     public enum SignInExclusivity
     {

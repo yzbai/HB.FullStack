@@ -2,18 +2,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
-using HB.FullStack.Identity;
-using HB.FullStack.Identity.Context;
-using HB.FullStack.Web.Controllers;
+using HB.FullStack.Server.Identity;
+using HB.FullStack.Server.Identity.Context;
+using HB.FullStack.Server.Services;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Todo.Server.Main.Controllers
+namespace HB.FullStack.Server.WebLib.Controllers
 {
     [ApiController]
     [Route($"api/[controller]")]
@@ -31,7 +30,7 @@ namespace Todo.Server.Main.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet(CommonApiConditions.BySms)]
+        [HttpGet(SharedNames.Conditions.BySms)]
         [ProducesResponseType(typeof(SignInReceiptRes), 200)]
         public async Task<IActionResult> GetBySmsAsync(
             [FromQuery][Mobile(CanBeNull  = false)] string      mobile,
@@ -41,7 +40,7 @@ namespace Todo.Server.Main.Controllers
             [FromHeader][Required]                  string      clientId,
             [FromHeader][Required]                  string      clientVersion)
         {
-            string lastUser = CommonConventions.GetLastUser(null, mobile, clientId);
+            string lastUser = Conventions.GetLastUser(null, mobile, clientId);
 
             ClientInfos clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };
 
@@ -60,7 +59,7 @@ namespace Todo.Server.Main.Controllers
         /// 可能同时收到一大批刷新请求，只在一定时间间隔里相应一个
         /// </summary>
         [AllowAnonymous]
-        [HttpGet(CommonApiConditions.ByRefresh)]
+        [HttpGet(SharedNames.Conditions.ByRefresh)]
         [ProducesResponseType(typeof(SignInReceiptRes), 200)]
         public async Task<IActionResult> GetByRefreshAsync(
             [FromQuery][NoEmptyGuid] Guid userId,
@@ -79,7 +78,7 @@ namespace Todo.Server.Main.Controllers
 
             //某一个accesstoken失败，直接拉黑
 
-            string lastUser = CommonConventions.GetLastUser(userId, null, clientId);
+            string lastUser = Conventions.GetLastUser(userId, null, clientId);
 
             ClientInfos clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };
 
@@ -105,7 +104,7 @@ namespace Todo.Server.Main.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet(CommonApiConditions.ByLoginName)]
+        [HttpGet(SharedNames.Conditions.ByLoginName)]
         public async Task<IActionResult> GetByLoginName(
             [LoginName(CanBeNull = false)] string loginName,
             [Password(CanBeNull = false)] string password,
@@ -124,7 +123,7 @@ namespace Todo.Server.Main.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost(CommonApiConditions.ByLoginName)]
+        [HttpPost(SharedNames.Conditions.ByLoginName)]
         public async Task<IActionResult> RegisterByLoginName([LoginName(CanBeNull = false)] string loginName,
             [Password(CanBeNull = false)] string password,
             [Required] string audience,

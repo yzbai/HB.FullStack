@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace HB.Infrastructure.Tencent
 {
-    public interface ITCapthaClient
+    public interface ICapthaClient
     {
         
         Task<bool> VerifyTicketAsync(string appid, string ticket, string randstr, string userIp);

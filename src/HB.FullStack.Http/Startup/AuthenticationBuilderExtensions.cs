@@ -1,10 +1,9 @@
-﻿using HB.FullStack.Identity;
-using HB.FullStack.Server.Startup;
-using HB.FullStack.Web;
-using HB.FullStack.Web.ApiKeyAuthentication;
+﻿using HB.FullStack.Server.Identity;
+using HB.FullStack.Server.WebLib.ApiKeyAuthentication;
+using HB.FullStack.Server.WebLib.Startup;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 using System;

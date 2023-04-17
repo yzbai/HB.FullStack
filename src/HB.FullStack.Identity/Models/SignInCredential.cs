@@ -4,7 +4,7 @@ using HB.FullStack.Database.DbModels;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     public class SignInCredential : TimestampGuidDbModel
     {

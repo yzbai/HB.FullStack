@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Web.Security;
+using HB.FullStack.Server.WebLib.Security;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
-namespace HB.FullStack.Web.Filters
+namespace HB.FullStack.Server.WebLib.Filters
 {
     public class CheckCommonResourceTokenFilter : IAsyncActionFilter
     {
@@ -29,34 +30,23 @@ namespace HB.FullStack.Web.Filters
         {
             try
             {
-                KeyValuePair<string, object?>? firstArgument = context?.ActionArguments?.FirstOrDefault();
-                object? firstArgumentValue = firstArgument.HasValue ? firstArgument.Value.Value : null;
-
-                if (firstArgumentValue is ApiRequest apiRequest)
+                if (await _securityService.NeedPublicResourceTokenAsync(context).ConfigureAwait(false))
                 {
-                    if (await _securityService.NeedPublicResourceTokenAsync(apiRequest).ConfigureAwait(false))
+                    StringValues token = context!.HttpContext.Request.Headers[SharedNames.ApiHeaders.CommonResourceToken];
+
+                    if (token.IsNullOrEmpty())
                     {
-                        StringValues token = context!.HttpContext.Request.Headers[ApiHeaderNames.CommonResourceToken];
-
-                        if (token.IsNullOrEmpty())
-                        {
-                            OnError(context, ErrorCodes.CommonResourceTokenNeeded);
-                            return;
-                        }
-
-                        string? crt = token.First();
-
-                        if (!_commonResTokenService.TryCheckToken(crt, out string? _))
-                        {
-                            OnError(context, ErrorCodes.CommonResourceTokenError);
-                            return;
-                        }
+                        OnError(context, ErrorCodes.CommonResourceTokenNeeded);
+                        return;
                     }
-                }
-                else
-                {
-                    OnError(context, ErrorCodes.CommonResourceTokenNeeded);
-                    return;
+
+                    string? crt = token.First();
+
+                    if (!_commonResTokenService.TryCheckToken(crt, out string? _))
+                    {
+                        OnError(context, ErrorCodes.CommonResourceTokenError);
+                        return;
+                    }
                 }
 
                 await next().ConfigureAwait(false);

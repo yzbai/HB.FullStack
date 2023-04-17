@@ -8,7 +8,7 @@ namespace HB.FullStack.Client.Services.Sms
     internal class SmsValidationCodeResGetByMobileRequest : ApiRequest
     {
         public SmsValidationCodeResGetByMobileRequest(string mobile) 
-            : base(nameof(SmsValidationCodeRes), ApiMethod.Get, ApiRequestAuth.NONE, CommonApiConditions.ByMobile)
+            : base(nameof(SmsValidationCodeRes), ApiMethod.Get, ApiRequestAuth.NONE, SharedNames.Conditions.ByMobile)
         {
             Mobile = mobile;
         }

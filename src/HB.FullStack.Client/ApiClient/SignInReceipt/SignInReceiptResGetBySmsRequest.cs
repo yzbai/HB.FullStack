@@ -26,7 +26,7 @@ namespace HB.FullStack.Client.ApiClient
 
         public SignInReceiptResGetBySmsRequest(
             string mobile, string smsCode, string signToWhere, DeviceInfos deviceInfos)
-            : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, CommonApiConditions.BySms)
+            : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, SharedNames.Conditions.BySms)
         {
             Mobile = mobile;
             SmsCode = smsCode;

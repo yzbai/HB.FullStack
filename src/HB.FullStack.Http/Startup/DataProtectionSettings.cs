@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace HB.FullStack.Server.Startup
+namespace HB.FullStack.Server.WebLib.Startup
 {
     public class DataProtectionSettings
     {

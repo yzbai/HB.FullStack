@@ -11,26 +11,4 @@
     <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.14" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\HB.FullStack.Business\HB.FullStack.Repository.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.Common\HB.FullStack.Common.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.Database\HB.FullStack.Database.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.EventBus\HB.FullStack.EventBus.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.Http\HB.FullStack.Web.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.Identity\HB.FullStack.Identity.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.KVStore\HB.FullStack.KVStore.csproj" />
-    <ProjectReference Include="..\..\src\HB.FullStack.Server\HB.FullStack.Server.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.DistributedLock\HB.Infrastructure.Redis.DistributedLock.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.EventBus\HB.Infrastructure.Redis.EventBus.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
-    <ProjectReference Include="..\..\src\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
-  </ItemGroup>
-
 </Project>

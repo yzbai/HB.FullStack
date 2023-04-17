@@ -3,9 +3,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-using static HB.FullStack.Identity.LengthConventions;
+using static HB.FullStack.Server.Identity.LengthConventions;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     /// <summary>
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息

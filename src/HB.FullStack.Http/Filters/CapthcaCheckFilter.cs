@@ -4,23 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Shared;
+using HB.Infrastructure.Tencent;
+using HB.Infrastructure.Tencent.TCaptha;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
-namespace HB.Infrastructure.Tencent.TCaptha
+namespace HB.FullStack.Server.WebLib.Filters
 {
     /// <summary>
     /// 验证Http Header中的Captha
     /// </summary>
-    public class TCapthcaCheckFilter : IAsyncActionFilter
+    public class CapthcaCheckFilter : IAsyncActionFilter
     {
-        private readonly ILogger<TCapthcaCheckFilter> _logger;
-        private readonly ITCapthaClient _tCapthaClient;
+        private readonly ILogger<CapthcaCheckFilter> _logger;
+        private readonly ICapthaClient _tCapthaClient;
 
-        public TCapthcaCheckFilter(ILogger<TCapthcaCheckFilter> logger, ITCapthaClient tCapthaClient)
+        public CapthcaCheckFilter(ILogger<CapthcaCheckFilter> logger, ICapthaClient tCapthaClient)
         {
             _logger = logger;
             _tCapthaClient = tCapthaClient;
@@ -30,7 +33,7 @@ namespace HB.Infrastructure.Tencent.TCaptha
         {
             try
             {
-                StringValues captcha = context.HttpContext.Request.Headers[ApiHeaderNames.Captcha];
+                StringValues captcha = context.HttpContext.Request.Headers[SharedNames.ApiHeaders.Captcha];
 
                 if (captcha.IsNullOrEmpty())
                 {

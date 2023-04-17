@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.Shared
 {
-    public static class CommonConventions
+    public static class Conventions
     {
-        public const int SmsCodeLength = 6;
 
         private const string RANDOM_NICK_NAME_REGEX = @"^User{1}\d{4,}$";
 

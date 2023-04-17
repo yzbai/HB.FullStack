@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.Tencent
 {
-    public class TCapthaClient : ITCapthaClient
+    public class TCapthaClient : ICapthaClient
     {
         private readonly ILogger _logger;
         private readonly TCapthaOptions _options;

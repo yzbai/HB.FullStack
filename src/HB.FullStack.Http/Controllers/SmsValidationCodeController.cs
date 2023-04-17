@@ -1,17 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
-
+using HB.FullStack.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Web.Controllers
+namespace HB.FullStack.Server.WebLib.Controllers
 {
     [Route($"api/[controller]")]
     [ApiController]
@@ -27,12 +25,12 @@ namespace HB.FullStack.Web.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet(CommonApiConditions.ByMobile)]
+        [HttpGet(SharedNames.Conditions.ByMobile)]
         [ProducesResponseType(200)]
         //TODO: Remove this later
         //#if !DEBUG
         //TODO: 将CapthaFilter 抽象出来，不能只依赖腾讯一家
-        //[ServiceFilter(typeof(TCapthcaCheckFilter))]
+        //[ServiceFilter(typeof(CapthcaCheckFilter))]
         //#endif
         public async Task<IActionResult> GetByMobileAsync([FromQuery][Mobile] string mobile)
         {

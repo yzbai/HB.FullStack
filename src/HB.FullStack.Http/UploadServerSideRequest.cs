@@ -5,7 +5,7 @@ using HB.FullStack.Common.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HB.FullStack.Web
+namespace HB.FullStack.Server.WebLib
 {
 
     [ModelBinder(BinderType = typeof(FileUpdateServerSideRequestModelBinder))]

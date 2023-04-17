@@ -3,7 +3,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     /// <summary>
     /// 用户-角色 关系 实体

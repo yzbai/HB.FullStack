@@ -14,8 +14,8 @@ namespace System
         private static IList<KeyValuePair<string, string>> NoiseQueryParameters =>
             new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(ClientNames.RANDOM_STR, SecurityUtil.CreateRandomString(6) ),
-                new KeyValuePair<string, string>(ClientNames.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture))
+                new KeyValuePair<string, string>(SharedNames.Client.RANDOM_STR, SecurityUtil.CreateRandomString(6) ),
+                new KeyValuePair<string, string>(SharedNames.Client.TIMESTAMP, TimeUtil.UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture))
             };
 
         public static string NoiseQueryString => ConvertToQueryString(NoiseQueryParameters);

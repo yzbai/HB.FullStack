@@ -6,7 +6,7 @@ using HB.FullStack.Database;
 
 using Microsoft.Extensions.Options;
 
-namespace HB.FullStack.Server.Startup
+namespace HB.FullStack.Server.WebLib.Startup
 {
     public class InitServiceOptions : IOptions<InitServiceOptions>
     {

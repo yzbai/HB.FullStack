@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public partial class IdentityService
     {

@@ -25,7 +25,11 @@ namespace HB.FullStack.Client.ApiClient
         public DeviceInfos DeviceInfos { get; set; }
 
 
-        public SignInReceiptResGetByLoginNameRequest(string loginName, string password, string audience, DeviceInfos deviceInfos) : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, CommonApiConditions.ByLoginName)
+        public SignInReceiptResGetByLoginNameRequest(
+            string loginName, 
+            string password, 
+            string audience, 
+            DeviceInfos deviceInfos) : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, SharedNames.Conditions.ByLoginName)
         {
             LoginName = loginName;
             Password = password;

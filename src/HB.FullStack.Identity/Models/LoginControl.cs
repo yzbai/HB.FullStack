@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     public class LoginControl : KVStoreModel
     {

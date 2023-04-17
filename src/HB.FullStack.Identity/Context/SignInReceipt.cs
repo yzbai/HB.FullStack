@@ -2,9 +2,9 @@
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
-using HB.FullStack.Identity.Models;
+using HB.FullStack.Server.Identity.Models;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class SignInReceipt : ValidatableObject, IModel
     {

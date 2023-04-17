@@ -8,9 +8,9 @@ using HB.FullStack.Common.Shared;
 
 using Microsoft.Maui.Controls;
 
-namespace HB.FullStack.Client.MauiLib.Services.TCaptcha
+namespace HB.FullStack.Client.MauiLib.Services.Captcha
 {
-    public static class ApiClientTCaptchaExtensions
+    public static class ApiClientCaptchaExtensions
     {
         public static async Task<T?> GetWithCaptchaCheckAsync<T>(this IApiClient apiClient, ApiRequest request, CancellationToken? cancellationToken = null) where T : ApiResource
         {
@@ -21,7 +21,7 @@ namespace HB.FullStack.Client.MauiLib.Services.TCaptcha
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.CapthcaNotFound)
             {
-                TCaptchaPopup popup = new TCaptchaPopup();
+                CaptchaPopup popup = new CaptchaPopup();
 
                 var rt = await popup.ShowAsync();
 
@@ -32,7 +32,7 @@ namespace HB.FullStack.Client.MauiLib.Services.TCaptcha
                     throw MauiExceptions.CaptchaErrorReturn(captcha, request);
                 }
 
-                request.Headers.Add(ApiHeaderNames.Captcha, captcha);
+                request.Headers.Add(SharedNames.ApiHeaders.Captcha, captcha);
 
                 return await apiClient.GetAsync<T>(request, cancellationToken ?? CancellationToken.None);
             }

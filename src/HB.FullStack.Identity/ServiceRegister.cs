@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Identity;
+﻿using HB.FullStack.Server.Identity;
 
 using Microsoft.Extensions.Configuration;
 

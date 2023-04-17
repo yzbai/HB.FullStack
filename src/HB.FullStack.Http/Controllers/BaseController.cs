@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace HB.FullStack.Web.Controllers
+namespace HB.FullStack.Server.WebLib.Controllers
 {
     public class BaseController : ControllerBase
     {

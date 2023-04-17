@@ -43,12 +43,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddHttpClient(TCapthaOptions.ENDPOINT_NAME, httpClient =>
             {
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-                httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ITCapthaClient).FullName);
+                httpClient.DefaultRequestHeaders.Add("User-Agent", typeof(ICapthaClient).FullName);
             });
 
-            services.AddSingleton<ITCapthaClient, TCapthaClient>();
+            services.AddSingleton<ICapthaClient, TCapthaClient>();
 
-            services.AddScoped<TCapthcaCheckFilter>();
+            
         }
 
     }

@@ -6,7 +6,7 @@ using HB.FullStack.Cache;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Web
+namespace HB.FullStack.Server.WebLib
 {
     public class CommonResourceTokenService : ICommonResourceTokenService
     {

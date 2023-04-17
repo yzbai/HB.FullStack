@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class IdentityOptions : IOptions<IdentityOptions>
     {

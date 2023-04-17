@@ -1,4 +1,5 @@
-﻿using HB.FullStack.Common.Shared;
+﻿using HB.FullStack.Client;
+using HB.FullStack.Common.Shared;
 
 namespace Todo.Client.ConsoleApp
 {

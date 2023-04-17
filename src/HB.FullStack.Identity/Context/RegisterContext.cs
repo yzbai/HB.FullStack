@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Shared;
 
-namespace HB.FullStack.Identity.Context
+namespace HB.FullStack.Server.Identity.Context
 {
     public class RegisterContext : ValidatableObject, IHasAudience
     {

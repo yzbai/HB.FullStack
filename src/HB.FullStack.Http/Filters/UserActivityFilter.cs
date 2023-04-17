@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using HB.FullStack.Identity;
+using HB.FullStack.Server.Identity;
 
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Web.Filters
+namespace HB.FullStack.Server.WebLib.Filters
 {
     public class UserActivityFilter : IAsyncActionFilter
     {

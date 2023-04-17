@@ -19,13 +19,14 @@ using HB.FullStack.EventBus.Abstractions;
 using HB.FullStack.EventBus;
 using HB.Infrastructure.Redis.EventBus;
 using Microsoft.Extensions.Options;
-using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.Test;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using HB.FullStack.Database.Implements;
 using HB.FullStack.Database.Config;
+using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
 

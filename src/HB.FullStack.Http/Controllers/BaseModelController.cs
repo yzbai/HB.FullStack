@@ -12,7 +12,7 @@ using HB.FullStack.KVStore.KVStoreModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HB.FullStack.Web.Controllers
+namespace HB.FullStack.Server.WebLib.Controllers
 {
     public class BaseModelController<TModel> : BaseController where TModel : IModel
     {

@@ -4,9 +4,9 @@ using CommunityToolkit.Maui.Views;
 using System;
 using HB.FullStack.Client.MauiLib.Controls;
 
-namespace HB.FullStack.Client.MauiLib.Services.TCaptcha
+namespace HB.FullStack.Client.MauiLib.Services.Captcha
 {
-    public class TCaptchaPopup : Popup
+    public class CaptchaPopup : Popup
     {
         public static string AppId { get; internal set; } = null!;
 
@@ -31,7 +31,7 @@ namespace HB.FullStack.Client.MauiLib.Services.TCaptcha
 
         private readonly HybridWebView _webView;
 
-        public TCaptchaPopup()
+        public CaptchaPopup()
         {
             CanBeDismissedByTappingOutsideOfPopup = false;
 

@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Identity.Context
+﻿namespace HB.FullStack.Server.Identity.Context
 {
     public interface IHasAudience
     {

@@ -78,7 +78,7 @@ namespace HB.FullStack.Client.ApiClient
 
             //Query
             request.RequestUri = request.RequestUri?.ToString()
-                    .AddQuery(ClientNames.CLIENT_ID, tokenProvider.ClientId)
+                    .AddQuery(SharedNames.Client.CLIENT_ID, tokenProvider.ClientId)
                     .AddNoiseQuery()
                     .ToUri();
         }

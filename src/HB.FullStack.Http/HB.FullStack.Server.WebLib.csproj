@@ -21,12 +21,22 @@
 		<PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 		<PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
-		<ProjectReference Include="..\HB.FullStack.Identity\HB.FullStack.Identity.csproj" />
+		<ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\HB.FullStack.Identity\HB.FullStack.Server.Identity.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.DistributedLock\HB.Infrastructure.Redis.DistributedLock.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.EventBus\HB.Infrastructure.Redis.EventBus.csproj" />
 		<ProjectReference Include="..\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -42,11 +52,6 @@
 			<Generator>ResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Service\" />
-		<Folder Include="UserActivityTrace\" />
 	</ItemGroup>
 
 </Project>

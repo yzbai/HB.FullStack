@@ -5,8 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using HB.FullStack.Common.Shared;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace HB.FullStack.Web.Security
+namespace HB.FullStack.Server.WebLib.Security
 {
     public class DefaultSecurityService : ISecurityService
     {
@@ -19,7 +20,7 @@ namespace HB.FullStack.Web.Security
 
         //static Random random = new Random();
 
-        public Task<bool> NeedPublicResourceTokenAsync(ApiRequest? apiRequest)
+        public Task<bool> NeedPublicResourceTokenAsync(FilterContext context)
         {
             //TODO:其他安全检测
             //1， 频率. ClientId, IP. 根据频率来决定客户端要不要弹出防水墙

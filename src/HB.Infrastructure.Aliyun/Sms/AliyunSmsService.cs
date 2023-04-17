@@ -8,9 +8,8 @@ using Aliyun.Acs.Core.Http;
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Cache;
-using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Validate;
-
+using HB.FullStack.Server.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

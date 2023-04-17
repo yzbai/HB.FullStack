@@ -1,4 +1,4 @@
-﻿namespace HB.FullStack.Identity
+﻿namespace HB.FullStack.Server.Identity
 {
     public interface IHasPassword
     {

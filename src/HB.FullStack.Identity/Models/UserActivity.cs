@@ -2,7 +2,7 @@
 
 using System;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     //TODO: 改用KVStore
     public class UserActivity : TimestampGuidDbModel

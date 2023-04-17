@@ -6,20 +6,18 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
-
-using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
-using HB.FullStack.Identity.Context;
-using HB.FullStack.Identity.Models;
+using HB.FullStack.Server.Identity.Context;
+using HB.FullStack.Server.Identity.Models;
 using HB.FullStack.Lock.Distributed;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using HB.FullStack.Server.Services;
 
-
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public partial class IdentityService : IIdentityService
     {

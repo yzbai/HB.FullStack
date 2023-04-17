@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using HB.FullStack.Client;
 using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.BaseTest

@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Web
+namespace HB.FullStack.Server.WebLib
 {
     public static class WebLoggerExtensions
     {

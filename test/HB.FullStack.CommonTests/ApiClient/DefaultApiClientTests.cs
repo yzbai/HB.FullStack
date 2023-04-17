@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
-using HB.FullStack.Common.Shared.CommonRequests;
+using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.Test;
 using HB.FullStack.CommonTests.Data;
 

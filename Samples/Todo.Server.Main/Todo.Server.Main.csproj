@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\HB.FullStack.Server\HB.FullStack.Server.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Certs\Brlite_Todo_DataProtection.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -24,6 +20,11 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="logs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\HB.FullStack.Http\HB.FullStack.Server.WebLib.csproj" />
   </ItemGroup>
 
 </Project>

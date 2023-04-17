@@ -7,7 +7,7 @@ namespace HB.FullStack.Client.ApiClient
     internal class SignInReceiptResRegisterByLoginNameRequest : ApiRequest
     {
         public SignInReceiptResRegisterByLoginNameRequest(string loginName, string password, string audience, DeviceInfos deviceInfos)
-            : base(nameof(SignInReceiptRes), ApiMethod.Add, ApiRequestAuth.NONE, CommonApiConditions.ByLoginName)
+            : base(nameof(SignInReceiptRes), ApiMethod.Add, ApiRequestAuth.NONE, SharedNames.Conditions.ByLoginName)
         {
             LoginName = loginName;
             Audience = audience;

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using HB.FullStack.Common.Shared.Attributes;
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.Client.ApiClient.Tests

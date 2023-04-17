@@ -54,7 +54,7 @@
 	  <Compile Update="Controls\Popups\ExceptionPopup.xaml.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
-	  <Compile Update="Services\TCaptcha\TCaptchaPopup.cs">
+	  <Compile Update="Services\Captcha\CaptchaPopup.cs">
 	    <DependentUpon>%(Filename)</DependentUpon>
 	  </Compile>
 	</ItemGroup>

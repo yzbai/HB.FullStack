@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public static class JwtHelper
     {

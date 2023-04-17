@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Identity.Models;
+using HB.FullStack.Server.Identity.Models;
 using Microsoft.Extensions.Logging;
 
-using static HB.FullStack.Identity.LengthConventions;
+using static HB.FullStack.Server.Identity.LengthConventions;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public partial class IdentityService
     {

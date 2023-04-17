@@ -4,17 +4,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
+using HB.FullStack.Server.Services;
 using HB.Infrastructure.Aliyun.Sts;
 
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Web.Controllers
+namespace HB.FullStack.Server.WebLib.Controllers
 {
     [ApiController]
     [Route($"api/[controller]")]
@@ -30,7 +29,7 @@ namespace HB.FullStack.Web.Controllers
         }
 
         //Rule: 确保LastUser被正确获取
-        [HttpGet(CommonApiConditions.ByDirectoryPermissionName)]
+        [HttpGet(SharedNames.Conditions.ByDirectoryPermissionName)]
         [ProducesResponseType(typeof(StsTokenRes), 200)]
         public async Task<IActionResult> GetByDirectoryPermissionNameAsync(
             [Required] string  directoryPermissionName,

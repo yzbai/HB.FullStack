@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Common.Shared;
+using HB.FullStack.Server.Identity.Context;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class SignInBySms : SignInContext, IBySmsCode
     {

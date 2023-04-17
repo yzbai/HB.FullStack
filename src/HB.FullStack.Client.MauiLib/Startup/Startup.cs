@@ -4,7 +4,6 @@ using CommunityToolkit.Maui;
 
 using HB.FullStack.Client.MauiLib;
 using HB.FullStack.Client.MauiLib.Controls;
-using HB.FullStack.Client.MauiLib.Services.TCaptcha;
 using HB.FullStack.Client.MauiLib.Startup;
 using HB.FullStack.Client.Services.Files;
 using HB.FullStack.Client.Services.KVManager;
