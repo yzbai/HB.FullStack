@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Maui;
+﻿using System.IO;
+
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
 
 using HB.FullStack.Client.ApiClient;
@@ -6,7 +8,9 @@ using HB.FullStack.Database;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.LifecycleEvents;
 
 using Todo.Shared;
@@ -89,7 +93,7 @@ namespace Todo.Client.MobileApp
                     },
                     initOptions => { },
                     TCaptchaAppId: TECENET_CAPTCHA_APP_ID)
-                .UseTodoApp()
+                .UseTodoApp(todoAppOptions => { })
                 .ConfigureLifecycleEvents(lifecycleBuilder => { })
                 .ConfigureFonts(fonts =>
                 {
@@ -100,10 +104,33 @@ namespace Todo.Client.MobileApp
             return builder.Build();
         }
 
-        public static MauiAppBuilder UseTodoApp(this MauiAppBuilder builder)
+        public static MauiAppBuilder UseTodoApp(this MauiAppBuilder builder, Action<TodoAppOptions> configTodoAppOptions)
         {
-            参考MyColorful，移植views，pages，格式,建立页面，建立导航
+            builder.Services.Configure(configTodoAppOptions);
+            //参考MyColorful，移植views，pages，格式,建立页面，建立导航
+
+            AddServices();
+
+            AddViewModels();
+
+            AddPages();
+
             return builder;
+
+            static void AddServices()
+            {
+                //注意Transient和Singleton的使用
+            }
+
+            static void AddViewModels()
+            {
+
+            }
+
+            static void AddPages()
+            {
+
+            }
         }
     }
 }

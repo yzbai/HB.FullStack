@@ -1,4 +1,6 @@
-﻿namespace Todo.Client.MobileApp
+﻿using Microsoft.Maui.Accessibility;
+
+namespace Todo.Client.MobileApp
 {
     public partial class MainPage : ContentPage
     {

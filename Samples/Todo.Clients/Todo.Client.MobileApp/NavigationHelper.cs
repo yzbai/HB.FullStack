@@ -1,6 +1,15 @@
-﻿using HB.FullStack.Client.MauiLib.Utils;
+﻿using System.Collections.Generic;
 
+using HB.FullStack.Client.MauiLib.Utils;
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Media;
+using Microsoft.Maui.Storage;
+
+using Todo.Client.MobileApp.Pages;
+using Todo.Client.MobileApp.Services;
 
 namespace Todo.Client.MobileApp
 {
@@ -15,10 +24,10 @@ namespace Todo.Client.MobileApp
             Routing.RegisterRoute(nameof(CropperPage), typeof(CropperPage));
 
             //TODO: 考虑SourceGeneration
-            //Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
-            //Routing.RegisterRoute(nameof(SmsVerifyPage), typeof(SmsVerifyPage));
-            //Routing.RegisterRoute(nameof(RegisterProfilePage), typeof(RegisterProfilePage));
-            //Routing.RegisterRoute(nameof(IntroducePage), typeof(IntroducePage));
+            Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
+            Routing.RegisterRoute(nameof(SmsVerifyPage), typeof(SmsVerifyPage));
+            Routing.RegisterRoute(nameof(RegisterProfilePage), typeof(RegisterProfilePage));
+            Routing.RegisterRoute(nameof(IntroducePage), typeof(IntroducePage));
 
         }
 
@@ -113,12 +122,12 @@ namespace Todo.Client.MobileApp
         }
 
         private static IUserDomainService? _userDomainService;
-        private static MyColorfulTimeOptions? _myColorfulTimeOptions;
+        private static TodoAppOptions? _todoAppOptions;
         private static IPreferenceProvider? _preferenceProvider;
 
         private static IUserDomainService UserDomainService => _userDomainService ??= Currents.Services.GetRequiredService<IUserDomainService>();
 
-        private static MyColorfulTimeOptions MyColorfulTimeOptions => _myColorfulTimeOptions ??= Currents.Services.GetRequiredService<IOptions<MyColorfulTimeOptions>>().Value;
+        private static TodoAppOptions TodoAppOptions => _todoAppOptions ??= Currents.Services.GetRequiredService<IOptions<TodoAppOptions>>().Value;
 
         private static IPreferenceProvider PreferenceProvider => _preferenceProvider ??= Currents.Services.GetRequiredService<IPreferenceProvider>();
 
