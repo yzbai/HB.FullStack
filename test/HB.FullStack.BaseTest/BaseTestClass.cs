@@ -162,7 +162,7 @@ namespace HB.FullStack.BaseTest
 
             var mysqlEngine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
+            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
         }
 
         [AssemblyCleanup]

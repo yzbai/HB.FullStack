@@ -216,7 +216,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            var connectionString = DbSettingManager.GetConnectionString(DbSchema_Mysql, true);
+            var connectionString = DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
                 new DbEngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1!.Id}"));
@@ -250,7 +250,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 ";
             var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
+            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
 
             List<string?> rt = new List<string?>();
 
@@ -714,7 +714,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             Stopwatch stopwatch = new Stopwatch();
 
-            using MySqlConnection mySqlConnection = new MySqlConnection(DbSettingManager.GetConnectionString(DbSchema_Mysql, true).ToString());
+            using MySqlConnection mySqlConnection = new MySqlConnection(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true).ToString());
 
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(Guid), new MySqlGuidTypeHandler(), false);

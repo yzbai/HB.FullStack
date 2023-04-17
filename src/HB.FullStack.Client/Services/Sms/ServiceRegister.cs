@@ -4,7 +4,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class SmsServiceRegister
     {
-        public static IServiceCollection AddSmsClientService(this IServiceCollection services)
+        public static IServiceCollection AddSmsService(this IServiceCollection services)
         {
             services.AddSingleton<ISmsService, SmsService>();
 

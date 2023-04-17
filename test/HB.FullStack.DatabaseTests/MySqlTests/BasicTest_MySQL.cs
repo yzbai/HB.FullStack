@@ -380,7 +380,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             Stopwatch stopwatch = new Stopwatch();
 
-            using MySqlConnection mySqlConnection = new MySqlConnection(DbSettingManager.GetConnectionString(DbSchema_Mysql, true).ToString());
+            using MySqlConnection mySqlConnection = new MySqlConnection(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true).ToString());
 
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(Guid), new MySqlGuidTypeHandler(), false);

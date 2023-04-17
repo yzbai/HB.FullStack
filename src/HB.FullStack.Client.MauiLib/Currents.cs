@@ -10,8 +10,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Dispatching;
+using Microsoft.Maui.Storage;
 
 using System;
+using System.IO;
 using System.Reflection;
 
 namespace HB.FullStack.Client.MauiLib
@@ -115,6 +117,12 @@ namespace HB.FullStack.Client.MauiLib
         public static IDispatcher Dispatcher => Page.Dispatcher;
 
         public static PopupSizeConstants PopupSizeConstants => _popupSizeConstants ??= Services.GetRequiredService<PopupSizeConstants>();
+
+        public static string AppDataDirectory => FileSystem.AppDataDirectory;
+
+        public static string DbFileDirectory => Path.Combine(FileSystem.AppDataDirectory, "dbs");
+
+        public static string CacheDirectory => FileSystem.CacheDirectory;
 
         #endregion
 

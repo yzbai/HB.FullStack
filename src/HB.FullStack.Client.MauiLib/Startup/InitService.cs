@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
+
 using HB.FullStack.Client.Services.Sync;
 using HB.FullStack.Database;
 
@@ -13,12 +14,6 @@ using Microsoft.Maui.Hosting;
 
 namespace HB.FullStack.Client.MauiLib.Startup
 {
-    public class InitOptions : IOptions<InitOptions>
-    {
-        public InitOptions Value => this;
-
-    }
-
     public class InitService : IMauiInitializeService
     {
         private readonly InitOptions _options;
@@ -30,26 +25,18 @@ namespace HB.FullStack.Client.MauiLib.Startup
 
         public void Initialize(IServiceProvider services)
         {
-            InitLog(services);
-
-            InitService.InitDatabase(services.GetRequiredService<IDatabase>());
-
-            InitSomeServices(services);
-        }
-
-        private static void InitLog(IServiceProvider services)
-        {
+            //Logger
             Globals.Logger = services.GetRequiredService<ILogger<InitService>>();
-        }
 
-        private static void InitSomeServices(IServiceProvider services)
-        {
+            //DB
+            InitDatabase(services.GetRequiredService<IDatabase>());
+
+            //Sync
             services.GetRequiredService<ISyncManager>().Initialize();
-            
-            //这个最后调用
-            services.GetRequiredService<IClientEvents>().Initialize();   
-            //TODO: 检查是否会卡住UI
 
+            //这个最后调用
+            //ClientEvents
+            services.GetRequiredService<IClientEvents>().Initialize();
         }
 
         private static void InitDatabase(IDatabase database)

@@ -115,7 +115,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             Guid_BookModel? book1 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
             var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Sqlite);
-            var connectionString = DbSettingManager.GetConnectionString(DbSchema_Sqlite, true);
+            var connectionString = DbSettingManager.GetRequiredConnectionString(DbSchema_Sqlite, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
                 new DbEngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));

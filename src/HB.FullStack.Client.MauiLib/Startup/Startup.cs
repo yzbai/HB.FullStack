@@ -10,13 +10,13 @@ using HB.FullStack.Client.Services.KVManager;
 using HB.FullStack.Client.ApiClient;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Devices;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using HB.FullStack.Client;
 using AsyncAwaitBestPractices;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Maui.Hosting
 {
@@ -28,9 +28,19 @@ namespace Microsoft.Maui.Hosting
             Action<ApiClientOptions> apiClientConfig,
             Action<FileManagerOptions> fileManagerOptionConfig,
             Action<InitOptions> configureInitOptions,
-            string tCaptchaAppId)
+            string TCaptchaAppId)
         {
-            SetGlobalException();
+            ConfigureGlobalException();
+
+            //Logging
+            if (Currents.IsDebug)
+            {
+                builder.Logging
+                    .AddDebug()
+                    //.AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("HB", LogLevel.Trace)
+                    .AddFilter("MyColorfulTime", LogLevel.Trace);
+            }
 
             IServiceCollection services = builder.Services;
 
@@ -52,13 +62,12 @@ namespace Microsoft.Maui.Hosting
             services.AddFileManager(fileManagerOptionConfig);
             services.AddKVManager();
             services.AddSyncManager();
-            services.AddSmsClientService();
+            services.AddSmsService();
 
 
             //HB.FullStack.Client.MauiLib
-
             services.AddLocalFileManager();
-            services.AddTCaptcha(tCaptchaAppId);
+            services.AddTCaptcha(TCaptchaAppId);
 
             //Initializers
             services.Configure(configureInitOptions);
@@ -85,7 +94,7 @@ namespace Microsoft.Maui.Hosting
             return builder;
         }
 
-        private static void SetGlobalException()
+        private static void ConfigureGlobalException()
         {
             TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
