@@ -1,4 +1,10 @@
-﻿using System.IO;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System.IO;
 
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
@@ -28,7 +34,7 @@ namespace Todo.Client.MobileApp
     /// </summary>
 
     /// Maui Application：就是Window的管理者
-    /// Platform Application: 
+    /// Platform Application:
     /// Maui Window: 在Android中就是Activity，提供Page的舞台
 
     public static class MauiProgram
@@ -124,12 +130,10 @@ namespace Todo.Client.MobileApp
 
             static void AddViewModels()
             {
-
             }
 
             static void AddPages()
             {
-
             }
         }
     }

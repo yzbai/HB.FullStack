@@ -1,7 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Files;
@@ -18,12 +21,12 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
         public override Task OnPageAppearingAsync()
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public override Task OnPageDisappearingAsync()
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }

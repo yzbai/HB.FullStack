@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System.Collections.Generic;
 
 using HB.FullStack.Client.MauiLib.Utils;
 
@@ -8,7 +14,6 @@ using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Media;
 using Microsoft.Maui.Storage;
 
-using Todo.Client.MobileApp.Pages;
 using Todo.Client.MobileApp.Services;
 
 namespace Todo.Client.MobileApp
@@ -28,7 +33,6 @@ namespace Todo.Client.MobileApp
             Routing.RegisterRoute(nameof(SmsVerifyPage), typeof(SmsVerifyPage));
             Routing.RegisterRoute(nameof(RegisterProfilePage), typeof(RegisterProfilePage));
             Routing.RegisterRoute(nameof(IntroducePage), typeof(IntroducePage));
-
         }
 
         private static bool IsPageLoginNeeded(string pageName)
@@ -36,15 +40,14 @@ namespace Todo.Client.MobileApp
             return pageName switch
             {
                 //nameof(TestPage) => false,
-                //nameof(IntroducePage) => false,
-                //nameof(LoginPage) => false,
-                //nameof(SmsVerifyPage) => false,
+                nameof(IntroducePage) => false,
+                nameof(LoginPage) => false,
+                nameof(SmsVerifyPage) => false,
 
-                //nameof(RegisterProfilePage) => true,
-                //nameof(HomePage) => true,
+                nameof(RegisterProfilePage) => true,
+                nameof(HomePage) => true,
 
-                //_ => MyColorfulTimeOptions.NeedLoginDefault
-                _ => false
+                _ => TodoAppOptions.NeedLoginDefault
             };
         }
 
@@ -131,7 +134,6 @@ namespace Todo.Client.MobileApp
 
         private static IPreferenceProvider PreferenceProvider => _preferenceProvider ??= Currents.Services.GetRequiredService<IPreferenceProvider>();
 
-
         public static async Task<bool> NeedRegisterProfileAsync()
         {
             return !await UserDomainService.NeedRegisterProfileAsync();
@@ -139,12 +141,12 @@ namespace Todo.Client.MobileApp
 
         public static bool NeedLogin(string pageName)
         {
-
             return !PreferenceProvider.IsLogined() && IsPageLoginNeeded(pageName);
         }
 
         //不用每次访问VersionTracking和UserPreferences，提高效率
         private static bool _firstCheckFlag = true;
+
         private static bool _alreadyKownNotNeedIntroduce;
 
         public static bool NeedIntroduce()
@@ -178,7 +180,5 @@ namespace Todo.Client.MobileApp
 
             return false;
         }
-
-
     }
 }

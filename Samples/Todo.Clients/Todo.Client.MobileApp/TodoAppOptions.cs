@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +18,6 @@ namespace Todo.Client.MobileApp
     {
         public TodoAppOptions Value => this;
 
-        public bool NeedLoginDefault { get; set; }
+        public static bool NeedLoginDefault { get; set; } = false;
     }
 }

@@ -8,9 +8,9 @@ using System.Collections.Generic;
 
 namespace HB.FullStack.Client.MauiLib.Controls;
 
-public partial class LoginPage : BasePage<LoginViewModel>
+public partial class IntroducePage : BasePage<IntroduceViewModel>
 {
-    public LoginPage()
+    public IntroducePage()
     {
         InitializeComponent();
     }
