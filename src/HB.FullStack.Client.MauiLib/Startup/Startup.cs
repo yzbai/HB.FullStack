@@ -5,8 +5,8 @@ using CommunityToolkit.Maui;
 using HB.FullStack.Client.MauiLib;
 using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Startup;
-using HB.FullStack.Client.Services.Files;
-using HB.FullStack.Client.Services.KVManager;
+using HB.FullStack.Client.Components.Files;
+using HB.FullStack.Client.Components.KVManager;
 using HB.FullStack.Client.ApiClient;
 
 using Microsoft.Extensions.DependencyInjection;

@@ -14,8 +14,6 @@ using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Media;
 using Microsoft.Maui.Storage;
 
-using Todo.Client.MobileApp.Services;
-
 namespace Todo.Client.MobileApp
 {
     public static class NavigationHelper

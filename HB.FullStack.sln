@@ -110,8 +110,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Client.MobileApp", "Sa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.MauiLib", "src\HB.FullStack.Client.MauiLib\HB.FullStack.Client.MauiLib.csproj", "{28BCD0EE-4A18-45BD-A724-8520799E17C0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiLib1", "Samples\Todo.Clients\MauiLib1\MauiLib1.csproj", "{26780C85-A558-44BD-B5E9-77118C50CFA1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -276,10 +274,6 @@ Global
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{26780C85-A558-44BD-B5E9-77118C50CFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{26780C85-A558-44BD-B5E9-77118C50CFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{26780C85-A558-44BD-B5E9-77118C50CFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{26780C85-A558-44BD-B5E9-77118C50CFA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -325,7 +319,6 @@ Global
 		{F4523E2B-38D9-4C7E-8C4F-C3298755C06F} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 		{41F6F6C9-B865-4DBB-969A-7EE464BA38C6} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
-		{26780C85-A558-44BD-B5E9-77118C50CFA1} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

@@ -1,5 +1,5 @@
-﻿using HB.FullStack.Client.Services;
-using HB.FullStack.Client.Services.Sync;
+﻿using HB.FullStack.Client.Components;
+using HB.FullStack.Client.Components.Sync;
 
 using Microsoft.Extensions.Logging;
 

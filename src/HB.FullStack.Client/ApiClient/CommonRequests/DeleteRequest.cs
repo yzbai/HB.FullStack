@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using HB.FullStack.Client.Services.IdBarriers;
+using HB.FullStack.Client.Components.IdBarriers;
 using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Client.ApiClient
