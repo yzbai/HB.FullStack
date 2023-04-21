@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -47,6 +52,8 @@ namespace HB.FullStack.Database.Convert
             [typeof(char)] = new DbPropertyMapping { DbTypeStatement = "CHAR", DbType = DbType.StringFixedLength },
             [typeof(Guid)] = new DbPropertyMapping { DbTypeStatement = "CHAR(36)", DbType = DbType.Guid },
             [typeof(DateTimeOffset)] = new DbPropertyMapping { DbTypeStatement = "DATETIME(6)", DbType = DbType.DateTimeOffset },
+            [typeof(DateOnly)] = new DbPropertyMapping { DbTypeStatement = "DATE", DbType = DbType.Date },
+            [typeof(TimeOnly)] = new DbPropertyMapping { DbTypeStatement = "TIME(6)", DbType = DbType.Time },
             [typeof(byte[])] = new DbPropertyMapping { DbTypeStatement = "Binary", DbType = DbType.Binary }
         };
 
