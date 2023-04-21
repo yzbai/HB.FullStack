@@ -1,34 +1,42 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
+using System.Threading.Tasks;
+
+using AsyncAwaitBestPractices;
 
 using CommunityToolkit.Maui;
 
+using HB.FullStack.Client;
+using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client.Components.Files;
 using HB.FullStack.Client.MauiLib;
 using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Startup;
-using HB.FullStack.Client.Components.Files;
-using HB.FullStack.Client.Components.KVManager;
-using HB.FullStack.Client.ApiClient;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Devices;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
-using HB.FullStack.Client;
-using AsyncAwaitBestPractices;
-using System.Threading.Tasks;
 
 namespace Microsoft.Maui.Hosting
 {
     public static class FullStackMauiServiceRegister
     {
-        public static MauiAppBuilder UseFullStackClient(
+        public static MauiAppBuilder UseFullStackMaui(
             this MauiAppBuilder builder,
-            Action<DbOptions> databaseConfig,
-            Action<ApiClientOptions> apiClientConfig,
-            Action<FileManagerOptions> fileManagerOptionConfig,
-            Action<InitOptions> configureInitOptions,
-            string TCaptchaAppId)
+            Action<DbOptions> configDbOptions,
+            Action<ApiClientOptions> configApiClientOptions,
+            Action<FileManagerOptions> configFileManagerOptions,
+            Action<ClientOptions> configClientOptions,
+            Action<MauiInitOptions> configMauiInitOptions,
+            string tCaptchaAppId)
         {
             ConfigureGlobalException();
 
@@ -38,42 +46,44 @@ namespace Microsoft.Maui.Hosting
                 builder.Logging
                     .AddDebug()
                     //.AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("HB", LogLevel.Trace)
-                    .AddFilter("MyColorfulTime", LogLevel.Trace);
+                    .AddFilter("HB", LogLevel.Trace);
             }
 
             IServiceCollection services = builder.Services;
 
-            //Options
-            services.AddOptions();
-
             //Core
+            services.AddOptions();
             services.AddIdGen(idGenOptions =>
             {
                 idGenOptions.MachineId = 1;
             });
-            services.AddDatabase(databaseConfig, databaseEngineBuilder => databaseEngineBuilder.AddSQLite());
+            services.AddDatabase(configDbOptions, databaseEngineBuilder => databaseEngineBuilder.AddSQLite());
 
+            //Client
+            services.AddFullStackClient(configClientOptions, configFileManagerOptions, configApiClientOptions);
 
-            //HB.FullStack.Client
+            //MauiLib - Client Abstractions
             services.AddSingleton<IPreferenceProvider, MauiPreferenceProvider>();
             services.AddSingleton<IClientEvents, MauiClientEvents>();
-            services.AddApiClient(apiClientConfig);
-            services.AddFileManager(fileManagerOptionConfig);
-            services.AddKVManager();
-            services.AddSyncManager();
-            services.AddSmsService();
 
-
-            //HB.FullStack.Client.MauiLib
+            //MauiLib - Components
             services.AddLocalFileManager();
-            services.AddTCaptcha(TCaptchaAppId);
+            services.AddTCaptcha(tCaptchaAppId);
 
-            //Initializers
-            services.Configure(configureInitOptions);
-            services.AddTransient<IMauiInitializeService, InitService>();
+            //MauiLib - Initialize
+            services.Configure(configMauiInitOptions);
+            services.AddTransient<IMauiInitializeService, MauiInitService>();
 
-            //Handlers
+            //MauiLib - Controls
+            services.AddSingleton<PopupSizeConstants>();
+            services.AddTransient<CropperPage>();
+            services.AddTransient<CropperViewModel>();
+
+            //MauiLib - Essentials
+            services.AddSingleton<IDeviceDisplay>(DeviceDisplay.Current);
+            services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
+
+            //MauiLib - Handlers
             builder.ConfigureMauiHandlers(handlers =>
             {
                 handlers.AddHandler<HybridWebView, HybridWebViewHandler>();
@@ -81,15 +91,6 @@ namespace Microsoft.Maui.Hosting
 
             //Skiasharp
             builder.UseSkiaSharp();
-
-            //UIs
-            services.AddSingleton<PopupSizeConstants>();
-            services.AddTransient<CropperPage>();
-            services.AddTransient<CropperViewModel>();
-
-            //Essentials
-            services.AddSingleton<IDeviceDisplay>(DeviceDisplay.Current);
-            services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
 
             return builder;
         }
@@ -112,7 +113,6 @@ namespace Microsoft.Maui.Hosting
                 //TODO:上报
 
                 Globals.Logger?.LogError(ex, "使用了SafeFireAndForget的默认异常处理");
-
 
                 Currents.ShowToast("抱歉，发生了错误");
             });

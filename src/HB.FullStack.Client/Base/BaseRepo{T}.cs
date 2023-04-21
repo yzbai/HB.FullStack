@@ -20,6 +20,7 @@ using HB.FullStack.Database.DbModels;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
+using HB.FullStack.Client.Abstractions;
 
 namespace HB.FullStack.Client.Base
 {

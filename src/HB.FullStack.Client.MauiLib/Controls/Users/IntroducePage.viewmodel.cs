@@ -6,7 +6,7 @@
 
 using System;
 using System.Threading.Tasks;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

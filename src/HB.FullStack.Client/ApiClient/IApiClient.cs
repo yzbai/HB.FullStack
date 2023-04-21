@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.ApiClient

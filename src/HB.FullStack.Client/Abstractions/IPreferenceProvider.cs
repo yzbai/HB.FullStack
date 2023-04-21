@@ -2,7 +2,7 @@
 
 using HB.FullStack.Common.Shared;
 
-namespace HB.FullStack.Client
+namespace HB.FullStack.Client.Abstractions
 {
     /// <summary>
     /// 客户端主要信息Provider, 用于存储和获取客户端主要信息

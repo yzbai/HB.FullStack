@@ -10,7 +10,6 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
 
 using HB.FullStack.Client.ApiClient;
-using HB.FullStack.Database;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 
@@ -58,7 +57,7 @@ namespace Todo.Client.MobileApp
                 .UseMauiCommunityToolkit()
                 .UseMauiCommunityToolkitMarkup()
                 .UseMauiCommunityToolkitMediaElement()
-                .UseFullStackClient(
+                .UseFullStackMaui(
                     dbOptions =>
                     {
                         dbOptions.DbSchemas.Add(new DbSchema
@@ -97,8 +96,9 @@ namespace Todo.Client.MobileApp
                         fileManagerOptions.DirectoryDescriptions = DirectorySettings.Descriptions.All;
                         fileManagerOptions.DirectoryPermissions = DirectorySettings.DirectoryPermissions.All;
                     },
-                    initOptions => { },
-                    TCaptchaAppId: TECENET_CAPTCHA_APP_ID)
+                    clientOptions => { },
+                    mauiInitOptions => { },
+                    tCaptchaAppId: TECENET_CAPTCHA_APP_ID)
                 .UseTodoApp(todoAppOptions => { })
                 .ConfigureLifecycleEvents(lifecycleBuilder => { })
                 .ConfigureFonts(fonts =>

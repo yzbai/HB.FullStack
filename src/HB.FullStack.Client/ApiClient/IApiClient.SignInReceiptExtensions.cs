@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
 

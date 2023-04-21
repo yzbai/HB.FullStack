@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common;
 
 using Microsoft.Maui.Networking;

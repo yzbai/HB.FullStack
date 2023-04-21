@@ -30,6 +30,8 @@ namespace HB.FullStack.Client
 
         public Directory2 AvatarDirectory { get; set; } = null!;
 
+        public bool NeedLoginDefault { get; set; } = true;
+
         #endregion
     }
 }

@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.Shared.Resources;
 

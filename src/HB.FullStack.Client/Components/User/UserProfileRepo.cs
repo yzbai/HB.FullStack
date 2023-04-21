@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Components.Sync;

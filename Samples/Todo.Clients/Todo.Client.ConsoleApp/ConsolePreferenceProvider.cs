@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Client;
+﻿using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 
 namespace Todo.Client.ConsoleApp

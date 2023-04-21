@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Components.Files;
+using HB.FullStack.Client.Abstractions;
 
 namespace HB.FullStack.Client.Components.Sts
 {

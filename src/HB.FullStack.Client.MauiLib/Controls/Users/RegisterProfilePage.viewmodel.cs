@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;

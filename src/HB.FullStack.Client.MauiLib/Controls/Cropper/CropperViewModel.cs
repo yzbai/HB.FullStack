@@ -14,6 +14,7 @@ using HB.FullStack.Client.MauiLib.Figures;
 using HB.FullStack.Common.Files;
 using HB.FullStack.Client.MauiLib.Utils;
 using CommunityToolkit.Mvvm.Input;
+using HB.FullStack.Client.Abstractions;
 
 namespace HB.FullStack.Client.MauiLib.Controls
 {

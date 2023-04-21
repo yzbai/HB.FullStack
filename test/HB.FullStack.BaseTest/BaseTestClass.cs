@@ -26,7 +26,7 @@ using System.IO;
 using HB.FullStack.Database.Implements;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Client.ApiClient;
-using HB.FullStack.Client;
+using HB.FullStack.Client.Abstractions;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
 

@@ -4,20 +4,48 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
+using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.Components.User;
+using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Utils;
+using HB.FullStack.Common.Shared;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Media;
 using Microsoft.Maui.Storage;
 
-namespace Todo.Client.MobileApp
+namespace HB.FullStack.Client.MauiLib
 {
     public static class NavigationHelper
     {
+        public const string HomePage = nameof(HomePage);
+
+        private static bool _isLoginPagePushed;
+
+        private static IUserService? _userService;
+
+        private static ClientOptions? _clientOptions;
+
+        private static IPreferenceProvider? _preferenceProvider;
+
+        //不用每次访问VersionTracking和UserPreferences，提高效率
+        private static bool _firstCheckFlag = true;
+
+        private static bool _alreadyKownNotNeedIntroduce;
+
+        private static IUserService UserService => _userService ??= Currents.Services.GetRequiredService<IUserService>();
+
+        private static ClientOptions ClientOptions => _clientOptions ??= Currents.Services.GetRequiredService<IOptions<ClientOptions>>().Value;
+
+        private static IPreferenceProvider PreferenceProvider => _preferenceProvider ??= Currents.Services.GetRequiredService<IPreferenceProvider>();
+
         /// <summary>
         /// 相对路由, 顶层路由在AppShell中定义
         /// </summary>
@@ -33,28 +61,12 @@ namespace Todo.Client.MobileApp
             Routing.RegisterRoute(nameof(IntroducePage), typeof(IntroducePage));
         }
 
-        private static bool IsPageLoginNeeded(string pageName)
-        {
-            return pageName switch
-            {
-                //nameof(TestPage) => false,
-                nameof(IntroducePage) => false,
-                nameof(LoginPage) => false,
-                nameof(SmsVerifyPage) => false,
-
-                nameof(RegisterProfilePage) => true,
-                nameof(HomePage) => true,
-
-                _ => TodoAppOptions.NeedLoginDefault
-            };
-        }
-
         /// <summary>
         /// 如果需要介绍就进入介绍页，否则正常进入
         /// </summary>
         public static async Task ToptoHomePageAsync()
         {
-            await Currents.Shell.GoToAsync($"//{nameof(HomePage)}");
+            await Currents.Shell.GoToAsync($"//{HomePage}");
         }
 
         public static async Task GotoIntroducePageAsync()
@@ -66,8 +78,6 @@ namespace Todo.Client.MobileApp
         {
             await Currents.Shell.GoBackAsync();
         }
-
-        private static bool _isLoginPagePushed;
 
         public static async Task GotoLoginPageAsync()
         {
@@ -122,30 +132,10 @@ namespace Todo.Client.MobileApp
             });
         }
 
-        private static IUserDomainService? _userDomainService;
-        private static TodoAppOptions? _todoAppOptions;
-        private static IPreferenceProvider? _preferenceProvider;
-
-        private static IUserDomainService UserDomainService => _userDomainService ??= Currents.Services.GetRequiredService<IUserDomainService>();
-
-        private static TodoAppOptions TodoAppOptions => _todoAppOptions ??= Currents.Services.GetRequiredService<IOptions<TodoAppOptions>>().Value;
-
-        private static IPreferenceProvider PreferenceProvider => _preferenceProvider ??= Currents.Services.GetRequiredService<IPreferenceProvider>();
-
-        public static async Task<bool> NeedRegisterProfileAsync()
-        {
-            return !await UserDomainService.NeedRegisterProfileAsync();
-        }
-
         public static bool NeedLogin(string pageName)
         {
             return !PreferenceProvider.IsLogined() && IsPageLoginNeeded(pageName);
         }
-
-        //不用每次访问VersionTracking和UserPreferences，提高效率
-        private static bool _firstCheckFlag = true;
-
-        private static bool _alreadyKownNotNeedIntroduce;
 
         public static bool NeedIntroduce()
         {
@@ -177,6 +167,29 @@ namespace Todo.Client.MobileApp
             _alreadyKownNotNeedIntroduce = true;
 
             return false;
+        }
+
+        private static bool IsPageLoginNeeded(string pageName)
+        {
+            return pageName switch
+            {
+                //nameof(TestPage) => false,
+                nameof(IntroducePage) => false,
+                nameof(LoginPage) => false,
+                nameof(SmsVerifyPage) => false,
+
+                nameof(RegisterProfilePage) => true,
+                HomePage => true,
+
+                _ => ClientOptions.NeedLoginDefault
+            };
+        }
+
+        private static async Task<bool> NeedRegisterProfileAsync()
+        {
+            string? nickName = await UserService.GetNickNameAsync().ConfigureAwait(false);
+
+            return nickName.IsNullOrEmpty() || Conventions.IsARandomNickName(nickName);
         }
     }
 }

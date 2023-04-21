@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using Aliyun.OSS;
 using Aliyun.OSS.Common;
 using Aliyun.OSS.Common.Authentication;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Components.KVManager;
 using HB.FullStack.Client.Components.Sts;
 using HB.FullStack.Common.Files;

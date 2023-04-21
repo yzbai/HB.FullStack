@@ -6,7 +6,7 @@ using AsyncAwaitBestPractices;
 
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;

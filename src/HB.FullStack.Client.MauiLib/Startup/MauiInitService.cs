@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Components.Sync;
 using HB.FullStack.Database;
 
@@ -14,11 +14,11 @@ using Microsoft.Maui.Hosting;
 
 namespace HB.FullStack.Client.MauiLib.Startup
 {
-    public class InitService : IMauiInitializeService
+    public class MauiInitService : IMauiInitializeService
     {
-        private readonly InitOptions _options;
+        private readonly MauiInitOptions _options;
 
-        public InitService(IOptions<InitOptions> options)
+        public MauiInitService(IOptions<MauiInitOptions> options)
         {
             _options = options.Value;
         }
@@ -26,7 +26,7 @@ namespace HB.FullStack.Client.MauiLib.Startup
         public void Initialize(IServiceProvider services)
         {
             //Logger
-            Globals.Logger = services.GetRequiredService<ILogger<InitService>>();
+            Globals.Logger = services.GetRequiredService<ILogger<MauiInitService>>();
 
             //DB
             InitDatabase(services.GetRequiredService<IDatabase>());

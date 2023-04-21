@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
-
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
