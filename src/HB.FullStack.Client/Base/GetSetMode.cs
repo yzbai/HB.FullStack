@@ -3,7 +3,7 @@
 
 namespace HB.FullStack.Client.Base
 {
-    public enum RepoSetMode
+    public enum GetSetMode
     {
         Mixed, //Mixed
         LocalForced,

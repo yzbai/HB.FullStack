@@ -18,9 +18,8 @@ using HB.FullStack.Database;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using HB.FullStack.Common.Shared.Resources;
-using HB.FullStack.Client.Components.Files;
 using HB.FullStack.Client.Base;
-using HB.FullStack.Client.Components.File;
+using HB.FullStack.Client.Components.Files;
 
 namespace HB.FullStack.Client.Components.Sts
 {
@@ -151,7 +150,7 @@ namespace HB.FullStack.Client.Components.Sts
                     localWhere: token => token.UserId == userId && token.DirectoryPermissionName == directoryPermissionName,
                     remoteRequest: new StsTokenResGetByDirectoryPermissionNameRequest(directoryPermissionName, placeHolderValue, !needWritePermission),
                     transactionContext: transactionContext,
-                    getMode: RepoGetMode.Mixed,
+                    getMode: GetSetMode.Mixed,
                     ifUseLocalData: (_, tokens) =>
                     {
                         StsToken? token = tokens.FirstOrDefault();

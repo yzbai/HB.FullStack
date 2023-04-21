@@ -6,8 +6,6 @@
 
 using System;
 
-using HB.FullStack.Client.Base;
-using HB.FullStack.Client.Components.File;
 using HB.FullStack.Client.Components.Files;
 using HB.FullStack.Client.Components.Sts;
 using HB.FullStack.Common.Files;

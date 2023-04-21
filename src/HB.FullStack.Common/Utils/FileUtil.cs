@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -244,11 +250,11 @@ namespace System
         {
             if (fileExtension.StartsWith('.'))
             {
-                return $"{Path.GetRandomFileName()}{fileExtension}";
+                return $"f_{Guid.NewGuid()}{fileExtension}";
             }
             else
             {
-                return $"{Path.GetRandomFileName()}.{fileExtension}";
+                return $"f_{Guid.NewGuid()}.{fileExtension}";
             }
         }
     }

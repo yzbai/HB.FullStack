@@ -14,7 +14,6 @@ using Aliyun.OSS;
 using Aliyun.OSS.Common;
 using Aliyun.OSS.Common.Authentication;
 
-using HB.FullStack.Client.Components.Files;
 using HB.FullStack.Client.Components.KVManager;
 using HB.FullStack.Client.Components.Sts;
 using HB.FullStack.Common.Files;
@@ -23,7 +22,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using Microsoft.Extensions.Options;
 
-namespace HB.FullStack.Client.Components.File
+namespace HB.FullStack.Client.Components.Files
 {
     public partial class FileManager : IFileManager
     {
@@ -97,7 +96,7 @@ namespace HB.FullStack.Client.Components.File
         ///<summary>
         ///返回本地fullpath
         ///</summary>
-        public async Task<string> PushToRemoteAsync(string sourceLocalFullPath, Directory2 directory, string fileName, bool recheckPermissionForced = false)
+        public async Task<string> SetAsync(string sourceLocalFullPath, Directory2 directory, string fileName, bool recheckPermissionForced = false)
         {
             //TODO: 先检查网络连接
 
@@ -160,7 +159,7 @@ namespace HB.FullStack.Client.Components.File
         /// <summary>
         /// 返回本地FullPath
         /// </summary>
-        public async Task<string> PullFromRemoteAsync(Directory2 directory, string fileName, bool remoteForced = false)
+        public async Task<string> GetAsync(Directory2 directory, string fileName, bool remoteForced = false)
         {
             string ossKey = GetOssKey(directory, fileName);
             DirectoryDescription description = GetDirectoryDescription(directory);

@@ -17,18 +17,26 @@ namespace HB.FullStack.Client.Components.User
     {
         #region Profile
 
-        Task<bool> NeedRegisterProfileAsync();
+        Task<UserProfile?> UpdateUserProfileAsync(
+            string? nickName,
+            Gender? gender,
+            DateOnly? birthDay,
+            string? tmpAvatarFileFullPath);
 
-        Task UpdateUserProfileAsync(string? nickName, Gender? gender, DateTimeOffset? birthDay, string? avatarFileName);
+        ///<summary>
+        ///返回本地FullPath
+        ///</summary>
+        Task<string?> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed);
 
-        Task<string?> GetAvatarFileAsync(Guid userId, RepoGetMode getMode = RepoGetMode.Mixed);
+        ///<summary>
+        ///返回本地FullPath
+        ///</summary>
+        Task<string?> SetAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed);
 
-        Task<string> SetAvatarFileAsync(string avatarFullPath);
-
-        Task<string?> GetNickNameAsync(Guid userId, RepoGetMode getMode = RepoGetMode.Mixed);
+        Task<string?> GetNickNameAsync(GetSetMode getMode = GetSetMode.Mixed);
 
         #endregion
 
-        Task LoginBySmsCodeAsync(string mobile, string smsCode, DeviceInfos deviceInfos);
+        Task LoginBySmsCodeAsync(string mobile, string smsCode, string audience);
     }
 }

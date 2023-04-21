@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.Components.File
+namespace HB.FullStack.Client.Components.Files
 {
     public class FileManagerOptions : IOptions<FileManagerOptions>
     {

@@ -4,6 +4,8 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
+using HB.FullStack.Common.Files;
+
 using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Client
@@ -21,6 +23,12 @@ namespace HB.FullStack.Client
         public int MediumExpirySeconds { get; set; } = 5 * 60;
 
         public int LongExpirySeconds { get; set; } = 60 * 60;
+
+        #endregion
+
+        #region User Settings
+
+        public Directory2 AvatarDirectory { get; set; } = null!;
 
         #endregion
     }

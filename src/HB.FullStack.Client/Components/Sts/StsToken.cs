@@ -10,7 +10,7 @@ using HB.FullStack.Client.Base;
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common.PropertyTrackable;
 
-namespace HB.FullStack.Client.Components.Files
+namespace HB.FullStack.Client.Components.Sts
 {
     [ClientModelSetting(expiryTimeType: ExpiryTimeType.NonExpiry, //由StsToken.ExpirationAt业务逻辑决定
       allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]

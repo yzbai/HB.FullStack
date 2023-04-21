@@ -5,17 +5,21 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using HB.FullStack.Client.Base;
-using HB.FullStack.Client.ClientModels;
+using HB.FullStack.Common.Models;
 using HB.FullStack.Common.Shared.Context;
 
-namespace HB.FullStack.Client.Components.User
+namespace HB.FullStack.Common.Shared.Resources
 {
-    [ClientModelSetting(expiryTimeType: ExpiryTimeType.Tiny, allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
-    public class UserProfile : ClientDbModel
+    public class UserProfileRes : ApiResource
     {
+        public Guid Id { get; set; }
+
         [NoEmptyGuid]
         public Guid UserId { get; set; }
 

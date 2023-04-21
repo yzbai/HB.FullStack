@@ -76,7 +76,7 @@ namespace HB.FullStack.Client.Base
             Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext,
-            RepoGetMode getMode,
+            GetSetMode getMode,
             IfUseLocalData<TModel>? ifUseLocalData = null)
         {
             _syncManager.WaitUntilNotSyncing();
@@ -84,7 +84,7 @@ namespace HB.FullStack.Client.Base
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
-            if (getMode == RepoGetMode.LocalForced)
+            if (getMode == GetSetMode.LocalForced)
             {
                 _logger.LogDebug("本地强制模式，返回, Type:{Type}", typeof(TModel).Name);
                 return locals;
@@ -97,7 +97,7 @@ namespace HB.FullStack.Client.Base
             Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext = null,
-            RepoGetMode getMode = RepoGetMode.Mixed,
+            GetSetMode getMode = GetSetMode.Mixed,
             IfUseLocalData<TModel>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
@@ -107,7 +107,7 @@ namespace HB.FullStack.Client.Base
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
-            if (getMode == RepoGetMode.LocalForced)
+            if (getMode == GetSetMode.LocalForced)
             {
                 return new ObservableTask<IEnumerable<TModel>>(locals, null, onException, continueOnCapturedContext);
             }
@@ -123,7 +123,7 @@ namespace HB.FullStack.Client.Base
             Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext,
-            RepoGetMode getMode,
+            GetSetMode getMode,
             IfUseLocalData<TModel>? ifUseLocalData = null)
         {
             IEnumerable<TModel> models = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
@@ -135,7 +135,7 @@ namespace HB.FullStack.Client.Base
             Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext = null,
-            RepoGetMode getMode = RepoGetMode.Mixed,
+            GetSetMode getMode = GetSetMode.Mixed,
             IfUseLocalData<TModel>? ifUseLocalData = null,
             Action<Exception>? onException = null,
             bool continueOnCapturedContext = false)
@@ -145,7 +145,7 @@ namespace HB.FullStack.Client.Base
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
             //如果强制获取本地，则返回本地
-            if (getMode == RepoGetMode.LocalForced)
+            if (getMode == GetSetMode.LocalForced)
             {
                 return new ObservableTask<TModel?>(locals.FirstOrDefault(), null, onException, continueOnCapturedContext);
             }
@@ -163,11 +163,11 @@ namespace HB.FullStack.Client.Base
             IEnumerable<TModel> localModels,
             ApiRequest remoteRequest,
             TransactionContext? transactionContext,
-            RepoGetMode getMode,
+            GetSetMode getMode,
             IfUseLocalData<TModel> ifUseLocalData)
         {
             //如果不强制远程，并且满足使用本地数据条件
-            if (getMode != RepoGetMode.RemoteForced && ifUseLocalData(remoteRequest, localModels))
+            if (getMode != GetSetMode.RemoteForced && ifUseLocalData(remoteRequest, localModels))
             {
                 _logger.LogDebug("本地数据可用，返回本地, Type:{Type}", typeof(TModel).Name);
                 return localModels;
