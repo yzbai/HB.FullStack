@@ -1,7 +1,15 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Windows.Input;
 
 using CommunityToolkit.Maui.Markup;
+
+using HB.FullStack.Client.MauiLib.Base;
 
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
@@ -71,6 +79,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
         #endregion
 
         #region Output
+
         #endregion
 
         #region InputOutput

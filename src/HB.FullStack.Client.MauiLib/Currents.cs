@@ -1,8 +1,15 @@
-﻿using AsyncAwaitBestPractices;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using AsyncAwaitBestPractices;
 
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 
+using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Client.MauiLib.Controls;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -29,12 +36,12 @@ namespace HB.FullStack.Client.MauiLib
         //private static IConfiguration? _configuration;
         private static PopupSizeConstants? _popupSizeConstants;
 
-
         #region Environment
 
         public static string Environment =>
 #if DEBUG
     DEBUG;
+
 #endif
 #if RELEASE
     RELEASE;
@@ -60,7 +67,6 @@ namespace HB.FullStack.Client.MauiLib
         //        string fileName = $"{assembly.FullName!.Split(',')[0]}.{appsettingsFile}";
 
         //        using Stream? resFileStream = assembly.GetManifestResourceStream(fileName);
-
 
         //        IConfigurationBuilder builder = new ConfigurationBuilder();
 
@@ -141,5 +147,4 @@ namespace HB.FullStack.Client.MauiLib
 
         //public static IList<Task> AppendingTasks { get; } = new List<Task>();
     }
-
 }

@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -6,12 +12,13 @@ using AsyncAwaitBestPractices;
 
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Client.MauiLib.Controls
+namespace HB.FullStack.Client.MauiLib.Base
 {
     public abstract partial class BaseViewModel : ObservableObject, IBaseViewModel
     {

@@ -6,6 +6,8 @@
 
 using System.Collections.Generic;
 
+using HB.FullStack.Client.MauiLib.Base;
+
 namespace HB.FullStack.Client.MauiLib.Controls;
 
 public partial class SmsVerifyPage : BasePage<SmsVerifyViewModel>

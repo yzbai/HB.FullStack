@@ -17,7 +17,5 @@ namespace Todo.Client.MobileApp
     public class TodoAppOptions : IOptions<TodoAppOptions>
     {
         public TodoAppOptions Value => this;
-
-        public static bool NeedLoginDefault { get; set; } = false;
     }
 }

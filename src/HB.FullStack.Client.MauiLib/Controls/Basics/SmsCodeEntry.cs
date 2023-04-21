@@ -1,6 +1,12 @@
-﻿using CommunityToolkit.Maui.Markup;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
+using CommunityToolkit.Maui.Markup;
 
+using HB.FullStack.Client.MauiLib.Base;
 
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
@@ -24,6 +30,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
                 smsCodeEntry.ResetLabels();
             }
         });
+
         public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(SmsCodeEntry), "", BindingMode.TwoWay, propertyChanged: (bindable, oldValue, newValue) =>
         {
             //TODO: 限制只能是数字
@@ -32,6 +39,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
                 smsCodeEntry.ResetLabelText();
             }
         });
+
         public static readonly BindableProperty FontSizeProperty = BindableProperty.Create(nameof(FontSize), typeof(double), typeof(SmsCodeEntry), 16.0, propertyChanged: (b, o, n) =>
         {
             if (b is SmsCodeEntry smsCodeEntry && n is double size)
@@ -39,6 +47,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
                 smsCodeEntry.ResetLabels();
             }
         });
+
         //public static readonly BindableProperty LabelWidthRequestProperty = BindableProperty.Create(nameof(LabelWidthRequest), typeof(double), typeof(SmsCodeEntry), 24.0, propertyChanged: (b, o, n) =>
         //{
         //    if (b is SmsCodeEntry smsCodeEntry && n is double width)
@@ -53,6 +62,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
                 smsCodeEntry.ResetLabels();
             }
         });
+
         public static readonly BindableProperty BorderSelectedColorProperty = BindableProperty.Create(nameof(BorderSelectedColor), typeof(Brush), typeof(SmsCodeEntry), Brush.Green, propertyChanged: (b, o, n) =>
         {
             if (b is SmsCodeEntry smsCodeEntry)
@@ -64,8 +74,10 @@ namespace HB.FullStack.Client.MauiLib.Controls
         public int CodeCount { get => (int)GetValue(CodeCountProperty); set => SetValue(CodeCountProperty, value); }
         public string Text { get => (string)GetValue(TextProperty); set => SetValue(TextProperty, value); }
         public double FontSize { get => (double)GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
+
         //public double LabelWidthRequest { get => (double)GetValue(LabelWidthRequestProperty); set => SetValue(LabelWidthRequestProperty, value); }
         public Brush BorderSelectedColor { get => (Brush)GetValue(BorderSelectedColorProperty); set => SetValue(BorderSelectedColorProperty, value); }
+
         public Brush BorderUnSelectedColor { get => (Brush)GetValue(BorderUnSelectedColorProperty); set => SetValue(BorderUnSelectedColorProperty, value); }
 
         private readonly List<Border> _borders = new List<Border>();
@@ -153,6 +165,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
             ResetLabelText();
         }
+
         private void ResetLabelText()
         {
             if (Text.IsNullOrEmpty())
@@ -194,6 +207,4 @@ namespace HB.FullStack.Client.MauiLib.Controls
             }
         }
     }
-
-
 }

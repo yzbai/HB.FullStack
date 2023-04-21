@@ -1,9 +1,14 @@
-
+/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
 using Microsoft.Maui.Controls;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System;
+using HB.FullStack.Client.MauiLib.Base;
 
 namespace HB.FullStack.Client.MauiLib.Controls
 {

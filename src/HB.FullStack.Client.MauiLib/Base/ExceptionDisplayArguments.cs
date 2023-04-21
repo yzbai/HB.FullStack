@@ -1,4 +1,10 @@
-﻿namespace HB.FullStack.Client.MauiLib.Controls
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+namespace HB.FullStack.Client.MauiLib.Base
 {
     public class ExceptionDisplayArguments
     {

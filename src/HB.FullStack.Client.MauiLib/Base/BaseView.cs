@@ -1,9 +1,15 @@
-﻿using Microsoft.Maui.Controls;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using Microsoft.Maui.Controls;
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.MauiLib.Controls
+namespace HB.FullStack.Client.MauiLib.Base
 {
     public abstract class BaseView : ContentView, IBaseContentView
     {

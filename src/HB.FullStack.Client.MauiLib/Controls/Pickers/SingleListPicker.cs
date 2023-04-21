@@ -1,10 +1,16 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 
 using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-
+using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Common;
 
 using Microsoft.Maui.Controls;
@@ -41,13 +47,15 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
         public SingleListPicker()
         {
-            Content = new StackLayout { Children = { 
-                    new ListView{ 
+            Content = new StackLayout
+            {
+                Children = {
+                    new ListView{
                         SelectionMode = ListViewSelectionMode.None,
                         ItemTemplate = new DataTemplate(()=>
-                            new ViewCell{ View = new StackLayout{ 
+                            new ViewCell{ View = new StackLayout{
                                 Orientation = StackOrientation.Horizontal,
-                                Children={ 
+                                Children={
                                     new Label{ }.Start().TextCenterVertical().Bind(Label.TextProperty, nameof(SingleListPickerItem.Text)),
 
                                     new RadioButton{ }.End()
@@ -61,8 +69,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
                     .Bind(ListView.ItemsSourceProperty, nameof(ItemsSource))
                     .Invoke(lst=>lst.ItemTapped += RadioList_ItemTapped)
                 }
-            }.Invoke(layout=>layout.BindingContext = this);
-
+            }.Invoke(layout => layout.BindingContext = this);
         }
 
         private void RadioList_ItemTapped(object? sender, ItemTappedEventArgs e)

@@ -1,5 +1,12 @@
-﻿
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
 using CommunityToolkit.Maui.Markup;
+
+using HB.FullStack.Client.MauiLib.Base;
 
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
@@ -58,6 +65,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
         private readonly WeakEventManager _eventManager = new WeakEventManager();
 
 #pragma warning disable CA1030 // Use events where appropriate
+
         public event EventHandler OnClicked
         {
             add => _eventManager.AddEventHandler(value);
@@ -81,6 +89,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
             add => _eventManager.AddEventHandler(value);
             remove => _eventManager.RemoveEventHandler(value);
         }
+
 #pragma warning restore CA1030 // Use events where appropriate
 
         public string Text
@@ -214,7 +223,6 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
         public object? Tag { get; set; }
 
-
         private static void OnIsSelectedPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             if (newValue != oldValue)
@@ -222,6 +230,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
         }
 
         private readonly Frame _frame;
+
         public Chip()
         {
             Content = new Frame
@@ -314,7 +323,6 @@ namespace HB.FullStack.Client.MauiLib.Controls
                             }
                         }
                     }
-
                 }
 
                 if (AutoToggle)

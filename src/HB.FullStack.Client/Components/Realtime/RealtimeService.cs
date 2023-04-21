@@ -11,6 +11,10 @@ namespace HB.FullStack.Client.Components
 {
     public class RealtimeService : IRealtimeService
     {
+#pragma warning disable CS0067 // The event 'RealtimeService.ServerCallTest' is never used
+
         public event Func<Task>? ServerCallTest;
+
+#pragma warning restore CS0067 // The event 'RealtimeService.ServerCallTest' is never used
     }
 }

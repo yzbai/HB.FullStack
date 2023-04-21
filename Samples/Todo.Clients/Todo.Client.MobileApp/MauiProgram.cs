@@ -113,27 +113,27 @@ namespace Todo.Client.MobileApp
         public static MauiAppBuilder UseTodoApp(this MauiAppBuilder builder, Action<TodoAppOptions> configTodoAppOptions)
         {
             builder.Services.Configure(configTodoAppOptions);
-            //参考MyColorful，移植views，pages，格式,建立页面，建立导航
 
-            AddServices();
+            AddServices(builder.Services);
 
-            AddViewModels();
+            AddViewModels(builder.Services);
 
-            AddPages();
+            AddPages(builder.Services);
 
             return builder;
 
-            static void AddServices()
-            {
-                //注意Transient和Singleton的使用
-            }
-
-            static void AddViewModels()
+            static void AddServices(IServiceCollection services)
             {
             }
 
-            static void AddPages()
+            static void AddViewModels(IServiceCollection services)
             {
+                services.AddSingleton<HomeViewModel>();
+            }
+
+            static void AddPages(IServiceCollection services)
+            {
+                services.AddSingleton<HomePage>();
             }
         }
     }

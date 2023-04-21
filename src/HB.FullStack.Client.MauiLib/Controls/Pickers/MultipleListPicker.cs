@@ -1,9 +1,15 @@
-﻿using System.Collections.Generic;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System.Collections.Generic;
 
 using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-
+using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Common;
 
 using Microsoft.Maui;
@@ -36,21 +42,24 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
         public MultipleListPicker()
         {
-            Content = new StackLayout { Children = { 
+            Content = new StackLayout
+            {
+                Children = {
                     new ListView{
                         HorizontalScrollBarVisibility = ScrollBarVisibility.Never,
                         VerticalScrollBarVisibility = ScrollBarVisibility.Never,
                         SelectionMode = ListViewSelectionMode.None,
-                        ItemTemplate = new DataTemplate(()=>new ViewCell{View = new StackLayout{ 
+                        ItemTemplate = new DataTemplate(()=>new ViewCell{View = new StackLayout{
                             Orientation = StackOrientation.Horizontal,
-                            Children={ 
+                            Children={
                                 new Label{ }.Start().TextCenterVertical().Bind(Label.TextProperty, nameof(MultipleListPickerItem.Text)),
                                 new CheckBox{ }.End().Bind(CheckBox.IsCheckedProperty, nameof(MultipleListPickerItem.IsChecked)).Invoke(v=>v.CheckedChanged+=CheckBox_CheckedChanged)
                             }
                         } })
                     }.Bind(ListView.ItemsSourceProperty, nameof(ItemsSource))
                     .Invoke(v=>v.ItemTapped+=ListView_ItemTapped)
-                } }.Top().Invoke(v => v.BindingContext = this);
+                }
+            }.Top().Invoke(v => v.BindingContext = this);
         }
 
         private void ListView_ItemTapped(object? sender, ItemTappedEventArgs e)
@@ -99,6 +108,5 @@ namespace HB.FullStack.Client.MauiLib.Controls
             get { return _isChecked; }
             set { SetProperty(ref _isChecked, value); }
         }
-
     }
 }

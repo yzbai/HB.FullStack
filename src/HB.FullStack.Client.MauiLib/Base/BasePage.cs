@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -9,11 +15,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 
-namespace HB.FullStack.Client.MauiLib.Controls
+namespace HB.FullStack.Client.MauiLib.Base
 {
     public abstract class BasePage<TViewModel> : BasePage where TViewModel : BaseViewModel
     {
-        protected BasePage() : base(Currents.Services.GetRequiredService<TViewModel>()) { }
+        protected BasePage() : base(Currents.Services.GetRequiredService<TViewModel>())
+        {
+        }
 
         public new TViewModel ViewModel => (TViewModel)base.ViewModel!;
     }
@@ -53,10 +61,8 @@ namespace HB.FullStack.Client.MauiLib.Controls
             //TODO: Do we need View.OnPageLoaded()?
         }
 
-
         private void BasePage_Unloaded(object? sender, EventArgs e)
         {
-
         }
 
         protected override void OnAppearing()
@@ -100,7 +106,6 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
             base.OnDisappearing();
         }
-
 
         #region Back Button
 

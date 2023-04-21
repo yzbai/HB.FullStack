@@ -1,4 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using Microsoft.Extensions.Logging;
 using SkiaSharp;
 
 using System;
@@ -17,6 +23,7 @@ using Microsoft.Maui;
 using System.Diagnostics.CodeAnalysis;
 using HB.FullStack.Common.Figures;
 using HB.FullStack.Client.MauiLib.Controls;
+using HB.FullStack.Client.MauiLib.Base;
 
 namespace HB.FullStack.Client.MauiLib.Figures
 {
@@ -62,6 +69,7 @@ namespace HB.FullStack.Client.MauiLib.Figures
 
         //储存指头与Figure的对应
         private readonly Dictionary<long, SKFigure> _fingerFigureDict = new Dictionary<long, SKFigure>();
+
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private Timer? _timer;
 
@@ -501,10 +509,8 @@ namespace HB.FullStack.Client.MauiLib.Figures
 
         public void NotifyVisualStateChanged(SKFigure figure)
         {
-            
         }
 
         #endregion
-
     }
 }

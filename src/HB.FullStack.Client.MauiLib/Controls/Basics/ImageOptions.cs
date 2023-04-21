@@ -1,5 +1,13 @@
-﻿using CommunityToolkit.Maui.Markup;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Mvvm.ComponentModel;
+
+using HB.FullStack.Client.MauiLib.Base;
 
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
@@ -59,33 +67,39 @@ namespace HB.FullStack.Client.MauiLib.Controls
         public ICommand SingleUnSelectedCommand { get; private set; }
 
         private int _imageHeightRequest = 80;
-        public int ImageHeightRequest { get { return _imageHeightRequest; } set { _imageHeightRequest = value; OnPropertyChanged(); } }
+        public int ImageHeightRequest
+        { get { return _imageHeightRequest; } set { _imageHeightRequest = value; OnPropertyChanged(); } }
 
         private int _imageWidthRequest = 80;
-        public int ImageWidthRequest { get { return _imageWidthRequest; } set { _imageWidthRequest = value; OnPropertyChanged(); } }
+        public int ImageWidthRequest
+        { get { return _imageWidthRequest; } set { _imageWidthRequest = value; OnPropertyChanged(); } }
 
         private int _verticalItemSpacing = 24;
-        public int VerticalItemSpacing { get { return _verticalItemSpacing; } set { _verticalItemSpacing = value; OnPropertyChanged(); } }
+        public int VerticalItemSpacing
+        { get { return _verticalItemSpacing; } set { _verticalItemSpacing = value; OnPropertyChanged(); } }
 
         private int _column = 2;
-        public int Column { get { return _column; } set { _column = value; OnPropertyChanged(); } }
+        public int Column
+        { get { return _column; } set { _column = value; OnPropertyChanged(); } }
 
         public Point ImageCenter { get => new Point(ImageWidthRequest / 2.0, ImageHeightRequest / 2.0); }
 
         public ImageOptions()
         {
-            Content = new CollectionView {
+            Content = new CollectionView
+            {
                 SelectionMode = SelectionMode.None,
-                
+
                 ItemsLayout = new GridItemsLayout(ItemsLayoutOrientation.Vertical) { }
                 .Bind(GridItemsLayout.SpanProperty, nameof(Column))
                 .Bind(GridItemsLayout.VerticalItemSpacingProperty, nameof(VerticalItemSpacing)),
 
-                ItemTemplate = new DataTemplate(()=>new StackLayout {
+                ItemTemplate = new DataTemplate(() => new StackLayout
+                {
                     Orientation = StackOrientation.Vertical,
-                    Children = { 
-                        new SelectableImage{ 
-                            Aspect = Aspect.AspectFill, 
+                    Children = {
+                        new SelectableImage{
+                            Aspect = Aspect.AspectFill,
                             Clip = new EllipseGeometry{ }
                             .Bind(EllipseGeometry.CenterProperty, nameof(ImageCenter), source:this)
                             .Bind(EllipseGeometry.RadiusXProperty, "ImageCenter.X", source:this)
@@ -133,7 +147,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
         /// <summary>
         /// OnSelectedIndexChanged
         /// </summary>
-        
+
         private void OnSelectedIndexChanged()
         {
             if (ItemsSource == null)
@@ -147,7 +161,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
             }
             else if (SelectedIndex > ItemsSource!.Count - 1)
             {
-                throw ClientExceptions.ImageOptionsOutOfRange(selectedIndex: SelectedIndex, cause:"ImageOptions SelectedIndex Out of Range.");
+                throw ClientExceptions.ImageOptionsOutOfRange(selectedIndex: SelectedIndex, cause: "ImageOptions SelectedIndex Out of Range.");
             }
 
             SelectedItem = ItemsSource[SelectedIndex];

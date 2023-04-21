@@ -1,4 +1,10 @@
-﻿using HB.FullStack.Common;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using HB.FullStack.Common;
 using Microsoft.Maui.Controls;
 
 using SkiaSharp;
@@ -15,6 +21,7 @@ using HB.FullStack.Common.Files;
 using HB.FullStack.Client.MauiLib.Utils;
 using CommunityToolkit.Mvvm.Input;
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.MauiLib.Base;
 
 namespace HB.FullStack.Client.MauiLib.Controls
 {

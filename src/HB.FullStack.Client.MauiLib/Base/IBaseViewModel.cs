@@ -1,11 +1,17 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 
-namespace HB.FullStack.Client.MauiLib.Controls
+namespace HB.FullStack.Client.MauiLib.Base
 {
     //TODO: 是否使用Toolkit中的ObservableObject
     public interface IBaseViewModel : INotifyPropertyChanging, INotifyPropertyChanged
@@ -29,6 +35,4 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
         void OnExceptionDisplay(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, bool report = false, [CallerMemberName] string caller = "");
     }
-
-
 }

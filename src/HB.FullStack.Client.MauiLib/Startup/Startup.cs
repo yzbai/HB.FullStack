@@ -78,6 +78,14 @@ namespace Microsoft.Maui.Hosting
             services.AddSingleton<PopupSizeConstants>();
             services.AddTransient<CropperPage>();
             services.AddTransient<CropperViewModel>();
+            services.AddTransient<IntroducePage>();
+            services.AddTransient<IntroduceViewModel>();
+            services.AddTransient<LoginPage>();
+            services.AddTransient<LoginViewModel>();
+            services.AddTransient<RegisterProfilePage>();
+            services.AddTransient<RegisterProfileViewModel>();
+            services.AddTransient<SmsVerifyPage>();
+            services.AddTransient<SmsVerifyViewModel>();
 
             //MauiLib - Essentials
             services.AddSingleton<IDeviceDisplay>(DeviceDisplay.Current);
