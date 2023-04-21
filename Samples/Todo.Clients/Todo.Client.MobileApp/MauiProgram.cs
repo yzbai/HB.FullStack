@@ -42,7 +42,9 @@ namespace Todo.Client.MobileApp
         public const string SITE_TODO_SERVER_MAIN_BASE_URL = "https://localhost:7157/api/";
 
         public const string DB_SCHEMA_MAIN = "TodoMain";
+        public const string DB_SCHEMA_MAIN_FILE = "TodoMain.db";
         public const string DB_SCHEMA_USER = "TodoUser_{0}";
+        public const string DB_SCHEMA_USER_FILE = "TodoUser_{0}.db";
 
         private const string ALIYUN_OSS_ENDPOINT = "oss-cn-hangzhou.aliyuncs.com";
         private const string ALIYUN_OSS_BUCKET_NAME = "mycolorfultime-private-dev";
@@ -65,7 +67,7 @@ namespace Todo.Client.MobileApp
                             Name = DB_SCHEMA_MAIN,
                             EngineType = DbEngineType.SQLite,
                             Version = 1,
-                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.DbFileDirectory, DB_SCHEMA_MAIN)}")
+                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.DbFileDirectory, DB_SCHEMA_MAIN_FILE)}")
                         });
                         dbOptions.DbSchemas.Add(new DbSchema
                         {

@@ -1,8 +1,10 @@
-﻿<?xml version = "1.0" encoding = "UTF-8" ?>
-<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Todo.Client.MobileApp"
-             x:Class="Todo.Client.MobileApp.App">
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<base:BaseApplication
+    x:Class="Todo.Client.MobileApp.App"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base;assembly=HB.FullStack.Client.MauiLib"
+    xmlns:local="clr-namespace:Todo.Client.MobileApp">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -11,4 +13,4 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
-</Application>
+</base:BaseApplication>
