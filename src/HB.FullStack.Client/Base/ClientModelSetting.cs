@@ -14,7 +14,7 @@ namespace HB.FullStack.Client.Base
 {
     public class ClientModelSetting
     {
-        public int ExpirySeconds { get; set; }
+        public TimeSpan ExpiryTime { get; set; }
 
         public bool AllowOfflineRead { get; set; }
 

@@ -44,15 +44,15 @@ namespace HB.FullStack.Client.Base
 
             ClientModelSetting newDef = new ClientModelSetting
             {
-                ExpirySeconds = localDataAttribute.ExpiryTimeType switch
+                ExpiryTime = localDataAttribute.ExpiryTimeType switch
                 {
-                    ExpiryTimeType.Always => 0,
-                    ExpiryTimeType.Tiny => _clientOptions.TinyExpirySeconds,
-                    ExpiryTimeType.Short => _clientOptions.ShortExpirySeconds,
-                    ExpiryTimeType.Medium => _clientOptions.MediumExpirySeconds,
-                    ExpiryTimeType.Long => _clientOptions.LongExpirySeconds,
-                    ExpiryTimeType.NonExpiry => int.MaxValue,
-                    _ => 0,
+                    ExpiryTimeType.Always => TimeSpan.FromSeconds(0),
+                    ExpiryTimeType.Tiny => TimeSpan.FromSeconds(_clientOptions.TinyExpirySeconds),
+                    ExpiryTimeType.Short => TimeSpan.FromSeconds(_clientOptions.ShortExpirySeconds),
+                    ExpiryTimeType.Medium => TimeSpan.FromSeconds(_clientOptions.MediumExpirySeconds),
+                    ExpiryTimeType.Long => TimeSpan.FromSeconds(_clientOptions.LongExpirySeconds),
+                    ExpiryTimeType.NonExpiry => TimeSpan.FromSeconds(int.MaxValue),
+                    _ => TimeSpan.FromSeconds(0),
                 },
 
                 AllowOfflineRead = localDataAttribute.AllowOfflineRead,

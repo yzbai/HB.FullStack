@@ -38,12 +38,13 @@ namespace HB.FullStack.Client.Components.Sts
         public StsTokenRepo(
             ILogger<StsTokenRepo> logger,
             IOptions<FileManagerOptions> fileManagerOptions,
+            IClientModelSettingFactory clientModelSettingFactory,
             IDatabase database,
             IApiClient apiClient,
             IClientEvents clientEvents,
             IPreferenceProvider preferenceProvider,
             ISyncManager syncManager)
-            : base(logger, database, apiClient, syncManager, clientEvents, preferenceProvider)
+            : base(logger, clientModelSettingFactory, database, apiClient, syncManager, clientEvents, preferenceProvider)
         {
             _logger = logger;
             _fileManagerOptions = fileManagerOptions.Value;

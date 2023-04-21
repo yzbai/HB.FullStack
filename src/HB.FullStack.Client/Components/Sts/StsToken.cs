@@ -12,8 +12,7 @@ using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Client.Components.Files
 {
-    [ClientModel(
-      expirySeconds: int.MaxValue, //由StsToken.ExpirationAt业务逻辑决定
+    [ClientModelSetting(expiryTimeType: ExpiryTimeType.NonExpiry, //由StsToken.ExpirationAt业务逻辑决定
       allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
     public partial class StsToken : ClientDbModel
     {

@@ -26,15 +26,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IFileManager, FileManager>();
             services.AddSingleton<StsTokenRepo>();
 
-            ClientModelSettingFactory.Register<StsToken>(new ClientModelSetting
-            {
-                ExpiryTime = TimeSpan.MaxValue,
-                AllowOfflineRead = false,
-                AllowOfflineAdd = false,
-                AllowOfflineDelete = false,
-                AllowOfflineUpdate = false
-            });
-
             return services;
         }
     }
