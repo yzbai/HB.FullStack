@@ -5,18 +5,22 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using HB.FullStack.Common.Files;
+
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.MauiLib.Base;
+using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
-using HB.FullStack.Client.Abstractions;
 
-namespace HB.FullStack.Client.MauiLib.Controls
+namespace HB.FullStack.Client.MauiLib.Components
 {
-    public class IntroduceViewModel : BaseViewModel
+    public class LoginViewModel : BaseViewModel
     {
-        public IntroduceViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        public LoginViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
         {
         }
 

@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -11,7 +17,7 @@ using HB.FullStack.Common.Files;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.Storage;
 
-namespace HB.FullStack.Client.MauiLib.Services.Files
+namespace HB.FullStack.Client.MauiLib.Components
 {
     public partial class LocalFileManager : ILocalFileManager
     {
@@ -103,6 +109,6 @@ namespace HB.FullStack.Client.MauiLib.Services.Files
         {
             //TODO:名字太长，缩短
             return $"r{SecurityUtil.CreateUniqueToken()}{fileExtension}";
-        }       
+        }
     }
 }

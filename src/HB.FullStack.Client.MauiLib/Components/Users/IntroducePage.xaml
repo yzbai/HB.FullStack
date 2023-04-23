@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <base:BasePage
-    x:Class="HB.FullStack.Client.MauiLib.Controls.SmsVerifyPage"
+    x:Class="HB.FullStack.Client.MauiLib.Components.IntroducePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base"
-    xmlns:fs="clr-namespace:HB.FullStack.Client.MauiLib.Controls"
-    Title="SmsVerifyPage"
-    x:DataType="fs:SmsVerifyViewModel"
-    x:TypeArguments="fs:SmsVerifyViewModel">
+    xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
+    Title="IntroducePage"
+    x:DataType="components:IntroduceViewModel"
+    x:TypeArguments="components:IntroduceViewModel">
     <VerticalStackLayout>
         <Label
             HorizontalOptions="Center"

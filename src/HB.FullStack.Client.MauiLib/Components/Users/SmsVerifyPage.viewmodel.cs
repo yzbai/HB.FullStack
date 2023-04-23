@@ -16,11 +16,11 @@ using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Client.MauiLib.Controls
+namespace HB.FullStack.Client.MauiLib.Components
 {
-    public class RegisterProfileViewModel : BaseViewModel
+    public class SmsVerifyViewModel : BaseViewModel
     {
-        public RegisterProfileViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        public SmsVerifyViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
         {
         }
 

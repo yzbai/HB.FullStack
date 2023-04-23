@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <base:BasePage
-    x:Class="HB.FullStack.Client.MauiLib.Controls.IntroducePage"
+    x:Class="HB.FullStack.Client.MauiLib.Components.LoginPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base"
-    xmlns:fs="clr-namespace:HB.FullStack.Client.MauiLib.Controls"
-    Title="IntroducePage"
-    x:DataType="fs:IntroduceViewModel"
-    x:TypeArguments="fs:IntroduceViewModel">
+    xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
+    Title="LoginPage"
+    x:DataType="components:LoginViewModel"
+    x:TypeArguments="components:LoginViewModel">
     <VerticalStackLayout>
         <Label
             HorizontalOptions="Center"

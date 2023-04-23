@@ -47,22 +47,22 @@
 		<Compile Update="Controls\Basics\TimeEditor.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
-		<Compile Update="Controls\Users\IntroducePage.xaml.cs">
+		<Compile Update="Components\Users\IntroducePage.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
 		<Compile Update="Controls\Popups\ExceptionPopup.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
-		<Compile Update="Controls\Users\LoginPage.xaml.cs">
+		<Compile Update="Components\Users\LoginPage.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
-		<Compile Update="Controls\Users\RegisterProfilePage.xaml.cs">
+		<Compile Update="Components\Users\RegisterProfilePage.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
-		<Compile Update="Controls\Users\SmsVerifyPage.xaml.cs">
+		<Compile Update="Components\Users\SmsVerifyPage.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
-		<Compile Update="Services\Captcha\CaptchaPopup.cs">
+		<Compile Update="Components\Captcha\CaptchaPopup.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
 	</ItemGroup>
@@ -74,19 +74,19 @@
 		<MauiXaml Update="Controls\Basics\TimeEditor.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Controls\Users\IntroducePage.xaml">
+		<MauiXaml Update="Components\Users\IntroducePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Controls\Popups\ExceptionPopup.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Controls\Users\LoginPage.xaml">
+		<MauiXaml Update="Components\Users\LoginPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Controls\Users\RegisterProfilePage.xaml">
+		<MauiXaml Update="Components\Users\RegisterProfilePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Controls\Users\SmsVerifyPage.xaml">
+		<MauiXaml Update="Components\Users\SmsVerifyPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	</ItemGroup>

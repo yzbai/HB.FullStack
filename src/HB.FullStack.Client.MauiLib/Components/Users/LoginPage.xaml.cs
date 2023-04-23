@@ -8,11 +8,11 @@ using System.Collections.Generic;
 
 using HB.FullStack.Client.MauiLib.Base;
 
-namespace HB.FullStack.Client.MauiLib.Controls;
+namespace HB.FullStack.Client.MauiLib.Components;
 
-public partial class RegisterProfilePage : BasePage<RegisterProfileViewModel>
+public partial class LoginPage : BasePage<LoginViewModel>
 {
-    public RegisterProfilePage()
+    public LoginPage()
     {
         InitializeComponent();
     }

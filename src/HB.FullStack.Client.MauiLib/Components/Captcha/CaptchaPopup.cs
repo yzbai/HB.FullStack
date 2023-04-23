@@ -1,10 +1,16 @@
-﻿using Microsoft.Maui.Controls;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using Microsoft.Maui.Controls;
 using CommunityToolkit.Maui.Markup;
 using CommunityToolkit.Maui.Views;
 using System;
 using HB.FullStack.Client.MauiLib.Controls;
 
-namespace HB.FullStack.Client.MauiLib.Services.Captcha
+namespace HB.FullStack.Client.MauiLib.Components
 {
     public class CaptchaPopup : Popup
     {
@@ -17,7 +23,7 @@ namespace HB.FullStack.Client.MauiLib.Services.Captcha
                     <script src=""https://ssl.captcha.qq.com/TCaptcha.js""></script>
                 </head>
                 <body>
-                    
+
                 </body>
                 <script>
                     function showCaptcha(appid) {

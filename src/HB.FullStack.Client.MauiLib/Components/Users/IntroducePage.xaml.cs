@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 using HB.FullStack.Client.MauiLib.Base;
 
-namespace HB.FullStack.Client.MauiLib.Controls;
+namespace HB.FullStack.Client.MauiLib.Components;
 
 public partial class IntroducePage : BasePage<IntroduceViewModel>
 {

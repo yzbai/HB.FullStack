@@ -1,10 +1,15 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.MauiLib.Services.Files
+namespace HB.FullStack.Client.MauiLib.Components
 {
     public partial class LocalFileManager
     {
