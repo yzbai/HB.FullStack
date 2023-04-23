@@ -43,7 +43,7 @@ namespace Todo.Client.ConsoleApp
             {
                 apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
 
-                apiClientOptions.SignInReceiptSiteSetting = new SiteSetting
+                apiClientOptions.TokenSiteSetting = new SiteSetting
                 {
                     SiteName = "SignInReceiptSite",
                     BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)

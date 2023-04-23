@@ -18,7 +18,6 @@ namespace HB.FullStack.Client.ApiClient
 
         event Func<object?, ApiEventArgs, Task>? Responsed;
 
-        ITokenPreferences TokenPreferences { get; }
 
         Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class;
 
@@ -27,5 +26,9 @@ namespace HB.FullStack.Client.ApiClient
         Task SendAsync(ApiRequest request, CancellationToken cancellationToken);
 
         Task SendAsync(ApiRequest request);
+        
+        internal ITokenPreferences TokenPreferences { get; }
+
+        internal ApiClientOptions ApiClientOptions { get; }
     }
 }

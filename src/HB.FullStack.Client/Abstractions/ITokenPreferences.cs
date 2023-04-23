@@ -45,7 +45,7 @@ namespace HB.FullStack.Client.Abstractions
 
         bool IsLogined() => AccessToken.IsNotNullOrEmpty();
 
-        void OnTokenFetched(TokenRes signInReceipt);
+        void OnTokenFetched(TokenRes tokenRes);
 
         void OnTokenDeleted();
 

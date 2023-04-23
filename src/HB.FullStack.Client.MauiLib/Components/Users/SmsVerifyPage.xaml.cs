@@ -8,6 +8,8 @@ using System.Collections.Generic;
 
 using HB.FullStack.Client.MauiLib.Base;
 
+using Microsoft.Maui.Controls;
+
 namespace HB.FullStack.Client.MauiLib.Components;
 
 public partial class SmsVerifyPage : BasePage<SmsVerifyViewModel>
@@ -19,5 +21,14 @@ public partial class SmsVerifyPage : BasePage<SmsVerifyViewModel>
 
     protected override void RegisterCustomerControls(IList<IBaseContentView> customerControls)
     {
+        customerControls.Add(SmsEntry);
+    }
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+
+        //TODO: ≤ª––æÕ ‘ ‘Loaded
+        SmsEntry.Focus();
     }
 }

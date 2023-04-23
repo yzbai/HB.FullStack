@@ -85,7 +85,7 @@ namespace Todo.Client.MobileApp
                             apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
                         }
 
-                        apiClientOptions.SignInReceiptSiteSetting = new SiteSetting
+                        apiClientOptions.TokenSiteSetting = new SiteSetting
                         {
                             SiteName = SITE_TODO_SERVER_MAIN,
                             BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)

@@ -17,12 +17,12 @@ namespace HB.FullStack.Client.ApiClient
 
         [RequestQuery]
         public string LoginName { get; set; }
+        
         [RequestQuery]
         public string Audience { get; set; }
 
         [RequestQuery]
         public string Password { get; set; }
-
 
         [RequestQuery]
         public DeviceInfos DeviceInfos { get; set; }

@@ -86,9 +86,9 @@ namespace HB.FullStack.Client.MauiLib
             _isLoginPagePushed = true;
         }
 
-        public static async Task GotoSmsVerifyPageAsync(string mobile, int codeLength)
+        public static async Task GotoSmsVerifyPageAsync(string mobile, int smsCodeLength)
         {
-            await Currents.Shell.GoToAsync($"{nameof(SmsVerifyPage)}?Mobile={mobile}&CodeLength={codeLength}");
+            await Currents.Shell.GoToAsync($"{nameof(SmsVerifyPage)}?Mobile={mobile}&SmsCodeLength={smsCodeLength}");
         }
 
         public static async Task OnSmsCodeVerifiedAsync()
@@ -146,7 +146,7 @@ namespace HB.FullStack.Client.MauiLib
                 return false;
             }
 
-            bool introducedYet = TokenPreferences.IsIntroducedYet;
+            bool introducedYet = Currents.IsIntroducedYet;
 
             if (!introducedYet)
             {
@@ -161,7 +161,7 @@ namespace HB.FullStack.Client.MauiLib
 
             if (isFirstLanch)
             {
-                TokenPreferences.IsIntroducedYet = false;
+                Currents.IsIntroducedYet = false;
                 return true;
             }
 

@@ -12,13 +12,14 @@ namespace HB.FullStack.Client.ApiClient
     {
         public ApiClientOptions Value => this;
 
-        public SiteSetting SignInReceiptSiteSetting { get; set; } = null!;
+        //TODO: 目前只能向一个站点进行登录，以后考虑多站点登录
+        public SiteSetting TokenSiteSetting { get; set; } = null!;
 
         public IList<SiteSetting> OtherSiteSettings { get; set; } = new List<SiteSetting>();
 
         public IList<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
-        public int SignInReceiptRefreshIntervalSeconds { get; set; } = 300;
+        public int TokenRefreshIntervalSeconds { get; set; } = 300;
 
         public TimeSpan HttpClientTimeout { get; set; } = TimeSpan.FromSeconds(20);
 

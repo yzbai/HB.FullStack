@@ -4,14 +4,51 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base"
+    xmlns:behaviors="clr-namespace:HB.FullStack.Client.MauiLib.Behaviors"
     xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
+    xmlns:controls="clr-namespace:HB.FullStack.Client.MauiLib.Controls"
     Title="SmsVerifyPage"
     x:DataType="components:SmsVerifyViewModel"
     x:TypeArguments="components:SmsVerifyViewModel">
     <VerticalStackLayout>
         <Label
-            HorizontalOptions="Center"
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" />
+            Margin="20,80,20,0"
+            FontSize="Title"
+            Text="请输入验证码"
+            TextColor="Black" />
+        <Label Margin="20,0,20,0" FontSize="Small">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="已发送至" />
+                    <Span Text="{Binding Mobile}" />
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+        <controls:SmsCodeEntry
+            x:Name="SmsEntry"
+            CodeCount="{Binding SmsCodeLength}"
+            FontSize="24"
+            Text="{Binding SmsCode}">
+            <controls:SmsCodeEntry.Behaviors>
+                <behaviors:SmsCodeValidationBehavior
+                    x:Name="SmsCodeEntryValidator"
+                    Flags="ValidateOnValueChanged,ValidateOnFocusing"
+                    SmsCodeLength="{Binding CodeCount, Source={x:Reference SmsEntry}}" />
+            </controls:SmsCodeEntry.Behaviors>
+        </controls:SmsCodeEntry>
+        <Label x:Name="CoutingDownLabel" Margin="20,0,20,0" FontSize="Small" IsVisible="{Binding CountingDownNumber, Converter={StaticResource IntToBoolConverter}}">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="{Binding CountingDownNumber}" />
+                    <Span Text="秒后可以重新发送" />
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+        <Label Text="重新发送" Margin="20,0,20,0" FontSize="Small" IsVisible="{Binding IsVisible, Source={x:Reference CoutingDownLabel}, Converter={StaticResource InvertedBoolConverter}}" TextColor="Blue">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding RequestSmsCodeCommand}" />
+            </Label.GestureRecognizers>
+        </Label>
+        <Button x:Name="ConfirmBtn" Text="确定" Margin="20,20,20,0" Command="{Binding ConfirmSmsCodeCommand}" IsEnabled="{Binding IsValid, Source={x:Reference SmsCodeEntryValidator}}" />
     </VerticalStackLayout>
 </base:BasePage>

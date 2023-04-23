@@ -9,7 +9,11 @@ namespace System
 {
     public static class IFileManagerImageSourceExtensions
     {
-        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, Directory2 directory, string? fileName, string defaultFileName, bool remoteForced = false)
+        public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, 
+            Directory2 directory, 
+            string? fileName, 
+            string? defaultFileName, 
+            bool remoteForced = false)
         {
             ImageSource? initImageSource = null;
 

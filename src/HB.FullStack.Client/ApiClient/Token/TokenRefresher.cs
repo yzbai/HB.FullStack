@@ -24,10 +24,10 @@ namespace HB.FullStack.Client.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        public static async Task<bool> RefreshSignInReceiptAsync(
+        public static async Task<bool> RefreshTokenAsync(
             IApiClient apiClient,
             ITokenPreferences preferenceProvider,
-            int signInReceiptRefreshIntervalSeconds)
+            int tokenRefreshIntervalSeconds)
         {
             if (preferenceProvider.AccessToken.IsNullOrEmpty())
             {
@@ -38,9 +38,9 @@ namespace HB.FullStack.Client.ApiClient
 
             //这个AccessToken不久前刷新过
             if (!_requestLimiter.NoWaitLock(
-                nameof(RefreshSignInReceiptAsync),
+                nameof(RefreshTokenAsync),
                 accessTokenHashKey,
-                TimeSpan.FromSeconds(signInReceiptRefreshIntervalSeconds)))
+                TimeSpan.FromSeconds(tokenRefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))

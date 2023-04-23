@@ -56,69 +56,68 @@ namespace HB.FullStack.Client.ApiClient
             {
                 _apiKeys = _options.ApiKeys.ToDictionary(item => item.Name, item => item.Key);
             }
-        }
-
-        public void RangeResEndpoints()
-        {
-            AddResEndpointsFromCode();
-            AddResEndpointsFromSignInReceiptSite();
-            AddResEndpointFromOtherSites();
-
-            void AddResEndpointsFromCode()
+            void RangeResEndpoints()
             {
-                IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
+                AddResEndpointsFromCode();
+                AddResEndpointsFromTokenSite();
+                AddResEndpointFromOtherSites();
 
-                foreach (Type resType in resTypes)
+                void AddResEndpointsFromCode()
                 {
-                    ResEndpoint endpoint = new ResEndpoint(resType.Name);
+                    IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
 
-                    //直接把SignInReceiptSite作为默认
-                    endpoint.SiteSetting = _options.SignInReceiptSiteSetting;
-
-                    ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
-
-                    if (attr != null)
+                    foreach (Type resType in resTypes)
                     {
-                        endpoint.ResName = attr.ResName ?? endpoint.ResName;
-                        endpoint.Type = attr.Type ?? endpoint.Type;
-                        endpoint.ControllerOrPlainUrl = attr.ControllerOrPlainUrl ?? endpoint.ControllerOrPlainUrl;
-                        endpoint.DefaultReadAuth = attr.DefaultReadAuth ?? endpoint.DefaultReadAuth;
-                        endpoint.DefaultWriteAuth = attr.DefaultWriteAuth ?? endpoint.DefaultWriteAuth;
-                    }
+                        ResEndpoint endpoint = new ResEndpoint(resType.Name);
 
-                    _resEndpoints[endpoint.ResName] = endpoint;
-                }
-            }
+                        //直接把TokenSite作为默认
+                        endpoint.SiteSetting = _options.TokenSiteSetting;
 
-            void AddResEndpointsFromSignInReceiptSite()
-            {
-                _options.SignInReceiptSiteSetting.SiteName ??= "SignInReceiptSite";
+                        ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
 
-                foreach (ResEndpoint endpoint in _options.SignInReceiptSiteSetting.Endpoints)
-                {
-                    endpoint.SiteSetting = _options.SignInReceiptSiteSetting;
-                    _resEndpoints[endpoint.ResName] = endpoint;
-                }
+                        if (attr != null)
+                        {
+                            endpoint.ResName = attr.ResName ?? endpoint.ResName;
+                            endpoint.Type = attr.Type ?? endpoint.Type;
+                            endpoint.ControllerOrPlainUrl = attr.ControllerOrPlainUrl ?? endpoint.ControllerOrPlainUrl;
+                            endpoint.DefaultReadAuth = attr.DefaultReadAuth ?? endpoint.DefaultReadAuth;
+                            endpoint.DefaultWriteAuth = attr.DefaultWriteAuth ?? endpoint.DefaultWriteAuth;
+                        }
 
-                ResEndpoint signInReCeiptResEndpoint = new ResEndpoint(nameof(TokenRes));
-                signInReCeiptResEndpoint.SiteSetting = _options.SignInReceiptSiteSetting;
-                _resEndpoints[nameof(TokenRes)] = signInReCeiptResEndpoint;
-            }
-
-            void AddResEndpointFromOtherSites()
-            {
-                foreach (SiteSetting siteSetting in _options.OtherSiteSettings)
-                {
-                    foreach (ResEndpoint endpoint in siteSetting.Endpoints)
-                    {
-                        endpoint.SiteSetting = siteSetting;
-
-                        //override attribute of res
                         _resEndpoints[endpoint.ResName] = endpoint;
                     }
                 }
+
+                void AddResEndpointsFromTokenSite()
+                {
+                    _options.TokenSiteSetting.SiteName ??= "TokenSite";
+
+                    foreach (ResEndpoint endpoint in _options.TokenSiteSetting.Endpoints)
+                    {
+                        endpoint.SiteSetting = _options.TokenSiteSetting;
+                        _resEndpoints[endpoint.ResName] = endpoint;
+                    }
+
+                    ResEndpoint toeknResEndpoint = new ResEndpoint(nameof(TokenRes));
+                    toeknResEndpoint.SiteSetting = _options.TokenSiteSetting;
+                    _resEndpoints[nameof(TokenRes)] = toeknResEndpoint;
+                }
+
+                void AddResEndpointFromOtherSites()
+                {
+                    foreach (SiteSetting siteSetting in _options.OtherSiteSettings)
+                    {
+                        foreach (ResEndpoint endpoint in siteSetting.Endpoints)
+                        {
+                            endpoint.SiteSetting = siteSetting;
+
+                            //override attribute of res
+                            _resEndpoints[endpoint.ResName] = endpoint;
+                        }
+                    }
+                }
             }
-        }
+        } 
 
         #region Events
 
@@ -189,7 +188,7 @@ namespace HB.FullStack.Client.ApiClient
             {
                 if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await TokenRefresher.RefreshSignInReceiptAsync(this, TokenPreferences, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
+                    bool refreshSuccessed = await TokenRefresher.RefreshTokenAsync(this, TokenPreferences, _options.TokenRefreshIntervalSeconds).ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {

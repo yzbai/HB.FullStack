@@ -13,14 +13,14 @@ using HB.FullStack.Common.Shared.Resources;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public static class IApiClientSignInReceiptExtensions
+    public static class IApiClientTokenExtensions
     {
-        public static async Task RegisterByLoginNameAsync(this IApiClient apiClient, string loginName, string password, string audience)
+        public static async Task RegisterByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
         {
             TokenResRegisterByLoginNameRequest registerRequest = new TokenResRegisterByLoginNameRequest(
                 loginName,
                 password,
-                audience,
+                apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
                 apiClient.TokenPreferences.DeviceInfos);
 
             await apiClient.SendAsync(registerRequest).ConfigureAwait(false);
@@ -29,23 +29,23 @@ namespace HB.FullStack.Client.ApiClient
             //apiClient.TokenPreferences.OnRegistered();
         }
 
-        public static async Task LoginByLoginNameAsync(this IApiClient apiClient, string loginName, string password, string audience)
+        public static async Task LoginByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
         {
             TokenResGetByLoginNameRequest request = new TokenResGetByLoginNameRequest(
                 loginName,
                 password,
-                audience,
+                apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
                 apiClient.TokenPreferences.DeviceInfos);
 
             await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
         }
 
-        public static async Task LoginBySmsAsync(this IApiClient apiClient, string mobile, string smsCode, string audience)
+        public static async Task LoginBySmsAsync(this IApiClient apiClient, string mobile, string smsCode)
         {
             TokenResGetBySmsRequest request = new TokenResGetBySmsRequest(
                 mobile,
                 smsCode,
-                audience,
+                apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
                 apiClient.TokenPreferences.DeviceInfos);
 
             await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
@@ -60,7 +60,7 @@ namespace HB.FullStack.Client.ApiClient
             apiClient.TokenPreferences.OnTokenDeleted();
         }
 
-        public static async Task RefreshSignInReceiptAsync(this IApiClient apiClient)
+        public static async Task RefreshTokenAsync(this IApiClient apiClient)
         {
             ITokenPreferences preferenceProvider = apiClient.TokenPreferences;
 
@@ -80,7 +80,7 @@ namespace HB.FullStack.Client.ApiClient
         {
             TokenRes? res = await apiClient.GetAsync<TokenRes>(request).ConfigureAwait(false);
 
-            ThrowIf.Null(res, "Return a null SignInReceiptRes");
+            ThrowIf.Null(res, "Return a null TokenRes");
 
             apiClient.TokenPreferences.OnTokenFetched(res);
         }

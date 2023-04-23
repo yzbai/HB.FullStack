@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddApiClientCore(IServiceCollection services, ApiClientOptions options)
         {
-            AddSignInReceiptSiteHttpClient(services, options);
+            AddTokenSiteHttpClient(services, options);
             
             AddOtherSiteHttpClient(services, options);
 
@@ -44,15 +44,15 @@ namespace Microsoft.Extensions.DependencyInjection
             //HttpClientHandler会随着HttpClient Dispose 而Dispose
             services.AddTransient<TokenRefreshHttpClientHandler>();
 
-            static void AddSignInReceiptSiteHttpClient(IServiceCollection services, ApiClientOptions options)
+            static void AddTokenSiteHttpClient(IServiceCollection services, ApiClientOptions options)
             {
-                //SignInReceiptSite
-                IHttpClientBuilder signInReceiptHttpClientBuilder = services.AddHttpClient(options.SignInReceiptSiteSetting.GetHttpClientName(), httpClient=>
+                //TokenSite
+                IHttpClientBuilder tokenHttpClientBuilder = services.AddHttpClient(options.TokenSiteSetting.GetHttpClientName(), httpClient=>
                 {
 #if NET5_0_OR_GREATER
-                    httpClient.DefaultRequestVersion = options.SignInReceiptSiteSetting.HttpVersion;
+                    httpClient.DefaultRequestVersion = options.TokenSiteSetting.HttpVersion;
 #endif
-                    httpClient.BaseAddress = options.SignInReceiptSiteSetting.BaseUrl;
+                    httpClient.BaseAddress = options.TokenSiteSetting.BaseUrl;
 
                     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
                     httpClient.DefaultRequestHeaders.Add("User-Agent", options.UserAgent);
@@ -62,7 +62,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 if (options.ConfigureHttpMessageHandler != null)
                 {
-                    signInReceiptHttpClientBuilder.ConfigurePrimaryHttpMessageHandler(options.ConfigureHttpMessageHandler);
+                    tokenHttpClientBuilder.ConfigurePrimaryHttpMessageHandler(options.ConfigureHttpMessageHandler);
                 }
             }
 

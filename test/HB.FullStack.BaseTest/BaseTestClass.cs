@@ -217,7 +217,7 @@ namespace HB.FullStack.BaseTest
                 {
                     options.HttpClientTimeout = TimeSpan.FromSeconds(100);
 
-                    options.SignInReceiptSiteSetting = new SiteSetting
+                    options.TokenSiteSetting = new SiteSetting
                     {
                         BaseUrl = new Uri($"http://localhost:{Port}/api/")
                     };

@@ -50,7 +50,7 @@ namespace HB.FullStack.Client.ApiClient
 
             if (endpointSettings == null)
             {
-                Globals.Logger.LogError($"SignInReceiptRefreshHttpClientHandler Not found endpoint for {request.RequestUri}");
+                Globals.Logger.LogError($"TokenRefreshHttpClientHandler Not found endpoint for {request.RequestUri}");
                 return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
 
@@ -66,7 +66,7 @@ namespace HB.FullStack.Client.ApiClient
             {
                 if (ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    await TokenRefresher.RefreshSignInReceiptAsync(_apiClient, _preferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
+                    await TokenRefresher.RefreshTokenAsync(_apiClient, _preferenceProvider, _options.TokenRefreshIntervalSeconds).ConfigureAwait(false);
 
                     return responseMessage;
                 }
