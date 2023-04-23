@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Client.MauiLib.Components;
 using HB.FullStack.Client.MauiLib.Controls;
 
 using Microsoft.Maui.Controls;
