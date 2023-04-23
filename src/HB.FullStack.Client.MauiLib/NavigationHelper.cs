@@ -86,9 +86,9 @@ namespace HB.FullStack.Client.MauiLib
             _isLoginPagePushed = true;
         }
 
-        public static async Task GotoSmsVerifyPageAsync(string mobile)
+        public static async Task GotoSmsVerifyPageAsync(string mobile, int codeLength)
         {
-            await Currents.Shell.GoToAsync($"{nameof(SmsVerifyPage)}?Mobile={mobile}");
+            await Currents.Shell.GoToAsync($"{nameof(SmsVerifyPage)}?Mobile={mobile}&CodeLength={codeLength}");
         }
 
         public static async Task OnSmsCodeVerifiedAsync()

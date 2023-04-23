@@ -18,6 +18,5 @@ public partial class IntroducePage : BasePage<IntroduceViewModel>
     }
 
     protected override void RegisterCustomerControls(IList<IBaseContentView> customerControls)
-    {
-    }
+    { }
 }

@@ -16,9 +16,9 @@ namespace HB.FullStack.Client.MauiLib.Base
     //TODO: 是否使用Toolkit中的ObservableObject
     public interface IBaseViewModel : INotifyPropertyChanging, INotifyPropertyChanged
     {
-        bool IsBusy { get; }
+        //bool IsBusy { get; }
 
-        string Title { get; }
+        //string Title { get; }
 
         /// <summary>
         /// 本质是：像网络请求一样，为无状态 储存或恢复状态

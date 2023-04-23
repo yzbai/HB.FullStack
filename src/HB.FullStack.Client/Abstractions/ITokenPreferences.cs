@@ -21,8 +21,6 @@ namespace HB.FullStack.Client.Abstractions
 
         DeviceInfos DeviceInfos { get; }
 
-        bool IsIntroducedYet { get; set; }
-
         #endregion
 
         Guid? UserId { get; }

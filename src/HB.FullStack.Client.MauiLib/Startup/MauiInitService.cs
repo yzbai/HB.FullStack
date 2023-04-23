@@ -16,9 +16,9 @@ namespace HB.FullStack.Client.MauiLib.Startup
 {
     public class MauiInitService : IMauiInitializeService
     {
-        private readonly MauiInitOptions _options;
+        private readonly MauiOptions _options;
 
-        public MauiInitService(IOptions<MauiInitOptions> options)
+        public MauiInitService(IOptions<MauiOptions> options)
         {
             _options = options.Value;
         }

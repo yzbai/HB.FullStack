@@ -11,13 +11,27 @@ using HB.FullStack.Client.MauiLib.Base;
 
 using Microsoft.Extensions.Logging;
 using HB.FullStack.Client.Abstractions;
+using System.Collections;
+using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Options;
+using HB.FullStack.Client.MauiLib.Startup;
 
 namespace HB.FullStack.Client.MauiLib.Components
 {
-    public class IntroduceViewModel : BaseViewModel
+    public partial class IntroduceViewModel : BaseViewModel
     {
-        public IntroduceViewModel(ILogger logger, ITokenPreferences preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        private readonly MauiOptions _options;
+
+        [ObservableProperty]
+        private IList<IntroduceContent>? _introduceContents;
+
+        public IntroduceViewModel(ILogger logger, ITokenPreferences preferenceProvider, IFileManager fileManager, IOptions<MauiOptions> options) : base(logger, preferenceProvider, fileManager)
         {
+            _options = options.Value;
+
+            IntroduceContents = _options.IntoduceContents;
         }
 
         public override Task OnPageAppearingAsync()
@@ -28,6 +42,14 @@ namespace HB.FullStack.Client.MauiLib.Components
         public override Task OnPageDisappearingAsync()
         {
             return Task.CompletedTask;
+        }
+
+        [RelayCommand]
+        private async Task OnFinishedAsync()
+        {
+            Currents.IsIntroducedYet = true;
+
+            await NavigationHelper.OnIntroduceFinishedAsync();
         }
     }
 }

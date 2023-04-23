@@ -26,7 +26,7 @@ using System.Reflection;
 namespace HB.FullStack.Client.MauiLib
 {
     /// <summary>
-    /// Useful Shortcuts
+    /// Useful Shortcuts, mostly UIs
     /// </summary>
     public static class Currents
     {
@@ -145,9 +145,7 @@ namespace HB.FullStack.Client.MauiLib
 
         #endregion
 
-        #region User
-
-        #endregion
+        public static bool IsIntroducedYet { get => ClientPreferences.IsIntroducedYet; set => ClientPreferences.IsIntroducedYet = value; }
 
         //public static IList<Task> AppendingTasks { get; } = new List<Task>();
     }

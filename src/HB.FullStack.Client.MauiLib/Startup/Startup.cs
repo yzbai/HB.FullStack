@@ -36,7 +36,7 @@ namespace Microsoft.Maui.Hosting
             Action<ApiClientOptions> configApiClientOptions,
             Action<FileManagerOptions> configFileManagerOptions,
             Action<ClientOptions> configClientOptions,
-            Action<MauiInitOptions> configMauiInitOptions,
+            Action<MauiOptions> configMauiOptions,
             string tCaptchaAppId)
         {
             ConfigureGlobalException();
@@ -72,7 +72,7 @@ namespace Microsoft.Maui.Hosting
             services.AddTCaptcha(tCaptchaAppId);
 
             //MauiLib - Initialize
-            services.Configure(configMauiInitOptions);
+            services.Configure(configMauiOptions);
             services.AddTransient<IMauiInitializeService, MauiInitService>();
 
             //MauiLib - Controls
