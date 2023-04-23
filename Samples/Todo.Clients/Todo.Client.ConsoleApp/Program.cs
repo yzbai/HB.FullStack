@@ -37,7 +37,7 @@ namespace Todo.Client.ConsoleApp
 
         private static void Configure(ServiceCollection services)
         {
-            services.AddSingleton<IPreferenceProvider, ConsolePreferenceProvider>();
+            services.AddSingleton<ITokenPreferences, ConsolePreferenceProvider>();
 
             services.AddApiClient(apiClientOptions =>
             {

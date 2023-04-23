@@ -145,6 +145,10 @@ namespace HB.FullStack.Client.MauiLib
 
         #endregion
 
+        #region User
+
+        #endregion
+
         //public static IList<Task> AppendingTasks { get; } = new List<Task>();
     }
 }

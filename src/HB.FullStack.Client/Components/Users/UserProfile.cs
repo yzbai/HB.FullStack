@@ -11,7 +11,7 @@ using HB.FullStack.Client.Base;
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common.Shared.Context;
 
-namespace HB.FullStack.Client.Components.User
+namespace HB.FullStack.Client.Components.Users
 {
     [ClientModelSetting(expiryTimeType: ExpiryTimeType.Tiny, allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
     public class UserProfile : ClientDbModel
@@ -29,5 +29,6 @@ namespace HB.FullStack.Client.Components.User
         public DateOnly? BirthDay { get; set; }
 
         public string? AvatarFileName { get; set; }
+
     }
 }

@@ -43,7 +43,7 @@ namespace HB.FullStack.Client.Base
             IApiClient apiClient,
             ISyncManager syncManager,
             IClientEvents clientEvents,
-            IPreferenceProvider preferenceProvider) : base(apiClient, preferenceProvider)
+            ITokenPreferences clientPreferences) : base(apiClient, clientPreferences)
         {
             _logger = logger;
             _clientModelSettingFactory = clientModelSettingFactory;
@@ -203,7 +203,7 @@ namespace HB.FullStack.Client.Base
                 //所以，只要覆盖即可
 
                 //TODO: 批量执行
-                await Database.AddOrUpdateByIdAsync(model, LastUser, transactionContext).ConfigureAwait(false);
+                await Database.AddOrUpdateByIdAsync(model, "", transactionContext).ConfigureAwait(false);
             }
 
             _logger.LogDebug("重新添加远程数据到本地数据库, Type:{Type}", typeof(TModel).Name);
@@ -258,7 +258,7 @@ namespace HB.FullStack.Client.Base
                 }
 
                 //Local
-                await Database.AddAsync(models, LastUser, transactionContext).ConfigureAwait(false);
+                await Database.AddAsync(models, "", transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
             {
@@ -293,7 +293,7 @@ namespace HB.FullStack.Client.Base
                     await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
                 }
 
-                await Database.UpdatePropertiesAsync<TModel>(changedPacks, LastUser, transactionContext).ConfigureAwait(false);
+                await Database.UpdatePropertiesAsync<TModel>(changedPacks, "", transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {
@@ -325,7 +325,7 @@ namespace HB.FullStack.Client.Base
                     await DeleteFromRemoteAsync(ApiClient, models).ConfigureAwait(false);
                 }
 
-                await Database.DeleteAsync(models, LastUser, transactionContext).ConfigureAwait(false);
+                await Database.DeleteAsync(models, "", transactionContext).ConfigureAwait(false);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {

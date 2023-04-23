@@ -32,14 +32,14 @@ namespace HB.FullStack.Server.Identity
 
         protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args) => Task.CompletedTask;
 
-        //public Task<SignInReceipt?> GetByConditionAsync(Guid signInReceiptId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
+        //public Task<Token?> GetByConditionAsync(Guid signInReceiptId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
         //{
         //    if (refreshToken.IsNullOrEmpty())
         //    {
-        //        return Task.FromResult((SignInReceipt?)null);
+        //        return Task.FromResult((Token?)null);
         //    }
 
-        //    return _databaseReader.ScalarAsync<SignInReceipt>(s =>
+        //    return _databaseReader.ScalarAsync<Token>(s =>
         //        s.RefreshToken == refreshToken &&
         //        s.UserId == userId &&
         //        s.Id == signInReceiptId &&

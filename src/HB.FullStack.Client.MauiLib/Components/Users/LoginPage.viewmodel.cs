@@ -20,7 +20,7 @@ namespace HB.FullStack.Client.MauiLib.Components
 {
     public class LoginViewModel : BaseViewModel
     {
-        public LoginViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        public LoginViewModel(ILogger logger, ITokenPreferences clientPreferences, IFileManager fileManager) : base(logger, clientPreferences, fileManager)
         {
         }
 

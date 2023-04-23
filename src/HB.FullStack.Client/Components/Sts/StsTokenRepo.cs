@@ -42,9 +42,9 @@ namespace HB.FullStack.Client.Components.Sts
             IDatabase database,
             IApiClient apiClient,
             IClientEvents clientEvents,
-            IPreferenceProvider preferenceProvider,
+            ITokenPreferences clientPreferences,
             ISyncManager syncManager)
-            : base(logger, clientModelSettingFactory, database, apiClient, syncManager, clientEvents, preferenceProvider)
+            : base(logger, clientModelSettingFactory, database, apiClient, syncManager, clientEvents, clientPreferences)
         {
             _logger = logger;
             _fileManagerOptions = fileManagerOptions.Value;
@@ -89,6 +89,7 @@ namespace HB.FullStack.Client.Components.Sts
         #endregion
 
         public async Task<StsToken?> GetByDirectoryPermissionNameAsync(
+            Guid? userId,
             string directoryPermissionName,
             bool needWritePermission,
             string? placeHolderValue,
@@ -108,7 +109,7 @@ namespace HB.FullStack.Client.Components.Sts
 
             if (permission.IsUserPrivate)
             {
-                placeHolderValue = PreferenceProvider.UserId?.ToString();
+                placeHolderValue = userId?.ToString();
             }
 
             if (permission.ContainsPlaceHoder && placeHolderValue.IsNullOrEmpty())
@@ -144,8 +145,6 @@ namespace HB.FullStack.Client.Components.Sts
                         }
                     }
                 }
-
-                Guid userId = PreferenceProvider.UserId!.Value;
 
                 StsToken? token = await GetFirstOrDefaultAsync(
                     localWhere: token => token.UserId == userId && token.DirectoryPermissionName == directoryPermissionName,

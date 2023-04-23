@@ -1,9 +1,10 @@
 ﻿using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
+using HB.FullStack.Common.Shared.Resources;
 
 namespace Todo.Client.ConsoleApp
 {
-    class ConsolePreferenceProvider : IPreferenceProvider
+    class ConsolePreferenceProvider : ITokenPreferences
     {
         public Guid? UserId { get; set; }
         public string? AccessToken { get; set; }
@@ -37,6 +38,30 @@ namespace Todo.Client.ConsoleApp
         }
 
         public void OnTokenRefreshFailed()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string? Mobile { get; set; }
+
+        public string? LoginName { get; set; }
+
+        public string? Email { get; set; }
+
+        public bool EmailConfirmed { get; set; }
+
+        public bool MobileConfirmed { get; set; }
+
+        public bool TwoFactorEnabled { get; set; }
+
+        public DateTimeOffset? TokenCreatedTime { get; set; }
+
+        public void OnTokenFetched(TokenRes signInReceipt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnTokenDeleted()
         {
             throw new NotImplementedException();
         }

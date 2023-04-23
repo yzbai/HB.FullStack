@@ -15,13 +15,13 @@ namespace HB.FullStack.Client.Base
 {
     public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource
     {
-        public SignInReceiptRefreshHttpClientHandler AutoRefreshedHttpClientHandler { get; }
+        public TokenRefreshHttpClientHandler AutoRefreshedHttpClientHandler { get; }
 
         protected BaseFileRepo(
             IApiClient apiClient,
-            IPreferenceProvider userPreferenceProvider,
-            SignInReceiptRefreshHttpClientHandler tokenAutoRefreshedHttpClientHandler)
-            : base(apiClient, userPreferenceProvider)
+            ITokenPreferences clientPreferences,
+            TokenRefreshHttpClientHandler tokenAutoRefreshedHttpClientHandler)
+            : base(apiClient, clientPreferences)
         {
             AutoRefreshedHttpClientHandler = tokenAutoRefreshedHttpClientHandler;
         }

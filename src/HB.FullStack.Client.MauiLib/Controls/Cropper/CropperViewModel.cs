@@ -48,8 +48,8 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
         public CropperViewModel(
             ILogger<CropperViewModel> logger,
-            IPreferenceProvider referenceProvider,
-            IFileManager fileManager) : base(logger, referenceProvider, fileManager)
+            ITokenPreferences clientPreferences,
+            IFileManager fileManager) : base(logger, clientPreferences, fileManager)
         {
             CropCommand = new AsyncRelayCommand(CropAsync);
             RotateCommand = new RelayCommand(Rotate);

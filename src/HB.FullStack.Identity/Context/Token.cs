@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
@@ -6,7 +12,7 @@ using HB.FullStack.Server.Identity.Models;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class SignInReceipt : ValidatableObject, IModel
+    public class Token : ValidatableObject, IModel
     {
         public Guid UserId { get; set; }
 
@@ -22,15 +28,16 @@ namespace HB.FullStack.Server.Identity
 
         public bool TwoFactorEnabled { get; set; }
 
-        public DateTimeOffset CreatedTime { get; set; }
-
         public string AccessToken { get; set; } = null!;
 
         public string RefreshToken { get; set; } = null!;
 
-        public SignInReceipt() { }
+        public DateTimeOffset TokenCreatedTime { get; set; }
 
-        public SignInReceipt(string accessToken, string refreshToken, User user)
+        public Token()
+        { }
+
+        public Token(string accessToken, string refreshToken, User user)
         {
             AccessToken = accessToken;
             RefreshToken = refreshToken;
@@ -41,7 +48,7 @@ namespace HB.FullStack.Server.Identity
             EmailConfirmed = user.EmailConfirmed;
             MobileConfirmed = user.MobileConfirmed;
             TwoFactorEnabled = user.TwoFactorEnabled;
-            CreatedTime = DateTimeOffset.UtcNow;
+            TokenCreatedTime = DateTimeOffset.UtcNow;
         }
 
         public ModelKind GetKind() => ModelKind.Plain;

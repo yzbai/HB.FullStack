@@ -19,41 +19,36 @@ using HB.FullStack.Database;
 using Microsoft.Extensions.Options;
 
 //TODO: 这里的ConfigureAWait需不需要去掉
-namespace HB.FullStack.Client.Components.User
+namespace HB.FullStack.Client.Components.Users
 {
-    internal class UserService : IUserService
+    internal class UserProfileService : IUserProfileService
     {
         private readonly ClientOptions _options;
         private readonly IApiClient _apiClient;
         private readonly ITransaction _transaction;
         private readonly IFileManager _fileManager;
-        private readonly IPreferenceProvider _preferenceProvider;
+        private readonly ITokenPreferences _tokenPreferences;
         private readonly UserProfileRepo _userProfileRepo;
 
-        public UserService(
+        public UserProfileService(
             IOptions<ClientOptions> options,
             IApiClient apiClient,
             ITransaction transaction,
             IFileManager fileManager,
-            IPreferenceProvider preferenceProvider,
+            ITokenPreferences tokenPreferences,
             UserProfileRepo userProfileRepo)
         {
             _options = options.Value;
             _apiClient = apiClient;
             _transaction = transaction;
             _fileManager = fileManager;
-            _preferenceProvider = preferenceProvider;
+            _tokenPreferences = tokenPreferences;
             _userProfileRepo = userProfileRepo;
-        }
-
-        public async Task LoginBySmsCodeAsync(string mobile, string smsCode, string audience)
-        {
-            await _apiClient.LoginBySmsAsync(mobile, smsCode, audience).ConfigureAwait(false);
         }
 
         public async Task<string?> GetNickNameAsync(GetSetMode getMode)
         {
-            UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_preferenceProvider.UserId!.Value, null, getMode).ConfigureAwait(false);
+            UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, null, getMode).ConfigureAwait(false);
 
             return userProfile?.NickName;
         }
@@ -72,14 +67,14 @@ namespace HB.FullStack.Client.Components.User
 
             try
             {
-                Guid userId = _preferenceProvider.UserId!.Value;
-                UserProfile? profile = await _userProfileRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
+                Guid userId = _tokenPreferences.UserId!.Value;
+                UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
 
-                if (profile == null)
+                if (userProfile == null)
                 {
-                    profile = new UserProfile
+                    userProfile = new UserProfile
                     {
-                        UserId = userId,
+                        Id = userId,
                         Level = null,
                         NickName = Conventions.GetRandomNickName(),
                         Gender = gender,
@@ -87,21 +82,21 @@ namespace HB.FullStack.Client.Components.User
                         AvatarFileName = newAvatarFileName
                     };
 
-                    await _userProfileRepo.AddAsync(new UserProfile[] { profile }, trans).ConfigureAwait(false);
+                    await _userProfileRepo.AddAsync(new UserProfile[] { userProfile }, trans).ConfigureAwait(false);
 
-                    return profile;
+                    return userProfile;
                 }
 
-                if (nickName.IsNotNullOrEmpty()) profile.NickName = nickName;
-                if (gender != null) profile.Gender = gender;
-                if (birthDay != null) profile.BirthDay = birthDay;
-                if (newAvatarFileName.IsNotNullOrEmpty()) profile.AvatarFileName = newAvatarFileName;
+                if (nickName.IsNotNullOrEmpty()) userProfile.NickName = nickName;
+                if (gender != null) userProfile.Gender = gender;
+                if (birthDay != null) userProfile.BirthDay = birthDay;
+                if (newAvatarFileName.IsNotNullOrEmpty()) userProfile.AvatarFileName = newAvatarFileName;
 
-                await _userProfileRepo.UpdateAsync(new UserProfile[] { profile }, trans).ConfigureAwait(false);
+                await _userProfileRepo.UpdateAsync(new UserProfile[] { userProfile }, trans).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(trans).ConfigureAwait(false);
 
-                return profile;
+                return userProfile;
             }
             catch
             {
@@ -112,7 +107,7 @@ namespace HB.FullStack.Client.Components.User
 
         public async Task<string?> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed)
         {
-            UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_preferenceProvider.UserId!.Value, null, getMode).ConfigureAwait(false);
+            UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, null, getMode).ConfigureAwait(false);
 
             string? fileName = userProfile?.AvatarFileName;
 
@@ -135,7 +130,7 @@ namespace HB.FullStack.Client.Components.User
 
             try
             {
-                UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_preferenceProvider.UserId!.Value, trans, setMode).ConfigureAwait(false);
+                UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, trans, setMode).ConfigureAwait(false);
 
                 if (userProfile == null)
                 {

@@ -7,13 +7,14 @@
 using HB.FullStack.Client.Base;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Context;
+using HB.FullStack.Common.Shared.Resources;
 
 using System;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Client.Components.User
+namespace HB.FullStack.Client.Components.Users
 {
-    public interface IUserService
+    public interface IUserProfileService
     {
         #region Profile
 
@@ -36,7 +37,5 @@ namespace HB.FullStack.Client.Components.User
         Task<string?> GetNickNameAsync(GetSetMode getMode = GetSetMode.Mixed);
 
         #endregion
-
-        Task LoginBySmsCodeAsync(string mobile, string smsCode, string audience);
     }
 }

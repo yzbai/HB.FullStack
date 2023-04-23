@@ -91,7 +91,7 @@ namespace HB.FullStack.BaseTest
 
         public static IApiClient ApiClient { get; set; } = null!;
 
-        public static IPreferenceProvider PreferenceProvider { get; set; } = null!;
+        public static ITokenPreferences PreferenceProvider { get; set; } = null!;
 
         #endregion
 
@@ -150,7 +150,7 @@ namespace HB.FullStack.BaseTest
 
             ApiClient = ServiceProvider.GetRequiredService<IApiClient>();
 
-            PreferenceProvider = ServiceProvider.GetRequiredService<IPreferenceProvider>();
+            PreferenceProvider = ServiceProvider.GetRequiredService<ITokenPreferences>();
 
             #endregion
 
@@ -212,7 +212,7 @@ namespace HB.FullStack.BaseTest
                 .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
                 .AddMemoryLock()
                 .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"))
-                .AddSingleton<IPreferenceProvider, PreferenceProviderStub>()
+                .AddSingleton<ITokenPreferences, PreferenceProviderStub>()
                 .AddApiClient(options =>
                 {
                     options.HttpClientTimeout = TimeSpan.FromSeconds(100);

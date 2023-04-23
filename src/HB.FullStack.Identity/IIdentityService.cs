@@ -9,9 +9,9 @@ namespace HB.FullStack.Server.Identity
     {
         string JsonWebKeySet { get; }
 
-        Task<SignInReceipt> RefreshSignInReceiptAsync(RefreshContext context, string lastUser);
+        Task<Token> RefreshSignInReceiptAsync(RefreshContext context, string lastUser);
 
-        Task<SignInReceipt> SignInAsync(SignInContext context, string lastUser);
+        Task<Token> SignInAsync(SignInContext context, string lastUser);
 
         Task SignOutAsync(Guid userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser);
 

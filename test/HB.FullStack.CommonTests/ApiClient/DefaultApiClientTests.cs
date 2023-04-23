@@ -27,14 +27,15 @@ namespace HB.FullStack.CommonTests.ApiClient
         [TestMethod()]
         public async Task GetAsyncTest()
         {
-            PreferenceProvider.OnLogined(
-                userId: Guid.NewGuid(),
-                userCreateTime: DateTimeOffset.Now,
-                mobile: null,
-                email: null,
-                loginName: null,
-                accessToken: Guid.NewGuid().ToString(),
-                refreshToken: Guid.NewGuid().ToString());
+            PreferenceProvider.OnTokenFetched(
+                new Common.Shared.Resources.TokenRes {
+                UserId = Guid.NewGuid(),
+                TokenCreatedTime =  DateTimeOffset.Now,
+                Mobile = null,
+                Email = null,
+                LoginName = null,
+                AccessToken = Guid.NewGuid().ToString(),
+                RefreshToken = Guid.NewGuid().ToString()});
 
             TestHttpServer httpServer = StartHttpServer(
                 new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", HttpMethod.Get, (request, response, parameters) =>

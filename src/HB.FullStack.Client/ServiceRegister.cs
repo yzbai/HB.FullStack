@@ -16,7 +16,7 @@ using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Components.Files;
 using HB.FullStack.Client.Components.KVManager;
 using HB.FullStack.Client.Components.Sts;
-using HB.FullStack.Client.Components.User;
+using HB.FullStack.Client.Components.Users;
 using HB.FullStack.Common.Files;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -50,9 +50,9 @@ namespace Microsoft.Extensions.DependencyInjection
             //Sync
             services.AddSyncManager();
 
-            //User
+            //Users
             services.AddSingleton<UserProfileRepo>();
-            services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IUserProfileService, UserProfileService>();
 
             return services;
         }

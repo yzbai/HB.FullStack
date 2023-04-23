@@ -1,7 +1,14 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared.Resources;
 
@@ -9,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public static class SignInReceiptRefresher
+    public static class TokenRefresher
     {
         private static readonly MemorySimpleLocker _requestLimiter = new MemorySimpleLocker();
 
@@ -18,8 +25,8 @@ namespace HB.FullStack.Client.ApiClient
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
         public static async Task<bool> RefreshSignInReceiptAsync(
-            IApiClient apiClient, 
-            IPreferenceProvider preferenceProvider, 
+            IApiClient apiClient,
+            ITokenPreferences preferenceProvider,
             int signInReceiptRefreshIntervalSeconds)
         {
             if (preferenceProvider.AccessToken.IsNullOrEmpty())
@@ -31,8 +38,8 @@ namespace HB.FullStack.Client.ApiClient
 
             //这个AccessToken不久前刷新过
             if (!_requestLimiter.NoWaitLock(
-                nameof(RefreshSignInReceiptAsync), 
-                accessTokenHashKey, 
+                nameof(RefreshSignInReceiptAsync),
+                accessTokenHashKey,
                 TimeSpan.FromSeconds(signInReceiptRefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
@@ -66,13 +73,11 @@ namespace HB.FullStack.Client.ApiClient
             {
                 if (preferenceProvider.RefreshToken.IsNotNullOrEmpty())
                 {
-                    SignInReceiptResGetByRefreshRequest refreshRequest = new SignInReceiptResGetByRefreshRequest(
-                        preferenceProvider.UserId!.Value,
+                    TokenResGetByRefreshRequest refreshRequest = new TokenResGetByRefreshRequest(
                         preferenceProvider.AccessToken,
-                        preferenceProvider.RefreshToken,
-                        preferenceProvider.DeviceInfos);
+                        preferenceProvider.RefreshToken);
 
-                    SignInReceiptRes? res = await apiClient.GetAsync<SignInReceiptRes>(refreshRequest).ConfigureAwait(false);
+                    TokenRes? res = await apiClient.GetAsync<TokenRes>(refreshRequest).ConfigureAwait(false);
 
                     if (res != null)
                     {
@@ -109,19 +114,12 @@ namespace HB.FullStack.Client.ApiClient
             }
         }
 
-        private static void OnRefreshSucceed(SignInReceiptRes res, IPreferenceProvider preferenceProvider)
+        private static void OnRefreshSucceed(TokenRes res, ITokenPreferences preferenceProvider)
         {
-            preferenceProvider.OnLogined(
-                res.UserId,
-                res.CreatedTime,
-                res.Mobile,
-                res.Email,
-                res.LoginName,
-                res.AccessToken,
-                res.RefreshToken);
+            preferenceProvider.OnTokenFetched(res);
         }
 
-        private static void OnRefreshFailed(IPreferenceProvider preferenceProvider)
+        private static void OnRefreshFailed(ITokenPreferences preferenceProvider)
         {
             preferenceProvider.OnTokenRefreshFailed();
         }

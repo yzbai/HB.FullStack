@@ -20,7 +20,7 @@ namespace HB.FullStack.Client.MauiLib.Components
 {
     public class SmsVerifyViewModel : BaseViewModel
     {
-        public SmsVerifyViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        public SmsVerifyViewModel(ILogger logger, ITokenPreferences clientPreferences, IFileManager fileManager) : base(logger, clientPreferences, fileManager)
         {
         }
 

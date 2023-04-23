@@ -64,7 +64,7 @@ namespace Microsoft.Maui.Hosting
             services.AddFullStackClient(configClientOptions, configFileManagerOptions, configApiClientOptions);
 
             //MauiLib - Client Abstractions
-            services.AddSingleton<IPreferenceProvider, MauiPreferenceProvider>();
+            services.AddSingleton<ITokenPreferences, MauiTokenPreferences>();
             services.AddSingleton<IClientEvents, MauiClientEvents>();
 
             //MauiLib - Components

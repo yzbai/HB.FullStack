@@ -1,24 +1,32 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public class SignInReceiptRefreshHttpClientHandler : HttpClientHandler
+    public class TokenRefreshHttpClientHandler : HttpClientHandler
     {
         private readonly IApiClient _apiClient;
-        private readonly IPreferenceProvider _preferenceProvider;
+        private readonly ITokenPreferences _preferenceProvider;
         private readonly ApiClientOptions _options;
 
-        public SignInReceiptRefreshHttpClientHandler(IApiClient apiClient, IPreferenceProvider preferenceProvider, IOptions<ApiClientOptions> options)
+        public TokenRefreshHttpClientHandler(IApiClient apiClient, ITokenPreferences preferenceProvider, IOptions<ApiClientOptions> options)
         {
             _apiClient = apiClient;
             _preferenceProvider = preferenceProvider;
@@ -58,7 +66,7 @@ namespace HB.FullStack.Client.ApiClient
             {
                 if (ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    await SignInReceiptRefresher.RefreshSignInReceiptAsync(_apiClient, _preferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
+                    await TokenRefresher.RefreshSignInReceiptAsync(_apiClient, _preferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
 
                     return responseMessage;
                 }
@@ -69,7 +77,7 @@ namespace HB.FullStack.Client.ApiClient
             return responseMessage;
         }
 
-        private static void AddRequestInfo(HttpRequestMessage request, IPreferenceProvider tokenProvider)
+        private static void AddRequestInfo(HttpRequestMessage request, ITokenPreferences tokenProvider)
         {
             //Headers
             if (tokenProvider.AccessToken.IsNotNullOrEmpty())

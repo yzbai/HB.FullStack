@@ -14,6 +14,7 @@ using HB.FullStack.Common.Shared;
 
 using Microsoft;
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.Components.Users;
 
 namespace HB.FullStack.Client.Base
 {
@@ -21,17 +22,13 @@ namespace HB.FullStack.Client.Base
 
     public abstract class BaseRepo
     {
-        protected IPreferenceProvider PreferenceProvider { get; }
+        protected ITokenPreferences ClientPreferences { get; }
 
         protected IApiClient ApiClient { get; }
 
-        //protected IStatusManager StatusManager { get; }
-
-        protected string LastUser => PreferenceProvider.UserId?.ToString() ?? "NotLogined";
-
         protected void EnsureLogined()
         {
-            if (!PreferenceProvider.IsLogined())
+            if (!ClientPreferences.IsLogined())
             {
                 throw ClientExceptions.NotLogined();
             }
@@ -45,11 +42,10 @@ namespace HB.FullStack.Client.Base
             }
         }
 
-        protected BaseRepo(IApiClient apiClient, IPreferenceProvider userPreferenceProvider/*, IStatusManager statusManager*/)
+        protected BaseRepo(IApiClient apiClient, ITokenPreferences clientPreferences)
         {
             ApiClient = apiClient;
-            PreferenceProvider = userPreferenceProvider;
-            //StatusManager = statusManager;
+            ClientPreferences = clientPreferences;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace HB.FullStack.Client.MauiLib.Base
     {
         public const string ExceptionDisplaySignalName = "HB.FullStack.Client.Maui.ExceptionDisplay";
         public ILogger Logger { get; }
-        public IPreferenceProvider PreferenceProvider { get; }
+        public ITokenPreferences TokenPreferences { get; }
         public IFileManager FileManager { get; }
 
         [ObservableProperty]
@@ -33,10 +33,10 @@ namespace HB.FullStack.Client.MauiLib.Base
         [ObservableProperty]
         private string _title = string.Empty;
 
-        protected BaseViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager)
+        protected BaseViewModel(ILogger logger, ITokenPreferences preferenceProvider, IFileManager fileManager)
         {
             Logger = logger ?? Globals.Logger;
-            PreferenceProvider = preferenceProvider;
+            TokenPreferences = preferenceProvider;
             FileManager = fileManager;
         }
 

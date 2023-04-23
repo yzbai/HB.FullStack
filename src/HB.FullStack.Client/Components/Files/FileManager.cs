@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Aliyun.OSS;
 using Aliyun.OSS.Common;
 using Aliyun.OSS.Common.Authentication;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Components.KVManager;
 using HB.FullStack.Client.Components.Sts;
@@ -28,7 +29,7 @@ namespace HB.FullStack.Client.Components.Files
     {
         private readonly ILogger _logger;
         private readonly ILocalFileManager _localFileManager;
-        private readonly IPreferenceProvider _preferenceProvider;
+        private readonly ITokenPreferences _clientPreferences;
         private readonly IDbSimpleLocker _dbLocker;
         private readonly StsTokenRepo _aliyunStsTokenRepo;
         private readonly FileManagerOptions _options;
@@ -39,14 +40,14 @@ namespace HB.FullStack.Client.Components.Files
             IOptions<FileManagerOptions> options,
             ILogger<FileManager> logger,
             ILocalFileManager localFileManager,
-            IPreferenceProvider preferenceProvider,
+            ITokenPreferences preferenceProvider,
             IDbSimpleLocker dbLocker,
             StsTokenRepo aliyunStsTokenRepo)
         {
             _options = options.Value;
             _logger = logger;
             _localFileManager = localFileManager;
-            _preferenceProvider = preferenceProvider;
+            _clientPreferences = preferenceProvider;
             _dbLocker = dbLocker;
             _aliyunStsTokenRepo = aliyunStsTokenRepo;
 
@@ -58,7 +59,13 @@ namespace HB.FullStack.Client.Components.Files
 
         private async Task<IOss> RentOssClientAsync(string directoryPermissionName, bool needWrite, string? placeHolderValue, bool recheckPermissionForced = false)
         {
-            StsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryPermissionNameAsync(directoryPermissionName, needWrite, placeHolderValue, null, recheckPermissionForced);
+            StsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryPermissionNameAsync(
+                _clientPreferences.UserId,
+                directoryPermissionName,
+                needWrite,
+                placeHolderValue,
+                null,
+                recheckPermissionForced);
 
             if (stsToken == null)
             {

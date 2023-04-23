@@ -4,10 +4,11 @@ using System.Text;
 using System.Threading.Tasks;
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
+using HB.FullStack.Common.Shared.Resources;
 
 namespace HB.FullStack.BaseTest
 {
-    public class PreferenceProviderStub : IPreferenceProvider
+    public class PreferenceProviderStub : ITokenPreferences
     {
         public PreferenceProviderStub()
         {
@@ -54,6 +55,30 @@ namespace HB.FullStack.BaseTest
         {
             AccessToken = null;
             RefreshToken = null;
+        }
+
+        public string? Mobile { get; set; }
+
+        public string? LoginName { get; set; }
+
+        public string? Email { get; set; }
+
+        public bool EmailConfirmed { get; set; }
+
+        public bool MobileConfirmed { get; set; }
+
+        public bool TwoFactorEnabled { get; set; }
+
+        public DateTimeOffset? TokenCreatedTime { get; set; }
+
+        public void OnTokenFetched(TokenRes signInReceipt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnTokenDeleted()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,7 +6,7 @@ using HB.FullStack.Common.Shared.Resources;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    internal class SignInReceiptResGetBySmsRequest : ApiRequest
+    internal class TokenResGetBySmsRequest : ApiRequest
     {
         [RequestQuery]
         [Mobile(CanBeNull = false)]
@@ -24,9 +24,9 @@ namespace HB.FullStack.Client.ApiClient
         [Required]
         public DeviceInfos DeviceInfos { get; set; } = null!;
 
-        public SignInReceiptResGetBySmsRequest(
+        public TokenResGetBySmsRequest(
             string mobile, string smsCode, string signToWhere, DeviceInfos deviceInfos)
-            : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, SharedNames.Conditions.BySms)
+            : base(nameof(TokenRes), ApiMethod.Get, ApiRequestAuth.NONE, SharedNames.Conditions.BySms)
         {
             Mobile = mobile;
             SmsCode = smsCode;

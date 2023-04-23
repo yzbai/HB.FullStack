@@ -17,7 +17,7 @@ using HB.FullStack.Database;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Client.Components.User
+namespace HB.FullStack.Client.Components.Users
 {
     public class UserProfileRepo : BaseRepo<UserProfile>
     {
@@ -28,12 +28,12 @@ namespace HB.FullStack.Client.Components.User
             IApiClient apiClient,
             ISyncManager syncManager,
             IClientEvents clientEvents,
-            IPreferenceProvider preferenceProvider) : base(logger, clientModelSettingFactory, database, apiClient, syncManager, clientEvents, preferenceProvider)
+            ITokenPreferences clientPreferences) : base(logger, clientModelSettingFactory, database, apiClient, syncManager, clientEvents, clientPreferences)
         { }
 
-        //protected override UserProfile ToModel(UserProfileRes res) => ResMapper.ToUserProfile(res);
+        //protected override Users ToModel(UserProfileRes res) => ResMapper.ToUserProfile(res);
 
-        //protected override UserProfileRes ToResource(UserProfile model) => ResMapper.ToUserProfileRes(model);
+        //protected override UserProfileRes ToResource(Users model) => ResMapper.ToUserProfileRes(model);
 
         internal Task<UserProfile?> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext, GetSetMode getMode = GetSetMode.Mixed)
         {

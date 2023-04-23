@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IApiClient, DefaultApiClient>();
 
             //HttpClientHandler会随着HttpClient Dispose 而Dispose
-            services.AddTransient<SignInReceiptRefreshHttpClientHandler>();
+            services.AddTransient<TokenRefreshHttpClientHandler>();
 
             static void AddSignInReceiptSiteHttpClient(IServiceCollection services, ApiClientOptions options)
             {

@@ -155,7 +155,7 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task<SignInReceipt> SignInAsync(SignInContext context, string lastUser)
+        public async Task<Token> SignInAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
             EnsureValidAudience(context);
@@ -194,7 +194,7 @@ namespace HB.FullStack.Server.Identity
                 //构造 Jwt
                 string accessToken = await ConstructAccessTokenAsync(user, signInCredential, context.Audience, transactionContext).ConfigureAwait(false);
 
-                SignInReceipt signInReceipt = new SignInReceipt(accessToken, signInCredential.RefreshToken, user);
+                Token signInReceipt = new Token(accessToken, signInCredential.RefreshToken, user);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -308,7 +308,7 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task<SignInReceipt> RefreshSignInReceiptAsync(RefreshContext context, string lastUser)
+        public async Task<Token> RefreshSignInReceiptAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
 
@@ -374,7 +374,7 @@ namespace HB.FullStack.Server.Identity
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new SignInReceipt(accessToken, signInCredential.RefreshToken, user);
+                return new Token(accessToken, signInCredential.RefreshToken, user);
             }
             catch
             {

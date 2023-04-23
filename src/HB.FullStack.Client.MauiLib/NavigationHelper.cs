@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.Abstractions;
-using HB.FullStack.Client.Components.User;
+using HB.FullStack.Client.Components.Users;
 using HB.FullStack.Client.MauiLib.Components;
 using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Utils;
@@ -30,22 +30,22 @@ namespace HB.FullStack.Client.MauiLib
 
         private static bool _isLoginPagePushed;
 
-        private static IUserService? _userService;
+        private static IUserProfileService? _userProfileService;
 
         private static ClientOptions? _clientOptions;
 
-        private static IPreferenceProvider? _preferenceProvider;
+        private static ITokenPreferences? _tokenProvider;
 
         //不用每次访问VersionTracking和UserPreferences，提高效率
         private static bool _firstCheckFlag = true;
 
         private static bool _alreadyKownNotNeedIntroduce;
 
-        private static IUserService UserService => _userService ??= Currents.Services.GetRequiredService<IUserService>();
+        private static IUserProfileService UserProfileService => _userProfileService ??= Currents.Services.GetRequiredService<IUserProfileService>();
 
         private static ClientOptions ClientOptions => _clientOptions ??= Currents.Services.GetRequiredService<IOptions<ClientOptions>>().Value;
 
-        private static IPreferenceProvider PreferenceProvider => _preferenceProvider ??= Currents.Services.GetRequiredService<IPreferenceProvider>();
+        private static ITokenPreferences TokenPreferences => _tokenProvider ??= Currents.Services.GetRequiredService<ITokenPreferences>();
 
         /// <summary>
         /// 相对路由, 顶层路由在AppShell中定义
@@ -135,7 +135,7 @@ namespace HB.FullStack.Client.MauiLib
 
         public static bool NeedLogin(string pageName)
         {
-            return !PreferenceProvider.IsLogined() && IsPageLoginNeeded(pageName);
+            return !TokenPreferences.IsLogined() && IsPageLoginNeeded(pageName);
         }
 
         public static bool NeedIntroduce()
@@ -146,7 +146,7 @@ namespace HB.FullStack.Client.MauiLib
                 return false;
             }
 
-            bool introducedYet = PreferenceProvider.IsIntroducedYet;
+            bool introducedYet = TokenPreferences.IsIntroducedYet;
 
             if (!introducedYet)
             {
@@ -161,7 +161,7 @@ namespace HB.FullStack.Client.MauiLib
 
             if (isFirstLanch)
             {
-                PreferenceProvider.IsIntroducedYet = false;
+                TokenPreferences.IsIntroducedYet = false;
                 return true;
             }
 
@@ -188,7 +188,7 @@ namespace HB.FullStack.Client.MauiLib
 
         private static async Task<bool> NeedRegisterProfileAsync()
         {
-            string? nickName = await UserService.GetNickNameAsync().ConfigureAwait(false);
+            string? nickName = await UserProfileService.GetNickNameAsync().ConfigureAwait(false);
 
             return nickName.IsNullOrEmpty() || Conventions.IsARandomNickName(nickName);
         }

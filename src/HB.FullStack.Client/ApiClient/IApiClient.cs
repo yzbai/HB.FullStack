@@ -1,8 +1,14 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.FullStack.Client.Abstractions;
-using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.ApiClient
 {
@@ -11,8 +17,8 @@ namespace HB.FullStack.Client.ApiClient
         event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
 
         event Func<object?, ApiEventArgs, Task>? Responsed;
-        
-        IPreferenceProvider PreferenceProvider { get; }
+
+        ITokenPreferences TokenPreferences { get; }
 
         Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class;
 

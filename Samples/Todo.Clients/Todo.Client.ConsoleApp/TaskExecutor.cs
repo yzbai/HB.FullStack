@@ -6,9 +6,9 @@ namespace Todo.Client.ConsoleApp
     internal class TaskExecutor
     {
         private readonly IApiClient _apiClient;
-        private readonly IPreferenceProvider _preferenceProvider;
+        private readonly ITokenPreferences _preferenceProvider;
 
-        public TaskExecutor(IApiClient apiClient, IPreferenceProvider preferenceProvider)
+        public TaskExecutor(IApiClient apiClient, ITokenPreferences preferenceProvider)
         {
             _apiClient = apiClient;
             _preferenceProvider = preferenceProvider;

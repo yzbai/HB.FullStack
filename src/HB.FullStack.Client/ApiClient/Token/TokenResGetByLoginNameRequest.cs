@@ -6,7 +6,7 @@ using HB.FullStack.Common.Shared.Resources;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    internal class SignInReceiptResGetByLoginNameRequest : ApiRequest
+    internal class TokenResGetByLoginNameRequest : ApiRequest
     {
         [RequestQuery]
         [LoginName(CanBeNull = false)]
@@ -25,11 +25,11 @@ namespace HB.FullStack.Client.ApiClient
         public DeviceInfos DeviceInfos { get; set; }
 
 
-        public SignInReceiptResGetByLoginNameRequest(
+        public TokenResGetByLoginNameRequest(
             string loginName, 
             string password, 
             string audience, 
-            DeviceInfos deviceInfos) : base(nameof(SignInReceiptRes), ApiMethod.Get, ApiRequestAuth.NONE, SharedNames.Conditions.ByLoginName)
+            DeviceInfos deviceInfos) : base(nameof(TokenRes), ApiMethod.Get, ApiRequestAuth.NONE, SharedNames.Conditions.ByLoginName)
         {
             LoginName = loginName;
             Password = password;

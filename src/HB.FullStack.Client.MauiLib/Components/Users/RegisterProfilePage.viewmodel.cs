@@ -20,7 +20,7 @@ namespace HB.FullStack.Client.MauiLib.Components
 {
     public class RegisterProfileViewModel : BaseViewModel
     {
-        public RegisterProfileViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        public RegisterProfileViewModel(ILogger logger, ITokenPreferences clientPreferences, IFileManager fileManager) : base(logger, clientPreferences, fileManager)
         {
         }
 

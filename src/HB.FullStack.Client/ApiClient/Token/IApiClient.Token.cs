@@ -1,5 +1,12 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Threading.Tasks;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
@@ -10,86 +17,72 @@ namespace HB.FullStack.Client.ApiClient
     {
         public static async Task RegisterByLoginNameAsync(this IApiClient apiClient, string loginName, string password, string audience)
         {
-            SignInReceiptResRegisterByLoginNameRequest registerRequest = new SignInReceiptResRegisterByLoginNameRequest(
+            TokenResRegisterByLoginNameRequest registerRequest = new TokenResRegisterByLoginNameRequest(
                 loginName,
                 password,
                 audience,
-                apiClient.PreferenceProvider.DeviceInfos);
+                apiClient.TokenPreferences.DeviceInfos);
 
             await apiClient.SendAsync(registerRequest).ConfigureAwait(false);
 
             //TODO
-            //apiClient.PreferenceProvider.OnRegistered();
+            //apiClient.TokenPreferences.OnRegistered();
         }
 
         public static async Task LoginByLoginNameAsync(this IApiClient apiClient, string loginName, string password, string audience)
         {
-            SignInReceiptResGetByLoginNameRequest request = new SignInReceiptResGetByLoginNameRequest(
+            TokenResGetByLoginNameRequest request = new TokenResGetByLoginNameRequest(
                 loginName,
                 password,
                 audience,
-                apiClient.PreferenceProvider.DeviceInfos);
-            
+                apiClient.TokenPreferences.DeviceInfos);
+
             await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
         }
 
         public static async Task LoginBySmsAsync(this IApiClient apiClient, string mobile, string smsCode, string audience)
         {
-            SignInReceiptResGetBySmsRequest request = new SignInReceiptResGetBySmsRequest(
+            TokenResGetBySmsRequest request = new TokenResGetBySmsRequest(
                 mobile,
                 smsCode,
                 audience,
-                apiClient.PreferenceProvider.DeviceInfos);
+                apiClient.TokenPreferences.DeviceInfos);
 
             await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
         }
 
         public static async Task UnLoginAsync(this IApiClient apiClient)
         {
-            SignInReceiptResDeleteRequest request = new SignInReceiptResDeleteRequest();
+            TokenResDeleteRequest request = new TokenResDeleteRequest();
 
             await apiClient.SendAsync(request).ConfigureAwait(false);
 
-            apiClient.PreferenceProvider.OnLogouted();
+            apiClient.TokenPreferences.OnTokenDeleted();
         }
 
         public static async Task RefreshSignInReceiptAsync(this IApiClient apiClient)
         {
-            IPreferenceProvider preferenceProvider = apiClient.PreferenceProvider;
+            ITokenPreferences preferenceProvider = apiClient.TokenPreferences;
 
-            if (!preferenceProvider.IsLogined())
+            if (preferenceProvider.AccessToken.IsNullOrEmpty())
             {
                 throw CommonExceptions.ApiClientInnerError("Can not Refresh your accesstoken if you not logined.", null, null);
             }
 
-            if (!preferenceProvider.UserId.HasValue)
-            {
-                throw CommonExceptions.ApiClientInnerError("Can not Refresh your accesstoken if you do not have a userid", null, null);
-            }
-
-            SignInReceiptResGetByRefreshRequest request = new SignInReceiptResGetByRefreshRequest(
-                preferenceProvider.UserId.Value,
+            TokenResGetByRefreshRequest request = new TokenResGetByRefreshRequest(
                 preferenceProvider.AccessToken!,
-                preferenceProvider.RefreshToken!,
-                preferenceProvider.DeviceInfos);
+                preferenceProvider.RefreshToken!);
 
             await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
         }
 
         private static async Task PerformLoginAsync(IApiClient apiClient, ApiRequest request)
         {
-            SignInReceiptRes? res = await apiClient.GetAsync<SignInReceiptRes>(request).ConfigureAwait(false);
+            TokenRes? res = await apiClient.GetAsync<TokenRes>(request).ConfigureAwait(false);
 
             ThrowIf.Null(res, "Return a null SignInReceiptRes");
 
-            apiClient.PreferenceProvider.OnLogined(
-                userId: res.UserId,
-                userCreateTime: res.CreatedTime,
-                mobile: res.Mobile,
-                email: res.Email,
-                loginName: res.LoginName,
-                accessToken: res.AccessToken,
-                refreshToken: res.RefreshToken);
+            apiClient.TokenPreferences.OnTokenFetched(res);
         }
     }
 }

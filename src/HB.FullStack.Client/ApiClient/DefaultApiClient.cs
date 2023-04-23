@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +12,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.Shared.Resources;
@@ -28,17 +35,17 @@ namespace HB.FullStack.Client.ApiClient
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public IPreferenceProvider PreferenceProvider { get; set; }
+        public ITokenPreferences TokenPreferences { get; set; }
 
         private IDictionary<string, string> _apiKeys = null!;
 
         private readonly IDictionary<string, ResEndpoint> _resEndpoints = new Dictionary<string, ResEndpoint>();
 
-        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, IPreferenceProvider preferenceProvider)
+        public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, ITokenPreferences preferenceProvider)
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;
-            PreferenceProvider = preferenceProvider;
+            TokenPreferences = preferenceProvider;
 
             RangeApiKeys();
             RangeResEndpoints();
@@ -93,9 +100,9 @@ namespace HB.FullStack.Client.ApiClient
                     _resEndpoints[endpoint.ResName] = endpoint;
                 }
 
-                ResEndpoint signInReCeiptResEndpoint = new ResEndpoint(nameof(SignInReceiptRes));
+                ResEndpoint signInReCeiptResEndpoint = new ResEndpoint(nameof(TokenRes));
                 signInReCeiptResEndpoint.SiteSetting = _options.SignInReceiptSiteSetting;
-                _resEndpoints[nameof(SignInReceiptRes)] = signInReCeiptResEndpoint;
+                _resEndpoints[nameof(TokenRes)] = signInReCeiptResEndpoint;
             }
 
             void AddResEndpointFromOtherSites()
@@ -116,6 +123,7 @@ namespace HB.FullStack.Client.ApiClient
         #region Events
 
         public event Func<ApiRequest, ApiEventArgs, Task>? Requesting;
+
         public event Func<object?, ApiEventArgs, Task>? Responsed;
 
         private Task OnRequestingAsync(ApiRequest apiRequest, ApiEventArgs apiEventArgs)
@@ -181,7 +189,7 @@ namespace HB.FullStack.Client.ApiClient
             {
                 if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await SignInReceiptRefresher.RefreshSignInReceiptAsync(this, PreferenceProvider, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
+                    bool refreshSuccessed = await TokenRefresher.RefreshSignInReceiptAsync(this, TokenPreferences, _options.SignInReceiptRefreshIntervalSeconds).ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
@@ -205,8 +213,8 @@ namespace HB.FullStack.Client.ApiClient
 
         private void ConfigureRequestBuilder(HttpRequestMessageBuilder requestBuilder)
         {
-            requestBuilder.SetClientId(PreferenceProvider.ClientId);
-            requestBuilder.SetClientVersion(PreferenceProvider.ClientVersion);
+            requestBuilder.SetClientId(TokenPreferences.ClientId);
+            requestBuilder.SetClientVersion(TokenPreferences.ClientVersion);
 
             ApiRequestAuth auth = requestBuilder.Request.Auth!;
 
@@ -230,12 +238,12 @@ namespace HB.FullStack.Client.ApiClient
                 }
 
                 case ApiAuthType.Jwt:
-                    if (PreferenceProvider.AccessToken.IsNullOrEmpty())
+                    if (TokenPreferences.AccessToken.IsNullOrEmpty())
                     {
                         throw CommonExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
                     }
 
-                    requestBuilder.SetJwt(PreferenceProvider.AccessToken);
+                    requestBuilder.SetJwt(TokenPreferences.AccessToken);
                     break;
 
                 default:

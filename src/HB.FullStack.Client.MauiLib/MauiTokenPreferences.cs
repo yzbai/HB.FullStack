@@ -1,72 +1,84 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Globalization;
 using System.Threading.Tasks;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
+using HB.FullStack.Common.Shared.Resources;
+
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Devices.Sensors;
 
 namespace HB.FullStack.Client.MauiLib
 {
-    internal class MauiPreferenceProvider : IPreferenceProvider
+    internal class MauiTokenPreferences : ITokenPreferences
     {
-        //private readonly IStatusManager _statusManager;
+        #region Client
 
-        public MauiPreferenceProvider()
-        {
+        public string ClientId => ClientPreferences.ClientId;
 
-        }
+        public string ClientVersion => ClientPreferences.ClientVersion;
 
-        public string? AccessToken { get => UserPreferences.AccessToken; set => UserPreferences.AccessToken = value ?? ""; }
+        public DeviceInfos DeviceInfos => ClientPreferences.DeviceInfos;
 
-        public string? RefreshToken { get => UserPreferences.RefreshToken; set => UserPreferences.RefreshToken = value ?? ""; }
+        public bool IsIntroducedYet { get => ClientPreferences.IsIntroducedYet; set => ClientPreferences.IsIntroducedYet = value; }
 
-        public string ClientId { get => DevicePreferences.ClientId; }
+        #endregion
 
-        public string ClientVersion { get => DevicePreferences.ClientVersion; }
+        #region User
 
-        public DeviceInfos DeviceInfos { get => DevicePreferences.DeviceInfos; }
+        public Guid? UserId { get => TokenPreferences.UserId; }
 
-        public void OnTokenRefreshFailed() => UserPreferences.Logout();
+        public string? Mobile { get => TokenPreferences.Mobile; }
 
-        public bool IsLogined() => UserPreferences.IsLogined;
+        public string? LoginName { get => TokenPreferences.LoginName; }
 
-        public bool IsIntroducedYet { get => UserPreferences.IsIntroducedYet; set => UserPreferences.IsIntroducedYet = value; }
+        public string? Email { get => TokenPreferences.Email; }
 
-        public void OnLogined(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string accessToken, string refreshToken)
-        {
-            UserPreferences.Login(userId, userCreateTime, mobile, email, loginName, accessToken, refreshToken);
+        public bool EmailConfirmed { get => TokenPreferences.EmailConfirmed; }
 
-            //_statusManager.ReportLogined();
-        }
+        public bool MobileConfirmed { get => TokenPreferences.MobileConfirmed; }
 
-        public void OnLogouted()
-        {
-            UserPreferences.Logout();
+        public bool TwoFactorEnabled { get => TokenPreferences.TwoFactorEnabled; }
 
-            //_statusManager.ReportLogouted();
-        }
+        public DateTimeOffset? TokenCreatedTime { get => TokenPreferences.TokenCreateTime; }
 
-        public Guid? UserId { get => UserPreferences.UserId; set => UserPreferences.UserId = value; }
+        public string? AccessToken { get => TokenPreferences.AccessToken; }
 
+        public string? RefreshToken { get => TokenPreferences.RefreshToken; }
 
-        private static class UserPreferences
+        public void OnTokenRefreshFailed() => TokenPreferences.DeleteToken();
+
+        public void OnTokenFetched(TokenRes signInReceipt) => TokenPreferences.SetToken(signInReceipt);
+
+        public void OnTokenDeleted() => TokenPreferences.DeleteToken();
+
+        #endregion
+
+        private static class TokenPreferences
         {
             public const string PREFERENCE_NAME_USERID = "wjUfoxCi";
-            public const string PREFERENCE_NAME_USERCREATETIME = "WMIliRIP";
+            public const string PREFERENCE_NAME_TOKEN_CREATETIME = "WMIliRIP";
             public const string PREFERENCE_NAME_MOBILE = "H8YA3d5aj";
+            public const string PREFERENCE_NAME_MOBILE_CONFIRMED = "H8xAsedxaj";
             public const string PREFERENCE_NAME_EMAIL = "B2JG5UN5f";
+            public const string PREFERENCE_NAME_EMAIL_CONFIRMED = "ebJG5UN5f";
+            public const string PREFERENCE_NAME_TWOFACTOR_ENABLED = "ejsg94ks";
             public const string PREFERENCE_NAME_LOGINNAME = "UwsSmhY1";
             public const string PREFERENCE_NAME_ACCESSTOKEN = "D3SQAAtrv";
             public const string PREFERENCE_NAME_REFRESHTOKEN = "ZTpMCJQl";
-            public const string PREFERENCE_NAME_INTRODUCEDYET = "BuOMCJ7l";
-
 
             private static Guid? _userId;
             private static bool _userIdFirstRead = true;
-            private static DateTimeOffset? _userCreateTime;
-            private static bool _userCreateTimeFirstRead = true;
+            private static DateTimeOffset? _tokenCreateTime;
+            private static bool _tokenCreateTimeFirstRead = true;
             private static string? _mobile;
             private static bool _mobileFirstRead = true;
             private static string? _loginName;
@@ -77,19 +89,12 @@ namespace HB.FullStack.Client.MauiLib
             private static bool _accessTokenFirstRead = true;
             private static string _refreshToken = null!;
             private static bool _refreshTokenFirstRead = true;
-
-            public static bool IsIntroducedYet
-            {
-                get
-                {
-                    string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_INTRODUCEDYET);
-                    return storedValue != null && Convert.ToBoolean(storedValue, CultureInfo.InvariantCulture);
-                }
-                set
-                {
-                    PreferenceHelper.Set(PREFERENCE_NAME_INTRODUCEDYET, value.ToString(CultureInfo.InvariantCulture));
-                }
-            }
+            private static bool? _emailConfirmed;
+            private static bool _emailConfirmed_FirstRead = true;
+            private static bool? _mobileConfirmed;
+            private static bool _mobileConfirmed_FirstRead = true;
+            private static bool? _twoFactoryEnabled;
+            private static bool _twoFactoryEnabled_FirstRead = true;
 
             public static Guid? UserId
             {
@@ -116,26 +121,26 @@ namespace HB.FullStack.Client.MauiLib
                 }
             }
 
-            public static DateTimeOffset? UserCreateTime
+            public static DateTimeOffset? TokenCreateTime
             {
                 get
                 {
-                    if (_userCreateTimeFirstRead && !_userCreateTime.HasValue)
+                    if (_tokenCreateTimeFirstRead && !_tokenCreateTime.HasValue)
                     {
-                        _userCreateTimeFirstRead = false;
-                        string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_USERCREATETIME);
-                        _userCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
+                        _tokenCreateTimeFirstRead = false;
+                        string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_TOKEN_CREATETIME);
+                        _tokenCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
                     }
 
-                    return _userCreateTime;
+                    return _tokenCreateTime;
                 }
                 private set
                 {
-                    _userCreateTime = value;
+                    _tokenCreateTime = value;
 
-                    if (_userCreateTime.HasValue)
+                    if (_tokenCreateTime.HasValue)
                     {
-                        PreferenceHelper.Set(PREFERENCE_NAME_USERCREATETIME, _userCreateTime.Value.ToString(CultureInfo.InvariantCulture));
+                        PreferenceHelper.Set(PREFERENCE_NAME_TOKEN_CREATETIME, _tokenCreateTime.Value.ToString(CultureInfo.InvariantCulture));
                     }
                 }
             }
@@ -255,30 +260,95 @@ namespace HB.FullStack.Client.MauiLib
                 }
             }
 
-            public static bool IsLogined => AccessToken.IsNotNullOrEmpty();
-
-            public static void Login(Guid userId, DateTimeOffset userCreateTime, string? mobile, string? email, string? loginName, string? accessToken, string? refreshToken)
+            public static bool EmailConfirmed
             {
-                UserId = userId;
-                UserCreateTime = userCreateTime;
-                Mobile = mobile;
-                Email = email;
-                LoginName = loginName;
-                AccessToken = accessToken ?? "";
-                RefreshToken = refreshToken ?? "";
+                get
+                {
+                    if (_emailConfirmed_FirstRead && _emailConfirmed == null)
+                    {
+                        _emailConfirmed_FirstRead = false;
+                        string? stored = PreferenceHelper.Get(PREFERENCE_NAME_EMAIL_CONFIRMED);
+
+                        _emailConfirmed = stored == null ? null : bool.Parse(stored);
+                    }
+
+                    return _emailConfirmed ?? false;
+                }
+                internal set
+                {
+                    _emailConfirmed = value;
+
+                    PreferenceHelper.Set(PREFERENCE_NAME_EMAIL_CONFIRMED, value.ToString());
+                }
             }
 
-            public static void Logout()
+            public static bool MobileConfirmed
+            {
+                get
+                {
+                    if (_mobileConfirmed_FirstRead && _mobileConfirmed == null)
+                    {
+                        _mobileConfirmed_FirstRead = false;
+                        string? stored = PreferenceHelper.Get(PREFERENCE_NAME_MOBILE_CONFIRMED);
+
+                        _mobileConfirmed = stored == null ? null : bool.Parse(stored);
+                    }
+
+                    return _mobileConfirmed ?? false;
+                }
+                internal set
+                {
+                    _mobileConfirmed = value;
+
+                    PreferenceHelper.Set(PREFERENCE_NAME_MOBILE_CONFIRMED, value.ToString());
+                }
+            }
+
+            public static bool TwoFactorEnabled
+            {
+                get
+                {
+                    if (_twoFactoryEnabled_FirstRead && _twoFactoryEnabled == null)
+                    {
+                        _twoFactoryEnabled_FirstRead = false;
+                        string? stored = PreferenceHelper.Get(PREFERENCE_NAME_TWOFACTOR_ENABLED);
+
+                        _twoFactoryEnabled = stored == null ? null : bool.Parse(stored);
+                    }
+
+                    return _twoFactoryEnabled ?? false;
+                }
+                internal set
+                {
+                    _twoFactoryEnabled = value;
+
+                    PreferenceHelper.Set(PREFERENCE_NAME_TWOFACTOR_ENABLED, value.ToString());
+                }
+            }
+
+            public static void SetToken(TokenRes tokenRes)
+            {
+                UserId = tokenRes.UserId;
+                Mobile = tokenRes.Mobile;
+                LoginName = tokenRes.LoginName;
+                Email = tokenRes.Email;
+                AccessToken = tokenRes.AccessToken ?? "";
+                RefreshToken = tokenRes.RefreshToken ?? "";
+                TokenCreateTime = tokenRes.TokenCreatedTime;
+            }
+
+            public static void DeleteToken()
             {
                 AccessToken = "";
                 RefreshToken = "";
             }
         }
 
-        private static class DevicePreferences
+        private static class ClientPreferences
         {
             private const int ADDRESS_REQUEST_INTERVAL_SECONDS = 60;
             public const string PREFERENCE_NAME_CLIENTID = "dbuKErtT";
+            public const string PREFERENCE_NAME_INTRODUCEDYET = "BuOMCJ7l";
 
             private static string? _clientId;
             private static string? _clientVersion;
@@ -286,6 +356,19 @@ namespace HB.FullStack.Client.MauiLib
             private static string? _deviceAddress;
 
             private static MemorySimpleLocker RequestLocker { get; } = new MemorySimpleLocker();
+
+            public static bool IsIntroducedYet
+            {
+                get
+                {
+                    string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_INTRODUCEDYET);
+                    return storedValue != null && Convert.ToBoolean(storedValue, CultureInfo.InvariantCulture);
+                }
+                set
+                {
+                    PreferenceHelper.Set(PREFERENCE_NAME_INTRODUCEDYET, value.ToString(CultureInfo.InvariantCulture));
+                }
+            }
 
             public static string ClientId
             {
@@ -356,10 +439,9 @@ namespace HB.FullStack.Client.MauiLib
                 }
             }
 
-
             public static async Task<string> GetDeviceAddressAsync()
             {
-                if (_deviceAddress.IsNullOrEmpty() || RequestLocker.NoWaitLock(nameof(DevicePreferences), nameof(GetDeviceAddressAsync), TimeSpan.FromSeconds(ADDRESS_REQUEST_INTERVAL_SECONDS)))
+                if (_deviceAddress.IsNullOrEmpty() || RequestLocker.NoWaitLock(nameof(ClientPreferences), nameof(GetDeviceAddressAsync), TimeSpan.FromSeconds(ADDRESS_REQUEST_INTERVAL_SECONDS)))
                 {
                     _deviceAddress = await GetLastKnownAddressAsync();
                 }
@@ -400,6 +482,5 @@ namespace HB.FullStack.Client.MauiLib
                 return "unkown";
             }
         }
-
     }
 }

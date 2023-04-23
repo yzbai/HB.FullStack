@@ -16,7 +16,7 @@ namespace HB.FullStack.Client.MauiLib.Components
 {
     public class IntroduceViewModel : BaseViewModel
     {
-        public IntroduceViewModel(ILogger logger, IPreferenceProvider preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        public IntroduceViewModel(ILogger logger, ITokenPreferences preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
         {
         }
 

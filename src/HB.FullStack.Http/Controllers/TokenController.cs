@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
@@ -16,13 +22,13 @@ namespace HB.FullStack.Server.WebLib.Controllers
 {
     [ApiController]
     [Route($"api/[controller]")]
-    public class SignInReceiptController : BaseModelController<SignInReceipt>
+    public class TokenController : BaseModelController<Token>
     {
-        private readonly ILogger<SignInReceiptController> _logger;
+        private readonly ILogger<TokenController> _logger;
         private readonly ISmsService _smsService;
         private readonly IIdentityService _identityService;
 
-        public SignInReceiptController(ILogger<SignInReceiptController> logger, ISmsService smsService, IIdentityService identityService)
+        public TokenController(ILogger<TokenController> logger, ISmsService smsService, IIdentityService identityService)
         {
             _logger = logger;
             _smsService = smsService;
@@ -31,14 +37,14 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
         [AllowAnonymous]
         [HttpGet(SharedNames.Conditions.BySms)]
-        [ProducesResponseType(typeof(SignInReceiptRes), 200)]
+        [ProducesResponseType(typeof(TokenRes), 200)]
         public async Task<IActionResult> GetBySmsAsync(
-            [FromQuery][Mobile(CanBeNull  = false)] string      mobile,
-            [FromQuery][SmsCode(CanBeNull = false)] string      smsCode,
-            [FromQuery][Required]                   string      audience,
-            [FromQuery][Required]                   DeviceInfos deviceInfos,
-            [FromHeader][Required]                  string      clientId,
-            [FromHeader][Required]                  string      clientVersion)
+            [FromQuery][Mobile(CanBeNull = false)] string mobile,
+            [FromQuery][SmsCode(CanBeNull = false)] string smsCode,
+            [FromQuery][Required] string audience,
+            [FromQuery][Required] DeviceInfos deviceInfos,
+            [FromHeader][Required] string clientId,
+            [FromHeader][Required] string clientVersion)
         {
             string lastUser = Conventions.GetLastUser(null, mobile, clientId);
 
@@ -46,9 +52,9 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             SignInContext context = new SignInBySms(mobile, smsCode, true, audience, true, SignInExclusivity.None, clientInfos, deviceInfos);
 
-            SignInReceipt signInReceipt = await _identityService.SignInAsync(context, lastUser).ConfigureAwait(false);
+            Token signInReceipt = await _identityService.SignInAsync(context, lastUser).ConfigureAwait(false);
 
-            SignInReceiptRes res = ToRes(signInReceipt);
+            TokenRes res = ToRes(signInReceipt);
 
             return Ok(res);
         }
@@ -60,12 +66,10 @@ namespace HB.FullStack.Server.WebLib.Controllers
         /// </summary>
         [AllowAnonymous]
         [HttpGet(SharedNames.Conditions.ByRefresh)]
-        [ProducesResponseType(typeof(SignInReceiptRes), 200)]
+        [ProducesResponseType(typeof(TokenRes), 200)]
         public async Task<IActionResult> GetByRefreshAsync(
-            [FromQuery][NoEmptyGuid] Guid userId,
             [FromQuery][Required] string accessToken,
             [FromQuery][Required] string refreshToken,
-            [FromQuery][Required] DeviceInfos deviceInfos,
             [FromHeader][Required] string clientId,
             [FromHeader][Required] string clientVersion)
         {
@@ -78,15 +82,15 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             //某一个accesstoken失败，直接拉黑
 
-            string lastUser = Conventions.GetLastUser(userId, null, clientId);
+            string lastUser = Conventions.GetLastUser(null, null, clientId);
 
             ClientInfos clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };
 
-            RefreshContext context = new RefreshContext(accessToken, refreshToken, clientInfos, deviceInfos);
+            RefreshContext context = new RefreshContext(accessToken, refreshToken, clientInfos);
 
-            SignInReceipt signInReceipt = await _identityService.RefreshSignInReceiptAsync(context, lastUser).ConfigureAwait(false);
+            Token signInReceipt = await _identityService.RefreshSignInReceiptAsync(context, lastUser).ConfigureAwait(false);
 
-            SignInReceiptRes res = ToRes(signInReceipt);
+            TokenRes res = ToRes(signInReceipt);
 
             return Ok(res);
         }
@@ -117,7 +121,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             SignInByLoginName context = new SignInByLoginName(loginName, password, audience, true, SignInExclusivity.None, clientInfos, deviceInfos);
 
-            SignInReceipt receipt = await _identityService.SignInAsync(context, "");
+            Token receipt = await _identityService.SignInAsync(context, "");
 
             return Ok(ToRes(receipt));
         }
@@ -139,10 +143,9 @@ namespace HB.FullStack.Server.WebLib.Controllers
             return Ok();
         }
 
-
-        private static SignInReceiptRes ToRes(SignInReceipt obj)
+        private static TokenRes ToRes(Token obj)
         {
-            return new SignInReceiptRes
+            return new TokenRes
             {
                 UserId = obj.UserId,
                 Mobile = obj.Mobile,
@@ -151,7 +154,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
                 EmailConfirmed = obj.EmailConfirmed,
                 MobileConfirmed = obj.MobileConfirmed,
                 TwoFactorEnabled = obj.TwoFactorEnabled,
-                CreatedTime = obj.CreatedTime,
+                TokenCreatedTime = obj.TokenCreatedTime,
                 AccessToken = obj.AccessToken,
                 RefreshToken = obj.RefreshToken
             };
