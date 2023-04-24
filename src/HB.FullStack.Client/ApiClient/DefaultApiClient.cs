@@ -31,7 +31,7 @@ namespace HB.FullStack.Client.ApiClient
 
         private readonly Type _streamType = typeof(Stream);
 
-        private readonly ApiClientOptions _options;
+        public ApiClientOptions ApiClientOptions { get; private set; }
 
         private readonly IHttpClientFactory _httpClientFactory;
 
@@ -43,7 +43,7 @@ namespace HB.FullStack.Client.ApiClient
 
         public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, ITokenPreferences preferenceProvider)
         {
-            _options = options.Value;
+            ApiClientOptions = options.Value;
             _httpClientFactory = httpClientFactory;
             TokenPreferences = preferenceProvider;
 
@@ -54,7 +54,7 @@ namespace HB.FullStack.Client.ApiClient
 
             void RangeApiKeys()
             {
-                _apiKeys = _options.ApiKeys.ToDictionary(item => item.Name, item => item.Key);
+                _apiKeys = ApiClientOptions.ApiKeys.ToDictionary(item => item.Name, item => item.Key);
             }
             void RangeResEndpoints()
             {
@@ -71,7 +71,7 @@ namespace HB.FullStack.Client.ApiClient
                         ResEndpoint endpoint = new ResEndpoint(resType.Name);
 
                         //直接把TokenSite作为默认
-                        endpoint.SiteSetting = _options.TokenSiteSetting;
+                        endpoint.SiteSetting = ApiClientOptions.TokenSiteSetting;
 
                         ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
 
@@ -90,22 +90,22 @@ namespace HB.FullStack.Client.ApiClient
 
                 void AddResEndpointsFromTokenSite()
                 {
-                    _options.TokenSiteSetting.SiteName ??= "TokenSite";
+                    ApiClientOptions.TokenSiteSetting.SiteName ??= "TokenSite";
 
-                    foreach (ResEndpoint endpoint in _options.TokenSiteSetting.Endpoints)
+                    foreach (ResEndpoint endpoint in ApiClientOptions.TokenSiteSetting.Endpoints)
                     {
-                        endpoint.SiteSetting = _options.TokenSiteSetting;
+                        endpoint.SiteSetting = ApiClientOptions.TokenSiteSetting;
                         _resEndpoints[endpoint.ResName] = endpoint;
                     }
 
                     ResEndpoint toeknResEndpoint = new ResEndpoint(nameof(TokenRes));
-                    toeknResEndpoint.SiteSetting = _options.TokenSiteSetting;
+                    toeknResEndpoint.SiteSetting = ApiClientOptions.TokenSiteSetting;
                     _resEndpoints[nameof(TokenRes)] = toeknResEndpoint;
                 }
 
                 void AddResEndpointFromOtherSites()
                 {
-                    foreach (SiteSetting siteSetting in _options.OtherSiteSettings)
+                    foreach (SiteSetting siteSetting in ApiClientOptions.OtherSiteSettings)
                     {
                         foreach (ResEndpoint endpoint in siteSetting.Endpoints)
                         {
@@ -188,7 +188,7 @@ namespace HB.FullStack.Client.ApiClient
             {
                 if (requestBuilder.Request.Auth == ApiRequestAuth.JWT && ex.ErrorCode == ErrorCodes.AccessTokenExpired)
                 {
-                    bool refreshSuccessed = await TokenRefresher.RefreshTokenAsync(this, TokenPreferences, _options.TokenRefreshIntervalSeconds).ConfigureAwait(false);
+                    bool refreshSuccessed = await TokenRefresher.RefreshTokenAsync(this, TokenPreferences, ApiClientOptions.TokenRefreshIntervalSeconds).ConfigureAwait(false);
 
                     if (refreshSuccessed)
                     {
@@ -256,7 +256,7 @@ namespace HB.FullStack.Client.ApiClient
 
             HttpClient httpClient = _httpClientFactory.CreateClient(httpClientName);
 
-            httpClient.Timeout = _options.HttpClientTimeout;
+            httpClient.Timeout = ApiClientOptions.HttpClientTimeout;
 
             return httpClient;
         }

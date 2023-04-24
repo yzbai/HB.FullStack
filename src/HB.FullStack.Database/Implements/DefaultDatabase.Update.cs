@@ -15,7 +15,7 @@ namespace HB.FullStack.Database
         {
             if (item is IPropertyTrackableObject trackableObject)
             {
-                PropertyChangePack changePack = trackableObject.GetPropertyChanges();
+                PropertyChangePack changePack = trackableObject.GetPropertyChangePack();
 
                 await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
 
@@ -122,7 +122,7 @@ namespace HB.FullStack.Database
             if (modelDef.IsPropertyTrackable)
             {
                 await UpdatePropertiesAsync<T>(
-                    items.Select(t => ((IPropertyTrackableObject)t).GetPropertyChanges()).ToList(), 
+                    items.Select(t => ((IPropertyTrackableObject)t).GetPropertyChangePack()).ToList(), 
                     lastUser, 
                     transContext).ConfigureAwait(false);
 

@@ -36,7 +36,11 @@
                     SmsCodeLength="{Binding CodeCount, Source={x:Reference SmsEntry}}" />
             </controls:SmsCodeEntry.Behaviors>
         </controls:SmsCodeEntry>
-        <Label x:Name="CoutingDownLabel" Margin="20,0,20,0" FontSize="Small" IsVisible="{Binding CountingDownNumber, Converter={StaticResource IntToBoolConverter}}">
+        <Label
+            x:Name="CoutingDownLabel"
+            Margin="20,0,20,0"
+            FontSize="Small"
+            IsVisible="{Binding CountingDownNumber, Converter={StaticResource IntToBoolConverter}}">
             <Label.FormattedText>
                 <FormattedString>
                     <Span Text="{Binding CountingDownNumber}" />
@@ -44,11 +48,21 @@
                 </FormattedString>
             </Label.FormattedText>
         </Label>
-        <Label Text="重新发送" Margin="20,0,20,0" FontSize="Small" IsVisible="{Binding IsVisible, Source={x:Reference CoutingDownLabel}, Converter={StaticResource InvertedBoolConverter}}" TextColor="Blue">
+        <Label
+            Margin="20,0,20,0"
+            FontSize="Small"
+            IsVisible="{Binding IsVisible, Source={x:Reference CoutingDownLabel}, Converter={StaticResource InvertedBoolConverter}}"
+            Text="重新发送"
+            TextColor="Blue">
             <Label.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding RequestSmsCodeCommand}" />
+                <TapGestureRecognizer Command="{Binding ReRequestSmsCodeCommand}" />
             </Label.GestureRecognizers>
         </Label>
-        <Button x:Name="ConfirmBtn" Text="确定" Margin="20,20,20,0" Command="{Binding ConfirmSmsCodeCommand}" IsEnabled="{Binding IsValid, Source={x:Reference SmsCodeEntryValidator}}" />
+        <Button
+            x:Name="ConfirmBtn"
+            Margin="20,20,20,0"
+            Command="{Binding ConfirmSmsCodeCommand}"
+            IsEnabled="{Binding IsValid, Source={x:Reference SmsCodeEntryValidator}}"
+            Text="确定" />
     </VerticalStackLayout>
 </base:BasePage>

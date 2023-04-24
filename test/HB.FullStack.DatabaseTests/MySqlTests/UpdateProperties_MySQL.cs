@@ -244,7 +244,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             model.InnerModel2 ??= new InnerModel2();
             model.InnerModel2.InnerName = "Changed_InnerModel2_Name";
 
-            PropertyChangePack cp = model.GetPropertyChanges();
+            PropertyChangePack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimelessModel>(cp, "", null);
 
@@ -276,7 +276,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             model.InnerModel2.InnerName = "Changed_InnerModel2_Name";
 
             //自动更新Timestamp
-            PropertyChangePack cp = model.GetPropertyChanges(true);
+            PropertyChangePack cp = model.GetPropertyChangePack(true);
 
             long timestamp3 = model.Timestamp;
 
@@ -308,7 +308,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 model.Age = 999;
                 model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
-                cps.Add(model.GetPropertyChanges());
+                cps.Add(model.GetPropertyChangePack());
             }
 
             await Db.UpdatePropertiesAsync<UPTimelessModel>(cps, "", null);
@@ -335,7 +335,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
                 model.Timestamp = TimeUtil.Timestamp;
 
-                cps.Add(model.GetPropertyChanges());
+                cps.Add(model.GetPropertyChangePack());
             }
 
             await Db.UpdatePropertiesAsync<UPTimestampModel>(cps, "", null);

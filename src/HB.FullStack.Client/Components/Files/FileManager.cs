@@ -196,6 +196,7 @@ namespace HB.FullStack.Client.Components.Files
                 Globals.Logger.LogDebug("前不久请求过文件，现在还不存在，不再等待，远程获取");
             }
 
+            //不存在，开始获取
             IOss oss = null!;
             try
             {

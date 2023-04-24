@@ -126,7 +126,7 @@ namespace HB.FullStack.Client.MauiLib
 
         public static string AppDataDirectory => FileSystem.AppDataDirectory;
 
-        public static string DbFileDirectory => Path.Combine(FileSystem.AppDataDirectory, "dbs");
+        //public static string DbFileDirectory => Path.Combine(FileSystem.AppDataDirectory, "dbs");
 
         public static string CacheDirectory => FileSystem.CacheDirectory;
 

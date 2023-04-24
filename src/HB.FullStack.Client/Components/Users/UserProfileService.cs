@@ -105,21 +105,18 @@ namespace HB.FullStack.Client.Components.Users
             }
         }
 
-        public async Task<string?> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed)
+        public async Task<(Directory2, string?)> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed)
         {
             UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, null, getMode).ConfigureAwait(false);
 
             string? fileName = userProfile?.AvatarFileName;
 
-            if (fileName.IsNullOrEmpty())
-            {
-                return null;
-            }
+            return (_options.AvatarDirectory, fileName);
 
-            return await _fileManager.GetAsync(_options.AvatarDirectory, fileName).ConfigureAwait(false);
+            //return await _fileManager.GetAsync(ApiClientOptions.AvatarDirectory, fileName).ConfigureAwait(false);
         }
 
-        public async Task<string?> SetAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed)
+        public async Task<string?> SaveAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed)
         {
             //TODO: Security Check File Extension
 

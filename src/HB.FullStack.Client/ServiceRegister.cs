@@ -31,6 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(configClientOptions);
 
             //Base
+            services.AddModelDefFactory();
             services.AddSingleton<IClientModelSettingFactory, ClientModelSettingFactory>();
 
             //ApiClient

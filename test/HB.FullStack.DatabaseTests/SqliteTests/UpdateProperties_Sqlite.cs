@@ -170,7 +170,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             model.Age = 999;
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
-            PropertyChangePack cp = model.GetPropertyChanges();
+            PropertyChangePack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimelessModel>(cp, "", null);
 
@@ -192,7 +192,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
             model.Timestamp = TimeUtil.Timestamp;
 
-            PropertyChangePack cp = model.GetPropertyChanges();
+            PropertyChangePack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimestampModel>(cp, "", null);
 
@@ -221,7 +221,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     model.Age = 999;
                     model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
-                    cps.Add(model.GetPropertyChanges());
+                    cps.Add(model.GetPropertyChangePack());
                 }
 
                 await Db.UpdatePropertiesAsync<UPTimelessModel>(cps, "", trans);
@@ -258,7 +258,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
                     model.Timestamp = TimeUtil.Timestamp;
 
-                    cps.Add(model.GetPropertyChanges());
+                    cps.Add(model.GetPropertyChangePack());
                 }
 
                 await Db.UpdatePropertiesAsync<UPTimestampModel>(cps, "", trans);

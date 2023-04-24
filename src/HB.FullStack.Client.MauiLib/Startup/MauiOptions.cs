@@ -19,5 +19,6 @@ namespace HB.FullStack.Client.MauiLib.Startup
         public IList<IntroduceContent> IntoduceContents { get; set; } = new List<IntroduceContent>();
         public string? UrlOfPrivacyAgreement { get; set; }
         public string? UrlOfServiceAgreement { get; set; }
+        public string DefaultAvatarFileName { get; set; } = null!;
     }
 }

@@ -5,6 +5,7 @@
  */
 
 using HB.FullStack.Client.Base;
+using HB.FullStack.Common.Files;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Context;
 using HB.FullStack.Common.Shared.Resources;
@@ -27,12 +28,12 @@ namespace HB.FullStack.Client.Components.Users
         ///<summary>
         ///返回本地FullPath
         ///</summary>
-        Task<string?> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed);
+        Task<(Directory2, string?)> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed);
 
         ///<summary>
         ///返回本地FullPath
         ///</summary>
-        Task<string?> SetAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed);
+        Task<string?> SaveAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed);
 
         Task<string?> GetNickNameAsync(GetSetMode getMode = GetSetMode.Mixed);
 

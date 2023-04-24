@@ -67,7 +67,7 @@ namespace Todo.Client.MobileApp
                             Name = DB_SCHEMA_MAIN,
                             EngineType = DbEngineType.SQLite,
                             Version = 1,
-                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.DbFileDirectory, DB_SCHEMA_MAIN_FILE)}")
+                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.AppDataDirectory, DB_SCHEMA_MAIN_FILE)}")
                         });
                         dbOptions.DbSchemas.Add(new DbSchema
                         {

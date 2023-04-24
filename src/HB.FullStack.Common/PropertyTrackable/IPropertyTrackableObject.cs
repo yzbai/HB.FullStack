@@ -4,7 +4,9 @@ namespace HB.FullStack.Common.PropertyTrackable
 {
     public interface IPropertyTrackableObject
     {
-        IList<PropertyChange> Changes { get; }
+        //IList<PropertyChange> _changes { get; }
+
+        IList<PropertyChange> GetChanges();
 
         //TODO: 是否需要自动StartTrack，比如刚从Db拿到手
         void StartTrack();
@@ -13,7 +15,7 @@ namespace HB.FullStack.Common.PropertyTrackable
 
         void Clear();
 
-        PropertyChangePack GetPropertyChanges(bool mergeMultipleChanges = true);
+        PropertyChangePack GetPropertyChangePack(bool mergeMultipleChanges = true);
 
         void Track<T>(string propertyName, T oldValue, T newValue);
 

@@ -97,8 +97,10 @@ namespace HB.FullStack.Client.MauiLib.Components
 
         public bool IsMobile => ValidationMethods.IsMobilePhone(Mobile);
 
+
+        //Remark:当RelayCommand的名字相同时，android下会生成warning
         [RelayCommand(CanExecute = nameof(IsMobile))]
-        private async Task RequestSmsCodeAsync()
+        private async Task ReRequestSmsCodeAsync()
         {
             IsBusy = true;
 

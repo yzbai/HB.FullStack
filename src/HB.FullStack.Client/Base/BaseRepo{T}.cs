@@ -273,7 +273,7 @@ namespace HB.FullStack.Client.Base
             ThrowIf.NotValid(models, nameof(models));
             _syncManager.WaitUntilNotSyncing();
 
-            IList<PropertyChangePack> changedPacks = models.Select(m => m.GetPropertyChanges()).ToList();
+            IList<PropertyChangePack> changedPacks = models.Select(m => m.GetPropertyChangePack()).ToList();
 
             try
             {

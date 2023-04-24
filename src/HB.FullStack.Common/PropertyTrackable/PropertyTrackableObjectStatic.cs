@@ -36,7 +36,7 @@ namespace HB.FullStack.Common.PropertyTrackable
                 {
                     Dictionary<string, PropertyChange> dict = new Dictionary<string, PropertyChange>();
 
-                    foreach (PropertyChange curProperty in trackableObject.Changes)
+                    foreach (PropertyChange curProperty in trackableObject.GetChanges())
                     {
                         if (dict.TryGetValue(curProperty.PropertyName, out PropertyChange? storedProperty))
                         {
@@ -54,7 +54,7 @@ namespace HB.FullStack.Common.PropertyTrackable
                 {
                     propertyChanges = new List<PropertyChange>();
 
-                    foreach (PropertyChange curProperty in trackableObject.Changes)
+                    foreach (PropertyChange curProperty in trackableObject.GetChanges())
                     {
                         propertyChanges.Add(new PropertyChange(curProperty));
                     }

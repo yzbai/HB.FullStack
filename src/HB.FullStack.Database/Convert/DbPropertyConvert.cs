@@ -75,6 +75,8 @@ namespace HB.FullStack.Database.Convert
             [typeof(char)] = new DbPropertyMapping { DbTypeStatement = "CHAR", DbType = DbType.StringFixedLength },
             [typeof(Guid)] = new DbPropertyMapping { DbTypeStatement = "CHAR(36)", DbType = DbType.Guid },
             [typeof(DateTimeOffset)] = new DbPropertyMapping { DbTypeStatement = "VARCHAR", DbType = DbType.DateTimeOffset },
+            [typeof(DateOnly)] = new DbPropertyMapping { DbTypeStatement = "VARCHAR", DbType = DbType.Date },
+            [typeof(TimeOnly)] = new DbPropertyMapping { DbTypeStatement = "VARCHAR", DbType = DbType.Time },
             [typeof(byte[])] = new DbPropertyMapping { DbTypeStatement = "BLOB", DbType = DbType.Binary }
         };
 

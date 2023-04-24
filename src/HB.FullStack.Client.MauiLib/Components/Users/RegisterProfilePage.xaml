@@ -4,14 +4,35 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base"
+    xmlns:behaviors="clr-namespace:HB.FullStack.Client.MauiLib.Behaviors"
     xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
     Title="RegisterProfilePage"
+    DisableBackButton="True"
+    IsNavBarVisible="True"
     x:DataType="components:RegisterProfileViewModel"
     x:TypeArguments="components:RegisterProfileViewModel">
-    <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" />
-    </VerticalStackLayout>
+    <StackLayout Margin="0,-120,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
+
+        <Label Text="基本信息" FontSize="Title" HorizontalTextAlignment="Center" />
+
+        <Image x:Name="AvatarImage" Aspect="AspectFill" HeightRequest="120" HorizontalOptions="Center" Source="{Binding AvatarImageSourceTask.Result}" WidthRequest="120">
+            <Image.Behaviors>
+                <behaviors:CircleClipBehavior />
+            </Image.Behaviors>
+            <Image.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CropAvatarImageCommand}" />
+            </Image.GestureRecognizers>
+        </Image>
+
+        <Entry
+            x:Name="NickNameEntry"
+            Text="{Binding NickName, Mode=TwoWay}"
+            Margin="0,48,0,0"
+            HorizontalOptions="CenterAndExpand"
+            HorizontalTextAlignment="Center"
+            Placeholder="起一个名字吧"
+            WidthRequest="240" />
+
+        <Button x:Name="FinishButton" Text="完成" Margin="0,16,0,0" Command="{Binding UpdateProfileCommand}" HorizontalOptions="Fill" />
+    </StackLayout>
 </base:BasePage>

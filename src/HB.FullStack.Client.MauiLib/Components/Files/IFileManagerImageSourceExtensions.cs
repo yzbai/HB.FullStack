@@ -12,7 +12,7 @@ namespace System
         public static ObservableTask<ImageSource> GetImageSource(this IFileManager fileManager, 
             Directory2 directory, 
             string? fileName, 
-            string? defaultFileName, 
+            string defaultFileName, 
             bool remoteForced = false)
         {
             ImageSource? initImageSource = null;

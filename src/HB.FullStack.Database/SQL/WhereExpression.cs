@@ -343,7 +343,7 @@ namespace HB.FullStack.Database.SQL
         public WhereExpression<T> OrderBy(string orderBy)
         {
             _orderByProperties.Clear();
-            _orderByString = orderBy;
+            _orderByString = " ORDER BY " + orderBy;
             return this;
         }
 
@@ -432,7 +432,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (_orderByProperties.Count > 0)
             {
-                _orderByString = "ORDER BY ";
+                _orderByString = " ORDER BY ";
 
                 foreach (string prop in _orderByProperties)
                 {

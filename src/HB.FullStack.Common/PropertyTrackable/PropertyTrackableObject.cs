@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Reflection;
-
+﻿
 namespace HB.FullStack.Common.PropertyTrackable
 {
     /// <summary>
@@ -11,8 +9,13 @@ namespace HB.FullStack.Common.PropertyTrackable
     public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrackable.IPropertyTrackableObject
     {
         public bool _startTrack = false;
+        
+        private global::System.Collections.Generic.IList<global::HB.FullStack.Common.PropertyTrackable.PropertyChange> _changes = new global::System.Collections.Generic.List<global::HB.FullStack.Common.PropertyTrackable.PropertyChange>();
 
-        public global::System.Collections.Generic.IList<global::HB.FullStack.Common.PropertyTrackable.PropertyChange> Changes { get; private set; } = new global::System.Collections.Generic.List<global::HB.FullStack.Common.PropertyTrackable.PropertyChange>();
+        public global::System.Collections.Generic.IList<global::HB.FullStack.Common.PropertyTrackable.PropertyChange> GetChanges()
+        {
+            return _changes;
+        }
 
         private readonly global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.PropertyChange> _updatingProperties = new global::System.Collections.Generic.Dictionary<string, global::HB.FullStack.Common.PropertyTrackable.PropertyChange>();
 
@@ -28,7 +31,7 @@ namespace HB.FullStack.Common.PropertyTrackable
 
         public void Clear()
         {
-            Changes.Clear();
+            _changes.Clear();
         }
 
         public void Track<T>(string propertyName, T oldValue, T newValue)
@@ -38,7 +41,7 @@ namespace HB.FullStack.Common.PropertyTrackable
                 return;
             }
 
-            Changes.Add(new global::HB.FullStack.Common.PropertyTrackable.PropertyChange(propertyName, oldValue, newValue));
+            _changes.Add(new global::HB.FullStack.Common.PropertyTrackable.PropertyChange(propertyName, oldValue, newValue));
         }
 
         public void TrackOldValue<T>(string propertyName, T oldValue)
@@ -72,7 +75,7 @@ namespace HB.FullStack.Common.PropertyTrackable
 
             _updatingProperties.Remove(propertyName);
 
-            Changes.Add(updatingProperty);
+            _changes.Add(updatingProperty);
         }
 
         protected void SetAndTrackProperty<T>([global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull("newValue")] ref T field, T newValue, [global::System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
@@ -87,7 +90,7 @@ namespace HB.FullStack.Common.PropertyTrackable
             field = newValue;
         }
 
-        public global::HB.FullStack.Common.PropertyTrackable.PropertyChangePack GetPropertyChanges(bool mergeMultipleChanged = true)
+        public global::HB.FullStack.Common.PropertyTrackable.PropertyChangePack GetPropertyChangePack(bool mergeMultipleChanged = true)
         {
             return global::HB.FullStack.Common.PropertyTrackable.PropertyTrackableObjectStatic.GetPropertyChanges(this, mergeMultipleChanged);
         }
