@@ -14,16 +14,17 @@ using HB.FullStack.Database.DbModels;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace HB.FullStack.DatabaseTests.MySqlTests
+namespace HB.FullStack.DatabaseTests.SQLite
 {
-    public class ConvertTestModel : TimelessGuidDbModel
+    [DbTable(BaseTestClass.DbSchema_Sqlite)]
+    public class ConvertTestModel_Sqlite : TimelessGuidDbModel
     {
         public DateOnly DateOnly { get; set; }
         public TimeOnly TimeOnly { get; set; }
 
-        public static ConvertTestModel GetRandomModel()
+        public static ConvertTestModel_Sqlite GetRandomModel()
         {
-            return new ConvertTestModel { DateOnly = new DateOnly(2022, 10, 22), TimeOnly = new TimeOnly(10, 23, 23, 877, 342) };
+            return new ConvertTestModel_Sqlite { DateOnly = new DateOnly(2022, 10, 22), TimeOnly = new TimeOnly(10, 23, 23, 877, 342) };
         }
     }
 
@@ -34,11 +35,11 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
         public async Task DateOnly_Test()
         {
             //TODO: finish this test
-            ConvertTestModel model = ConvertTestModel.GetRandomModel();
+            ConvertTestModel_Sqlite model = ConvertTestModel_Sqlite.GetRandomModel();
 
             await Db.AddAsync(model, "", null);
 
-            var rt = await Db.ScalarAsync<ConvertTestModel>(model.Id, null);
+            var rt = await Db.ScalarAsync<ConvertTestModel_Sqlite>(model.Id, null);
 
             Assert.AreEqual(model.DateOnly, rt!.DateOnly);
             Assert.AreEqual(model.TimeOnly, rt!.TimeOnly);

@@ -51,7 +51,7 @@ namespace System
             //catch (FeatureNotSupportedException ex)
             catch (Exception ex)
             {
-                Globals.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
+                Globals.Logger?.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
 
                 SecurityStorageSupported = false;
 
@@ -80,7 +80,7 @@ namespace System
             //catch (FeatureNotSupportedException ex)
             catch (Exception ex)
             {
-                Globals.Logger.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
+                Globals.Logger?.Log(LogLevel.Critical, ex, $"SecureStorage Set 失败，很严重. key:{key}. Message:{ex.Message}");
 
                 SecurityStorageSupported = false;
 

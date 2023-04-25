@@ -4,11 +4,13 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
+using HB.FullStack.Client.MauiLib.Base;
+
 using Microsoft.Maui.Accessibility;
 
 namespace Todo.Client.MobileApp.Pages
 {
-    public partial class HomePage : ContentPage
+    public partial class HomePage : BasePage<HomeViewModel>
     {
         private int count = 0;
 

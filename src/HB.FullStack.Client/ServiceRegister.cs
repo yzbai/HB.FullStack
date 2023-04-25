@@ -53,7 +53,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //Users
             services.AddSingleton<UserProfileRepo>();
-            services.AddSingleton<IUserProfileService, UserProfileService>();
+            services.AddSingleton<IUserService, UserService>();
 
             return services;
         }

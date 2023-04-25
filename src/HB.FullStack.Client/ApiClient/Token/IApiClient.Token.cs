@@ -5,6 +5,7 @@
  */
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.Abstractions;
@@ -15,21 +16,21 @@ namespace HB.FullStack.Client.ApiClient
 {
     public static class IApiClientTokenExtensions
     {
-        public static async Task RegisterByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
-        {
-            TokenResRegisterByLoginNameRequest registerRequest = new TokenResRegisterByLoginNameRequest(
-                loginName,
-                password,
-                apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
-                apiClient.TokenPreferences.DeviceInfos);
+        //public static async Task RegisterByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
+        //{
+        //    TokenResRegisterByLoginNameRequest registerRequest = new TokenResRegisterByLoginNameRequest(
+        //        loginName,
+        //        password,
+        //        apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
+        //        apiClient.TokenPreferences.DeviceInfos);
 
-            await apiClient.SendAsync(registerRequest).ConfigureAwait(false);
+        //    await apiClient.SendAsync(registerRequest).ConfigureAwait(false);
 
-            //TODO
-            //apiClient.TokenPreferences.OnRegistered();
-        }
+        //    //TODO
+        //    //apiClient.TokenPreferences.OnRegistered();
+        //}
 
-        public static async Task LoginByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
+        internal static async Task FetchTokenByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
         {
             TokenResGetByLoginNameRequest request = new TokenResGetByLoginNameRequest(
                 loginName,
@@ -37,10 +38,14 @@ namespace HB.FullStack.Client.ApiClient
                 apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
                 apiClient.TokenPreferences.DeviceInfos);
 
-            await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
+            TokenRes? res = await apiClient.GetAsync<TokenRes>(request).ConfigureAwait(false);
+
+            ThrowIf.Null(res, "Return a null TokenRes");
+
+            apiClient.TokenPreferences.OnTokenFetched(res);
         }
 
-        public static async Task LoginBySmsAsync(this IApiClient apiClient, string mobile, string smsCode)
+        internal static async Task FetchTokenBySmsAsync(this IApiClient apiClient, string mobile, string smsCode)
         {
             TokenResGetBySmsRequest request = new TokenResGetBySmsRequest(
                 mobile,
@@ -48,10 +53,14 @@ namespace HB.FullStack.Client.ApiClient
                 apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
                 apiClient.TokenPreferences.DeviceInfos);
 
-            await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
+            TokenRes? res = await apiClient.GetAsync<TokenRes>(request).ConfigureAwait(false);
+
+            ThrowIf.Null(res, "Return a null TokenRes");
+
+            apiClient.TokenPreferences.OnTokenFetched(res);
         }
 
-        public static async Task UnLoginAsync(this IApiClient apiClient)
+        internal static async Task DeleteTokenAsync(this IApiClient apiClient)
         {
             TokenResDeleteRequest request = new TokenResDeleteRequest();
 
@@ -60,29 +69,35 @@ namespace HB.FullStack.Client.ApiClient
             apiClient.TokenPreferences.OnTokenDeleted();
         }
 
-        public static async Task RefreshTokenAsync(this IApiClient apiClient)
+        internal static async Task RefreshTokenAsync(this IApiClient apiClient)
         {
-            ITokenPreferences preferenceProvider = apiClient.TokenPreferences;
-
-            if (preferenceProvider.AccessToken.IsNullOrEmpty())
+            try
             {
-                throw CommonExceptions.ApiClientInnerError("Can not Refresh your accesstoken if you not logined.", null, null);
+                ITokenPreferences preferenceProvider = apiClient.TokenPreferences;
+
+                if (preferenceProvider.AccessToken.IsNullOrEmpty())
+                {
+                    throw CommonExceptions.ApiClientInnerError("Can not Refresh your accesstoken if you not logined.", null, null);
+                }
+
+                if (preferenceProvider.RefreshToken.IsNullOrEmpty())
+                {
+                    throw CommonExceptions.ApiClientInnerError("Can not Refresh your accesstoken if you not logined.RefreshToken Empty", null, null);
+                }
+
+                TokenResGetByRefreshRequest request = new TokenResGetByRefreshRequest(preferenceProvider.AccessToken!, preferenceProvider.RefreshToken!);
+
+                TokenRes? res = await apiClient.GetAsync<TokenRes>(request).ConfigureAwait(false);
+
+                ThrowIf.Null(res, "Return a null TokenRes");
+
+                apiClient.TokenPreferences.OnTokenFetched(res);
             }
-
-            TokenResGetByRefreshRequest request = new TokenResGetByRefreshRequest(
-                preferenceProvider.AccessToken!,
-                preferenceProvider.RefreshToken!);
-
-            await PerformLoginAsync(apiClient, request).ConfigureAwait(false);
-        }
-
-        private static async Task PerformLoginAsync(IApiClient apiClient, ApiRequest request)
-        {
-            TokenRes? res = await apiClient.GetAsync<TokenRes>(request).ConfigureAwait(false);
-
-            ThrowIf.Null(res, "Return a null TokenRes");
-
-            apiClient.TokenPreferences.OnTokenFetched(res);
+            catch
+            {
+                apiClient.TokenPreferences.OnTokenRefreshFailed();
+                throw;
+            }
         }
     }
 }

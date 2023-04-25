@@ -30,7 +30,7 @@ namespace HB.FullStack.Client.MauiLib
 
         private static bool _isLoginPagePushed;
 
-        private static IUserProfileService? _userProfileService;
+        private static IUserService? _userProfileService;
 
         private static ClientOptions? _clientOptions;
 
@@ -41,7 +41,7 @@ namespace HB.FullStack.Client.MauiLib
 
         private static bool _alreadyKownNotNeedIntroduce;
 
-        private static IUserProfileService UserProfileService => _userProfileService ??= Currents.Services.GetRequiredService<IUserProfileService>();
+        private static IUserService UserProfileService => _userProfileService ??= Currents.Services.GetRequiredService<IUserService>();
 
         private static ClientOptions ClientOptions => _clientOptions ??= Currents.Services.GetRequiredService<IOptions<ClientOptions>>().Value;
 

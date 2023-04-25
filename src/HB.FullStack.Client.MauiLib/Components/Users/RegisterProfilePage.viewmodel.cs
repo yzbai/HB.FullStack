@@ -33,7 +33,7 @@ namespace HB.FullStack.Client.MauiLib.Components
     public partial class RegisterProfileViewModel : BaseViewModel, IQueryAttributable
     {
         private readonly MauiOptions _options;
-        private readonly IUserProfileService _userProfileService;
+        private readonly IUserService _userService;
 
 
         [ObservableProperty]
@@ -46,10 +46,10 @@ namespace HB.FullStack.Client.MauiLib.Components
         private string? _newTempAvatarFile;
         private string? _oldNickName;
 
-        public RegisterProfileViewModel(ILogger logger, IUserProfileService userProfileService, ITokenPreferences clientPreferences, IFileManager fileManager, IOptions<MauiOptions> options) : base(logger, clientPreferences, fileManager)
+        public RegisterProfileViewModel(ILogger logger, IUserService userProfileService, ITokenPreferences clientPreferences, IFileManager fileManager, IOptions<MauiOptions> options) : base(logger, clientPreferences, fileManager)
         {
             _options = options.Value;
-            _userProfileService = userProfileService;
+            _userService = userProfileService;
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -74,7 +74,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         {
             if (NickName.IsNullOrEmpty())
             {
-                _userProfileService.GetNickNameAsync().ContinueWith(nickNameTask =>
+                _userService.GetNickNameAsync().ContinueWith(nickNameTask =>
                 {
                     _oldNickName = nickNameTask.Result;
 
@@ -93,23 +93,18 @@ namespace HB.FullStack.Client.MauiLib.Components
                 //使用已有头像
                 AvatarImageSourceTask = await GetAvatarImageSourceAsync();
             }
+
+            async Task<ObservableTask<ImageSource>> GetAvatarImageSourceAsync()
+            {
+                (Directory2 directory, string? fileName) = await _userService.GetAvatarFileAsync();
+
+                return FileManager.GetImageSource(directory, fileName, _options.DefaultAvatarFileName, true);
+            }
         }
 
         public override Task OnPageDisappearingAsync()
         {
             return Task.CompletedTask;
-        }
-
-        private async Task<ObservableTask<ImageSource>> GetAvatarImageSourceAsync()
-        {
-            (Directory2 directory, string? fileName) = await _userProfileService.GetAvatarFileAsync();
-
-            return FileManager.GetImageSource(directory, fileName, GetDefaultAvatarFileName(), true);
-        }
-
-        private string GetDefaultAvatarFileName()
-        {
-            return _options.DefaultAvatarFileName;
         }
 
         [RelayCommand]
@@ -137,7 +132,7 @@ namespace HB.FullStack.Client.MauiLib.Components
                     _oldNickName = NickName;
                 }
 
-                await _userProfileService.UpdateUserProfileAsync(updatedNickName, null, null, _avatarChanged ? _newTempAvatarFile: null);
+                await _userService.UpdateUserProfileAsync(updatedNickName, null, null, _avatarChanged ? _newTempAvatarFile: null);
                 _avatarChanged = false;
 
                 //Navigation

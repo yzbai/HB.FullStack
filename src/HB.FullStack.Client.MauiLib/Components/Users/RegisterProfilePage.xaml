@@ -7,15 +7,27 @@
     xmlns:behaviors="clr-namespace:HB.FullStack.Client.MauiLib.Behaviors"
     xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
     Title="RegisterProfilePage"
-    DisableBackButton="True"
-    IsNavBarVisible="True"
     x:DataType="components:RegisterProfileViewModel"
-    x:TypeArguments="components:RegisterProfileViewModel">
-    <StackLayout Margin="0,-120,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
+    x:TypeArguments="components:RegisterProfileViewModel"
+    DisableBackButton="True"
+    IsNavBarVisible="True">
+    <StackLayout
+        Margin="0,-120,0,0"
+        HorizontalOptions="CenterAndExpand"
+        VerticalOptions="Center">
 
-        <Label Text="基本信息" FontSize="Title" HorizontalTextAlignment="Center" />
+        <Label
+            FontSize="Title"
+            HorizontalTextAlignment="Center"
+            Text="基本信息" />
 
-        <Image x:Name="AvatarImage" Aspect="AspectFill" HeightRequest="120" HorizontalOptions="Center" Source="{Binding AvatarImageSourceTask.Result}" WidthRequest="120">
+        <Image
+            x:Name="AvatarImage"
+            Aspect="AspectFill"
+            HeightRequest="120"
+            HorizontalOptions="Center"
+            Source="{Binding AvatarImageSourceTask.Result}"
+            WidthRequest="120">
             <Image.Behaviors>
                 <behaviors:CircleClipBehavior />
             </Image.Behaviors>
@@ -26,13 +38,18 @@
 
         <Entry
             x:Name="NickNameEntry"
-            Text="{Binding NickName, Mode=TwoWay}"
             Margin="0,48,0,0"
             HorizontalOptions="CenterAndExpand"
             HorizontalTextAlignment="Center"
             Placeholder="起一个名字吧"
+            Text="{Binding NickName, Mode=TwoWay}"
             WidthRequest="240" />
 
-        <Button x:Name="FinishButton" Text="完成" Margin="0,16,0,0" Command="{Binding UpdateProfileCommand}" HorizontalOptions="Fill" />
+        <Button
+            x:Name="FinishButton"
+            Margin="0,16,0,0"
+            Command="{Binding UpdateProfileCommand}"
+            HorizontalOptions="Fill"
+            Text="完成" />
     </StackLayout>
 </base:BasePage>

@@ -21,8 +21,8 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
             TestObject testObject = new TestObject();
             ActionOnTestObject1(testObject);
 
-            var changes = testObject.GetPropertyChanges(mergeMultipleChanged: false);
-            var changes2 = testObject.GetPropertyChanges(mergeMultipleChanged: true);
+            var changes = testObject.GetPropertyChangePack(mergeMultipleChanged: false);
+            var changes2 = testObject.GetPropertyChangePack(mergeMultipleChanged: true);
 
             string json = SerializeUtil.ToJson(changes);
             string json2 = SerializeUtil.ToJson(changes2);

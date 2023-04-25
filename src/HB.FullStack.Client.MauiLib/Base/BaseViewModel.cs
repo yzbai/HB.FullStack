@@ -23,9 +23,9 @@ namespace HB.FullStack.Client.MauiLib.Base
     public abstract partial class BaseViewModel : ObservableObject, IBaseViewModel
     {
         public const string ExceptionDisplaySignalName = "HB.FullStack.Client.Maui.ExceptionDisplay";
-        public ILogger Logger { get; }
-        public ITokenPreferences TokenPreferences { get; }
-        public IFileManager FileManager { get; }
+        //public ILogger Logger { get; }
+        //public ITokenPreferences TokenPreferences { get; }
+        //public IFileManager FileManager { get; }
 
         [ObservableProperty]
         private bool _isBusy;
@@ -33,12 +33,19 @@ namespace HB.FullStack.Client.MauiLib.Base
         [ObservableProperty]
         private string _title = string.Empty;
 
-        protected BaseViewModel(ILogger logger, ITokenPreferences preferenceProvider, IFileManager fileManager)
+        protected BaseViewModel()
         {
-            Logger = logger ?? Globals.Logger;
-            TokenPreferences = preferenceProvider;
-            FileManager = fileManager;
+            //Logger = logger ?? Globals.Logger;
+            //TokenPreferences = tokenPreferences;
+            //FileManager = fileManager;
         }
+
+        //protected BaseViewModel(ITokenPreferences tokenPreferences, IFileManager fileManager)
+        //{
+        //    Logger = Globals.Logger;
+        //    TokenPreferences = tokenPreferences;
+        //    FileManager = fileManager;
+        //}
 
         /// <summary>
         /// ViewModel可以是Singleton，所以多个page先后使用同一个viewmodel，这里做准备工作。与这个page相关的数据被建立
@@ -61,7 +68,7 @@ namespace HB.FullStack.Client.MauiLib.Base
 
         public virtual void OnExceptionDisplay(Exception ex, string message, ExceptionDisplayMode displayMode = ExceptionDisplayMode.Toast, bool report = false, [CallerMemberName] string caller = "")
         {
-            Logger.LogError(ex, message);
+            Globals.Logger.LogError(ex, message);
 
             //TODO:错误上报处理report
             //TODO: 处理displayMode

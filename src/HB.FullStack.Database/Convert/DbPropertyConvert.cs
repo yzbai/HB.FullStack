@@ -86,10 +86,12 @@ namespace HB.FullStack.Database.Convert
 
             //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
             RegisterGlobalDbPropertyConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetDbPropertyConverter(), DbEngineType.MySQL);
+            RegisterGlobalDbPropertyConverter(typeof(DateOnly), new MySqlDateOnlyDbPropertyConverter(), DbEngineType.MySQL);
+            RegisterGlobalDbPropertyConverter(typeof(TimeOnly), new MySqlTimeOnlyDbPropertyConverter(), DbEngineType.MySQL);
 
             //解决MySql存储Guid的问题，存储为Binary(16)
             RegisterGlobalDbPropertyConverter(typeof(Guid), new MySqlGuidDbPropertyConverter(), DbEngineType.MySQL);
-
+            
             RegisterGlobalDbPropertyConverter(typeof(SimpleDate), new SimpleDateDbPropertyConverter(), DbEngineType.MySQL);
             RegisterGlobalDbPropertyConverter(typeof(Time24Hour), new Time24HourDbPropertyConverter(), DbEngineType.MySQL);
 
@@ -98,6 +100,8 @@ namespace HB.FullStack.Database.Convert
             #region SQLite
 
             RegisterGlobalDbPropertyConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetDbPropertyConverter(), DbEngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(DateOnly), new SqliteDateOnlyDbPropertyConverter(), DbEngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(TimeOnly), new SqliteTimeOnlyDbPropertyConverter(), DbEngineType.SQLite);
             RegisterGlobalDbPropertyConverter(typeof(Guid), new SqliteGuidDbPropertyConverter(), DbEngineType.SQLite);
             RegisterGlobalDbPropertyConverter(typeof(SimpleDate), new SimpleDateDbPropertyConverter(), DbEngineType.SQLite);
             RegisterGlobalDbPropertyConverter(typeof(Time24Hour), new Time24HourDbPropertyConverter(), DbEngineType.SQLite);

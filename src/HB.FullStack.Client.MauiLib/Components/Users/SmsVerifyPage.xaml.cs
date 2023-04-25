@@ -4,7 +4,10 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
+using System;
 using System.Collections.Generic;
+
+using CommunityToolkit.Maui.Alerts;
 
 using HB.FullStack.Client.MauiLib.Base;
 
@@ -29,6 +32,15 @@ public partial class SmsVerifyPage : BasePage<SmsVerifyViewModel>
         base.OnNavigatedTo(args);
 
         //TODO: ≤ª––æÕ ‘ ‘Loaded
+        //SmsEntry.Focus();
+    }
+
+    protected override async void BasePage_Loaded(object? sender, EventArgs e)
+    {
+        base.BasePage_Loaded(sender, e);
+
         SmsEntry.Focus();
+
+        await Toast.Make("Test Loaded", CommunityToolkit.Maui.Core.ToastDuration.Long).Show();
     }
 }

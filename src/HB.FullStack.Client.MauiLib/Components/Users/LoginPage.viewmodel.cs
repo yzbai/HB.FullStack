@@ -89,7 +89,7 @@ namespace HB.FullStack.Client.MauiLib.Components
             await webviewDialog.ShowAsync();
         }
 
-        public LoginViewModel(ILogger logger, IOptions<MauiOptions> options, ITokenPreferences tokenPreferences, IFileManager fileManager, ISmsService smsService) : base(logger, tokenPreferences, fileManager)
+        public LoginViewModel(ILogger<LoginViewModel> logger, IOptions<MauiOptions> options, ITokenPreferences tokenPreferences, IFileManager fileManager, ISmsService smsService) : base(logger, tokenPreferences, fileManager)
         {
             _options = options.Value;
             _smsService = smsService;

@@ -43,12 +43,12 @@ namespace HB.FullStack.Client.Abstractions
 
         DateTimeOffset? TokenCreatedTime { get; }
 
-        bool IsLogined() => AccessToken.IsNotNullOrEmpty();
+        public bool IsLogined() => UserId.HasValue && AccessToken.IsNotNullOrEmpty();
 
-        void OnTokenFetched(TokenRes tokenRes);
+        public void OnTokenFetched(TokenRes tokenRes);
 
-        void OnTokenDeleted();
+        public void OnTokenDeleted();
 
-        void OnTokenRefreshFailed();
+        public void OnTokenRefreshFailed();
     }
 }

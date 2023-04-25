@@ -24,23 +24,17 @@ namespace HB.FullStack.Client.ApiClient
 
         private static readonly IDictionary<string, bool> _lastRefreshResults = new Dictionary<string, bool>();
 
-        public static async Task<bool> RefreshTokenAsync(
-            IApiClient apiClient,
-            ITokenPreferences preferenceProvider,
-            int tokenRefreshIntervalSeconds)
+        public static async Task<bool> RefreshTokenAsync(IApiClient apiClient, ITokenPreferences tokenPreferences, int tokenRefreshIntervalSeconds)
         {
-            if (preferenceProvider.AccessToken.IsNullOrEmpty())
+            if (tokenPreferences.AccessToken.IsNullOrEmpty())
             {
                 return false;
             }
 
-            string accessTokenHashKey = SecurityUtil.GetHash(preferenceProvider.AccessToken);
+            string accessTokenHashKey = SecurityUtil.GetHash(tokenPreferences.AccessToken);
 
             //这个AccessToken不久前刷新过
-            if (!_requestLimiter.NoWaitLock(
-                nameof(RefreshTokenAsync),
-                accessTokenHashKey,
-                TimeSpan.FromSeconds(tokenRefreshIntervalSeconds)))
+            if (!_requestLimiter.NoWaitLock(nameof(RefreshTokenAsync), accessTokenHashKey, TimeSpan.FromSeconds(tokenRefreshIntervalSeconds)))
             {
                 //可能已经有人在刷新，等他刷新完
                 if (!await _lastRefreshResultsAccessSemaphore.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false))
@@ -71,40 +65,16 @@ namespace HB.FullStack.Client.ApiClient
 
             try
             {
-                if (preferenceProvider.RefreshToken.IsNotNullOrEmpty())
-                {
-                    TokenResGetByRefreshRequest refreshRequest = new TokenResGetByRefreshRequest(
-                        preferenceProvider.AccessToken,
-                        preferenceProvider.RefreshToken);
+                await apiClient.RefreshTokenAsync();
 
-                    TokenRes? res = await apiClient.GetAsync<TokenRes>(refreshRequest).ConfigureAwait(false);
+                OnRefreshSucceed();
 
-                    if (res != null)
-                    {
-                        _lastRefreshResults.Clear();
-                        _lastRefreshResults[accessTokenHashKey] = true;
+                return true;
 
-                        OnRefreshSucceed(res, preferenceProvider);
-
-                        return true;
-                    }
-                }
-
-                //刷新失败
-                _lastRefreshResults.Clear();
-                _lastRefreshResults[accessTokenHashKey] = false;
-
-                OnRefreshFailed(preferenceProvider);
-
-                return false;
             }
             catch
             {
-                //刷新失败
-                _lastRefreshResults.Clear();
-                _lastRefreshResults[accessTokenHashKey] = false;
-
-                OnRefreshFailed(preferenceProvider);
+                OnRefreshFailed();
 
                 throw;
             }
@@ -112,16 +82,18 @@ namespace HB.FullStack.Client.ApiClient
             {
                 _lastRefreshResultsAccessSemaphore.Release();
             }
-        }
 
-        private static void OnRefreshSucceed(TokenRes res, ITokenPreferences preferenceProvider)
-        {
-            preferenceProvider.OnTokenFetched(res);
-        }
+            void OnRefreshSucceed()
+            {
+                _lastRefreshResults.Clear();
+                _lastRefreshResults[accessTokenHashKey] = true;
+            }
 
-        private static void OnRefreshFailed(ITokenPreferences preferenceProvider)
-        {
-            preferenceProvider.OnTokenRefreshFailed();
+            void OnRefreshFailed()
+            {
+                _lastRefreshResults.Clear();
+                _lastRefreshResults[accessTokenHashKey] = false;
+            }
         }
     }
 }

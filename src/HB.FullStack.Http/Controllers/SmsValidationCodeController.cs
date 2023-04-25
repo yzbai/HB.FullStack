@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Server.Services;
+
 using Microsoft.AspNetCore.Authorization;
 
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +34,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
         //TODO: 将CapthaFilter 抽象出来，不能只依赖腾讯一家
         //[ServiceFilter(typeof(CapthcaCheckFilter))]
         //#endif
-        public async Task<IActionResult> GetByMobileAsync([FromQuery][Mobile] string mobile)
+        public IActionResult GetByMobile([FromQuery][Mobile] string mobile)
         {
             //_smsService.SendValidationCodeAsync(mobile)
             //    .SafeFireAndForget(ex =>
@@ -44,9 +46,9 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             //TODO: 同一用户的罚时操作？比如同一手机号，连续请求5次以上？
 
-            await _smsService.SendValidationCodeAsync(mobile).ConfigureAwait(false);
+            int smsCodeLength = _smsService.SendValidationCode(mobile);
 
-            return Ok(new SmsValidationCodeRes());
+            return Ok(new SmsValidationCodeRes { Length = smsCodeLength });
         }
     }
 }

@@ -18,7 +18,6 @@ namespace HB.FullStack.Client.ApiClient
 
         event Func<object?, ApiEventArgs, Task>? Responsed;
 
-
         Task<TResponse?> GetAsync<TResponse>(ApiRequest request, CancellationToken cancellationToken) where TResponse : class;
 
         Task<TResponse?> GetAsync<TResponse>(ApiRequest request) where TResponse : class;

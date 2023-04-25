@@ -21,7 +21,7 @@ using Microsoft.Extensions.Options;
 //TODO: 这里的ConfigureAWait需不需要去掉
 namespace HB.FullStack.Client.Components.Users
 {
-    internal class UserProfileService : IUserProfileService
+    internal class UserService : IUserService
     {
         private readonly ClientOptions _options;
         private readonly IApiClient _apiClient;
@@ -30,7 +30,7 @@ namespace HB.FullStack.Client.Components.Users
         private readonly ITokenPreferences _tokenPreferences;
         private readonly UserProfileRepo _userProfileRepo;
 
-        public UserProfileService(
+        public UserService(
             IOptions<ClientOptions> options,
             IApiClient apiClient,
             ITransaction transaction,

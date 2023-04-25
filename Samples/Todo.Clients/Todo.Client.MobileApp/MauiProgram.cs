@@ -10,6 +10,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
 
 using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client.MauiLib.Components;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 
@@ -98,8 +99,21 @@ namespace Todo.Client.MobileApp
                         fileManagerOptions.DirectoryDescriptions = DirectorySettings.Descriptions.All;
                         fileManagerOptions.DirectoryPermissions = DirectorySettings.DirectoryPermissions.All;
                     },
-                    clientOptions => { },
-                    mauiInitOptions => { },
+                    clientOptions =>
+                    {
+                        clientOptions.AvatarDirectory = DirectorySettings.PUBLIC_AVATAR;
+                    },
+                    mauiInitOptions =>
+                    {
+                        mauiInitOptions.DefaultAvatarFileName = "default_avatar.png";
+                        mauiInitOptions.IntoduceContents = new IntroduceContent[] 
+                        {
+                            new IntroduceContent{ ImageSource="introduce_1.png", IsLastPage = false},
+                            new IntroduceContent{ ImageSource="introduce_2.png", IsLastPage = false},
+                            new IntroduceContent{ ImageSource="introduce_3.png", IsLastPage = false},
+                            new IntroduceContent{ ImageSource="introduce_4.png", IsLastPage = true},
+                        };
+                    },
                     tCaptchaAppId: TECENET_CAPTCHA_APP_ID)
                 .UseTodoApp(todoAppOptions => { })
                 .ConfigureLifecycleEvents(lifecycleBuilder => { })

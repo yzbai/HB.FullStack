@@ -8,7 +8,12 @@ namespace HB.FullStack.Server.Services
     /// </summary>
     public interface ISmsService
     {
-        Task SendValidationCodeAsync(string mobile/*, out string code*/);
+        /// <summary>
+        /// 返回SmsCodeLength
+        /// </summary>
+        /// <param name="mobile"></param>
+        /// <returns></returns>
+        int SendValidationCode(string mobile/*, out string code*/);
 
 
         Task<bool> ValidateAsync(string mobile, string code);

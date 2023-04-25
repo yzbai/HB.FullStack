@@ -27,7 +27,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         [ObservableProperty]
         private IList<IntroduceContent>? _introduceContents;
 
-        public IntroduceViewModel(ILogger logger, ITokenPreferences preferenceProvider, IFileManager fileManager, IOptions<MauiOptions> options) : base(logger, preferenceProvider, fileManager)
+        public IntroduceViewModel(ILogger<IntroduceViewModel> logger, ITokenPreferences preferenceProvider, IFileManager fileManager, IOptions<MauiOptions> options) : base(logger, preferenceProvider, fileManager)
         {
             _options = options.Value;
 

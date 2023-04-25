@@ -15,8 +15,11 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Client.Components.Users
 {
-    public interface IUserProfileService
+    public interface IUserService
     {
+        #region User
+        #endregion
+
         #region Profile
 
         Task<UserProfile?> UpdateUserProfileAsync(

@@ -48,26 +48,26 @@ namespace HB.FullStack.Client.MauiLib.Base
 
             this.SetBinding(TitleProperty, nameof(BaseViewModel.Title));
 
-            RegisterCustomerControls(CustomerControls);
-
             Loaded += BasePage_Loaded;
 
             Unloaded += BasePage_Unloaded;
         }
 
-        private void BasePage_Loaded(object? sender, EventArgs e)
+        protected virtual void BasePage_Loaded(object? sender, EventArgs e)
         {
             //TODO: Do we need ViewModel.OnPageLoaded()?
             //TODO: Do we need View.OnPageLoaded()?
         }
 
-        private void BasePage_Unloaded(object? sender, EventArgs e)
+        protected virtual void BasePage_Unloaded(object? sender, EventArgs e)
         {
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
+
+            RegisterCustomerControls(CustomerControls);
 
             //viewmodel
             ViewModel?.OnPageAppearingAsync().SafeFireAndForget();
@@ -77,7 +77,12 @@ namespace HB.FullStack.Client.MauiLib.Base
             //TODO: 检查各个自定义控件的OnPageAppearing方法有没有改成异步的。
             if (CustomerControls.IsNotNullOrEmpty())
             {
-                Parallel.ForEach(CustomerControls, controls => controls.OnPageAppearing());
+                //Parallel.ForEach(CustomerControls, controls => controls.OnPageAppearing());
+
+                foreach(var control in CustomerControls)
+                {
+                    control.OnPageAppearing();
+                }
             }
         }
 

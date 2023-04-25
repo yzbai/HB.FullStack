@@ -31,11 +31,13 @@ namespace HB.FullStack.Client.MauiLib.Base
             if (NavigationHelper.NeedIntroduce() && pageName != nameof(IntroducePage))
             {
                 await NavigationHelper.GotoIntroducePageAsync();
+                return;
             }
 
             if (NavigationHelper.NeedLogin(pageName))
             {
                 await NavigationHelper.GotoLoginPageAsync();
+                return;
             }
 
             return;

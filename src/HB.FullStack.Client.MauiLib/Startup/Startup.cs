@@ -44,10 +44,13 @@ namespace Microsoft.Maui.Hosting
             //Logging
             if (Currents.IsDebug)
             {
-                builder.Logging
-                    .AddDebug()
-                    //.AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("HB", LogLevel.Trace);
+                builder.Logging.AddDebug().AddFilter("HB", LogLevel.Trace);
+                //builder.Services.AddLogging(loggingBuilder => { loggingBuilder.AddDebug().AddFilter("HB", LogLevel.Trace); });
+            }
+            else
+            {
+                builder.Logging.AddDebug().AddFilter("HB", LogLevel.Trace);
+                //builder.Services.AddLogging(loggingBuilder => { loggingBuilder.AddDebug().AddFilter("HB", LogLevel.Trace); });
             }
 
             IServiceCollection services = builder.Services;

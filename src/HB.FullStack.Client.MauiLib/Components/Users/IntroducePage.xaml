@@ -38,7 +38,7 @@
                             IsVisible="{Binding IsLastPage}"
                             Orientation="Horizontal"
                             Spacing="50">
-                            <Button Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={Type components:IntroduceViewModel}}, Path=OnFinishedCommand}" Text="Enter" />
+                            <Button Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={Type components:IntroduceViewModel}}, Path=FinishedCommand}" Text="Enter" />
                         </StackLayout>
                     </AbsoluteLayout>
                 </DataTemplate>
