@@ -10,8 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
-using HB.FullStack.Client.Components.Files;
+using HB.FullStack.Client.Files;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Options;

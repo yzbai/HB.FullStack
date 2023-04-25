@@ -23,7 +23,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using Microsoft.Extensions.Options;
 
-namespace HB.FullStack.Client.Components.Files
+namespace HB.FullStack.Client.Files
 {
     public partial class FileManager : IFileManager
     {
@@ -117,7 +117,7 @@ namespace HB.FullStack.Client.Components.Files
 
             if (!localFullPath.Equals(sourceLocalFullPath, StringComparison.OrdinalIgnoreCase))
             {
-                using Stream stream = System.IO.File.Open(sourceLocalFullPath, FileMode.Open);
+                using Stream stream = File.Open(sourceLocalFullPath, FileMode.Open);
                 _ = await _localFileManager.SaveFileAsync(stream, localFullPath);
             }
 
@@ -184,7 +184,7 @@ namespace HB.FullStack.Client.Components.Files
 
                 while (tryCount-- > 0)
                 {
-                    if (System.IO.File.Exists(fullPath))
+                    if (File.Exists(fullPath))
                     {
                         return fullPath;
                     }

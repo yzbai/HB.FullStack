@@ -14,7 +14,7 @@ using CommunityToolkit.Maui;
 using HB.FullStack.Client;
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
-using HB.FullStack.Client.Components.Files;
+using HB.FullStack.Client.Files;
 using HB.FullStack.Client.MauiLib;
 using HB.FullStack.Client.MauiLib.Components;
 using HB.FullStack.Client.MauiLib.Controls;

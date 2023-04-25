@@ -47,7 +47,7 @@ namespace HB.FullStack.Client.MauiLib.Components
 
         private bool _isAppearing;
 
-        public SmsVerifyViewModel(ILogger<SmsVerifyViewModel> logger, ITokenPreferences clientPreferences, IFileManager fileManager, IApiClient apiClient, ISmsService smsService) : base(logger, clientPreferences, fileManager)
+        public SmsVerifyViewModel(ILogger<SmsVerifyViewModel> logger, ITokenPreferences clientPreferences, IFileManager fileManager, IApiClient apiClient, ISmsService smsService)
         {
             _apiClient = apiClient;
             _smsService = smsService;

@@ -13,10 +13,10 @@ using System.Threading.Tasks;
 using HB.FullStack.Client;
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Base;
-using HB.FullStack.Client.Components.Files;
 using HB.FullStack.Client.Components.KVManager;
 using HB.FullStack.Client.Components.Sts;
 using HB.FullStack.Client.Components.Users;
+using HB.FullStack.Client.Files;
 using HB.FullStack.Common.Files;
 
 namespace Microsoft.Extensions.DependencyInjection
