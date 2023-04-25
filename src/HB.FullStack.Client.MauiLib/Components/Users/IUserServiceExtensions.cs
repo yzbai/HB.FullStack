@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HB.FullStack.Client.Components.Files;
 using HB.FullStack.Client.Components.Users;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Files;

@@ -46,6 +46,22 @@ namespace HB.FullStack.Client.Components.Users
             _userProfileRepo = userProfileRepo;
         }
 
+        public async Task RegisterByLoginNameAsync(string loginName, string password)
+        {
+            UserResRegisterByLoginNameRequest registerRequest = new UserResRegisterByLoginNameRequest(
+                loginName,
+                password,
+                _apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
+                _apiClient.TokenPreferences.DeviceInfos);
+
+            await _apiClient.SendAsync(registerRequest).ConfigureAwait(false);
+        }
+
+        public Task LoginBySmsAsync(string mobile, string smsCode)
+        {
+            return _apiClient.FetchTokenBySmsAsync(mobile, smsCode);
+        }
+
         public async Task<string?> GetNickNameAsync(GetSetMode getMode)
         {
             UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, null, getMode).ConfigureAwait(false);
@@ -115,6 +131,8 @@ namespace HB.FullStack.Client.Components.Users
 
             //return await _fileManager.GetAsync(ApiClientOptions.AvatarDirectory, fileName).ConfigureAwait(false);
         }
+
+
 
         public async Task<string?> SaveAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed)
         {

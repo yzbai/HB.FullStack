@@ -34,9 +34,9 @@ namespace HB.FullStack.Server.WebLib.Controllers
         public async Task<IActionResult> RegisterByLoginName([LoginName(CanBeNull = false)] string loginName,
             [Password(CanBeNull = false)] string password,
             [Required] string audience,
+            [ValidatedObject][FromQuery] DeviceInfos deviceInfos,
             [Required][FromHeader] string clientId,
-            [Required][FromHeader] string clientVersion,
-            [ValidatedObject][FromQuery] DeviceInfos deviceInfos)
+            [Required][FromHeader] string clientVersion)
         {
             ClientInfos clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };
             RegisterByLoginName context = new RegisterByLoginName(loginName, password, audience, clientInfos, deviceInfos);

@@ -37,7 +37,7 @@ namespace HB.FullStack.Client.MauiLib.Components
 
 
         [ObservableProperty]
-        private ObservableTask<ImageSource>? _avatarImageSourceTask;
+        private ObservableTask<string>? _avatarFileTask;
 
         [ObservableProperty]
         private string? _nickName;
@@ -46,7 +46,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         private string? _newTempAvatarFile;
         private string? _oldNickName;
 
-        public RegisterProfileViewModel(ILogger logger, IUserService userProfileService, ITokenPreferences clientPreferences, IFileManager fileManager, IOptions<MauiOptions> options) : base(logger, clientPreferences, fileManager)
+        public RegisterProfileViewModel(IOptions<MauiOptions> options, IUserService userProfileService)
         {
             _options = options.Value;
             _userService = userProfileService;
@@ -88,17 +88,10 @@ namespace HB.FullStack.Client.MauiLib.Components
                 });
             }
 
-            if (AvatarImageSourceTask == null)
+            if (AvatarFileTask == null)
             {
                 //使用已有头像
-                AvatarImageSourceTask = await GetAvatarImageSourceAsync();
-            }
-
-            async Task<ObservableTask<ImageSource>> GetAvatarImageSourceAsync()
-            {
-                (Directory2 directory, string? fileName) = await _userService.GetAvatarFileAsync();
-
-                return FileManager.GetImageSource(directory, fileName, _options.DefaultAvatarFileName, true);
+                AvatarFileTask = _userService.GetAvatarFileObservableTaskAsync();
             }
         }
 
@@ -132,7 +125,7 @@ namespace HB.FullStack.Client.MauiLib.Components
                     _oldNickName = NickName;
                 }
 
-                await _userService.UpdateUserProfileAsync(updatedNickName, null, null, _avatarChanged ? _newTempAvatarFile: null);
+                await _userService.UpdateUserProfileAsync(updatedNickName, null, null, _avatarChanged ? _newTempAvatarFile : null);
                 _avatarChanged = false;
 
                 //Navigation

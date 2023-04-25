@@ -5,6 +5,7 @@
  */
 
 using HB.FullStack.Client.Base;
+using HB.FullStack.Common;
 using HB.FullStack.Common.Files;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Context;
@@ -18,6 +19,10 @@ namespace HB.FullStack.Client.Components.Users
     public interface IUserService
     {
         #region User
+        Task RegisterByLoginNameAsync(string loginName, string password);
+
+        Task LoginBySmsAsync(string mobile, string smsCode);
+
         #endregion
 
         #region Profile
@@ -32,6 +37,7 @@ namespace HB.FullStack.Client.Components.Users
         ///返回本地FullPath
         ///</summary>
         Task<(Directory2, string?)> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed);
+        ObservableTask<string>? GetAvatarFileObservableTaskAsync();
 
         ///<summary>
         ///返回本地FullPath
@@ -39,6 +45,7 @@ namespace HB.FullStack.Client.Components.Users
         Task<string?> SaveAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed);
 
         Task<string?> GetNickNameAsync(GetSetMode getMode = GetSetMode.Mixed);
+
 
         #endregion
     }

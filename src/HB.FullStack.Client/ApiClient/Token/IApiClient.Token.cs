@@ -16,20 +16,6 @@ namespace HB.FullStack.Client.ApiClient
 {
     public static class IApiClientTokenExtensions
     {
-        //public static async Task RegisterByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
-        //{
-        //    TokenResRegisterByLoginNameRequest registerRequest = new TokenResRegisterByLoginNameRequest(
-        //        loginName,
-        //        password,
-        //        apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
-        //        apiClient.TokenPreferences.DeviceInfos);
-
-        //    await apiClient.SendAsync(registerRequest).ConfigureAwait(false);
-
-        //    //TODO
-        //    //apiClient.TokenPreferences.OnRegistered();
-        //}
-
         internal static async Task FetchTokenByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
         {
             TokenResGetByLoginNameRequest request = new TokenResGetByLoginNameRequest(

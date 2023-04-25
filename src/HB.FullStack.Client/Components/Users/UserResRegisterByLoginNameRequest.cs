@@ -1,13 +1,14 @@
-﻿using HB.FullStack.Common.Shared;
+﻿using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Common.Shared;
 
 using HB.FullStack.Common.Shared.Resources;
 
-namespace HB.FullStack.Client.ApiClient
+namespace HB.FullStack.Client.Components
 {
-    internal class TokenResRegisterByLoginNameRequest : ApiRequest
+    internal class UserResRegisterByLoginNameRequest : ApiRequest
     {
-        public TokenResRegisterByLoginNameRequest(string loginName, string password, string audience, DeviceInfos deviceInfos)
-            : base(nameof(TokenRes), ApiMethod.Add, ApiRequestAuth.NONE, SharedNames.Conditions.ByLoginName)
+        public UserResRegisterByLoginNameRequest(string loginName, string password, string audience, DeviceInfos deviceInfos)
+            : base("UserRes", ApiMethod.Add, ApiRequestAuth.NONE, SharedNames.Conditions.ByLoginName)
         {
             LoginName = loginName;
             Audience = audience;
@@ -17,7 +18,7 @@ namespace HB.FullStack.Client.ApiClient
 
         [RequestQuery]
         public string LoginName { get; set; }
-        
+
         [RequestQuery]
         public string Audience { get; set; }
 

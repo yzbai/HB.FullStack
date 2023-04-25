@@ -36,25 +36,10 @@ namespace HB.FullStack.Client.MauiLib.Controls
         public string? ImageFullPath { get; set; }
         public string? CroppedImageFullPath { get; set; }
 
-        public ICommand RotateCommand { get; }
-
-        public ICommand CancelCommand { get; }
-
-        public ICommand ResetCommand { get; }
-
-        public ICommand CropCommand { get; }
-
         public ObservableRangeCollection<SKFigure> Figures { get; } = new ObservableRangeCollection<SKFigure>();
 
-        public CropperViewModel(
-            ILogger<CropperViewModel> logger,
-            ITokenPreferences clientPreferences,
-            IFileManager fileManager) : base(logger, clientPreferences, fileManager)
+        public CropperViewModel()
         {
-            CropCommand = new AsyncRelayCommand(CropAsync);
-            RotateCommand = new RelayCommand(Rotate);
-            CancelCommand = new AsyncRelayCommand(CancelAsync);
-            ResetCommand = new RelayCommand(Reset);
         }
 
         public override Task OnPageAppearingAsync()
@@ -107,12 +92,14 @@ namespace HB.FullStack.Client.MauiLib.Controls
             _bitmapFigure = null;
         }
 
+        [RelayCommand]
         private void Reset()
         {
             RemoveFigures();
             ResumeFigures();
         }
 
+        [RelayCommand]
         private async Task CropAsync()
         {
             if (CroppedImageFullPath.IsNullOrEmpty() || _cropperFrameFigure == null || _bitmapFigure == null)
@@ -139,11 +126,13 @@ namespace HB.FullStack.Client.MauiLib.Controls
             return await FileUtil.TrySaveFileAsync(data.ToArray(), fullPathToSave);
         }
 
+        [RelayCommand]
         private void Rotate()
         {
             _bitmapFigure?.Rotate90(false);
         }
 
+        [RelayCommand]
         private static async Task CancelAsync()
         {
             await Currents.Shell.GoBackAsync();

@@ -26,7 +26,7 @@
             Aspect="AspectFill"
             HeightRequest="120"
             HorizontalOptions="Center"
-            Source="{Binding AvatarImageSourceTask.Result}"
+            Source="{Binding AvatarFileTask.Result}"
             WidthRequest="120">
             <Image.Behaviors>
                 <behaviors:CircleClipBehavior />

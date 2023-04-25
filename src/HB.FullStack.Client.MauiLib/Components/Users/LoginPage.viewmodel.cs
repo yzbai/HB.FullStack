@@ -5,24 +5,18 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Components.Sms;
 using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Startup;
-using HB.FullStack.Common.Files;
 using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Common.Validate;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.Controls;
 
@@ -89,7 +83,7 @@ namespace HB.FullStack.Client.MauiLib.Components
             await webviewDialog.ShowAsync();
         }
 
-        public LoginViewModel(ILogger<LoginViewModel> logger, IOptions<MauiOptions> options, ITokenPreferences tokenPreferences, IFileManager fileManager, ISmsService smsService) : base(logger, tokenPreferences, fileManager)
+        public LoginViewModel(IOptions<MauiOptions> options, ISmsService smsService)
         {
             _options = options.Value;
             _smsService = smsService;
