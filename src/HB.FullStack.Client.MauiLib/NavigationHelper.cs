@@ -110,7 +110,7 @@ namespace HB.FullStack.Client.MauiLib
             await Currents.Shell.GoBackAsync();
         }
 
-        public static async Task GotoCropPageAsync(string toSaveFullPath)
+        public static async Task GotoCropPageAsync()
         {
             string action = await Currents.Page.DisplayActionSheet("", "取消", null, new string[] { "拍照", "相册" });
 
@@ -128,8 +128,7 @@ namespace HB.FullStack.Client.MauiLib
 
             await Currents.Shell.GoToAsync(nameof(CropperPage), new Dictionary<string, object>
             {
-                { nameof(CropperViewModel.ImageFullPath), photo.FullPath },
-                { nameof(CropperViewModel.CroppedImageFullPath), toSaveFullPath }
+                { nameof(CropperViewModel.ImageFullPath), photo.FullPath }
             });
         }
 

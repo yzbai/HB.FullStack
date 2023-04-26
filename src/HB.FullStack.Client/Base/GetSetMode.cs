@@ -7,6 +7,6 @@ namespace HB.FullStack.Client.Base
     {
         Mixed, //Mixed
         LocalForced,
-        RemoteForced
+        RemoteForced,
     }
 }

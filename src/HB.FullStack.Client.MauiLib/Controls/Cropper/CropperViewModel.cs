@@ -13,33 +13,30 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using HB.FullStack.Client.MauiLib.Figures;
-using HB.FullStack.Common.Files;
 using HB.FullStack.Client.MauiLib.Utils;
 using CommunityToolkit.Mvvm.Input;
-using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.MauiLib.Base;
+using HB.FullStack.Common.Files;
 
 namespace HB.FullStack.Client.MauiLib.Controls
 {
     [QueryProperty(nameof(ImageFullPath), nameof(ImageFullPath))]
-    [QueryProperty(nameof(CroppedImageFullPath), nameof(CroppedImageFullPath))]
     [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "Already taken care.")]
     public partial class CropperViewModel : BaseViewModel
     {
         private CropperFrameFigure? _cropperFrameFigure;
         private BitmapFigure? _bitmapFigure;
+        private readonly ILocalFileManager _localFileManager;
 
         public string? ImageFullPath { get; set; }
-        public string? CroppedImageFullPath { get; set; }
 
         public ObservableRangeCollection<SKFigure> Figures { get; } = new ObservableRangeCollection<SKFigure>();
 
-        public CropperViewModel()
+        public CropperViewModel(ILocalFileManager localFileManager)
         {
+            _localFileManager = localFileManager;
         }
 
         public override Task OnPageAppearingAsync()
@@ -57,6 +54,46 @@ namespace HB.FullStack.Client.MauiLib.Controls
         {
             RemoveFigures();
             return Task.CompletedTask;
+        }
+
+        [RelayCommand]
+        private void Reset()
+        {
+            RemoveFigures();
+            ResumeFigures();
+        }
+
+        [RelayCommand]
+        private async Task CropAsync()
+        {
+            if (_cropperFrameFigure == null || _bitmapFigure == null)
+            {
+                return;
+            }
+
+            using SKBitmap croppedBitmap = _bitmapFigure.Crop(_cropperFrameFigure.CropRect);
+
+            string croppedFullPath = _localFileManager.GetNewTempFullPath(".png");
+
+            bool isSucceed = await SKUtil.SaveSKBitmapAsync(croppedBitmap, croppedFullPath);
+
+            await Currents.Shell.GoBackAsync(new Dictionary<string, object?>
+            {
+                { CropperPage.Query_CroppedSuccess, isSucceed },
+                { CropperPage.Query_CroppedFullPath, croppedFullPath}
+            });
+        }
+
+        [RelayCommand]
+        private void Rotate()
+        {
+            _bitmapFigure?.Rotate90(false);
+        }
+
+        [RelayCommand]
+        private static async Task CancelAsync()
+        {
+            await Currents.Shell.GoBackAsync();
         }
 
         private void ResumeFigures()
@@ -90,52 +127,6 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
             _cropperFrameFigure = null;
             _bitmapFigure = null;
-        }
-
-        [RelayCommand]
-        private void Reset()
-        {
-            RemoveFigures();
-            ResumeFigures();
-        }
-
-        [RelayCommand]
-        private async Task CropAsync()
-        {
-            if (CroppedImageFullPath.IsNullOrEmpty() || _cropperFrameFigure == null || _bitmapFigure == null)
-            {
-                return;
-            }
-
-            using SKBitmap croppedBitmap = _bitmapFigure.Crop(_cropperFrameFigure.CropRect);
-
-            bool isSucceed = await SaveSKBitmapAsync(croppedBitmap, CroppedImageFullPath);
-
-            await Currents.Shell.GoBackAsync(new Dictionary<string, object?> { { CropperPage.Query_CroppedSucceed, isSucceed } });
-        }
-
-        private static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPathToSave)
-        {
-            //Save
-            using SKImage image = SKImage.FromBitmap(sKBitmap);
-
-            using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
-
-            fullPathToSave = Path.ChangeExtension(fullPathToSave, ".png");
-
-            return await FileUtil.TrySaveFileAsync(data.ToArray(), fullPathToSave);
-        }
-
-        [RelayCommand]
-        private void Rotate()
-        {
-            _bitmapFigure?.Rotate90(false);
-        }
-
-        [RelayCommand]
-        private static async Task CancelAsync()
-        {
-            await Currents.Shell.GoBackAsync();
         }
     }
 }

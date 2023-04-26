@@ -36,8 +36,9 @@ namespace HB.FullStack.Client.Components.Users
         ///<summary>
         ///返回本地FullPath
         ///</summary>
-        Task<(Directory2, string?)> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed);
-        ObservableTask<string>? GetAvatarFileObservableTaskAsync();
+        Task<string?> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed);
+        
+        Task<ObservableTask<string?>> GetAvatarFileObservableTaskAsync(string? defaultFile, GetSetMode getSetMode = GetSetMode.Mixed);
 
         ///<summary>
         ///返回本地FullPath

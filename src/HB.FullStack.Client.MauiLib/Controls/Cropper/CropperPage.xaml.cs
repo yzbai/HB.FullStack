@@ -15,7 +15,8 @@ namespace HB.FullStack.Client.MauiLib.Controls
     /// </summary>
     public partial class CropperPage : BasePage<CropperViewModel>
     {
-        public const string Query_CroppedSucceed = "CroppedSucceed";
+        public const string Query_CroppedSuccess = "CroppedSuccess";
+        public const string Query_CroppedFullPath = "CroppedFullPath";
 
         public CropperPage()
         {

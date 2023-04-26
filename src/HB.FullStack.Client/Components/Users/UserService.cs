@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Base;
+using HB.FullStack.Common;
 using HB.FullStack.Common.Files;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Context;
@@ -69,14 +70,14 @@ namespace HB.FullStack.Client.Components.Users
             return userProfile?.NickName;
         }
 
-        public async Task<UserProfile?> UpdateUserProfileAsync(string? nickName, Gender? gender, DateOnly? birthDay, string? tmpAvatarFileFullPath)
+        public async Task<UserProfile?> UpdateUserProfileAsync(string? nickName, Gender? gender, DateOnly? birthDay, string? avatarFileFullPath)
         {
             string? newAvatarFileName = null;
 
-            if (tmpAvatarFileFullPath.IsNotNullOrEmpty())
+            if (avatarFileFullPath.IsNotNullOrEmpty())
             {
-                newAvatarFileName = FileUtil.GetRandomFileName(Path.GetExtension(tmpAvatarFileFullPath));
-                _ = await _fileManager.SetAsync(tmpAvatarFileFullPath, _options.AvatarDirectory, newAvatarFileName).ConfigureAwait(false);
+                newAvatarFileName = FileUtil.GetRandomFileName(Path.GetExtension(avatarFileFullPath));
+                _ = await _fileManager.SetAsync(avatarFileFullPath, _options.AvatarDirectory, newAvatarFileName).ConfigureAwait(false);
             }
 
             TransactionContext trans = await _transaction.BeginTransactionAsync<UserProfile>().ConfigureAwait(false);
@@ -121,18 +122,35 @@ namespace HB.FullStack.Client.Components.Users
             }
         }
 
-        public async Task<(Directory2, string?)> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed)
+        public async Task<string?> GetAvatarFileAsync(GetSetMode getMode = GetSetMode.Mixed)
         {
             UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, null, getMode).ConfigureAwait(false);
 
             string? fileName = userProfile?.AvatarFileName;
 
-            return (_options.AvatarDirectory, fileName);
+            if (fileName.IsNullOrEmpty())
+            {
+                return null;
+            }
 
-            //return await _fileManager.GetAsync(ApiClientOptions.AvatarDirectory, fileName).ConfigureAwait(false);
+            return await _fileManager.GetAsync(_options.AvatarDirectory, fileName).ConfigureAwait(false);
         }
 
+        public async Task<ObservableTask<string?>> GetAvatarFileObservableTaskAsync(string? defaultFile, GetSetMode getSetMode = GetSetMode.Mixed)
+        {
+            UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, null, getSetMode).ConfigureAwait(false);
 
+            string? fileName = userProfile?.AvatarFileName;
+
+            if (fileName.IsNullOrEmpty())
+            {
+                return new ObservableTask<string?>(defaultFile, null);
+            }
+
+            string localFullPath = _fileManager.LocalFileManager.GetFullPath(_options.AvatarDirectory, fileName);
+
+            return new ObservableTask<string?>(localFullPath, async () => await _fileManager.GetAsync(_options.AvatarDirectory, fileName));
+        }
 
         public async Task<string?> SaveAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed)
         {

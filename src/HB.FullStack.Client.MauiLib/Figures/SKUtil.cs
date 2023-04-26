@@ -6,6 +6,7 @@ using SkiaSharp;
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace HB.FullStack.Client.MauiLib.Figures
 {
@@ -400,6 +401,16 @@ namespace HB.FullStack.Client.MauiLib.Figures
         //}
 
         #endregion
+
+        public static async Task<bool> SaveSKBitmapAsync(SKBitmap sKBitmap, string fullPathToSave)
+        {
+            //Save
+            using SKImage image = SKImage.FromBitmap(sKBitmap);
+
+            using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
+
+            return await FileUtil.TrySaveFileAsync(data.ToArray(), fullPathToSave);
+        }
     }
 
     public static class SKExtensions

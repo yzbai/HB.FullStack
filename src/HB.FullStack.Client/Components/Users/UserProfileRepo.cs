@@ -12,6 +12,7 @@ using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Components.Sync;
+using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 
@@ -35,13 +36,24 @@ namespace HB.FullStack.Client.Components.Users
 
         //protected override UserProfileRes ToResource(Users model) => ResMapper.ToUserProfileRes(model);
 
-        internal Task<UserProfile?> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext, GetSetMode getMode = GetSetMode.Mixed)
+        internal Task<UserProfile?> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext, GetSetMode getMode = GetSetMode.Mixed, IfUseLocalData<UserProfile>? ifUseLocalData = null)
         {
             return GetFirstOrDefaultAsync(
                 localWhere: userProfile => userProfile.UserId == userId,
                 remoteRequest: new UserProfileResGetByUserIdRequest(userId),
                 transactionContext: transactionContext,
-                getMode: getMode);
+                getMode: getMode, 
+                ifUseLocalData: ifUseLocalData);
+        }
+
+        internal Task<ObservableTask<UserProfile?>> GetByUserIdObservableTaskAsync(Guid userId, TransactionContext? transactionContext, GetSetMode getMode = GetSetMode.Mixed, IfUseLocalData<UserProfile>? ifUseLocalData = null)
+        {
+            return GetFirstOrDefaultObservableTaskAsync(
+                localWhere: userProfile => userProfile.UserId == userId,
+                remoteRequest: new UserProfileResGetByUserIdRequest(userId),
+                transactionContext: transactionContext,
+                getMode: getMode,
+                ifUseLocalData: ifUseLocalData);
         }
 
         protected override Task<IEnumerable<UserProfile>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request)

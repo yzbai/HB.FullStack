@@ -13,18 +13,15 @@ using AsyncAwaitBestPractices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Components.Users;
 using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Startup;
 using HB.FullStack.Client.MauiLib.Utils;
 using HB.FullStack.Common;
-using HB.FullStack.Common.Files;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Validate;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.Controls;
 
@@ -35,16 +32,16 @@ namespace HB.FullStack.Client.MauiLib.Components
         private readonly MauiOptions _options;
         private readonly IUserService _userService;
 
+        private string? _croppedFullPath;
+        private bool _avatarChanged;
+        private string? _oldNickName;
 
         [ObservableProperty]
-        private ObservableTask<string>? _avatarFileTask;
+        private ObservableTask<string?>? _avatarFileTask;
 
         [ObservableProperty]
         private string? _nickName;
 
-        private bool _avatarChanged;
-        private string? _newTempAvatarFile;
-        private string? _oldNickName;
 
         public RegisterProfileViewModel(IOptions<MauiOptions> options, IUserService userProfileService)
         {
@@ -54,12 +51,13 @@ namespace HB.FullStack.Client.MauiLib.Components
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.TryGetValue(CropperPage.Query_CroppedSucceed, out object? obj)
-                && bool.TryParse(obj?.ToString(), out bool croppedSucceed))
+            if (query.TryGetValue(CropperPage.Query_CroppedSuccess, out object? croppedSuccessObj))
             {
-                if (croppedSucceed)
+                if (croppedSuccessObj is bool croppedSuccess && croppedSuccess)
                 {
-                    AvatarImageSourceTask = new ObservableTask<ImageSource>(ImageSource.FromFile(_newTempAvatarFile), null);
+                    _croppedFullPath = query[CropperPage.Query_CroppedFullPath].ToString()!;
+
+                    AvatarFileTask = new ObservableTask<string?>(_croppedFullPath, null);
                     _avatarChanged = true;
                 }
                 else
@@ -91,7 +89,7 @@ namespace HB.FullStack.Client.MauiLib.Components
             if (AvatarFileTask == null)
             {
                 //使用已有头像
-                AvatarFileTask = _userService.GetAvatarFileObservableTaskAsync();
+                AvatarFileTask = await _userService.GetAvatarFileObservableTaskAsync(_options.DefaultAvatarFileName);
             }
         }
 
@@ -103,9 +101,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         [RelayCommand]
         private async Task CropAvatarImageAsync()
         {
-            _newTempAvatarFile = FileManager.LocalFileManager.GetNewTempFullPath(".png");
-
-            await NavigationHelper.GotoCropPageAsync(_newTempAvatarFile);
+            await NavigationHelper.GotoCropPageAsync();
         }
 
         public bool IsNickNameNotNull => NickName.IsNotNullOrEmpty();
@@ -125,7 +121,7 @@ namespace HB.FullStack.Client.MauiLib.Components
                     _oldNickName = NickName;
                 }
 
-                await _userService.UpdateUserProfileAsync(updatedNickName, null, null, _avatarChanged ? _newTempAvatarFile : null);
+                await _userService.UpdateUserProfileAsync(updatedNickName, null, null, _avatarChanged ? _croppedFullPath : null);
                 _avatarChanged = false;
 
                 //Navigation
