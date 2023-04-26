@@ -80,7 +80,7 @@ namespace HB.FullStack.Client.MauiLib.Components
             }
             catch (Exception ex)
             {
-                OnExceptionDisplay(ex, "UnKown Error");
+                OnExceptionDisplay(ex, "SmsVeriryPage UnKown Error");
             }
             finally
             {

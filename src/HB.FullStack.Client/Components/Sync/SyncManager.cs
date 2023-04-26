@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common;
@@ -11,6 +12,7 @@ using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
+using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Client.Components.Sync
 {
@@ -37,7 +39,7 @@ namespace HB.FullStack.Client.Components.Sync
         }
 
         //判断是否正在进行同步操作
-        private readonly EventWaitHandle _notSyncingWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset, nameof(SyncManager));
+        private readonly EventWaitHandle _notSyncingWaitHandle = new EventWaitHandle(true, EventResetMode.ManualReset, nameof(SyncManager));
 
         public void WaitUntilNotSyncing()
         {
@@ -51,13 +53,25 @@ namespace HB.FullStack.Client.Components.Sync
                 return;
             }
 
+            WaitUntilNotSyncing();
+
+            Status = SyncStatus.Syncing;
+
+            _notSyncingWaitHandle.Reset();
+
             try
             {
                 //TODO: 反复对同一个Guid进行修改，需要合并
 
-                var changes = await _database.RetrieveAllAsync<OfflineChange>(null, orderBy: nameof(OfflineChange.Id));
+                IEnumerable<OfflineChange> changes = await _database.RetrieveAsync<OfflineChange>(
+                    t => t.Status == OfflineChangeStatus.Waiting || t.Status == OfflineChangeStatus.Failed, null, orderBy: nameof(OfflineChange.Id));
 
-                throw new NotImplementedException();
+                if (changes.IsNullOrEmpty())
+                {
+                    return;
+                }
+
+                //TODO: 处理
 
                 //处理Add
 
@@ -66,20 +80,21 @@ namespace HB.FullStack.Client.Components.Sync
                 //处理Delete
 
                 //
-                //Status = Status.Synced;
+                Status = SyncStatus.Synced;
             }
             catch
             {
                 Status = SyncStatus.SynceFailed;
+            }
+            finally
+            {
+                _notSyncingWaitHandle.Set();
             }
 
             //TODO: 处理失败的情况
         }
 
         public SyncStatus Status { get; private set; }
-
-
-        
 
         public void EnsureSynced()
         {
@@ -115,7 +130,7 @@ namespace HB.FullStack.Client.Components.Sync
                 OfflineChange offlineChange = new OfflineChange
                 {
                     Type = offlineChangeType,
-                    Status = OfflineChangeStatus.Pending,
+                    Status = OfflineChangeStatus.Waiting,
                     ModelId = model.Id,
                     ModelFullName = modelDef.ModelFullName
                 };
@@ -139,7 +154,7 @@ namespace HB.FullStack.Client.Components.Sync
                 OfflineChange offlineChange = new OfflineChange
                 {
                     Type = OfflineChangeType.UpdateProperties,
-                    Status = OfflineChangeStatus.Pending,
+                    Status = OfflineChangeStatus.Waiting,
                     ModelId = changedPack.AddtionalProperties["Id"].To<Guid>()!,
                     ModelFullName = modelDef.ModelFullName,
                     ChangePack = changedPack
@@ -156,7 +171,7 @@ namespace HB.FullStack.Client.Components.Sync
         {
             WaitUntilNotSyncing();
 
-            long count = await _database.CountAsync<OfflineChange>(null).ConfigureAwait(false);
+            long count = await _database.CountAsync<OfflineChange>(t => t.Status == OfflineChangeStatus.Waiting || t.Status == OfflineChangeStatus.Failed, null).ConfigureAwait(false);
 
             return count != 0;
         }

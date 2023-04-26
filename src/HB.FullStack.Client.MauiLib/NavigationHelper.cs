@@ -58,7 +58,7 @@ namespace HB.FullStack.Client.MauiLib
             //TODO: 考虑SourceGeneration
             Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
             Routing.RegisterRoute(nameof(SmsVerifyPage), typeof(SmsVerifyPage));
-            Routing.RegisterRoute(nameof(RegisterProfilePage), typeof(RegisterProfilePage));
+            Routing.RegisterRoute(nameof(UserProfileUpdatePage), typeof(UserProfileUpdatePage));
             Routing.RegisterRoute(nameof(IntroducePage), typeof(IntroducePage));
         }
 
@@ -94,11 +94,11 @@ namespace HB.FullStack.Client.MauiLib
         public static async Task OnSmsCodeVerifiedAsync()
         {
             //如果需要就登记信息，否则返回
-            bool needRegister = await NeedRegisterProfileAsync();
+            bool needUpdateProfile = await UserProfileService.NeedUpdateUserProfileAsync();
 
             string backUrl = _isLoginPagePushed ? "../.." : "..";
 
-            string url = needRegister ? $"{backUrl}/{nameof(RegisterProfilePage)}" : $"{backUrl}";
+            string url = needUpdateProfile ? $"{backUrl}/{nameof(UserProfileUpdatePage)}" : $"{backUrl}";
 
             await Currents.Shell.GoToAsync(url);
 
@@ -178,18 +178,11 @@ namespace HB.FullStack.Client.MauiLib
                 nameof(LoginPage) => false,
                 nameof(SmsVerifyPage) => false,
 
-                nameof(RegisterProfilePage) => true,
+                nameof(UserProfileUpdatePage) => true,
                 HomePage => true,
 
                 _ => ClientOptions.NeedLoginDefault
             };
-        }
-
-        private static async Task<bool> NeedRegisterProfileAsync()
-        {
-            string? nickName = await UserProfileService.GetNickNameAsync().ConfigureAwait(false);
-
-            return nickName.IsNullOrEmpty() || Conventions.IsARandomNickName(nickName);
         }
     }
 }

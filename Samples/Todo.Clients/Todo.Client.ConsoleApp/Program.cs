@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client.Components.Users;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,18 +38,30 @@ namespace Todo.Client.ConsoleApp
 
         private static void Configure(ServiceCollection services)
         {
-            services.AddSingleton<ITokenPreferences, ConsolePreferenceProvider>();
-
-            services.AddApiClient(apiClientOptions =>
-            {
-                apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
-
-                apiClientOptions.TokenSiteSetting = new SiteSetting
+            services.AddFullStackClient(
+                clientOptions =>
                 {
-                    SiteName = "SignInReceiptSite",
-                    BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)
-                };
-            });
+                },
+                fileManagerOptions =>
+                {
+                },
+                apiClientOptions =>
+                {
+                    apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
+
+                    apiClientOptions.TokenSiteSetting = new SiteSetting
+                    {
+                        SiteName = "SignInReceiptSite",
+                        BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)
+                    };
+                });
+            
+            AddConsoleService(services);
+        }
+
+        private static void AddConsoleService(ServiceCollection services)
+        {
+            services.AddSingleton<ITokenPreferences, ConsolePreferenceProvider>();
 
             services.AddSingleton<IConsoleInitializeService>(new ConsoleInitializeService());
 

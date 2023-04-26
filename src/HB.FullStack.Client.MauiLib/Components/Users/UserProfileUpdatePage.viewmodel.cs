@@ -27,7 +27,7 @@ using Microsoft.Maui.Controls;
 
 namespace HB.FullStack.Client.MauiLib.Components
 {
-    public partial class RegisterProfileViewModel : BaseViewModel, IQueryAttributable
+    public partial class UserProfileUpdateViewModel : BaseViewModel, IQueryAttributable
     {
         private readonly MauiOptions _options;
         private readonly IUserService _userService;
@@ -43,7 +43,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         private string? _nickName;
 
 
-        public RegisterProfileViewModel(IOptions<MauiOptions> options, IUserService userProfileService)
+        public UserProfileUpdateViewModel(IOptions<MauiOptions> options, IUserService userProfileService)
         {
             _options = options.Value;
             _userService = userProfileService;

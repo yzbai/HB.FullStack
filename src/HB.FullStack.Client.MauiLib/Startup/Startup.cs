@@ -22,6 +22,7 @@ using HB.FullStack.Client.MauiLib.Startup;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;
 
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -86,8 +87,8 @@ namespace Microsoft.Maui.Hosting
             services.AddTransient<IntroduceViewModel>();
             services.AddTransient<LoginPage>();
             services.AddTransient<LoginViewModel>();
-            services.AddTransient<RegisterProfilePage>();
-            services.AddTransient<RegisterProfileViewModel>();
+            services.AddTransient<UserProfileUpdatePage>();
+            services.AddTransient<UserProfileUpdateViewModel>();
             services.AddTransient<SmsVerifyPage>();
             services.AddTransient<SmsVerifyViewModel>();
 
@@ -109,6 +110,17 @@ namespace Microsoft.Maui.Hosting
 
         private static void ConfigureGlobalException()
         {
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                string msg = "AppDomain UnHandled Exceptions : " + e.ExceptionObject.ToString();
+                
+                Globals.Logger?.LogError(msg);
+
+                Currents.ShowToast(msg);
+
+                //程序还是会结束
+            };
+
             TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
                 //TODO: 上报

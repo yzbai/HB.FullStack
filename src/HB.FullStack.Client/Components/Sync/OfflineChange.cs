@@ -38,9 +38,10 @@ namespace HB.FullStack.Client.Components.Sync
 
     public enum OfflineChangeStatus
     {
-        Pending = 0,
-        Success = 1,
-        Failed = 2
+        Waiting = 0,
+        Failed = 1,
+        Success = 2,
+        Discard = 3
     }
 
 }

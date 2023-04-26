@@ -16,15 +16,25 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.DatabaseTests.SQLite
 {
+    public enum ConvertTestEnum
+    {
+        None,
+        This,
+        Is,
+        Fun
+    }
+
     [DbTable(BaseTestClass.DbSchema_Sqlite)]
     public class ConvertTestModel_Sqlite : TimelessGuidDbModel
     {
         public DateOnly DateOnly { get; set; }
         public TimeOnly TimeOnly { get; set; }
 
+        public ConvertTestEnum TestEnum { get; set; }
+
         public static ConvertTestModel_Sqlite GetRandomModel()
         {
-            return new ConvertTestModel_Sqlite { DateOnly = new DateOnly(2022, 10, 22), TimeOnly = new TimeOnly(10, 23, 23, 877, 342) };
+            return new ConvertTestModel_Sqlite { DateOnly = new DateOnly(2022, 10, 22), TimeOnly = new TimeOnly(10, 23, 23, 877, 342), TestEnum = ConvertTestEnum.This };
         }
     }
 
@@ -46,8 +56,15 @@ namespace HB.FullStack.DatabaseTests.SQLite
         }
 
         [TestMethod]
-        public void TimeOnly_Test()
+        public async Task Enum_Test()
         {
+            ConvertTestModel_Sqlite model = ConvertTestModel_Sqlite.GetRandomModel();
+
+            await Db.AddAsync(model, "", null);
+
+            var rt = await Db.ScalarAsync<ConvertTestModel_Sqlite>(t => t.TestEnum == ConvertTestEnum.This, null);
+
+            Assert.AreEqual(rt?.Id, model.Id);
         }
     }
 }

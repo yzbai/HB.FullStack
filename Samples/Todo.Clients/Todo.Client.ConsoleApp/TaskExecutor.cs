@@ -1,5 +1,6 @@
 ﻿using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client.Components.Users;
 
 namespace Todo.Client.ConsoleApp
 {
@@ -7,11 +8,13 @@ namespace Todo.Client.ConsoleApp
     {
         private readonly IApiClient _apiClient;
         private readonly ITokenPreferences _preferenceProvider;
+        private readonly IUserService _userService;
 
-        public TaskExecutor(IApiClient apiClient, ITokenPreferences preferenceProvider)
+        public TaskExecutor(IApiClient apiClient, ITokenPreferences preferenceProvider, IUserService userService)
         {
             _apiClient = apiClient;
             _preferenceProvider = preferenceProvider;
+            _userService = userService;
         }
 
         internal async Task RunDownAsync()
@@ -22,10 +25,10 @@ namespace Todo.Client.ConsoleApp
                 string password = "Password123";    
                 
                 //Register
-                await _apiClient.RegisterByLoginNameAsync(loginName, password);
+                await _userService.RegisterByLoginNameAsync(loginName, password);
 
                 //Login
-                await _apiClient.LoginByLoginNameAsync(loginName, password);
+                await _userService.LoginByLoginNameAsync(loginName, password);
             }
             catch (Exception ex)
             {

@@ -16,14 +16,23 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.DatabaseTests.MySqlTests
 {
+    public enum ConvertTestEnum
+    {
+        None,
+        This,
+        Is,
+        Fun
+    }
     public class ConvertTestModel : TimelessGuidDbModel
     {
         public DateOnly DateOnly { get; set; }
         public TimeOnly TimeOnly { get; set; }
 
+        public ConvertTestEnum TestEnum { get; set; }
+
         public static ConvertTestModel GetRandomModel()
         {
-            return new ConvertTestModel { DateOnly = new DateOnly(2022, 10, 22), TimeOnly = new TimeOnly(10, 23, 23, 877, 342) };
+            return new ConvertTestModel { DateOnly = new DateOnly(2022, 10, 22), TimeOnly = new TimeOnly(10, 23, 23, 877, 342), TestEnum = ConvertTestEnum.This };
         }
     }
 
@@ -45,8 +54,15 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
         }
 
         [TestMethod]
-        public void TimeOnly_Test()
+        public async Task Enum_Test()
         {
+            ConvertTestModel model = ConvertTestModel.GetRandomModel();
+
+            await Db.AddAsync(model, "", null);
+
+            var rt = await Db.ScalarAsync<ConvertTestModel>(t=>t.TestEnum == ConvertTestEnum.This, null);
+
+            Assert.AreEqual(rt?.Id, model.Id);
         }
     }
 }

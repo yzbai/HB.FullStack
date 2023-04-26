@@ -8,6 +8,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
@@ -50,7 +52,7 @@ namespace HB.FullStack.Client.ApiClient
         {
             TokenResDeleteRequest request = new TokenResDeleteRequest();
 
-            await apiClient.SendAsync(request).ConfigureAwait(false);
+            await apiClient.SendAsync(request);
 
             apiClient.TokenPreferences.OnTokenDeleted();
         }

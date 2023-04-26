@@ -23,6 +23,10 @@ namespace HB.FullStack.Client.Components.Users
 
         Task LoginBySmsAsync(string mobile, string smsCode);
 
+        Task LoginByLoginNameAsync(string loginName, string password);
+
+        Task LogoutAsync();
+
         #endregion
 
         #region Profile
@@ -46,6 +50,10 @@ namespace HB.FullStack.Client.Components.Users
         Task<string?> SaveAvatarFileAsync(string avatarFullPath, GetSetMode setMode = GetSetMode.Mixed);
 
         Task<string?> GetNickNameAsync(GetSetMode getMode = GetSetMode.Mixed);
+        
+        Task<bool> NeedUpdateUserProfileAsync();
+
+
 
 
         #endregion

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.Components.Users;
 using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Common.Files;
 
@@ -14,10 +15,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Todo.Client.MobileApp.ViewModels
 {
-    internal partial class HomeViewModel : BaseViewModel
+    public partial class HomeViewModel : BaseViewModel
     {
-        public HomeViewModel(ILogger<HomeViewModel> logger, ITokenPreferences preferenceProvider, IFileManager fileManager) : base(logger, preferenceProvider, fileManager)
+        private readonly IUserService _userService;
+
+        public HomeViewModel(IUserService userService)
         {
+            _userService = userService;
         }
 
         public override Task OnPageAppearingAsync()
@@ -31,9 +35,16 @@ namespace Todo.Client.MobileApp.ViewModels
         }
 
         [RelayCommand]
-        private Task LogoutAsync()
+        private async Task LogoutAsync()
         {
-            TokenPreferences.
+            try
+            {
+                await _userService.LogoutAsync();
+            }
+            catch(Exception ex)
+            {
+                Currents.ShowToast(ex.Message);
+            }
         }
     }
 }

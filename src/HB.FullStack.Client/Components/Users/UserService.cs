@@ -63,7 +63,24 @@ namespace HB.FullStack.Client.Components.Users
             return _apiClient.FetchTokenBySmsAsync(mobile, smsCode);
         }
 
-        public async Task<string?> GetNickNameAsync(GetSetMode getMode)
+        public Task LoginByLoginNameAsync(string loginName, string password)
+        {
+            return _apiClient.FetchTokenByLoginNameAsync(loginName, password);
+        }
+
+        public async Task LogoutAsync()
+        {
+            await _apiClient.DeleteTokenAsync();
+        }
+
+        public async Task<bool> NeedUpdateUserProfileAsync()
+        {
+            string? nickName = await GetNickNameAsync().ConfigureAwait(false);
+
+            return nickName.IsNullOrEmpty() || Conventions.IsARandomNickName(nickName);
+        }
+
+        public async Task<string?> GetNickNameAsync(GetSetMode getMode = GetSetMode.Mixed)
         {
             UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(_tokenPreferences.UserId!.Value, null, getMode).ConfigureAwait(false);
 

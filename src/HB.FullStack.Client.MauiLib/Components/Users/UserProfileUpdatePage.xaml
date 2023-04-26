@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <base:BasePage
-    x:Class="HB.FullStack.Client.MauiLib.Components.RegisterProfilePage"
+    x:Class="HB.FullStack.Client.MauiLib.Components.UserProfileUpdatePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base"
     xmlns:behaviors="clr-namespace:HB.FullStack.Client.MauiLib.Behaviors"
     xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
     Title="RegisterProfilePage"
-    x:DataType="components:RegisterProfileViewModel"
-    x:TypeArguments="components:RegisterProfileViewModel"
+    x:DataType="components:UserProfileUpdateViewModel"
+    x:TypeArguments="components:UserProfileUpdateViewModel"
     DisableBackButton="True"
     IsNavBarVisible="True">
     <StackLayout

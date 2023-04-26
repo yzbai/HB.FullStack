@@ -70,7 +70,14 @@ namespace System
             {
                 if (SecurityStorageSupported)
                 {
-                    await SecureStorage.SetAsync(key, value);
+                    if (value.IsNullOrEmpty())
+                    {
+                        SecureStorage.Remove(key);
+                    }
+                    else
+                    {
+                        await SecureStorage.SetAsync(key, value);
+                    }
                 }
                 else
                 {

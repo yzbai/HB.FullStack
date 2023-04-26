@@ -74,15 +74,15 @@ namespace HB.FullStack.Client.MauiLib.Base
             //_pendingTasks.Add(ViewModel?.OnPageAppearingAsync()??Task.CompletedTask);
 
             //baseContentViews
-            //TODO: 检查各个自定义控件的OnPageAppearing方法有没有改成异步的。
+            
             if (CustomerControls.IsNotNullOrEmpty())
             {
-                //Parallel.ForEach(CustomerControls, controls => controls.OnPageAppearing());
+                Parallel.ForEach(CustomerControls, controls => controls.OnPageAppearing());
 
-                foreach(var control in CustomerControls)
-                {
-                    control.OnPageAppearing();
-                }
+                //foreach(var control in CustomerControls)
+                //{
+                //    control.OnPageAppearing();
+                //}
             }
         }
 
@@ -102,7 +102,7 @@ namespace HB.FullStack.Client.MauiLib.Base
 
         protected override void OnDisappearing()
         {
-            if (CustomerControls != null)
+            if (CustomerControls.IsNotNullOrEmpty())
             {
                 Parallel.ForEach(CustomerControls, v => v.OnPageDisappearing());
             }

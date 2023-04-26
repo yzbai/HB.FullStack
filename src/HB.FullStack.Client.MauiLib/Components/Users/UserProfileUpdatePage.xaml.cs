@@ -10,9 +10,9 @@ using HB.FullStack.Client.MauiLib.Base;
 
 namespace HB.FullStack.Client.MauiLib.Components;
 
-public partial class RegisterProfilePage : BasePage<RegisterProfileViewModel>
+public partial class UserProfileUpdatePage : BasePage<UserProfileUpdateViewModel>
 {
-    public RegisterProfilePage()
+    public UserProfileUpdatePage()
     {
         InitializeComponent();
     }

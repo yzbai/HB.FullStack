@@ -56,8 +56,8 @@
 		<Compile Update="Components\Users\LoginPage.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
 		</Compile>
-		<Compile Update="Components\Users\RegisterProfilePage.xaml.cs">
-			<DependentUpon>%(Filename)</DependentUpon>
+		<Compile Update="Components\Users\UserProfileUpdatePage.xaml.cs">
+			<DependentUpon>UserProfileUpdatePage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Components\Users\SmsVerifyPage.xaml.cs">
 			<DependentUpon>%(Filename)</DependentUpon>
@@ -83,7 +83,7 @@
 		<MauiXaml Update="Components\Users\LoginPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Components\Users\RegisterProfilePage.xaml">
+		<MauiXaml Update="Components\Users\UserProfileUpdatePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Components\Users\SmsVerifyPage.xaml">

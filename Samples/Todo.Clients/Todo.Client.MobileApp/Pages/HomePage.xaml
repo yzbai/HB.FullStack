@@ -3,7 +3,10 @@
     x:Class="Todo.Client.MobileApp.Pages.HomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base;assembly=HB.FullStack.Client.MauiLib">
+    xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base;assembly=HB.FullStack.Client.MauiLib"
+    xmlns:vm="clr-namespace:Todo.Client.MobileApp.ViewModels"
+    x:DataType="vm:HomeViewModel"
+    x:TypeArguments="vm:HomeViewModel">
 
     <ScrollView>
         <VerticalStackLayout
@@ -39,7 +42,7 @@
 
             <Button
                 x:Name="LogoutBtn"
-                Clicked="LogoutCommand"
+                Command="{Binding LogoutCommand}"
                 HorizontalOptions="Center"
                 Text="Logout" />
         </VerticalStackLayout>

@@ -4,6 +4,8 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
+using System.Collections.Generic;
+
 using HB.FullStack.Client.MauiLib.Base;
 
 using Microsoft.Maui.Accessibility;
@@ -29,6 +31,11 @@ namespace Todo.Client.MobileApp.Pages
                 CounterBtn.Text = $"Clicked {count} times";
 
             SemanticScreenReader.Announce(CounterBtn.Text);
+        }
+
+        protected override void RegisterCustomerControls(IList<IBaseContentView> customerControls)
+        {
+
         }
     }
 }
