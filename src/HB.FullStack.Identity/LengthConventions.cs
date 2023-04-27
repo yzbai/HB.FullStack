@@ -18,5 +18,7 @@ namespace HB.FullStack.Server.Identity
         public const int MAX_USER_LOGIN_NAME_LENGTH = 100;
         public const int MAX_USER_MOBILE_LENGTH = 14;
         public const int MAX_USER_EMAIL_LENGTH = 256;
+
+        public const int MAX_FILE_NAME_LENGTH = 128;
     }
 }

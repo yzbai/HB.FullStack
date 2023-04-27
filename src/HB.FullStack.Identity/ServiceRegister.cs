@@ -1,4 +1,5 @@
 ﻿using HB.FullStack.Server.Identity;
+using HB.FullStack.Server.Identity.Repos;
 
 using Microsoft.Extensions.Configuration;
 
@@ -34,6 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             //internal
             services.AddSingleton<UserRepo>();
+            services.AddSingleton<UserProfileRepo>();
             services.AddSingleton<UserClaimRepo>();
             services.AddSingleton<RoleRepo>();
             services.AddSingleton<LoginControlRepo>();

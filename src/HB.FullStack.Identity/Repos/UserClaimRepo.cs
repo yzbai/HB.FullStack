@@ -29,7 +29,7 @@ namespace HB.FullStack.Server.Identity
 
                 foreach (var userClaim in userClaims)
                 {
-                    InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
+                    InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId)); 
                 }
             }
             else if (sender is IEnumerable<PropertyChangePack> cpps)
