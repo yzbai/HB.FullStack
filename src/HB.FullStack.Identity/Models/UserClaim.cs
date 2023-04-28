@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
@@ -14,7 +15,7 @@ namespace HB.FullStack.Server.Identity.Models
         [DbField(NotNull = true)]
         public string ClaimType { get; set; } = default!;
 
-        [DbField(MaxLength = LengthConventions.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
+        [DbField(MaxLength = SharedNames.Length.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
         public string ClaimValue { get; set; } = default!;
 
         public bool AddToJwt { get; set; }

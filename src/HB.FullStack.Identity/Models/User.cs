@@ -1,9 +1,8 @@
-﻿using HB.FullStack.Database.DbModels;
+﻿using HB.FullStack.Common.Shared;
+using HB.FullStack.Database.DbModels;
 
 using System;
 using System.ComponentModel.DataAnnotations;
-
-using static HB.FullStack.Server.Identity.LengthConventions;
 
 namespace HB.FullStack.Server.Identity.Models
 {
@@ -24,7 +23,7 @@ namespace HB.FullStack.Server.Identity.Models
         /// 唯一, 可为空，一旦不为空后不可修改,注意和NickName区分,这里实为LoginName
         /// </summary>
         [LoginName]
-        [DbField(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
+        [DbField(MaxLength = SharedNames.Length.MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
         public string? LoginName { get; set; }
 
         /// <summary>
@@ -32,14 +31,14 @@ namespace HB.FullStack.Server.Identity.Models
         /// 唯一
         /// </summary>
         [Mobile]
-        [DbField(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
+        [DbField(MaxLength = SharedNames.Length.MAX_USER_MOBILE_LENGTH, Unique = true)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [DbField(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
+        [DbField(MaxLength = SharedNames.Length.MAX_USER_EMAIL_LENGTH, Unique = true)]
         public string? Email { get; set; }
 
         /// <summary>

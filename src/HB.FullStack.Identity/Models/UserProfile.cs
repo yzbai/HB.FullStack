@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Context;
 using HB.FullStack.Database.DbModels;
 
@@ -25,7 +26,7 @@ namespace HB.FullStack.Server.Identity.Models
 
         public DateOnly? BirthDay { get; set; }
 
-        [DbField(MaxLength = LengthConventions.MAX_FILE_NAME_LENGTH)]
+        [DbField(MaxLength = SharedNames.Length.MAX_FILE_NAME_LENGTH)]
         public string? AvatarFileName { get; set; }
     }
 }

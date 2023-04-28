@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public class SignInCredential : TimestampGuidDbModel
+    public class TokenCredential : TimestampGuidDbModel
     {
         [NoEmptyGuid]
         [DbForeignKey(typeof(User), false)]
@@ -58,11 +58,11 @@ namespace HB.FullStack.Server.Identity.Models
 
         #endregion
 
-        public SignInCredential()
+        public TokenCredential()
         {
         }
 
-        public SignInCredential(
+        public TokenCredential(
             Guid userId,
             string refreshToken,
             DateTimeOffset? expireAt,

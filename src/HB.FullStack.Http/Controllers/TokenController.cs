@@ -52,7 +52,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             SignInContext context = new SignInBySms(mobile, smsCode, true, audience, true, SignInExclusivity.None, clientInfos, deviceInfos);
 
-            Token signInReceipt = await _identityService.SignInAsync(context, lastUser).ConfigureAwait(false);
+            Token signInReceipt = await _identityService.GetTokenAsync(context, lastUser).ConfigureAwait(false);
 
             TokenRes res = ToRes(signInReceipt);
 
@@ -88,7 +88,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             RefreshContext context = new RefreshContext(accessToken, refreshToken, clientInfos);
 
-            Token signInReceipt = await _identityService.RefreshSignInReceiptAsync(context, lastUser).ConfigureAwait(false);
+            Token signInReceipt = await _identityService.RefreshTokenAsync(context, lastUser).ConfigureAwait(false);
 
             TokenRes res = ToRes(signInReceipt);
 
@@ -102,7 +102,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteAsync()
         {
-            await _identityService.SignOutAsync(User.GetSignInCredentialId().GetValueOrDefault(), User.GetLastUser()!).ConfigureAwait(false);
+            await _identityService.DeleteTokenAsync(User.GetSignInCredentialId().GetValueOrDefault(), User.GetLastUser()!).ConfigureAwait(false);
 
             return Ok();
         }
@@ -121,7 +121,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             SignInByLoginName context = new SignInByLoginName(loginName, password, audience, true, SignInExclusivity.None, clientInfos, deviceInfos);
 
-            Token receipt = await _identityService.SignInAsync(context, "");
+            Token receipt = await _identityService.GetTokenAsync(context, "");
 
             return Ok(ToRes(receipt));
         }

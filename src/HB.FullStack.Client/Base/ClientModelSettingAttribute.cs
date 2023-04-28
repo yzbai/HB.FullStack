@@ -24,11 +24,11 @@ namespace HB.FullStack.Client.Base
         public bool AllowOfflineUpdate { get; }
         public bool AllowOfflineDelete { get; }
 
-        public bool AllowOfflineRead { get; } = false;
+        public bool AllowOfflineRead { get; }
 
         //public bool NeedLogined { get; } = true;
 
-        public ClientModelSettingAttribute(ExpiryTimeType expiryTimeType, bool allowOfflineRead, bool allowOfflineAdd, bool allowOfflineUpdate, bool allowOfflineDelete)
+        public ClientModelSettingAttribute(ExpiryTimeType expiryTimeType, bool allowOfflineRead = true, bool allowOfflineAdd = false, bool allowOfflineUpdate = false, bool allowOfflineDelete = false)
         {
             ExpiryTimeType = expiryTimeType;
 

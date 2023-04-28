@@ -106,7 +106,7 @@
         public static ErrorCode IdentityDisallowRegisterByLoginName { get; set; } = new ErrorCode(nameof(IdentityDisallowRegisterByLoginName), "");
         public static ErrorCode IdentityUserNotExists = new ErrorCode(nameof(IdentityUserNotExists), "");
         public static ErrorCode AuthorizationPasswordWrong = new ErrorCode(nameof(AuthorizationPasswordWrong), "");
-        public static ErrorCode SignInReceiptRefreshConcurrentError = new ErrorCode(nameof(SignInReceiptRefreshConcurrentError), "同一设备正在Refreshing");
+        public static ErrorCode TokenRefreshConcurrentError = new ErrorCode(nameof(TokenRefreshConcurrentError), "同一设备正在Refreshing");
         public static ErrorCode RefreshAccessTokenError = new ErrorCode(nameof(RefreshAccessTokenError), "");
         public static ErrorCode AuthorizationInvalideClientId = new ErrorCode(nameof(AuthorizationInvalideClientId), "");
         public static ErrorCode AuthorizationInvalideUserId = new ErrorCode(nameof(AuthorizationInvalideUserId), "");

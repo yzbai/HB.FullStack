@@ -1,3 +1,4 @@
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
@@ -12,7 +13,7 @@ namespace HB.FullStack.Server.Identity.Models
 
         public bool IsActivated { get; set; }
 
-        [DbField(MaxLength = LengthConventions.MAX_ROLE_COMMENT_LENGTH)]
+        [DbField(MaxLength = SharedNames.Length.MAX_ROLE_COMMENT_LENGTH)]
         public string? Comment { get; set; }
 
         public void Update(string name, string displayName, bool isActivated, string? comment)

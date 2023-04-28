@@ -56,7 +56,7 @@ namespace HB.FullStack.Client.MauiLib
 
         public void OnTokenRefreshFailed() => TokenPreferences.DeleteToken();
 
-        public void OnTokenFetched(TokenRes signInReceipt) => TokenPreferences.SetToken(signInReceipt);
+        public void OnTokenFetched(TokenRes tokenRes) => TokenPreferences.SetToken(tokenRes);
 
         public void OnTokenDeleted() => TokenPreferences.DeleteToken();
 

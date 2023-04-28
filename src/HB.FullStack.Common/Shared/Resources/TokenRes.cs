@@ -12,7 +12,7 @@ using HB.FullStack.Common.Models;
 namespace HB.FullStack.Common.Shared.Resources
 {
     /// <summary>
-    /// 可能存在多个Endpoint，即不同的Endpoint使用不同站点的SignInReceipt
+    /// 可能存在多个Endpoint，即不同的Endpoint使用不同站点的Token
     /// </summary>
     public class TokenRes : ApiResource
     {

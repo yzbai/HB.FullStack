@@ -56,7 +56,7 @@ namespace Todo.Client.ConsoleApp
 
         public DateTimeOffset? TokenCreatedTime { get; set; }
 
-        public void OnTokenFetched(TokenRes signInReceipt)
+        public void OnTokenFetched(TokenRes tokenRes)
         {
             throw new NotImplementedException();
         }

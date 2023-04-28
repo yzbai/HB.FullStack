@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Server.Identity.Models;
-using Microsoft.Extensions.Logging;
 
-using static HB.FullStack.Server.Identity.LengthConventions;
+using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    public partial class IdentityService
+    internal partial class IdentityService
     {
         #region UserActivity
 
@@ -19,26 +16,26 @@ namespace HB.FullStack.Server.Identity
         {
             if (SerializeUtil.TryToJson(errorCode, out string? resultError))
             {
-                if (resultError?.Length > MAX_RESULT_ERROR_LENGTH)
+                if (resultError?.Length > SharedNames.Length.MAX_RESULT_ERROR_LENGTH)
                 {
                     _logger.LogWarning("记录UserActivity时，ErrorCode过长，已截断, {ErrorCode}", resultError);
 
-                    resultError = resultError[..MAX_RESULT_ERROR_LENGTH];
+                    resultError = resultError[..SharedNames.Length.MAX_RESULT_ERROR_LENGTH];
                 }
             }
 
-            if (arguments != null && arguments.Length > MAX_ARGUMENTS_LENGTH)
+            if (arguments != null && arguments.Length > SharedNames.Length.MAX_ARGUMENTS_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，Arguments过长，已截断, {Arguments}", arguments);
 
-                arguments = arguments[..MAX_ARGUMENTS_LENGTH];
+                arguments = arguments[..SharedNames.Length.MAX_ARGUMENTS_LENGTH];
             }
 
-            if (url != null && url.Length > MAX_URL_LENGTH)
+            if (url != null && url.Length > SharedNames.Length.MAX_URL_LENGTH)
             {
                 _logger.LogWarning("记录UserActivity时，url过长，已截断, {Url}", url);
 
-                url = url[..MAX_URL_LENGTH];
+                url = url[..SharedNames.Length.MAX_URL_LENGTH];
             }
 
             UserActivity model = new UserActivity

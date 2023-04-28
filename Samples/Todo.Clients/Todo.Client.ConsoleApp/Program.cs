@@ -51,7 +51,7 @@ namespace Todo.Client.ConsoleApp
 
                     apiClientOptions.TokenSiteSetting = new SiteSetting
                     {
-                        SiteName = "SignInReceiptSite",
+                        SiteName = "TokenSite",
                         BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)
                     };
                 });

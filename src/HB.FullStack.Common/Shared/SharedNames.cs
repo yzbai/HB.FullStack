@@ -1,6 +1,11 @@
-﻿namespace HB.FullStack.Common.Shared
-{
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
+namespace HB.FullStack.Common.Shared
+{
     public static class SharedNames
     {
         public static class ApiHeaders
@@ -57,6 +62,22 @@
             //public const string SMS_CODE = "SmsCode";
 
             //public const string EMAIL = "Email";
+        }
+
+        public static class Length
+        {
+            public const int MAX_URL_LENGTH = 2000;
+            public const int MAX_ARGUMENTS_LENGTH = 2000;
+            public const int MAX_RESULT_ERROR_LENGTH = 2000;
+
+            public const int MAX_USER_CLAIM_VALUE_LENGTH = 5000;
+            public const int MAX_ROLE_COMMENT_LENGTH = 1024;
+
+            public const int MAX_USER_LOGIN_NAME_LENGTH = 100;
+            public const int MAX_USER_MOBILE_LENGTH = 14;
+            public const int MAX_USER_EMAIL_LENGTH = 256;
+
+            public const int MAX_FILE_NAME_LENGTH = 128;
         }
     }
 }

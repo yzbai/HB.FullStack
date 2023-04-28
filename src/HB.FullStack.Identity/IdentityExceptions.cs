@@ -33,7 +33,7 @@ namespace HB.FullStack.Server.Identity
 
         internal static Exception SignInReceiptRefreshConcurrentError(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(ErrorCodes.SignInReceiptRefreshConcurrentError, nameof(SignInReceiptRefreshConcurrentError));
+            IdentityException exception = new IdentityException(ErrorCodes.TokenRefreshConcurrentError, nameof(SignInReceiptRefreshConcurrentError));
             exception.Data["Context"] = context;
 
             return exception;

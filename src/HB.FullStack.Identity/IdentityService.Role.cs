@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Server.Identity
 {
-    public partial class IdentityService
+    internal partial class IdentityService
     {
         #region Role
 

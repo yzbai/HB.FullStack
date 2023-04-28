@@ -388,7 +388,7 @@ namespace HB.FullStack.Repository
 
         #endregion
 
-        #region Model Cache Strategy
+        #region Cached Model Strategy
 
         protected async Task<TMainDBModel?> GetUsingCacheAsideAsync(string keyName, object keyValue, Func<IDbReader, Task<TMainDBModel?>> dbRetrieve)
         {
@@ -429,7 +429,7 @@ namespace HB.FullStack.Repository
 
         #endregion
 
-        #region Timestamp Cache Strategy
+        #region CachedItem Strategy
 
         protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDbReader, Task<TResult>> dbRetrieve) where TResult : TimestampDbModel
         {

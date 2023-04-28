@@ -16,10 +16,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using HB.FullStack.Server.Services;
+using HB.FullStack.Server.Identity.Repos;
 
 namespace HB.FullStack.Server.Identity
 {
-    public partial class IdentityService : IIdentityService
+    internal partial class IdentityService : IIdentityService
     {
         private readonly IdentityOptions _options;
         private readonly ILogger _logger;
@@ -28,7 +29,8 @@ namespace HB.FullStack.Server.Identity
         private readonly ISmsService _smsServerService;
 
         private readonly UserRepo _userRepo;
-        private readonly SignInCredentialRepo _signInCredentialRepo;
+        private readonly UserProfileRepo _userProfileRepo;
+        private readonly TokenCredentialRepo _signInCredentialRepo;
         private readonly UserClaimRepo _userClaimRepo;
         private readonly LoginControlRepo _userLoginControlRepo;
         private readonly RoleRepo _roleRepo;
@@ -49,7 +51,8 @@ namespace HB.FullStack.Server.Identity
             IDistributedLockManager lockManager,
             ISmsService smsServerService,
             UserRepo userRepo,
-            SignInCredentialRepo signInCredentialRepo,
+            UserProfileRepo userProfileRepo,
+            TokenCredentialRepo signInCredentialRepo,
             UserClaimRepo userClaimRepo,
             LoginControlRepo userLoginControlRepo,
             RoleRepo roleRepo,
@@ -62,6 +65,7 @@ namespace HB.FullStack.Server.Identity
             _smsServerService = smsServerService;
 
             _userRepo = userRepo;
+            _userProfileRepo = userProfileRepo;
             _userClaimRepo = userClaimRepo;
             _userLoginControlRepo = userLoginControlRepo;
             _signInCredentialRepo = signInCredentialRepo;
@@ -107,71 +111,23 @@ namespace HB.FullStack.Server.Identity
 
         public string JsonWebKeySet => _jwtJsonWebKeySet;
 
-        public async Task RegisterAsync(RegisterContext context, string lastUser)
-        {
-            //TODO: RegisterContext的ClientVerson, ClientId, DeviceInfo, Ip 都没有使用到，需要考虑是否需要使用
-
-            ThrowIf.NotValid(context, nameof(context));
-            EnsureValidAudience(context);
-
-            TransactionContext transContext = await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
-            User? user = null;
-            try
-            {
-                switch (context)
-                {
-                    case RegisterByEmail registerByEmail:
-                        //TODO: 完成EmailCode验证
-                        throw new NotImplementedException();
-
-                    case RegisterByLoginName registerByLoginName:
-
-                        if (!_options.SignInSettings.AllowRegisterByLoginName)
-                        {
-                            throw IdentityExceptions.DisallowRegisterByLoginName();
-                        }
-
-                        //TODO: 安全检查，一般不建议使用LoginName和Password进行注册
-                        user = await CreateUserAsync(null, null, registerByLoginName.LoginName, registerByLoginName.Password, false, false, lastUser, transContext).ConfigureAwait(false);
-
-                        break;
-                    case RegisterBySms registerBySms:
-                        await EnsureValidSmsCode(registerBySms, lastUser).ConfigureAwait(false);
-
-                        user = await CreateUserAsync(registerBySms.Mobile, null, null, null, true, false, lastUser, transContext).ConfigureAwait(false);
-                        break;
-                    default:
-                        break;
-                }
-
-                await transContext.CommitAsync().ConfigureAwait(false);
-
-                //return user;
-            }
-            catch
-            {
-                await transContext.RollbackAsync().ConfigureAwait(false);
-                throw;
-            }
-        }
-
-        public async Task<Token> SignInAsync(SignInContext context, string lastUser)
+        public async Task<Token> GetTokenAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
             EnsureValidAudience(context);
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInCredential>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
 
             try
             {
                 User user = await EnsureUser(context, lastUser, transactionContext).ConfigureAwait(false);
 
-                await EnsureSignInCheckAsync(context, user, lastUser).ConfigureAwait(false);
+                await EnsureTokenCheckAsync(context, user, lastUser).ConfigureAwait(false);
 
-                await DeleteSignInCredentialsAsync(context.Exclusivity, user.Id, context.DeviceInfos.Idiom, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
+                await DeleteTokenCredentialsAsync(context.Exclusivity, user.Id, context.DeviceInfos.Idiom, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
 
                 //创建Credential
-                SignInCredential signInCredential = new SignInCredential
+                TokenCredential tokenCredential = new TokenCredential
                 (
                     userId: user.Id,
                     refreshToken: SecurityUtil.CreateUniqueToken(),
@@ -189,12 +145,12 @@ namespace HB.FullStack.Server.Identity
                     deviceType: context.DeviceInfos.Type
                 );
 
-                await _signInCredentialRepo.AddAsync(signInCredential, lastUser, transactionContext).ConfigureAwait(false);
+                await _signInCredentialRepo.AddAsync(tokenCredential, lastUser, transactionContext).ConfigureAwait(false);
 
                 //构造 Jwt
-                string accessToken = await ConstructAccessTokenAsync(user, signInCredential, context.Audience, transactionContext).ConfigureAwait(false);
+                string accessToken = await ConstructAccessTokenAsync(user, tokenCredential, context.Audience, transactionContext).ConfigureAwait(false);
 
-                Token signInReceipt = new Token(accessToken, signInCredential.RefreshToken, user);
+                Token signInReceipt = new Token(accessToken, tokenCredential.RefreshToken, user);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -206,7 +162,7 @@ namespace HB.FullStack.Server.Identity
                 throw;
             }
 
-            async Task EnsureSignInCheckAsync(SignInContext context, User user, string lastUser)
+            async Task EnsureTokenCheckAsync(SignInContext context, User user, string lastUser)
             {
                 LoginControl loginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
@@ -308,7 +264,7 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task<Token> RefreshSignInReceiptAsync(RefreshContext context, string lastUser)
+        public async Task<Token> RefreshTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
 
@@ -316,7 +272,7 @@ namespace HB.FullStack.Server.Identity
             //如果刷新失败呢？那就重新登录吧
 
             using IDistributedLock distributedLock = await _lockManager.NoWaitLockAsync(
-               nameof(RefreshSignInReceiptAsync) + context.ClientInfos.ClientId,
+               nameof(RefreshTokenAsync) + context.ClientInfos.ClientId,
                _options.JwtSettings.RefreshIntervalTimeSpan,
                notUnlockWhenDispose: true).ConfigureAwait(false);
 
@@ -331,10 +287,10 @@ namespace HB.FullStack.Server.Identity
             Guid userId = claimsPrincipal.GetUserId() ?? throw IdentityExceptions.RefreshSignInReceiptError("UserId验证不通过", null, context);
             Guid signInCredentialId = claimsPrincipal.GetSignInCredentialId() ?? throw IdentityExceptions.RefreshSignInReceiptError("SignInCredentialId验证不通过", null, context);
 
-            //SignInCredential 验证
+            //TokenCredential 验证
             User? user;
-            SignInCredential? signInCredential = null;
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInCredential>().ConfigureAwait(false);
+            TokenCredential? signInCredential = null;
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
 
             try
             {
@@ -408,7 +364,7 @@ namespace HB.FullStack.Server.Identity
 
                 if (claimsPrincipal == null)
                 {
-                    //TODO: Black concern SignInCredential by RefreshToken
+                    //TODO: Black concern TokenCredential by RefreshToken
                     throw IdentityExceptions.RefreshSignInReceiptError("验证过期的AccessToken时出错", null, context);
                 }
 
@@ -421,15 +377,15 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task SignOutAsync(Guid signInCredentialId, string lastUser)
+        public async Task DeleteTokenAsync(Guid signInCredentialId, string lastUser)
         {
             ThrowIf.Empty(ref signInCredentialId, nameof(signInCredentialId));
 
-            TransactionContext transContext = await _transaction.BeginTransactionAsync<SignInCredential>().ConfigureAwait(false);
+            TransactionContext transContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
 
             try
             {
-                SignInCredential? signInCredential = await _signInCredentialRepo.GetByIdAsync(signInCredentialId, transContext).ConfigureAwait(false);
+                TokenCredential? signInCredential = await _signInCredentialRepo.GetByIdAsync(signInCredentialId, transContext).ConfigureAwait(false);
 
                 if (signInCredential != null)
                 {
@@ -449,15 +405,15 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task SignOutAsync(Guid userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser)
+        public async Task DeleteTokenAsync(Guid userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser)
         {
             ThrowIf.Empty(ref userId, nameof(userId));
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<SignInCredential>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
 
             try
             {
-                await DeleteSignInCredentialsAsync(logOffType, userId, idiom, lastUser, transactionContext).ConfigureAwait(false);
+                await DeleteTokenCredentialsAsync(logOffType, userId, idiom, lastUser, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -499,22 +455,22 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        private async Task DeleteSignInCredentialsAsync(SignInExclusivity logOffType, Guid userId, DeviceIdiom idiom, string lastUser, TransactionContext transactionContext)
+        private async Task DeleteTokenCredentialsAsync(SignInExclusivity logOffType, Guid userId, DeviceIdiom idiom, string lastUser, TransactionContext transactionContext)
         {
-            IEnumerable<SignInCredential> resultList = await _signInCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
+            IEnumerable<TokenCredential> resultList = await _signInCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
 
-            IEnumerable<SignInCredential> toDeletes = logOffType switch
+            IEnumerable<TokenCredential> toDeletes = logOffType switch
             {
                 SignInExclusivity.LogOffAllOthers => resultList,
                 SignInExclusivity.LogOffAllButWeb => resultList.Where(s => s.DeviceIdiom != DeviceIdiom.Web),
                 SignInExclusivity.LogOffSameIdiom => resultList.Where(s => s.DeviceIdiom == idiom),
-                _ => new List<SignInCredential>()
+                _ => new List<TokenCredential>()
             };
 
             await _signInCredentialRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        private async Task<string> ConstructAccessTokenAsync(User user, SignInCredential signInCredential, string audience, TransactionContext transactionContext)
+        private async Task<string> ConstructAccessTokenAsync(User user, TokenCredential signInCredential, string audience, TransactionContext transactionContext)
         {
             IEnumerable<Claim> jwtClaims = await GetClaimsAsync(user, signInCredential).ConfigureAwait(false);
 
@@ -528,7 +484,7 @@ namespace HB.FullStack.Server.Identity
 
             return jwt;
 
-            async Task<IEnumerable<Claim>> GetClaimsAsync(User user, SignInCredential signInCredential)
+            async Task<IEnumerable<Claim>> GetClaimsAsync(User user, TokenCredential signInCredential)
             {
                 IEnumerable<Role> roles = await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
                 IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);

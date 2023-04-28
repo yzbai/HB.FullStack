@@ -41,7 +41,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
             ClientInfos clientInfos = new ClientInfos { ClientId = clientId, ClientVersion = clientVersion, ClientIp = HttpContext.GetIpAddress() };
             RegisterByLoginName context = new RegisterByLoginName(loginName, password, audience, clientInfos, deviceInfos);
 
-            await _identityService.RegisterAsync(context, "");
+            await _identityService.RegisterUserAsync(context, "");
 
             return Ok();
         }
