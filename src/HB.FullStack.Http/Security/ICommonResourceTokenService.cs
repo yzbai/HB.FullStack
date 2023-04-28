@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.WebApi
+namespace HB.FullStack.Server.WebLib
 {
     public interface ICommonResourceTokenService
     {

@@ -35,7 +35,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -72,7 +72,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 };
                 }
 
-                await Db.BatchUpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
+                await Db.UpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transContext).ConfigureAwait(false);
             }
@@ -97,7 +97,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
                 if (lst.Count != 0)
                 {
-                    await Db.BatchDeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
+                    await Db.DeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
                 }
                 else
                 {
@@ -239,19 +239,19 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             try
             {
-                await Db.BatchAddAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items, "xx", trans).ConfigureAwait(false);
 
                 var results = await Db.RetrieveAsync<PublisherModel>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items, "xx", trans).ConfigureAwait(false);
 
                 var items2 = Mocker.GetPublishers();
 
-                await Db.BatchAddAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 results = await Db.RetrieveAsync<PublisherModel>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
@@ -370,7 +370,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             try
             {
-                await Db.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+                await Db.AddAsync(books, "x", trans).ConfigureAwait(false);
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
             catch
@@ -380,7 +380,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             Stopwatch stopwatch = new Stopwatch();
 
-            using MySqlConnection mySqlConnection = new MySqlConnection(DbSettingManager.GetConnectionString(DbSchema_Mysql, true).ToString());
+            using MySqlConnection mySqlConnection = new MySqlConnection(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true).ToString());
 
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(Guid), new MySqlGuidTypeHandler(), false);
@@ -445,7 +445,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, EngineType.MySQL);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, DbEngineType.MySQL);
 
                         if (value != null)
                         {
@@ -482,7 +482,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }

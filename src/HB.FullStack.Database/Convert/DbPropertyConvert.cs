@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -47,6 +52,8 @@ namespace HB.FullStack.Database.Convert
             [typeof(char)] = new DbPropertyMapping { DbTypeStatement = "CHAR", DbType = DbType.StringFixedLength },
             [typeof(Guid)] = new DbPropertyMapping { DbTypeStatement = "CHAR(36)", DbType = DbType.Guid },
             [typeof(DateTimeOffset)] = new DbPropertyMapping { DbTypeStatement = "DATETIME(6)", DbType = DbType.DateTimeOffset },
+            [typeof(DateOnly)] = new DbPropertyMapping { DbTypeStatement = "DATE", DbType = DbType.Date },
+            [typeof(TimeOnly)] = new DbPropertyMapping { DbTypeStatement = "TIME(6)", DbType = DbType.Time },
             [typeof(byte[])] = new DbPropertyMapping { DbTypeStatement = "Binary", DbType = DbType.Binary }
         };
 
@@ -68,6 +75,8 @@ namespace HB.FullStack.Database.Convert
             [typeof(char)] = new DbPropertyMapping { DbTypeStatement = "CHAR", DbType = DbType.StringFixedLength },
             [typeof(Guid)] = new DbPropertyMapping { DbTypeStatement = "CHAR(36)", DbType = DbType.Guid },
             [typeof(DateTimeOffset)] = new DbPropertyMapping { DbTypeStatement = "VARCHAR", DbType = DbType.DateTimeOffset },
+            [typeof(DateOnly)] = new DbPropertyMapping { DbTypeStatement = "VARCHAR", DbType = DbType.Date },
+            [typeof(TimeOnly)] = new DbPropertyMapping { DbTypeStatement = "VARCHAR", DbType = DbType.Time },
             [typeof(byte[])] = new DbPropertyMapping { DbTypeStatement = "BLOB", DbType = DbType.Binary }
         };
 
@@ -76,32 +85,36 @@ namespace HB.FullStack.Database.Convert
             #region MySQL
 
             //解决MySql最多存储到Datetime(6)，而.net里为Datetime(7)
-            RegisterGlobalDbPropertyConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetDbPropertyConverter(), EngineType.MySQL);
+            RegisterGlobalDbPropertyConverter(typeof(DateTimeOffset), new MySqlDateTimeOffsetDbPropertyConverter(), DbEngineType.MySQL);
+            RegisterGlobalDbPropertyConverter(typeof(DateOnly), new MySqlDateOnlyDbPropertyConverter(), DbEngineType.MySQL);
+            RegisterGlobalDbPropertyConverter(typeof(TimeOnly), new MySqlTimeOnlyDbPropertyConverter(), DbEngineType.MySQL);
 
             //解决MySql存储Guid的问题，存储为Binary(16)
-            RegisterGlobalDbPropertyConverter(typeof(Guid), new MySqlGuidDbPropertyConverter(), EngineType.MySQL);
-
-            RegisterGlobalDbPropertyConverter(typeof(SimpleDate), new SimpleDateDbPropertyConverter(), EngineType.MySQL);
-            RegisterGlobalDbPropertyConverter(typeof(Time24Hour), new Time24HourDbPropertyConverter(), EngineType.MySQL);
+            RegisterGlobalDbPropertyConverter(typeof(Guid), new MySqlGuidDbPropertyConverter(), DbEngineType.MySQL);
+            
+            RegisterGlobalDbPropertyConverter(typeof(SimpleDate), new SimpleDateDbPropertyConverter(), DbEngineType.MySQL);
+            RegisterGlobalDbPropertyConverter(typeof(Time24Hour), new Time24HourDbPropertyConverter(), DbEngineType.MySQL);
 
             #endregion
 
             #region SQLite
 
-            RegisterGlobalDbPropertyConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetDbPropertyConverter(), EngineType.SQLite);
-            RegisterGlobalDbPropertyConverter(typeof(Guid), new SqliteGuidDbPropertyConverter(), EngineType.SQLite);
-            RegisterGlobalDbPropertyConverter(typeof(SimpleDate), new SimpleDateDbPropertyConverter(), EngineType.SQLite);
-            RegisterGlobalDbPropertyConverter(typeof(Time24Hour), new Time24HourDbPropertyConverter(), EngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(DateTimeOffset), new SqliteDateTimeOffsetDbPropertyConverter(), DbEngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(DateOnly), new SqliteDateOnlyDbPropertyConverter(), DbEngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(TimeOnly), new SqliteTimeOnlyDbPropertyConverter(), DbEngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(Guid), new SqliteGuidDbPropertyConverter(), DbEngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(SimpleDate), new SimpleDateDbPropertyConverter(), DbEngineType.SQLite);
+            RegisterGlobalDbPropertyConverter(typeof(Time24Hour), new Time24HourDbPropertyConverter(), DbEngineType.SQLite);
 
             #endregion
         }
 
-        public static void RegisterGlobalDbPropertyConverter(Type type, IDbPropertyConverter typeConverter, EngineType engineType)
+        public static void RegisterGlobalDbPropertyConverter(Type type, IDbPropertyConverter typeConverter, DbEngineType engineType)
         {
             Dictionary<Type, DbPropertyMapping> globalConverterInfos = engineType switch
             {
-                EngineType.MySQL => _mysqlGlobalConverterInfos,
-                EngineType.SQLite => _sqliteGlobalConverterInfos,
+                DbEngineType.MySQL => _mysqlGlobalConverterInfos,
+                DbEngineType.SQLite => _sqliteGlobalConverterInfos,
                 _ => throw new NotSupportedException(),
             };
 
@@ -118,7 +131,7 @@ namespace HB.FullStack.Database.Convert
         /// <summary>
         /// 将DataReader.GetValue(i)得到的数据库值，转换为Model的Type值. 逻辑同ModelMapperCreator一致
         /// </summary>
-        public static object? DbFieldValueToPropertyValue(object dbValue, DbModelPropertyDef propertyDef, EngineType engineType) //Type targetType)
+        public static object? DbFieldValueToPropertyValue(object dbValue, DbModelPropertyDef propertyDef, DbEngineType engineType) //Type targetType)
         {
             Type dbValueType = dbValue.GetType();
 
@@ -175,7 +188,7 @@ namespace HB.FullStack.Database.Convert
         /// <summary>
         /// propertyDef为null，则不考虑这个属性自定义的TypeConverter
         /// </summary>
-        public static object PropertyValueToDbFieldValue(object? typeValue, DbModelPropertyDef? propertyDef, EngineType engineType)
+        public static object PropertyValueToDbFieldValue(object? typeValue, DbModelPropertyDef? propertyDef, DbEngineType engineType)
         {
             if (typeValue == null)
             {
@@ -211,7 +224,7 @@ namespace HB.FullStack.Database.Convert
         /// 没有考虑属性自定义的TypeConvert
         /// 有安全隐患,
         /// </summary>
-        public static string DoNotUseUnSafePropertyValueToDbFieldValueStatement(object? typeValue, bool quotedIfNeed, EngineType engineType)
+        public static string DoNotUseUnSafePropertyValueToDbFieldValueStatement(object? typeValue, bool quotedIfNeed, DbEngineType engineType)
         {
             if (typeValue == null)
             {
@@ -233,7 +246,7 @@ namespace HB.FullStack.Database.Convert
                 //null => "null",
                 //Enum e => e.ToString(),
                 DBNull _ => "null",
-                DateTime _ => throw DatabaseExceptions.UseDateTimeOffsetOnly(),
+                DateTime _ => throw DbExceptions.UseDateTimeOffsetOnly(),
                 DateTimeOffset dt => dt.ToString(@"yyyy\-MM\-dd HH\:mm\:ss.FFFFFFFzzz", Globals.Culture),
                 bool b => b ? "1" : "0",
                 _ => dbValue.ToString()!
@@ -247,7 +260,7 @@ namespace HB.FullStack.Database.Convert
             return SqlHelper.GetQuoted(statement);
         }
 
-        public static DbType PropertyTypeToDbType(DbModelPropertyDef propertyDef, EngineType engineType)
+        public static DbType PropertyTypeToDbType(DbModelPropertyDef propertyDef, DbEngineType engineType)
         {
             //查看属性的TypeConvert
             if (propertyDef.TypeConverter != null)
@@ -271,10 +284,10 @@ namespace HB.FullStack.Database.Convert
                 return DbType.String;
             }
 
-            throw DatabaseExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DbExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
-        public static string PropertyTypeToDbTypeStatement(DbModelPropertyDef propertyDef, EngineType engineType)
+        public static string PropertyTypeToDbTypeStatement(DbModelPropertyDef propertyDef, DbEngineType engineType)
         {
             //查看属性自定义
             if (propertyDef.TypeConverter != null)
@@ -297,25 +310,25 @@ namespace HB.FullStack.Database.Convert
             {
                 return GetGlobalDbPropertyMapping(typeof(string), engineType)!.DbTypeStatement;
             }
-            throw DatabaseExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DbExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
-        public static IDbPropertyConverter? GetGlobalDbPropertyConverter(Type trueType, EngineType engineType)
+        public static IDbPropertyConverter? GetGlobalDbPropertyConverter(Type trueType, DbEngineType engineType)
         {
             return GetGlobalDbPropertyMapping(trueType, engineType)?.DbPropertyConverter;
         }
 
         public static IDbPropertyConverter? GetGlobalDbPropertyConverter(Type trueType, int engineType)
         {
-            return GetGlobalDbPropertyMapping(trueType, (EngineType)engineType)?.DbPropertyConverter;
+            return GetGlobalDbPropertyMapping(trueType, (DbEngineType)engineType)?.DbPropertyConverter;
         }
 
-        private static DbPropertyMapping? GetGlobalDbPropertyMapping(Type trueType, EngineType engineType)
+        private static DbPropertyMapping? GetGlobalDbPropertyMapping(Type trueType, DbEngineType engineType)
         {
             Dictionary<Type, DbPropertyMapping> typeConvertSettings = engineType switch
             {
-                EngineType.MySQL => _mysqlGlobalConverterInfos,
-                EngineType.SQLite => _sqliteGlobalConverterInfos,
+                DbEngineType.MySQL => _mysqlGlobalConverterInfos,
+                DbEngineType.SQLite => _sqliteGlobalConverterInfos,
                 _ => throw new NotImplementedException(),
             };
 

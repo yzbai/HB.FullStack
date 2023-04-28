@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Builder;
 
-namespace HB.FullStack.WebApi
+namespace HB.FullStack.Server.WebLib
 {
     public static class GlobalWebApplicationAccessor
     {
@@ -14,7 +14,7 @@ namespace HB.FullStack.WebApi
             {
                 if (_application == null)
                 {
-                    throw WebApiExceptions.ShouldSetGlobalWebApplicationAccessorAtBegining();
+                    throw WebExceptions.ShouldSetGlobalWebApplicationAccessorAtBegining();
                 }
 
                 return _application;

@@ -1,0 +1,11 @@
+<Project>
+	<PropertyGroup>
+		<LangVersion>Latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<!--<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
+		<ImplicitUsings>disable</ImplicitUsings>
+	</PropertyGroup>
+</Project>

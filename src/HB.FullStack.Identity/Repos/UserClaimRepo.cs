@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
-using HB.FullStack.Identity.Models;
+using HB.FullStack.Server.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class UserClaimRepo : ModelRepository<UserClaim>
     {
 
-        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserClaimRepo(ILogger<UserClaimRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
@@ -28,16 +29,17 @@ namespace HB.FullStack.Identity
 
                 foreach (var userClaim in userClaims)
                 {
-                    InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId));
+                    InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId)); 
                 }
             }
-            else if (sender is IEnumerable<ChangedPack> cpps)
+            else if (sender is IEnumerable<PropertyChangePack> cpps)
             {
                 foreach (var cpp in cpps)
                 {
-                    if (cpp.AddtionalProperties.TryGetValue(nameof(UserClaim.UserId), out object? value))
+                    if (cpp.AddtionalProperties.TryGetValue(nameof(UserClaim.UserId), out JsonElement element))
                     {
-                        InvalidateCache(new CachedUserClaimsByUserId((Guid)value!));
+                        Guid userId = SerializeUtil.To<Guid>(element)!;
+                        InvalidateCache(new CachedUserClaimsByUserId(userId));
                     }
                     else
                     {

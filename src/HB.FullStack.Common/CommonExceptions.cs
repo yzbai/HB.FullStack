@@ -107,6 +107,13 @@ namespace System
             return ex;
         }
 
+        internal static Exception ApiClientOptionsError(string cause)
+        {
+            CommonException ex = new CommonException(ErrorCodes.ApiClientInnerError, cause, null, null);
+
+            return ex;
+        }
+
         #endregion
 
     }

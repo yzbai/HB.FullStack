@@ -5,41 +5,59 @@ using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using HandlebarsDotNet.Collections;
+
 using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.CommonTests.PropertyTrackable
 {
+
     [PropertyTrackableObject]
-    public partial class TestObject
+    public partial class TestTestObject
     {
-        [TrackProperty]
-        private string? _name;
-
-        //[TrackProperty]
-        //private ObservableCollection2<string>? _testCollection;
-
-        //[TrackProperty]
-        //public InnerTestObject? _innerCls;
-
-        [TrackProperty]
-        public InnerTestRecord? _innerRecord;
-
-        [TrackProperty]
-        [AddtionalProperty]
-        private string _forwordAttributeName = "This is a Addtional";
-
-        [TrackProperty]
-        private ImmutableList<string>? _immutables;
-
-        [TrackProperty]
-        private ImmutableArray<string>? _immutables2;
-
-        //[TrackProperty]
-        //private InnerModel? _innerModel;
 
     }
 
-    public partial class InnerModel : ObservableObject
+    [PropertyTrackableObject]
+    public partial class TestObject
+    {
+        [AddtionalProperty]
+        public string Id { get; set; } = "This is a Id";
+
+        //String
+        [TrackProperty]
+        private string? _name;
+
+        //Value Type
+        [TrackProperty]
+        private int _age;
+
+        //Record
+        [TrackProperty]
+        public TestRecord? _testRecord;
+
+
+        //ImmutableCollection
+        [TrackProperty]
+        private ImmutableList<string>? _immutableList;
+
+        //ImmutableCollection
+        [TrackProperty]
+        private ImmutableArray<string>? _immutableArray;
+
+
+        //Observable class
+        [TrackProperty]
+        private ObservableInner? _observableInner;
+
+        //Observable Collection
+        [TrackProperty]
+        private ObservableCollection2<string>? _observableCollection2;
+    }
+
+    public record TestRecord(string? InnerName);
+
+    public partial class ObservableInner : ObservableObject
     {
         [ObservableProperty]
         private string? _innerName;

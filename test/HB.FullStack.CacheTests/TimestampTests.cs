@@ -138,7 +138,7 @@ namespace HB.FullStack.CacheTests
 
             try
             {
-                await Db.BatchAddAsync(books, "", transContext).ConfigureAwait(false);
+                await Db.AddAsync(books, "", transContext).ConfigureAwait(false);
                 await transContext.CommitAsync();
             }
             catch

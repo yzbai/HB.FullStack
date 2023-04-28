@@ -8,8 +8,8 @@ using Aliyun.Acs.Core.Http;
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Cache;
-using HB.FullStack.Common.Server;
 using HB.FullStack.Common.Validate;
+using HB.FullStack.Server.Services;
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -19,7 +19,7 @@ using ClientException = Aliyun.Acs.Core.Exceptions.ClientException;
 
 namespace HB.Infrastructure.Aliyun.Sms
 {
-    public class AliyunSmsService : ISmsServerService
+    public class AliyunSmsService : ISmsService
     {
         private readonly AliyunSmsOptions _options;
         private readonly IAcsClient _client;
@@ -36,7 +36,7 @@ namespace HB.Infrastructure.Aliyun.Sms
             _client = AliyunUtil.CreateAcsClient(_options.RegionId, _options.AccessKeyId, _options.AccessKeySecret);
         }
 
-        public async Task SendValidationCodeAsync(string mobile/*, out string smsCode*/)
+        public int SendValidationCode(string mobile/*, out string smsCode*/)
         {
             string smsCode = GenerateNewSmsCode(_options.TemplateIdentityValidation.CodeLength);
 
@@ -61,28 +61,36 @@ namespace HB.Infrastructure.Aliyun.Sms
 
             try
             {
-                CommonResponse response = await PolicyManager
+                PolicyManager
                     .SendSmsRetryPolicy(_logger)
                     .ExecuteAsync(async () =>
                     {
                         return await _client.GetCommonResponseAsync(request).ConfigureAwait(false);
-                    }).ConfigureAwait(false);
+                    })
+                    .ContinueWith(async task =>
+                    {
+                        CommonResponse response = await task;
 
-                SendResult? sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
+                        SendResult? sendResult = SerializeUtil.FromJson<SendResult>(response.Data);
 
-                if (sendResult != null && sendResult.IsSuccessful())
-                {
-                    SetSmsCodeToCacheAsync(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes)
-                        .SafeFireAndForget(ex =>
+                        if (sendResult != null && sendResult.IsSuccessful())
                         {
-                            _logger.LogCritical(ex, "Aliyun Sms 服务在使用缓存时出错，有可能缓存不可用。");
-                        });
-                }
-                else
-                {
-                    string errorMessage = $"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}";
-                    throw AliyunExceptions.SmsSendError(mobile: mobile, code: sendResult?.Code, message: sendResult?.Message);
-                }
+                            await SetSmsCodeToCacheAsync(mobile, smsCode, _options.TemplateIdentityValidation.ExpireMinutes).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            string errorMessage = $"Validate Sms Code Send Err. Mobile:{mobile}, Code:{sendResult?.Code}, Message:{sendResult?.Message}";
+                            throw AliyunExceptions.SmsSendError(mobile: mobile, code: sendResult?.Code, message: sendResult?.Message);
+                        }
+
+
+                    }).SafeFireAndForget(ex =>
+                    {
+                        _logger.LogCritical(ex, "Aliyun Sms 服务在使用时出错，有可能发送失败，有可能缓存不可用。");
+                    });
+
+                return _options.TemplateIdentityValidation.CodeLength;
+
             }
             catch (CacheException ex)
             {

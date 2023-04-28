@@ -16,78 +16,78 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         public string Mobile { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     [CacheModel]
     public class Book2Model : TimestampFlackIdDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     [CacheModel]
     public class Guid_BookModel : TimestampGuidDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     [CacheModel]
     public class Book : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
-        [DbModelProperty]
+        [DbField]
         [CacheModelAltKey]
         public long BookID { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Publisher { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public double Price { get; set; }
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     [CacheModel]
     public class BookModel_Client : TimestampFlackIdDbModel
     {
 
-        [DbModelProperty(NeedIndex = true)]
+        [DbField(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public double Price { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     [CacheModel]
     public class Book_Client : TimestampFlackIdDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
-        [DbModelProperty]
+        [DbField]
         [CacheModelAltKey]
         public long BookID { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public string? Publisher { get; set; }
 
-        [DbModelProperty]
+        [DbField]
         public double Price { get; set; }
     }
 }

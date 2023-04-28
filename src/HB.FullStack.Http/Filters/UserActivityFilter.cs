@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using HB.FullStack.Identity;
+using HB.FullStack.Server.Identity;
 
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.WebApi.Filters
+namespace HB.FullStack.Server.WebLib.Filters
 {
     public class UserActivityFilter : IAsyncActionFilter
     {
@@ -28,7 +28,7 @@ namespace HB.FullStack.WebApi.Filters
         {
             try
             {
-                Guid? signInTokenId = context.HttpContext?.User?.GetSignInTokenId();
+                Guid? signInCredentialId = context.HttpContext?.User?.GetSignInCredentialId();
                 Guid? userId = context.HttpContext?.User?.GetUserId();
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
@@ -61,7 +61,7 @@ namespace HB.FullStack.WebApi.Filters
                     }
                 }
 
-                _identityService.RecordUserActivityAsync(signInTokenId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode)
+                _identityService.RecordUserActivityAsync(signInCredentialId, userId, ip, url, httpMethod, arguments, resultStatusCode, resultType, errorCode)
                     .SafeFireAndForget(ex =>
                     {
                         //TODO:错误处理？

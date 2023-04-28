@@ -5,7 +5,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class AutoIdBTTimestamp : TimestampAutoIncrementIdDbModel
     {
         public string Name { get; set; } = SecurityUtil.CreateRandomString(10);
@@ -13,7 +13,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class AutoIdBTTimeless : TimelessAutoIncrementIdDbModel
     {
         public string Name { get; set; } = SecurityUtil.CreateRandomString(10);

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="HB.FullStack.Client.MauiLib.Controls.ExceptionPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:popups="clr-namespace:HB.FullStack.Client.MauiLib.Controls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:DataType="popups:ExceptionPopup">
+    <VerticalStackLayout Style="{StaticResource PopupLayout}">
+
+        <VerticalStackLayout.Resources>
+            <ResourceDictionary>
+                <Style x:Key="Content" TargetType="Label">
+                    <Setter Property="HorizontalTextAlignment" Value="Start" />
+                    <Setter Property="VerticalTextAlignment" Value="Center" />
+                </Style>
+                <Style x:Key="PopupLayout" TargetType="StackLayout">
+                    <Setter Property="Padding" Value="{OnPlatform Android=20, WinUI=20, iOS=5, MacCatalyst=5}" />
+                </Style>
+                <Style x:Key="ConfirmButton" TargetType="Button">
+                    <Setter Property="VerticalOptions" Value="EndAndExpand" />
+                </Style>
+            </ResourceDictionary>
+        </VerticalStackLayout.Resources>
+
+        <Label Style="{StaticResource Content}" Text="{Binding Message}" />
+        <Button
+            Clicked="Button_Clicked"
+            Style="{StaticResource ConfirmButton}"
+            Text="知道了" />
+    </VerticalStackLayout>
+</toolkit:Popup>

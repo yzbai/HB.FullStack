@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage
+    x:Class="HB.FullStack.Client.MauiLib.Components.IntroducePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base"
+    xmlns:behaviors="clr-namespace:HB.FullStack.Client.MauiLib.Behaviors"
+    xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
+    xmlns:controls="clr-namespace:HB.FullStack.Client.MauiLib.Controls"
+    x:Name="root"
+    Title="IntroducePage"
+    x:DataType="components:IntroduceViewModel"
+    x:TypeArguments="components:IntroduceViewModel"
+    DisableBackButton="True"
+    IsBottomTabBarVisible="False"
+    IsFullScreen="True"
+    IsNavBarVisible="False">
+    <AbsoluteLayout>
+        <CarouselView
+            x:Name="carouselIntro"
+            AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+            AbsoluteLayout.LayoutFlags="All"
+            IndicatorView="indicatorIntro"
+            ItemsSource="{Binding IntroduceContents}"
+            Loop="False">
+            <CarouselView.ItemTemplate>
+                <DataTemplate>
+                    <AbsoluteLayout x:DataType="components:IntroduceContent">
+                        <Image
+                            AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                            AbsoluteLayout.LayoutFlags="All"
+                            Aspect="Center"
+                            Source="{Binding ImageSource}" />
+                        <StackLayout
+                            Margin="0,0,0,60"
+                            AbsoluteLayout.LayoutBounds="0.5, 1, -1, -1"
+                            AbsoluteLayout.LayoutFlags="PositionProportional"
+                            IsVisible="{Binding IsLastPage}"
+                            Orientation="Horizontal"
+                            Spacing="50">
+                            <Button Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={Type components:IntroduceViewModel}}, Path=FinishedCommand}" Text="Enter" />
+                        </StackLayout>
+                    </AbsoluteLayout>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+        <IndicatorView
+            x:Name="indicatorIntro"
+            Margin="0,0,0,10"
+            AbsoluteLayout.LayoutBounds="0.5, 1, -1, -1"
+            AbsoluteLayout.LayoutFlags="PositionProportional"
+            IndicatorColor="LightGray"
+            MaximumVisible="6"
+            SelectedIndicatorColor="DarkGray" />
+    </AbsoluteLayout>
+</base:BasePage>

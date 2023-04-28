@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.PropertyTrackable
 {
+    /// <summary>
+    /// Addtional Property always been recorded
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public sealed class AddtionalPropertyAttribute : Attribute
+    public class AddtionalPropertyAttribute : Attribute
     {
 
     }

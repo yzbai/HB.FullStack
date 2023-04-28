@@ -40,24 +40,24 @@ namespace System
             return principal.GetClaimValue(ClaimExtensionTypes.AUDIENCE);
         }
 
-        public static Guid? GetSignInTokenId(this ClaimsPrincipal principal)
+        public static Guid? GetSignInCredentialId(this ClaimsPrincipal principal)
         {
-            string? str = principal.GetClaimValue(ClaimExtensionTypes.SIGN_IN_TOKEN_ID);
+            string? str = principal.GetClaimValue(ClaimExtensionTypes.SIGN_IN_CREDENTIAL_ID);
 
             return str.IsNullOrEmpty() ? null : new Guid(str);
         }
 
-        public static string? GetDeviceId(this ClaimsPrincipal principal)
+        public static string? GetClientId(this ClaimsPrincipal principal)
         {
-            return principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);
+            return principal.GetClaimValue(ClaimExtensionTypes.CLIENT_ID);
         }
 
         public static string GetLastUser(this ClaimsPrincipal principal)
         {
             string? userIdStr = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
-            string? deviceId = principal.GetClaimValue(ClaimExtensionTypes.DEVICE_ID);
+            string? clientId = principal.GetClaimValue(ClaimExtensionTypes.CLIENT_ID);
 
-            return $"{userIdStr}-{deviceId}";
+            return $"{userIdStr}-{clientId}";
         }
 
         //public static string GetAuthtoken(this ClaimsPrincipal principal)

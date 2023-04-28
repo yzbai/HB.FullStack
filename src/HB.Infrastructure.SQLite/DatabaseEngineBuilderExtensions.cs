@@ -4,20 +4,17 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
-using HB.FullStack.Database.Engine;
 using HB.Infrastructure.SQLite;
-
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class DatabaseEngineBuilderExtensions
     {
-        public static IDatabaseEngineBuilder AddSQLite(this IDatabaseEngineBuilder builder)
+        public static IDbEngineBuilder AddSQLite(this IDbEngineBuilder builder)
         {
             SQLitePCL.Batteries_V2.Init();
 
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IDatabaseEngine, SQLiteEngine>());
+            builder.AddDatabaseEngine<SQLiteEngine>();  
 
             return builder;
         }

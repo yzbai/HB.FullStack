@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 
 using Microsoft.Extensions.Logging;
@@ -16,16 +17,16 @@ using MySqlConnector.Logging;
 
 namespace HB.Infrastructure.MySQL
 {
-    public class MySQLEngine : IDatabaseEngine
+    public class MySQLEngine : IDbEngine
     {
-        public EngineType EngineType => EngineType.MySQL;
+        public DbEngineType EngineType => DbEngineType.MySQL;
 
         public MySQLEngine(ILoggerFactory loggerFactory)
         {
             MySqlConnectorLogManager.Provider = new MicrosoftExtensionsLoggingLoggerProvider(loggerFactory);
         }
 
-        private static MySqlCommand CreateTextCommand(EngineCommand engineCommand)
+        private static MySqlCommand CreateTextCommand(DbEngineCommand engineCommand)
         {
             MySqlCommand command = new MySqlCommand(engineCommand.CommandText)
             {
@@ -47,41 +48,41 @@ namespace HB.Infrastructure.MySQL
 
         #region Command 能力
 
-        public async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, EngineCommand engineCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, DbEngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
             return await MySQLExecuter.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
         }
 
-        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction trans, EngineCommand engineCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction trans, DbEngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
             return await MySQLExecuter.ExecuteCommandNonQueryAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
         }
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectionString, EngineCommand engineCommand)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectionString, DbEngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
             return await MySQLExecuter.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
         }
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, EngineCommand engineCommand)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction trans, DbEngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
             return await MySQLExecuter.ExecuteCommandReaderAsync((MySqlTransaction)trans, command).ConfigureAwait(false);
         }
 
-        public async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectionString, EngineCommand engineCommand)
+        public async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectionString, DbEngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 
             return await MySQLExecuter.ExecuteCommandScalarAsync(connectionString, command).ConfigureAwait(false);
         }
 
-        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction trans, EngineCommand engineCommand)
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction trans, DbEngineCommand engineCommand)
         {
             using MySqlCommand command = CreateTextCommand(engineCommand);
 

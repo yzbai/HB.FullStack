@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 using HB.FullStack.Cache;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
-using HB.FullStack.Identity.Models;
+using HB.FullStack.Server.Identity.Models;
 using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
 
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class RoleRepo : ModelRepository<Role>
     {
-        public RoleRepo(ILogger<RoleRepo> logger, IDatabaseReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public RoleRepo(ILogger<RoleRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override async Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
@@ -38,9 +38,9 @@ namespace HB.FullStack.Identity
 
                     await InvalidCachedRolesByUserId(roleIdList).ConfigureAwait(false);
                 }
-                else if (sender is IEnumerable<ChangedPack> cpps)
+                else if (sender is IEnumerable<PropertyChangePack> cpps)
                 {
-                    IEnumerable<Guid> roleIdList = cpps.Select(cpp => (Guid)cpp.Id!);
+                    IEnumerable<Guid> roleIdList = cpps.Select(cpp => SerializeUtil.To<Guid>(cpp.AddtionalProperties[nameof(Role.Id)])!);
 
                     await InvalidCachedRolesByUserId(roleIdList).ConfigureAwait(false);
                 }

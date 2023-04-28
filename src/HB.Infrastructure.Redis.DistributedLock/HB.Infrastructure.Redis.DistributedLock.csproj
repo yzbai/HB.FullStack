@@ -1,21 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems" Label="Shared" />
+	<Import Project="..\HB.Infrastructure.Redis.Shared\HB.Infrastructure.Redis.Shared.projitems" Label="Shared" />
 
-  <Import Project="..\..\common.props" />
+	<Import Project="..\..\common.props" />
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-   
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Polly" Version="7.2.3" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Polly" Version="7.2.3" />
+		<PackageReference Include="StackExchange.Redis" Version="2.6.104" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\HB.FullStack.DistributedLock\HB.FullStack.Lock.csproj" />
+	</ItemGroup>
 
 </Project>

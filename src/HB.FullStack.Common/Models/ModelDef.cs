@@ -17,6 +17,8 @@ namespace HB.FullStack.Common.Models
         /// </summary>
         public Type ModelType { get; set; } = null!;
 
+        public bool IsPropertyTrackable { get; set; }
+
 
         public abstract ModelPropertyDef? GetPropertyDef(string propertyName);
     }

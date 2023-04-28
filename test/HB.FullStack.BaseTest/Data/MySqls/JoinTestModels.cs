@@ -5,56 +5,56 @@ using HB.FullStack.Database.DbModels;
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
 
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class A : TimestampFlackIdDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class B : TimestampFlackIdDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class AB : TimestampFlackIdDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         public long AId { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public long BId { get; set; } = default!;
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class C : TimestampFlackIdDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public long AId { get; set; } = default!;
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_A : TimestampGuidDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_B : TimestampGuidDbModel
     {
 
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_AB : TimestampGuidDbModel
     {
 
@@ -62,13 +62,13 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         public Guid Guid_BId { get; set; }
     }
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     public class Guid_C : TimestampGuidDbModel
     {
-        [DbModelProperty]
+        [DbField]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty]
+        [DbField]
         public Guid Guid_AId { get; set; }
     }
 

@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Database.DbModels
 {
     /// <summary>
-    /// 适合不怎么冲突的Model，没有行乐观锁
+    /// 适合不怎么冲突的Model,各字段独立
     /// </summary>
     public abstract class TimelessDbModel : DbModel
     {
@@ -20,22 +21,22 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimelessLongIdDbModel : TimelessDbModel, ILongId
     {
-        [DbModelProperty(0)]
+        [DbField(0)]
         public abstract long Id { get; set; }
     }
 
     public abstract class TimelessAutoIncrementIdDbModel : TimelessLongIdDbModel, IAutoIncrementId
     {
-        [AutoIncrementPrimaryKey]
-        [DbModelProperty(0)]
+        [DbAutoIncrementPrimaryKey]
+        [DbField(0)]
         [CacheModelKey]
         public override long Id { get; set; } = -1;
     }
 
     public abstract class TimelessFlackIdDbModel : TimelessLongIdDbModel
     {
-        [PrimaryKey]
-        [DbModelProperty(0)]
+        [DbPrimaryKey]
+        [DbField(0)]
         [CacheModelKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
@@ -43,9 +44,9 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimelessGuidDbModel : TimelessDbModel, IGuidId
     {
-        [DbModelProperty(0)]
+        [DbField(0)]
         [NoEmptyGuid]
-        [PrimaryKey]
+        [DbPrimaryKey]
         [CacheModelKey]
         public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
 

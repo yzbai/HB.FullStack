@@ -54,7 +54,7 @@ namespace HB.FullStack.CommonTests
 
             object obj = new { Name = "sfasdf", Age = 12 };
 
-            object nullObj = null;
+            object? nullObj = null;
 
             logger.LogWarning("This is a class : {@Item}", item);
             logger.LogWarning("This is a class : {@DynamicItem}", obj);

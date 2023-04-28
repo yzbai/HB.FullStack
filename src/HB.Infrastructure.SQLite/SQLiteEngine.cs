@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 
 using Microsoft.Data.Sqlite;
@@ -15,15 +16,15 @@ using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.SQLite
 {
-    internal class SQLiteEngine : IDatabaseEngine
+    internal class SQLiteEngine : IDbEngine
     {
-        public EngineType EngineType => EngineType.SQLite;
+        public DbEngineType EngineType => DbEngineType.SQLite;
 
         public SQLiteEngine()
         {
         }
 
-        public static SqliteCommand CreateTextCommand(EngineCommand engineCommand)
+        public static SqliteCommand CreateTextCommand(DbEngineCommand engineCommand)
         {
             SqliteCommand command = new SqliteCommand(engineCommand.CommandText)
             {
@@ -45,21 +46,21 @@ namespace HB.Infrastructure.SQLite
 
         #region Command 能力
 
-        public async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, EngineCommand engineCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(ConnectionString connectionString, DbEngineCommand engineCommand)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
 
             return await SQLiteExecuter.ExecuteCommandNonQueryAsync(connectionString, dbCommand).ConfigureAwait(false);
         }
 
-        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction Transaction, EngineCommand engineCommand)
+        public async Task<int> ExecuteCommandNonQueryAsync(IDbTransaction Transaction, DbEngineCommand engineCommand)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
 
             return await SQLiteExecuter.ExecuteCommandNonQueryAsync((SqliteTransaction)Transaction, dbCommand).ConfigureAwait(false);
         }
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectionString, EngineCommand engineCommand)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(ConnectionString connectionString, DbEngineCommand engineCommand)
         {
             //使用using的话，会同时关闭reader.
             //在Microsoft.Data.Sqlite实现中， dipose connection后，会自动dispose command
@@ -67,7 +68,7 @@ namespace HB.Infrastructure.SQLite
             return await SQLiteExecuter.ExecuteCommandReaderAsync(connectionString, dbCommand).ConfigureAwait(false);
         }
 
-        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction Transaction, EngineCommand engineCommand)
+        public async Task<IDataReader> ExecuteCommandReaderAsync(IDbTransaction Transaction, DbEngineCommand engineCommand)
         {
             //使用using的话，会同时关闭reader.
             //在Microsoft.Data.Sqlite实现中， dipose connection后，会自动dispose command
@@ -76,14 +77,14 @@ namespace HB.Infrastructure.SQLite
             return await SQLiteExecuter.ExecuteCommandReaderAsync((SqliteTransaction)Transaction, dbCommand).ConfigureAwait(false);
         }
 
-        public async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectionString, EngineCommand engineCommand)
+        public async Task<object?> ExecuteCommandScalarAsync(ConnectionString connectionString, DbEngineCommand engineCommand)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
 
             return await SQLiteExecuter.ExecuteCommandScalarAsync(connectionString, dbCommand).ConfigureAwait(false);
         }
 
-        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction Transaction, EngineCommand engineCommand)
+        public async Task<object?> ExecuteCommandScalarAsync(IDbTransaction Transaction, DbEngineCommand engineCommand)
         {
             using SqliteCommand dbCommand = CreateTextCommand(engineCommand);
 
@@ -103,7 +104,7 @@ namespace HB.Infrastructure.SQLite
         {
             //if (!await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false))
             //{
-            //    throw DatabaseExceptions.TransactionError("等待sqlite事务超过5秒钟", null, 0);
+            //    throw DbExceptions.TransactionError("等待sqlite事务超过5秒钟", null, 0);
             //}
 
             SqliteConnection conn = new SqliteConnection(connectionString.ToString());

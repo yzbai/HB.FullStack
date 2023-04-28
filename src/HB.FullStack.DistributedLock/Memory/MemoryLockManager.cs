@@ -128,7 +128,7 @@ namespace HB.FullStack.Lock.Memory
 
             for (int i = 0; i < memoryLock.ResourceKeys.Count; ++i)
             {
-                if (_memoryCache.TryGetValue(memoryLock.ResourceKeys[i], out MemoryLockResourceExpiryInfo storedInfo) && storedInfo.ResourceValue == memoryLock.ResourceValues[i])
+                if (_memoryCache.TryGetValue(memoryLock.ResourceKeys[i], out MemoryLockResourceExpiryInfo? storedInfo) && storedInfo!.ResourceValue == memoryLock.ResourceValues[i])
                 {
                     _memoryCache.Set(
                         memoryLock.ResourceKeys[i],
@@ -149,7 +149,7 @@ namespace HB.FullStack.Lock.Memory
                 string resourceKey = memoryLock.ResourceKeys[i];
 
                 //不存在 or 存在但已经过期，因为MemoryCache并不能即使的清除过期，所以也得检查
-                if (!_memoryCache.TryGetValue(resourceKey, out MemoryLockResourceExpiryInfo storedInfo) || now - storedInfo.Timestamp >= storedInfo.ExpiryMilliseconds)
+                if (!_memoryCache.TryGetValue(resourceKey, out MemoryLockResourceExpiryInfo? storedInfo) || now - storedInfo!.Timestamp >= storedInfo.ExpiryMilliseconds)
                 {
                     _memoryCache.Set(
                         resourceKey,
@@ -177,7 +177,7 @@ namespace HB.FullStack.Lock.Memory
 
             for (int i = 0; i < memoryLock.ResourceKeys.Count; ++i)
             {
-                if (_memoryCache.TryGetValue(memoryLock.ResourceKeys[i], out MemoryLockResourceExpiryInfo storedInfo) && storedInfo.ResourceValue == memoryLock.ResourceValues[i])
+                if (_memoryCache.TryGetValue(memoryLock.ResourceKeys[i], out MemoryLockResourceExpiryInfo? storedInfo) && storedInfo!.ResourceValue == memoryLock.ResourceValues[i])
                 {
                     _memoryCache.Remove(memoryLock.ResourceKeys[i]);
                 }

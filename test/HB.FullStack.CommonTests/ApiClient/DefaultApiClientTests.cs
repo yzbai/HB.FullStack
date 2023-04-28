@@ -1,4 +1,5 @@
 ﻿global using static HB.FullStack.BaseTest.ApiConstants;
+
 using System;
 using System.IO;
 using System.Net.Http;
@@ -6,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
-using HB.FullStack.Common.Api;
+using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.Test;
 using HB.FullStack.CommonTests.Data;
 
@@ -26,14 +27,15 @@ namespace HB.FullStack.CommonTests.ApiClient
         [TestMethod()]
         public async Task GetAsyncTest()
         {
-            PreferenceProvider.Login(
-                userId: Guid.NewGuid(),
-                userCreateTime: DateTimeOffset.Now,
-                mobile: null,
-                email: null,
-                loginName: null,
-                accessToken: Guid.NewGuid().ToString(),
-                refreshToken: Guid.NewGuid().ToString());
+            PreferenceProvider.OnTokenFetched(
+                new Common.Shared.Resources.TokenRes {
+                UserId = Guid.NewGuid(),
+                TokenCreatedTime =  DateTimeOffset.Now,
+                Mobile = null,
+                Email = null,
+                LoginName = null,
+                AccessToken = Guid.NewGuid().ToString(),
+                RefreshToken = Guid.NewGuid().ToString()});
 
             TestHttpServer httpServer = StartHttpServer(
                 new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", HttpMethod.Get, (request, response, parameters) =>
@@ -41,11 +43,11 @@ namespace HB.FullStack.CommonTests.ApiClient
                     using StreamReader streamReader = new StreamReader(request.InputStream);
                     string requestJson = streamReader.ReadToEnd();
 
-                    GetBookByNameRequest getBookByNameRequest = SerializeUtil.FromJson<GetBookByNameRequest>(requestJson);
+                    GetBookByNameRequest? getBookByNameRequest = SerializeUtil.FromJson<GetBookByNameRequest>(requestJson);
 
                     //Assert.IsNull(getBookByNameRequest.RequestBuilder);
 
-                    BookRes res = new BookRes { Title = "T", Name = getBookByNameRequest.Name, Price = 12.123 };
+                    BookRes res = new BookRes { Title = "T", Name = getBookByNameRequest!.Name!, Price = 12.123 };
 
                     response.ContentType = "application/json";
 
@@ -55,7 +57,7 @@ namespace HB.FullStack.CommonTests.ApiClient
                     streamWriter.Write(json);
                 }));
 
-            BookRes bookRes = await ApiClient.GetAsync<BookRes>(new GetBookByNameRequest("TestBook"));
+            BookRes? bookRes = await ApiClient.GetAsync<BookRes>(new GetBookByNameRequest("TestBook"));
 
             Assert.IsNotNull(bookRes);
         }
@@ -69,7 +71,7 @@ namespace HB.FullStack.CommonTests.ApiClient
 
     public class GetBookByNameRequest : GetRequest<BookRes>
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonConstructor]
         public GetBookByNameRequest() { }

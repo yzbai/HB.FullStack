@@ -15,32 +15,11 @@ namespace HB.FullStack.DatabaseTests.MySQL
             //Timeless
             var timelessLst = Mocker.GetAutoIdBTTimelesses(10);
 
-            await Db.BatchAddAsync(timelessLst, "Tester", null);
+            await Db.AddAsync(timelessLst, "Tester", null);
 
             long count = await Db.CountAsync<AutoIdBTTimeless>(null);
 
             Assert.AreEqual(count, timelessLst.Count);
-        }
-
-        [TestMethod]
-        public async Task Batch_Update_AutoIdTimeless_Test()
-        {
-            //Timeless
-            var timelessLst = Mocker.GetAutoIdBTTimelesses(10);
-
-            await Db.BatchAddAsync(timelessLst, "Tester", null);
-
-            foreach (AutoIdBTTimeless t in timelessLst)
-            {
-                t.Name = "Modified";
-                t.Age = 100;
-            }
-
-            await Db.BatchUpdateAsync(timelessLst, "dd", null);
-
-            var rt = await Db.ScalarAsync<AutoIdBTTimeless>(timelessLst[0].Id, null);
-
-            Assert.IsTrue(SerializeUtil.ToJson(rt) == SerializeUtil.ToJson(timelessLst[0]));
         }
 
         [TestMethod]
@@ -49,7 +28,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             //Timeless
             var lst = Mocker.GetAutoIdBTTimestamps(10);
 
-            await Db.BatchAddAsync(lst, "Tester", null);
+            await Db.AddAsync(lst, "Tester", null);
 
             long count = await Db.CountAsync<AutoIdBTTimestamp>(null);
 
@@ -62,7 +41,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             //Timeless
             var lst = Mocker.GetAutoIdBTTimestamps(10);
 
-            await Db.BatchAddAsync(lst, "Tester", null);
+            await Db.AddAsync(lst, "Tester", null);
 
             foreach (var t in lst)
             {
@@ -70,7 +49,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 t.Age = 100;
             }
 
-            await Db.BatchUpdateAsync(lst, "dd", null);
+            await Db.UpdateAsync(lst, "dd", null);
 
             var rt = await Db.ScalarAsync<AutoIdBTTimestamp>(lst[0].Id, null);
 

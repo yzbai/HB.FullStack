@@ -1,18 +1,19 @@
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     public class Role : TimestampGuidDbModel
     {
-        [DbModelProperty(Unique = true, NotNull = true)]
+        [DbField(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;
 
-        [DbModelProperty(NotNull = true)]
+        [DbField(NotNull = true)]
         public string DisplayName { get; set; } = default!;
 
         public bool IsActivated { get; set; }
 
-        [DbModelProperty(MaxLength = LengthConventions.MAX_ROLE_COMMENT_LENGTH)]
+        [DbField(MaxLength = SharedNames.Length.MAX_ROLE_COMMENT_LENGTH)]
         public string? Comment { get; set; }
 
         public void Update(string name, string displayName, bool isActivated, string? comment)

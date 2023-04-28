@@ -1,21 +1,38 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HB.FullStack.Common.Shared;
+using HB.FullStack.Server.Identity.Context;
+using HB.FullStack.Server.Identity.Models;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public interface IIdentityService
     {
-        string JsonWebKeySetJson { get; }
+        #region Token
 
-        Task<UserToken> RefreshAccessTokenAsync(RefreshContext context, string lastUser);
+        string JsonWebKeySet { get; }
 
-        Task<UserToken> SignInAsync(SignInContext context, string lastUser);
+        Task<Token> RefreshTokenAsync(RefreshContext context, string lastUser);
 
-        Task SignOutAsync(Guid userId, DeviceIdiom idiom, LogOffType logOffType, string lastUser);
+        Task<Token> GetTokenAsync(SignInContext context, string lastUser);
 
-        Task SignOutAsync(Guid signInTokenId, string lastUser);
+        Task DeleteTokenAsync(Guid userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser);
 
-        Task OnSignInFailedBySmsAsync(string mobile, string lastUser);
+        Task DeleteTokenAsync(Guid signInCredentialId, string lastUser);
+
+        #endregion
+
+        #region User
+
+        Task RegisterUserAsync(RegisterContext context, string lastUser);
+
+        #endregion
+
+        #region UserProfile
+
+        Task<UserProfile> GetUserProfileByUserIdAsync(Guid userId, string lastUser);
+
+        #endregion
 
         #region Role
 
@@ -27,8 +44,8 @@ namespace HB.FullStack.Identity
 
         #region UserActivity
 
-        Task RecordUserActivityAsync(Guid? signInTokenId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
-
+        Task RecordUserActivityAsync(Guid? signInCredentialId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
+        
         #endregion
     }
 }

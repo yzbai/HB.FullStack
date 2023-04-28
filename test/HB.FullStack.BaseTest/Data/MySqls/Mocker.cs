@@ -100,6 +100,25 @@ namespace HB.FullStack.BaseTest.Data.MySqls
             return books;
         }
 
+        public static IList<Guid_BookModel_Timeless> Guid_GetBooks_Timeless(int? count = null)
+        {
+            List<Guid_BookModel_Timeless> books = new List<Guid_BookModel_Timeless>();
+
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                books.Add(new Guid_BookModel_Timeless
+                {
+                    //Guid = SecurityUtil.CreateUniqueToken(),
+                    Name = "Book" + i.ToString(),
+                    Price = _random.NextDouble()
+                });
+            }
+
+            return books;
+        }
+
         public static IList<BookModel_Client> GetBooks_Client(int? count = null)
         {
             List<BookModel_Client> books = new List<BookModel_Client>();

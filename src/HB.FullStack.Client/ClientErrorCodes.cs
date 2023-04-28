@@ -1,4 +1,5 @@
-﻿using HB.FullStack.Client;
+﻿using HB.FullStack.Client.Components;
+using HB.FullStack.Client.Components.Sync;
 
 using Microsoft.Extensions.Logging;
 
@@ -6,27 +7,27 @@ namespace System
 {
     public static class ClientErrorCodes
     {
-        public static ErrorCode NoSuchDirectory   = new ErrorCode(nameof(NoSuchDirectory), "");
+        public static ErrorCode NoSuchDirectory = new ErrorCode(nameof(NoSuchDirectory), "");
 
-        public static ErrorCode ImageOptionsOutOfRange  = new ErrorCode(nameof(ImageOptionsOutOfRange), "");
-        public static ErrorCode IdBarrierError  = new ErrorCode(nameof(IdBarrierError), "");
-        public static ErrorCode ResourceNotFound  = new ErrorCode(nameof(ResourceNotFound), "");
-        public static ErrorCode BizError  = new ErrorCode(nameof(BizError), "");
-        public static ErrorCode NotLogined  = new ErrorCode(nameof(NotLogined), "");
-        public static ErrorCode AliyunStsTokenError  = new ErrorCode(nameof(AliyunStsTokenError), "");
-        public static ErrorCode FileServiceError  = new ErrorCode(nameof(FileServiceError), "");
-        public static ErrorCode AliyunOssPutObjectError  = new ErrorCode(nameof(AliyunOssPutObjectError), "");
-        public static ErrorCode LocalFileCopyError  = new ErrorCode(nameof(LocalFileCopyError), "");
-        public static ErrorCode LocalFileSaveError  = new ErrorCode(nameof(LocalFileSaveError), "");
-        public static ErrorCode AliyunStsTokenOverTime  = new ErrorCode(nameof(AliyunStsTokenOverTime), "");
-        public static ErrorCode SmsCodeValidateError  = new ErrorCode(nameof(SmsCodeValidateError), "");
-        public static ErrorCode NoInternet  = new ErrorCode(nameof(NoInternet), "");
-        public static ErrorCode UploadError  = new ErrorCode(nameof(UploadError), "");
+        public static ErrorCode ImageOptionsOutOfRange = new ErrorCode(nameof(ImageOptionsOutOfRange), "");
+        public static ErrorCode IdBarrierError = new ErrorCode(nameof(IdBarrierError), "");
+        public static ErrorCode ResourceNotFound = new ErrorCode(nameof(ResourceNotFound), "");
+        public static ErrorCode BizError = new ErrorCode(nameof(BizError), "");
+        public static ErrorCode NotLogined = new ErrorCode(nameof(NotLogined), "");
+        public static ErrorCode AliyunStsTokenError = new ErrorCode(nameof(AliyunStsTokenError), "");
+        public static ErrorCode FileServiceError = new ErrorCode(nameof(FileServiceError), "");
+        public static ErrorCode AliyunOssPutObjectError = new ErrorCode(nameof(AliyunOssPutObjectError), "");
+        public static ErrorCode LocalFileCopyError = new ErrorCode(nameof(LocalFileCopyError), "");
+        public static ErrorCode LocalFileSaveError = new ErrorCode(nameof(LocalFileSaveError), "");
+        public static ErrorCode AliyunStsTokenOverTime = new ErrorCode(nameof(AliyunStsTokenOverTime), "");
+        public static ErrorCode SmsCodeValidateError = new ErrorCode(nameof(SmsCodeValidateError), "");
+        public static ErrorCode NoInternet = new ErrorCode(nameof(NoInternet), "");
+        public static ErrorCode UploadError = new ErrorCode(nameof(UploadError), "");
 
-        public static ErrorCode DbSimpleLockerNoWaitLockFailed  = new ErrorCode(nameof(DbSimpleLockerNoWaitLockFailed), "");
-        public static ErrorCode UnSupportedModelType  = new ErrorCode(nameof(UnSupportedModelType), "");
-        public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected  = new ErrorCode(nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
-        public static ErrorCode SyncError  = new ErrorCode(nameof(SyncError), "");
+        public static ErrorCode DbSimpleLockerNoWaitLockFailed = new ErrorCode(nameof(DbSimpleLockerNoWaitLockFailed), "");
+        public static ErrorCode UnSupportedModelType = new ErrorCode(nameof(UnSupportedModelType), "");
+        public static ErrorCode OperationInvalidCauseofSyncingAfterReconnected = new ErrorCode(nameof(OperationInvalidCauseofSyncingAfterReconnected), "");
+        public static ErrorCode SyncError = new ErrorCode(nameof(SyncError), "");
     }
 
     public static class LoggerExtensions
@@ -56,6 +57,41 @@ namespace System
 
     public static class ClientExceptions
     {
+        public static Exception AliyunStsTokenReturnNull()
+        {
+            ClientException exception = new ClientException(ErrorCodes.AliyunStsTokenReturnNull, "AliyunStsTokenReturnNull");
+
+            return exception;
+        }
+
+        public static Exception AliyunOssPutObjectError(string cause, Exception? innerException)
+        {
+            ClientException ex = new ClientException(ClientErrorCodes.AliyunOssPutObjectError, nameof(AliyunOssPutObjectError), innerException);
+
+            ex.Data["Cause"] = cause;
+
+            return ex;
+        }
+
+        public static Exception AliyunOssPutObjectError(string bucketName, string key)
+        {
+            ClientException exception = new ClientException(ErrorCodes.AliyunOssPutObjectError, "AliyunOssPutObjectError");
+
+            exception.Data["BucketName"] = bucketName;
+            exception.Data["Key"] = key;
+
+            return exception;
+        }
+
+        internal static Exception UnSupportedResToModel(string resName, string modelName)
+        {
+            ClientException ex = new ClientException(ErrorCodes.UnSupportedResToModel, "UnSupportedResToModel");
+            ex.Data["ResName"] = resName;
+            ex.Data["ModelName"] = modelName;
+
+            return ex;
+        }
+
         public static Exception LocalFileSaveError(string fullPath)
         {
             ClientException ex = new ClientException(ClientErrorCodes.LocalFileSaveError, nameof(LocalFileSaveError));
@@ -73,14 +109,7 @@ namespace System
             return ex;
         }
 
-        public static Exception AliyunOssPutObjectError(string cause, Exception? innerException)
-        {
-            ClientException ex = new ClientException(ClientErrorCodes.AliyunOssPutObjectError, nameof(AliyunOssPutObjectError), innerException);
-
-            ex.Data["Cause"] = cause;
-
-            return ex;
-        }
+        
 
         public static Exception FileServiceError(string fileName, string directoryName, string cause, Exception innerException)
         {

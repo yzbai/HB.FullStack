@@ -1,22 +1,32 @@
-﻿using HB.FullStack.Common;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yuzhaobai@outlook.com
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
-using System;
+using HB.FullStack.Common;
+using HB.FullStack.Common.Shared;
+
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class RefreshContext : ValidatableObject
     {
         [Required]
-        public string AccessToken { get; set; } = default!;
+        public string AccessToken { get; set; }
 
         [Required]
-        public string RefreshToken { get; set; } = default!;
+        public string RefreshToken { get; set; }
 
-        [Required]
-        public string DeviceId { get; set; } = default!;
-        public DeviceInfos DeviceInfos { get; set; } = default!;
-        public string DeviceVersion { get; set; } = default!;
-        //public string DeviceAddress { get; set; } = default!;
+        [ValidatedObject(CanBeNull = false)]
+        public ClientInfos ClientInfos { get; set; }
+
+        public RefreshContext(string accessToken, string refreshToken, ClientInfos clientInfos)
+        {
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
+            ClientInfos = clientInfos;
+        }
     }
 }

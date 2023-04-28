@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using HB.FullStack.Identity.Models;
+using HB.FullStack.Server.Identity.Models;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     internal static class IdentityExceptions
     {
-        internal static Exception AuthorizationNotFound(SignInContext signInContext)
+        internal static Exception IdentityUserNotExists(SignInContext signInContext)
         {
-            IdentityException exception = new IdentityException(ErrorCodes.AuthorizationNotFound, nameof(AuthorizationNotFound));
+            IdentityException exception = new IdentityException(ErrorCodes.IdentityUserNotExists, nameof(IdentityUserNotExists));
             exception.Data["Context"] = signInContext;
+
+            return exception;
+        }
+
+        public static Exception IdentityInvalidSmsCode(IBySmsCode context)
+        {
+            IdentityException exception = new IdentityException(ErrorCodes.InvalidSmsCode, nameof(IdentityInvalidSmsCode));
+            exception.Data["Context"] = context;
 
             return exception;
         }
@@ -23,15 +31,15 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AccessTokenRefreshing(RefreshContext context)
+        internal static Exception SignInReceiptRefreshConcurrentError(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(ErrorCodes.AccessTokenRefreshing, nameof(AccessTokenRefreshing));
+            IdentityException exception = new IdentityException(ErrorCodes.TokenRefreshConcurrentError, nameof(SignInReceiptRefreshConcurrentError));
             exception.Data["Context"] = context;
 
             return exception;
         }
 
-        internal static Exception RefreshAccessTokenError(string cause, Exception? innerException, object? context)
+        internal static Exception RefreshSignInReceiptError(string cause, Exception? innerException, object? context)
         {
             IdentityException exception = new IdentityException(ErrorCodes.RefreshAccessTokenError, cause, innerException);
             exception.Data["Context"] = context;
@@ -39,9 +47,9 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationInvalideDeviceId(RefreshContext context)
+        internal static Exception AuthorizationInvalideClientId(RefreshContext context)
         {
-            IdentityException exception = new IdentityException(ErrorCodes.AuthorizationInvalideDeviceId, nameof(AuthorizationInvalideDeviceId));
+            IdentityException exception = new IdentityException(ErrorCodes.AuthorizationInvalideClientId, nameof(AuthorizationInvalideClientId));
             exception.Data["Context"] = context;
 
             return exception;
@@ -121,10 +129,10 @@ namespace HB.FullStack.Identity
             return exception;
         }
 
-        internal static Exception AudienceNotFound(SignInContext context)
+        internal static Exception AudienceNotFound(object context)
         {
             IdentityException exception = new IdentityException(ErrorCodes.AudienceNotFound, nameof(AudienceNotFound));
-            exception.Data["SignInContext"] = SerializeUtil.ToJson(context);
+            exception.Data["Context"] = SerializeUtil.ToJson(context);
 
             return exception;
         }
@@ -178,6 +186,13 @@ namespace HB.FullStack.Identity
             ex.Data["UserId"] = userId.ToString();
             ex.Data["Roles"] = SerializeUtil.ToJson(roles);
             ex.Data["LastUser"] = lastUser;
+
+            return ex;
+        }
+
+        internal static Exception DisallowRegisterByLoginName()
+        {
+            IdentityException ex = new IdentityException(ErrorCodes.IdentityDisallowRegisterByLoginName, nameof(DisallowRegisterByLoginName));
 
             return ex;
         }

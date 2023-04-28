@@ -22,7 +22,7 @@ namespace HB.FullStack.Common.Test.Tests
                 writer.WriteLine("<html><body>");
                 writer.WriteLine("<h1>Test Ok.</h1>");
                 writer.WriteLine("<ul>");
-                foreach (KeyValuePair<string, string> kv in queryDict)
+                foreach (KeyValuePair<string, string> kv in queryDict!)
                 {
                     writer.WriteLine($"<li>{kv.Key} - {kv.Value}</li>");
                 }

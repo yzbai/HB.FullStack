@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
-
+using HB.FullStack.Database.Config;
 using MySqlConnector;
 
 namespace HB.Infrastructure.MySQL
@@ -23,7 +23,7 @@ namespace HB.Infrastructure.MySQL
             dbCommand.Transaction = mySqlTransaction;
 
             return await ExecuteCommandReaderAsync(
-                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(commandText: dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DbExceptions.TransactionConnectionIsNull(commandText: dbCommand.CommandText),
                 false,
                 dbCommand).ConfigureAwait(false);
         }
@@ -88,7 +88,7 @@ namespace HB.Infrastructure.MySQL
         {
             dbCommand.Transaction = mySqlTransaction;
             return await ExecuteCommandScalarAsync(
-                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DbExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
                 dbCommand).ConfigureAwait(false);
         }
 
@@ -126,7 +126,7 @@ namespace HB.Infrastructure.MySQL
         {
             dbCommand.Transaction = mySqlTransaction;
             return await ExecuteCommandNonQueryAsync(
-                mySqlTransaction.Connection ?? throw DatabaseExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
+                mySqlTransaction.Connection ?? throw DbExceptions.TransactionConnectionIsNull(dbCommand.CommandText),
                 dbCommand).ConfigureAwait(false);
         }
 
@@ -158,12 +158,13 @@ namespace HB.Infrastructure.MySQL
 
                 return mEx.ErrorCode switch
                 {
-                    MySqlErrorCode.DuplicateKeyEntry => DatabaseExceptions.DuplicateKeyError(command.CommandText, ex),
-                    _ => DatabaseExceptions.MySQLExecuterError(command.CommandText, mEx.ErrorCode.ToString(), mEx.SqlState, ex)
+                    MySqlErrorCode.DuplicateKeyEntry => DbExceptions.DuplicateKeyError(command.CommandText, ex),
+                    MySqlErrorCode.DataTooLong => DbExceptions.DataTooLong(ex),
+                    _ => DbExceptions.MySQLExecuterError(command.CommandText, mEx.ErrorCode.ToString(), mEx.SqlState, ex)
                 };
             }
 
-            return DatabaseExceptions.MySQLUnKownExecuterError(command.CommandText, ex);
+            return DbExceptions.MySQLUnKownExecuterError(command.CommandText, ex);
         }
     }
 }

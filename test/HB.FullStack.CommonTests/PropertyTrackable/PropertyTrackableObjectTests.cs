@@ -15,67 +15,45 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TestMethod()]
         public void GetChangedPropertiesTest1()
         {
-            string rightJson = "[{\"PropertyName\":\"Name\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"InnerRecord\",\"PropertyPropertyName\":null,\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"Immutables\",\"PropertyPropertyName\":null,\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]}]";
+            string rightJson = "[{\"PropertyName\":\"Name\",\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"Age\",\"OldValue\":0,\"NewValue\":1000},{\"PropertyName\":\"TestRecord\",\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"ImmutableList\",\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]},{\"PropertyName\":\"ImmutableArray\",\"OldValue\":[\"y\"],\"NewValue\":[\"y\",\"ydfd\"]},{\"PropertyName\":\"ObservableInner\",\"OldValue\":null,\"NewValue\":{\"InnerName\":\"sdfs\"}},{\"PropertyName\":\"ObservableInner\",\"OldValue\":{\"InnerName\":\"sdfs\"},\"NewValue\":{\"InnerName\":\"sfasfs\"}}]";
+            string rightJson2 = "[{\"PropertyName\":\"Name\",\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"Age\",\"OldValue\":0,\"NewValue\":1000},{\"PropertyName\":\"TestRecord\",\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"ImmutableList\",\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]},{\"PropertyName\":\"ImmutableArray\",\"OldValue\":[\"y\"],\"NewValue\":[\"y\",\"ydfd\"]},{\"PropertyName\":\"ObservableInner\",\"OldValue\":null,\"NewValue\":{\"InnerName\":\"sfasfs\"}}]";
 
             TestObject testObject = new TestObject();
             ActionOnTestObject1(testObject);
 
-            var changes = testObject.GetChangedProperties();
+            var changes = testObject.GetPropertyChangePack(mergeMultipleChanged: false);
+            var changes2 = testObject.GetPropertyChangePack(mergeMultipleChanged: true);
 
             string json = SerializeUtil.ToJson(changes);
+            string json2 = SerializeUtil.ToJson(changes2);
 
             Assert.AreEqual(json, rightJson);
-        }
-
-        [TestMethod()]
-        public void GetChangedPropertiesTest2()
-        {
-            string rightJson = "[{\"PropertyName\":\"Name\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"InnerRecord\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"Immutables\",\"PropertyPropertyName\":null,\"OldValue\":null,\"NewValue\":[\"x\",\"y\"]}]";
-
-            TestObject testObject = new TestObject();
-            ActionOnTestObject2(testObject);
-
-            var changes = testObject.GetChangedProperties();
-
-            string json = SerializeUtil.ToJson(changes);
-
-
-            Assert.AreEqual(json, rightJson);
+            Assert.AreEqual(json2, rightJson2);
         }
 
         private static void ActionOnTestObject1(TestObject testObject)
         {
-            testObject.InnerRecord = new InnerTestRecord(null);
-            testObject.Immutables = ImmutableList.Create("x");
-
+            testObject.TestRecord = new TestRecord(null);
+            testObject.ImmutableList = ImmutableList.Create("x");
+            testObject.ImmutableArray = ImmutableArray.Create("y");
             testObject.StartTrack();
 
-            testObject.Name = "TestName";
-
-            testObject.InnerRecord = testObject.InnerRecord with { InnerName = "InnerTestRecord" };
-            testObject.Immutables = testObject.Immutables.Add("y");
-            
-        }
-
-        private static void ActionOnTestObject2(TestObject testObject)
-        {
-
-            testObject.StartTrack();
+            //Modify
 
             testObject.Name = "TestName";
+            testObject.Age = 1000;
+            testObject.TestRecord = testObject.TestRecord with { InnerName = "InnerTestRecord" };
+            testObject.ImmutableList = testObject.ImmutableList.Add("y");
+            testObject.ImmutableArray = testObject.ImmutableArray.Value.Add("ydfd");
+            testObject.ObservableInner = new ObservableInner { InnerName = "sdfs" };
+            testObject.ObservableInner.InnerName = "sfasfs";
 
-            testObject.InnerRecord = new InnerTestRecord(null);
-
-            testObject.InnerRecord = testObject.InnerRecord with { InnerName = "InnerTestRecord" };
-
-            testObject.Immutables = ImmutableList.Create("x");
-            testObject.Immutables = testObject.Immutables.Add("y");
         }
 
         [TestMethod]
         public void TestAttributeForward()
         {
-            var attr = typeof(TestObject).GetProperty(nameof(TestObject.ForwordAttributeName))?.GetCustomAttribute<AddtionalPropertyAttribute>();
+            var attr = typeof(TestObject).GetProperty(nameof(TestObject.Id))?.GetCustomAttribute<AddtionalPropertyAttribute>();
 
             Assert.IsNotNull(attr);
         }

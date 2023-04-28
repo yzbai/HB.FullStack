@@ -12,7 +12,7 @@ namespace HB.FullStack.Database
     //TODO: 实现 多数据库事务： TransactionScope
     public interface ITransaction
     {
-        Task<TransactionContext> BeginTransactionAsync(string dbSchema, IsolationLevel? isolationLevel = null);
+        Task<TransactionContext> BeginTransactionAsync(string dbSchemaName, IsolationLevel? isolationLevel = null);
 
         Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DbModel;
 

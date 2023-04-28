@@ -8,7 +8,7 @@ using HB.FullStack.Common.PropertyTrackable;
 namespace HB.FullStack.Database.DbModels
 {
     /// <summary>
-    /// 使用timestamp做行乐观锁
+    /// 使用timestamp做行乐观锁，适合所有字段整体不独立改变
     /// </summary>
     public abstract class TimestampDbModel : DbModel, ITimestampModel
     {
@@ -20,7 +20,6 @@ namespace HB.FullStack.Database.DbModels
         /// 就把Timestamp看作Version就行
         /// </summary>
         /// 
-
         private long _timestamp = TimeUtil.Timestamp;
 
         [Range(638000651894004864, long.MaxValue)]
@@ -43,22 +42,23 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimestampLongIdDbModel : TimestampDbModel, ILongId
     {
-        [DbModelProperty(0)]
+        [DbField(0)]
         public abstract long Id { get; set; }
     }
 
     public abstract class TimestampAutoIncrementIdDbModel : TimestampLongIdDbModel, IAutoIncrementId
     {
-        [AutoIncrementPrimaryKey]
-        [DbModelProperty(0)]
-        [CacheModelKey]
+        [DbAutoIncrementPrimaryKey]
+        [DbField(0)]
+        [CacheModelKey] //在这里Cache与DB交汇，
+        //TODO: 思考，提取一个同一的EDM给Cache、DB、KVStore使用
         public override long Id { get; set; } = -1;
     }
 
     public abstract class TimestampFlackIdDbModel : TimestampLongIdDbModel
     {
-        [PrimaryKey]
-        [DbModelProperty(0)]
+        [DbPrimaryKey]
+        [DbField(0)]
         [CacheModelKey]
         [LongId2]
         public override long Id { get; set; } = StaticIdGen.GetId();
@@ -66,9 +66,9 @@ namespace HB.FullStack.Database.DbModels
 
     public abstract class TimestampGuidDbModel : TimestampDbModel, IGuidId
     {
-        [DbModelProperty(0)]
+        [DbField(0)]
         [NoEmptyGuid]
-        [PrimaryKey]
+        [DbPrimaryKey]
         [CacheModelKey]
         public Guid Id { get; set; } = SecurityUtil.CreateSequentialGuid(DateTimeOffset.UtcNow, GuidStoredFormat.AsBinary);
 

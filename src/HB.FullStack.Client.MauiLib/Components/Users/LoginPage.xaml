@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage
+    x:Class="HB.FullStack.Client.MauiLib.Components.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:HB.FullStack.Client.MauiLib.Base"
+    xmlns:behaviors="clr-namespace:HB.FullStack.Client.MauiLib.Behaviors"
+    xmlns:controls="clr-namespace:HB.FullStack.Client.MauiLib.Controls"
+    xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    Title="LoginPage"
+    x:Name="root"
+    x:DataType="components:LoginViewModel"
+    x:TypeArguments="components:LoginViewModel">
+    <base:BasePage.Resources>
+        <Style x:Key="InvalidEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="Red" />
+        </Style>
+        <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        <toolkit:IntToBoolConverter x:Key="IntToBoolConverter" />
+    </base:BasePage.Resources>
+    <StackLayout>
+        <Label
+            Margin="20,80,20,0"
+            FontSize="Title"
+            Text="登录/注册"
+            TextColor="Black" />
+        <Label
+            Margin="20,0,20,0"
+            FontSize="Small"
+            LineBreakMode="WordWrap">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="登录注册表示同意" />
+                    <Span Text="服务使用协议" TextColor="Blue">
+                        <Span.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShowServieAgreementCommand}" />
+                        </Span.GestureRecognizers>
+                    </Span>
+                    <Span Text="和" />
+                    <Span Text="隐私政策" TextColor="Blue">
+                        <Span.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShowPrivacyAgreementCommand}" />
+                        </Span.GestureRecognizers>
+                    </Span>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+        <Grid
+            Margin="20,50,20,0"
+            ColumnDefinitions="Auto, *"
+            RowDefinitions="Auto, Auto">
+            <Entry
+                Grid.Row="0"
+                Grid.Column="0"
+                IsReadOnly="True"
+                Text="+86" />
+            <Entry
+                x:Name="MobileEntry"
+                Grid.Row="0"
+                Grid.Column="1"
+                ClearButtonVisibility="WhileEditing"
+                Keyboard="Telephone"
+                Placeholder="手机号码"
+                Text="{Binding Mobile, Mode=TwoWay}">
+                <Entry.Behaviors>
+                    <behaviors:MobileValidationBehavior
+                        x:Name="MobileEntryValidator"
+                        Flags=" ValidateOnValueChanged, ValidateOnUnfocusing"
+                        InvalidStyle="{StaticResource InvalidEntryStyle}" />
+                </Entry.Behaviors>
+            </Entry>
+            <Label
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                IsVisible="{Binding IsValid, Converter={StaticResource InvertedBoolConverter}, Source={x:Reference MobileEntryValidator}}"
+                Text="请输入手机号码" />
+        </Grid>
+
+        <Button
+            x:Name="SendSmsCodeBtn"
+            Margin="20,20,20,0"
+            Command="{Binding RequestSmsCodeCommand}"
+            HorizontalOptions="FillAndExpand"
+            IsEnabled="{Binding IsValid, Source={x:Reference MobileEntryValidator}}"
+            Text="发送验证码" />
+    </StackLayout>
+</base:BasePage>

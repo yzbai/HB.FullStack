@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\..\common.props" />
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+		<PackageReference Include="Polly" Version="7.2.3" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.28.1" />
+
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="7.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.4" />
+		<PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+		<PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HB.FullStack.Cache\HB.FullStack.Cache.csproj" />
+		<ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\HB.FullStack.Identity\HB.FullStack.Server.Identity.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Aliyun\HB.Infrastructure.Aliyun.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.MySQL\HB.Infrastructure.MySQL.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.Cache\HB.Infrastructure.Redis.Cache.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.DistributedLock\HB.Infrastructure.Redis.DistributedLock.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.EventBus\HB.Infrastructure.Redis.EventBus.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Redis.KVStore\HB.Infrastructure.Redis.KVStore.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
+		<ProjectReference Include="..\HB.Infrastructure.Tencent\HB.Infrastructure.Tencent.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>

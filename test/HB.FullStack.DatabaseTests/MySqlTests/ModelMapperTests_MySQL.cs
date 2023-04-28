@@ -14,9 +14,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
     public class ModelMapperTests_MySQL : BaseTestClass
     {
         [TestMethod]
-        [DataRow(EngineType.MySQL)]
-        [DataRow(EngineType.SQLite)]
-        public void ModelMapper_ToParameter_Test(EngineType engineType)
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public void ModelMapper_ToParameter_Test(DbEngineType engineType)
         {
             PublisherModel publisherModel = Mocker.MockOnePublisherModel();
 
@@ -47,7 +47,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             AssertEqual(emit_results3, reflect_results3, engineType);
         }
 
-        private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, EngineType engineType)
+        private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, DbEngineType engineType)
         {
             var dict = results.ToDictionary(kv => kv.Key);
 
@@ -64,9 +64,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
         }
 
         [TestMethod]
-        [DataRow(EngineType.MySQL)]
-        [DataRow(EngineType.SQLite)]
-        public void ModelMapper_ToParameter_Performance_Test(EngineType engineType)
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public void ModelMapper_ToParameter_Performance_Test(DbEngineType engineType)
         {
             var models = Mocker.GetPublishers(10000);
 

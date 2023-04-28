@@ -139,7 +139,7 @@ namespace HB.FullStack.Database.SQL
         /// <returns></returns>
         //TODO:  �����������������һ��sql����ע�����
 
-        private string SqlFormat(EngineType engineType, string sqlText, params object[] sqlParams)
+        private string SqlFormat(DbEngineType engineType, string sqlText, params object[] sqlParams)
         {
             List<string> escapedParams = new List<string>();
 
@@ -343,7 +343,7 @@ namespace HB.FullStack.Database.SQL
         public WhereExpression<T> OrderBy(string orderBy)
         {
             _orderByProperties.Clear();
-            _orderByString = orderBy;
+            _orderByString = " ORDER BY " + orderBy;
             return this;
         }
 
@@ -432,7 +432,7 @@ namespace HB.FullStack.Database.SQL
         {
             if (_orderByProperties.Count > 0)
             {
-                _orderByString = "ORDER BY ";
+                _orderByString = " ORDER BY ";
 
                 foreach (string prop in _orderByProperties)
                 {
@@ -554,7 +554,7 @@ namespace HB.FullStack.Database.SQL
                 {
                     if (!_tModelDef.ContainsProperty(orderName))
                     {
-                        throw DatabaseExceptions.NoSuchProperty(_tModelDef.ModelFullName, orderName);
+                        throw DbExceptions.NoSuchProperty(_tModelDef.ModelFullName, orderName);
                     }
 
                     orderBuilder.Append(SqlHelper.GetQuoted(orderName));

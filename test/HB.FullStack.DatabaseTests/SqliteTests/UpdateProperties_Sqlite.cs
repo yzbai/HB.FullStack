@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using CommunityToolkit.Mvvm.ComponentModel;
-
 using HB.FullStack.Common.PropertyTrackable;
-using HB.FullStack.Database.Convert;
-using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.SQL;
 using HB.FullStack.BaseTest.Data.Sqlites;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using HB.FullStack.Database;
+using System.Runtime.InteropServices;
 
 namespace HB.FullStack.DatabaseTests.SQLite
 {
@@ -76,17 +74,16 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            await Db.UpdatePropertiesAsync<UPTimestampModel>(
-                model.Id,
-                new List<(string propertyName, object? propertyValue)> {
-                    (nameof(model.Name), model.Name),
-                    (nameof(model.Age), model.Age),
-                    (nameof(model.InnerModel), model.InnerModel)
-                },
-                model.Timestamp,
-                "",
-                null,
-                newTimestamp);
+            UpdatePackTimestamp updatePack = new UpdatePackTimestamp
+            {
+                Id = model.Id,
+                OldTimestamp = model.Timestamp,
+                NewTimestamp = newTimestamp,
+                PropertyNames = new string[] { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },
+                NewPropertyValues = new object?[] { model.Name, model.Age, model.InnerModel }
+            };
+
+            await Db.UpdatePropertiesAsync<UPTimestampModel>(updatePack, "", null);
 
             model.Timestamp = newTimestamp;
 
@@ -100,9 +97,10 @@ namespace HB.FullStack.DatabaseTests.SQLite
         public async Task Test_Batch_UpdateProperties_Timestamp()
         {
             var models = Mocker.MockTimestampList(3);
-            await Db.BatchAddAsync(models, "", null);
 
-            var changes = new List<(object id, IList<(string, object?)> properties, long oldTimestamp, long? newTimestamp)>();
+            await Db.AddAsync(models, "", null);
+
+            var updatePacks = new List<UpdatePackTimestamp>();
 
             foreach (var model in models)
             {
@@ -112,21 +110,19 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                 long newTimestamp = TimeUtil.Timestamp;
 
-                changes.Add((
-                    model.Id,
-                    new List<(string, object?)>
-                    {
-                        (nameof(model.Name),model.Name),
-                        (nameof(model.Age), model.Age),
-                        (nameof(model.InnerModel) , model.InnerModel)
-                    },
-                    model.Timestamp,
-                    newTimestamp));
+                updatePacks.Add(new UpdatePackTimestamp
+                {
+                    Id = model.Id,
+                    OldTimestamp = model.Timestamp,
+                    NewTimestamp = newTimestamp,
+                    PropertyNames = new List<string> { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },
+                    NewPropertyValues = new List<object?> { model.Name, model.Age, model.InnerModel }
+                });
 
                 model.Timestamp = newTimestamp;
             }
 
-            await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(changes, "", null);
+            await Db.UpdatePropertiesAsync<UPTimestampModel>(updatePacks, "", null);
 
             var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), null);
 
@@ -134,64 +130,28 @@ namespace HB.FullStack.DatabaseTests.SQLite
         }
 
         [TestMethod]
-        public async Task Test_UpdateProperties_Compare_Timestamp()
-        {
-            var model = Mocker.MockTimestampModel();
-            await Db.AddAsync(model, "", null);
-
-            string? newName = "ChangedName";
-            int newAge = 10000;
-            InnerModel? newInnerModel = null;
-
-            long newTimestamp = TimeUtil.Timestamp;
-
-            await Db.UpdatePropertiesAsync<UPTimestampModel>(
-                model.Id,
-                new List<(string propertyName, object? oldValue, object? newValue)> {
-                    (nameof(model.Name), model.Name, newName),
-                    (nameof(model.Age), model.Age, newAge),
-                    (nameof(model.InnerModel), model.InnerModel, newInnerModel)
-                },
-                "",
-                null,
-                newTimestamp);
-
-            model.Name = newName;
-            model.Age = newAge;
-            model.InnerModel = newInnerModel;
-            model.Timestamp = newTimestamp;
-
-            var rt = await Db.ScalarAsync<UPTimestampModel>(model.Id, null);
-
-            Assert.AreEqual(SerializeUtil.ToJson(model), SerializeUtil.ToJson(rt));
-        }
-
-        [TestMethod]
         public async Task Test_UpdateProperties_Compare_Timeless()
         {
-            var model = Mocker.MockTimelessModel();
+            UPTimelessModel model = Mocker.MockTimelessModel();
             await Db.AddAsync(model, "", null);
 
             string? newName = "ChangedName";
             int newAge = 10000;
             InnerModel? newInnerModel = null;
 
-            long newTimestamp = TimeUtil.Timestamp;
-
-            await Db.UpdatePropertiesAsync<UPTimelessModel>(
-                model.Id,
-                new List<(string propertyName, object? oldValue, object? newValue)> {
-                    (nameof(model.Name), model.Name, newName),
-                    (nameof(model.Age), model.Age, newAge),
-                    (nameof(model.InnerModel), model.InnerModel, newInnerModel)
-                },
-                "",
-                null,
-                newTimestamp);
+            UpdatePackTimeless updatePack = new UpdatePackTimeless
+            {
+                Id = model.Id,
+                PropertyNames = new[] { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },
+                OldPropertyValues = new object?[] { model.Name, model.Age, model.InnerModel },
+                NewPropertyValues = new object?[] { newName, newAge, newInnerModel }
+            };
 
             model.Name = newName;
             model.Age = newAge;
             model.InnerModel = newInnerModel;
+
+            await Db.UpdatePropertiesAsync<UPTimelessModel>(updatePack, "", null);
 
             var rt = await Db.ScalarAsync<UPTimelessModel>(model.Id, null);
 
@@ -199,58 +159,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
         }
 
         [TestMethod]
-        public async Task Test_Batch_UpdateProperties_Compare()
-        {
-            var trans = await Trans.BeginTransactionAsync<DeleteTimestampModel>();
-
-            try
-            {
-                var models = Mocker.MockTimestampList(3);
-                await Db.BatchAddAsync(models, "", trans);
-
-                var changes = new List<(object id, IList<(string, object?, object?)> properties, long? newTimestamp)>();
-
-                foreach (var model in models)
-                {
-                    string? newName = "ChangedName";
-                    int newAge = 10000;
-                    InnerModel? newInnerModel = null;
-                    long newTimestamp = TimeUtil.Timestamp;
-
-                    changes.Add((
-                        model.Id,
-                        new List<(string, object?, object?)>
-                        {
-                            (nameof(model.Name), model.Name, newName),
-                            (nameof(model.Age), model.Age, newAge),
-                            (nameof(model.InnerModel) , model.InnerModel, newInnerModel)
-                        },
-                        newTimestamp));
-
-                    model.Name = newName;
-                    model.Age = newAge;
-                    model.InnerModel = newInnerModel;
-                    model.Timestamp = newTimestamp;
-                }
-
-                await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(changes, "", trans);
-
-                var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), trans);
-
-                await trans.CommitAsync();
-
-                Assert.AreEqual(SerializeUtil.ToJson(rts), SerializeUtil.ToJson(models));
-            }
-            catch
-            {
-                await trans.RollbackAsync();
-            }
-        }
-
-        [TestMethod]
         public async Task Test_UpdateProperties_Cps_Timeless()
         {
-            var model = Mocker.MockTimelessModel();
+            UPTimelessModel model = Mocker.MockTimelessModel();
             await Db.AddAsync(model, "", null);
 
             model.StartTrack();
@@ -259,7 +170,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             model.Age = 999;
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
-            ChangedPack cp = model.GetChangedPack(model.Id);
+            PropertyChangePack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimelessModel>(cp, "", null);
 
@@ -271,7 +182,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [TestMethod]
         public async Task Test_UpdateProperties_Cps_Timestamp()
         {
-            var model = Mocker.MockTimestampModel();
+            UPTimestampModel model = Mocker.MockTimestampModel();
             await Db.AddAsync(model, "", null);
 
             model.StartTrack();
@@ -281,7 +192,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
             model.Timestamp = TimeUtil.Timestamp;
 
-            ChangedPack cp = model.GetChangedPack(model.Id);
+            PropertyChangePack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimestampModel>(cp, "", null);
 
@@ -298,9 +209,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
             try
             {
                 var models = Mocker.MockTimelessList(3);
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
-                var cps = new List<ChangedPack>();
+                var cps = new List<PropertyChangePack>();
 
                 foreach (var model in models)
                 {
@@ -310,10 +221,10 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     model.Age = 999;
                     model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
-                    cps.Add(model.GetChangedPack(model.Id));
+                    cps.Add(model.GetPropertyChangePack());
                 }
 
-                await Db.BatchUpdatePropertiesAsync<UPTimelessModel>(cps, "", trans);
+                await Db.UpdatePropertiesAsync<UPTimelessModel>(cps, "", trans);
 
                 var rts = await Db.RetrieveAsync<UPTimelessModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), trans);
 
@@ -334,9 +245,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
             try
             {
                 var models = Mocker.MockTimestampList(3);
-                await Db.BatchAddAsync(models, "", trans);
+                await Db.AddAsync(models, "", trans);
 
-                var cps = new List<ChangedPack>();
+                var cps = new List<PropertyChangePack>();
 
                 foreach (var model in models)
                 {
@@ -347,10 +258,10 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
                     model.Timestamp = TimeUtil.Timestamp;
 
-                    cps.Add(model.GetChangedPack(model.Id));
+                    cps.Add(model.GetPropertyChangePack());
                 }
 
-                await Db.BatchUpdatePropertiesAsync<UPTimestampModel>(cps, "", trans);
+                await Db.UpdatePropertiesAsync<UPTimestampModel>(cps, "", trans);
 
                 var rts = await Db.RetrieveAsync<UPTimestampModel>(m => SqlStatement.In(m.Id, true, models.Select(i => i.Id).ToList()), trans);
 

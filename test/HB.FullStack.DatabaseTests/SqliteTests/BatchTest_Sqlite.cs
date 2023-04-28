@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HB.FullStack.BaseTest.Data.Sqlites;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,7 +18,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //Timeless
             var timelessLst = Mocker.GetAutoIdBTTimelesses(10);
 
-            await Db.BatchAddAsync(timelessLst, "Tester", null);
+            await Db.AddAsync(timelessLst, "Tester", null);
 
             long count = await Db.CountAsync<AutoIdBTTimeless>(null);
 
@@ -28,9 +29,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
         public async Task Batch_Update_AutoIdTimeless_Test()
         {
             //Timeless
-            var timelessLst = Mocker.GetAutoIdBTTimelesses(10);
+            IList<AutoIdBTTimeless> timelessLst = Mocker.GetAutoIdBTTimelesses(10);
 
-            await Db.BatchAddAsync(timelessLst, "Tester", null);
+            await Db.AddAsync(timelessLst, "Tester", null);
 
             foreach (AutoIdBTTimeless t in timelessLst)
             {
@@ -38,7 +39,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 t.Age = 100;
             }
 
-            await Db.BatchUpdateAsync(timelessLst, "dd", null);
+            await Db.UpdateAsync(timelessLst, "dd", null);
 
             var rt = await Db.ScalarAsync<AutoIdBTTimeless>(timelessLst[0].Id, null);
 
@@ -51,7 +52,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //Timeless
             var lst = Mocker.GetAutoIdBTTimestamps(10);
 
-            await Db.BatchAddAsync(lst, "Tester", null);
+            await Db.AddAsync(lst, "Tester", null);
 
             long count = await Db.CountAsync<AutoIdBTTimestamp>(null);
 
@@ -64,7 +65,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //Timeless
             var lst = Mocker.GetAutoIdBTTimestamps(10);
 
-            await Db.BatchAddAsync(lst, "Tester", null);
+            await Db.AddAsync(lst, "Tester", null);
 
             foreach (var t in lst)
             {
@@ -72,7 +73,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 t.Age = 100;
             }
 
-            await Db.BatchUpdateAsync(lst, "dd", null);
+            await Db.UpdateAsync(lst, "dd", null);
 
             var rt = await Db.ScalarAsync<AutoIdBTTimestamp>(lst[0].Id, null);
 

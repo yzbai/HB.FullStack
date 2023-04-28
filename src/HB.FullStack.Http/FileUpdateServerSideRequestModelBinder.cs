@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Common.Api
+namespace HB.FullStack.Server.WebLib
 {
     public class FileUpdateServerSideRequestModelBinder : IModelBinder
     {

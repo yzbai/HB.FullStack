@@ -5,7 +5,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.Sqlites
 {
-    [DbModel(DbSchema_Sqlite)]
+    [DbTable(DbSchema_Sqlite)]
     public class CExtModel : TimelessFlackIdDbModel
     {
         public string? Name { get; set; }

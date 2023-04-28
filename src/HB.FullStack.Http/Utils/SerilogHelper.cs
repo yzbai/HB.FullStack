@@ -12,7 +12,7 @@ using Serilog.Exceptions;
 using Serilog.Extensions.Logging;
 using Serilog.Formatting.Compact;
 
-namespace HB.FullStack.WebApi
+namespace HB.FullStack.Server.WebLib
 {
     public static class SerilogHelper
     {
@@ -67,7 +67,8 @@ namespace HB.FullStack.WebApi
             {
                 loggerConfiguration
                     .MinimumLevel.Verbose()
-                    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Debug)
+                    .MinimumLevel.Override("MySqlConnector", LogEventLevel.Warning)
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
                     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning); // for use Serialog request log;
             }
             else if (EnvironmentUtil.IsStaging())
@@ -80,7 +81,7 @@ namespace HB.FullStack.WebApi
             else if (EnvironmentUtil.IsProduction())
             {
                 loggerConfiguration
-                    .MinimumLevel.Warning()
+                    .MinimumLevel.Information()
                     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
                     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning); // for use Serialog request log;
             }

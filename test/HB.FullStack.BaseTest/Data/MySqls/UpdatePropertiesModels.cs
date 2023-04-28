@@ -14,7 +14,14 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 {
     public record InnerModel(string? InnerName);
 
-    [DbModel(DbSchema_Mysql)]
+
+    public partial class InnerModel2 : ObservableObject
+    {
+        [ObservableProperty]
+        public string? _innerName;
+    }
+
+    [DbTable(DbSchema_Mysql)]
     [PropertyTrackableObject]
     public partial class UPTimestampModel : TimestampGuidDbModel
     {
@@ -25,12 +32,16 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         private int? _age;
 
         [TrackProperty]
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         private InnerModel? _innerModel;
+
+        [TrackProperty]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
+        private InnerModel2? _innerModel2;
 
     }
 
-    [DbModel(DbSchema_Mysql)]
+    [DbTable(DbSchema_Mysql)]
     [PropertyTrackableObject]
     public partial class UPTimelessModel : TimelessGuidDbModel
     {
@@ -41,7 +52,11 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         private int? _age;
 
         [TrackProperty]
-        [DbModelProperty(Converter = typeof(JsonDbPropertyConverter))]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
         private InnerModel? _innerModel;
+
+        [TrackProperty]
+        [DbField(Converter = typeof(JsonDbPropertyConverter))]
+        private InnerModel2? _innerModel2;
     }
 }

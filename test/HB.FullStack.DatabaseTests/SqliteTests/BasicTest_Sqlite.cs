@@ -33,12 +33,15 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             //update-fields
 
-            List<(string, object?)> toUpdate = new List<(string, object?)>();
+            var updatePack = new UpdatePackTimestamp
+            {
+                Id = book.Id,
+                OldTimestamp = book.Timestamp,
+                PropertyNames = new List<string> { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
+                NewPropertyValues = new List<object?> { 123456.789, "TTTTTXXXXTTTTT" }
+            };
 
-            toUpdate.Add((nameof(Guid_BookModel.Price), 123456.789));
-            toUpdate.Add((nameof(Guid_BookModel.Name), "TTTTTXXXXTTTTT"));
-
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
             Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
@@ -52,9 +55,9 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //应该抛出冲突异常
             try
             {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(book.Id, toUpdate, book.Timestamp, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
             }
-            catch (DatabaseException ex)
+            catch (DbException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
@@ -86,7 +89,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 await Db.UpdateAsync(book2, "tester", null);
             }
-            catch (DatabaseException ex)
+            catch (DbException ex)
             {
                 Assert.IsTrue(ex.ErrorCode == ErrorCodes.ConcurrencyConflict);
 
@@ -112,20 +115,20 @@ namespace HB.FullStack.DatabaseTests.SQLite
             Guid_BookModel? book1 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
 
             var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Sqlite);
-            var connectionString = DbSettingManager.GetConnectionString(DbSchema_Sqlite, true);
+            var connectionString = DbSettingManager.GetRequiredConnectionString(DbSchema_Sqlite, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
+                new DbEngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt == 1);
 
             int rt2 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
+                new DbEngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt2 == 1);
 
             int rt3 = await engine.ExecuteCommandNonQueryAsync(connectionString,
-                new EngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
+                new DbEngineCommand($"update tb_Guid_Book set Name='Update_xxx' where Id = '{book.Id}'"));
 
             Assert.IsTrue(rt3 == 1);
         }
@@ -139,7 +142,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }
@@ -176,7 +179,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 };
                 }
 
-                await Db.BatchUpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
+                await Db.UpdateAsync(lst, "lastUsre", transContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transContext).ConfigureAwait(false);
             }
@@ -201,7 +204,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                 if (lst.Count != 0)
                 {
-                    await Db.BatchDeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
+                    await Db.DeleteAsync(lst, "lastUsre", transactionContext).ConfigureAwait(false);
                 }
                 else
                 {
@@ -257,7 +260,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", tContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", tContext).ConfigureAwait(false);
 
                 IList<PublisherModel_Client> testModels = (await Db.RetrieveAllAsync<PublisherModel_Client>(tContext, 0, 1).ConfigureAwait(false)).ToList();
 
@@ -347,19 +350,19 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             try
             {
-                await Db.BatchAddAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items, "xx", trans).ConfigureAwait(false);
 
                 IEnumerable<PublisherModel_Client>? results = await Db.RetrieveAsync<PublisherModel_Client>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items, "xx", trans).ConfigureAwait(false);
 
                 List<PublisherModel_Client>? items2 = Mocker.GetPublishers_Client();
 
-                await Db.BatchAddAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.AddAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 results = await Db.RetrieveAsync<PublisherModel_Client>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
-                await Db.BatchUpdateAsync(items2, "xx", trans).ConfigureAwait(false);
+                await Db.UpdateAsync(items2, "xx", trans).ConfigureAwait(false);
 
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
@@ -484,7 +487,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                 await Db.AddAsync(Mocker.GetBooks_Client(1)[0], "", trans).ConfigureAwait(false);
 
-                await Db.BatchAddAsync(books, "x", trans).ConfigureAwait(false);
+                await Db.AddAsync(books, "x", trans).ConfigureAwait(false);
 
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
             }
@@ -559,7 +562,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                     {
                         DbModelPropertyDef property = propertyDefs[i];
 
-                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.EngineType.SQLite);
+                        object? value = DbPropertyConvert.DbFieldValueToPropertyValue(reader0[i], property, Database.Engine.DbEngineType.SQLite);
 
                         if (value != null)
                         {
@@ -596,7 +599,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             try
             {
-                await Db.BatchAddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
+                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
             }

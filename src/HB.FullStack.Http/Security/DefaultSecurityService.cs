@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
-using HB.FullStack.Common.Api;
-
+using HB.FullStack.Common.Shared;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace HB.FullStack.WebApi.Security
+namespace HB.FullStack.Server.WebLib.Security
 {
     public class DefaultSecurityService : ISecurityService
     {
@@ -21,13 +20,13 @@ namespace HB.FullStack.WebApi.Security
 
         //static Random random = new Random();
 
-        public Task<bool> NeedPublicResourceTokenAsync(ApiRequest? apiRequest)
+        public Task<bool> NeedPublicResourceTokenAsync(FilterContext context)
         {
             //TODO:其他安全检测
-            //1， 频率. DeviceId, IP. 根据频率来决定客户端要不要弹出防水墙
-            //2， 历史登录比较 Mobile和DeviceId绑定。Address
+            //1， 频率. ClientId, IP. 根据频率来决定客户端要不要弹出防水墙
+            //2， 历史登录比较 Mobile和ClientId绑定。Address
 
-            //检查从某IP，DeviceId，Mobile发来的请求是否需要防水墙。
+            //检查从某IP，ClientId，Mobile发来的请求是否需要防水墙。
             //需要的话，查看request.PublicResourceToken. 没有的话，返回ErrorCode.API_NEED_PUBLIC_RESOURCE_TOKEN
 
             //可以根据不同的ApiRequest类型来判断
@@ -48,12 +47,12 @@ namespace HB.FullStack.WebApi.Security
             // a BOM as their content.
             if (formFile == null || formFile.Length == 0 || permittedFileSuffixes.IsNullOrEmpty())
             {
-                throw WebApiExceptions.UploadError("Upload empty file.", null, new { FileName = formFile?.FileName });
+                throw WebExceptions.UploadError("Upload empty file.", null, new { FileName = formFile?.FileName });
             }
 
             if (formFile.Length > sizeLimit)
             {
-                throw WebApiExceptions.UploadError("Upload OverSize", null, new { FileName = formFile.FileName });
+                throw WebExceptions.UploadError("Upload OverSize", null, new { FileName = formFile.FileName });
             }
 
             try
@@ -67,12 +66,12 @@ namespace HB.FullStack.WebApi.Security
                 // empty after removing the BOM.
                 if (memoryStream.Length == 0)
                 {
-                    throw WebApiExceptions.UploadError("Upload empty file after removing BOM.", null, new { FileName = formFile.FileName });
+                    throw WebExceptions.UploadError("Upload empty file after removing BOM.", null, new { FileName = formFile.FileName });
                 }
 
                 if (!IsValidFileExtensionAndSignature(formFile.FileName, memoryStream, permittedFileSuffixes))
                 {
-                    throw WebApiExceptions.UploadError("Upload Wrong Type Files", null, new { FileName = formFile.FileName });
+                    throw WebExceptions.UploadError("Upload Wrong Type Files", null, new { FileName = formFile.FileName });
                 }
                 else
                 {
@@ -81,7 +80,7 @@ namespace HB.FullStack.WebApi.Security
             }
             catch (Exception ex)
             {
-                throw WebApiExceptions.UploadError("Unkown file upload error", ex, new { FileName = formFile.FileName });
+                throw WebExceptions.UploadError("Unkown file upload error", ex, new { FileName = formFile.FileName });
             }
         }
 

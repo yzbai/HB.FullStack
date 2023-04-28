@@ -3,7 +3,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     /// <summary>
     /// 用户-角色 关系 实体
@@ -12,11 +12,11 @@ namespace HB.FullStack.Identity.Models
     public class UserRole : TimelessFlackIdDbModel
     {
         [NoEmptyGuid]
-        [ForeignKey(typeof(User), false)]
+        [DbForeignKey(typeof(User), false)]
         public Guid UserId { get; set; }
 
         [NoEmptyGuid]
-        [ForeignKey(typeof(Role), false)]
+        [DbForeignKey(typeof(Role), false)]
         public Guid RoleId { get; set; }
 
         public UserRole() { }

@@ -2,6 +2,8 @@
 global using static HB.FullStack.BaseTest.BaseTestClass;
 global using static HB.FullStack.BaseTest.ApiConstants;
 
+global using System;
+
 using HB.FullStack.Database;
 
 using Microsoft.Data.Sqlite;
@@ -17,8 +19,14 @@ using HB.FullStack.EventBus.Abstractions;
 using HB.FullStack.EventBus;
 using HB.Infrastructure.Redis.EventBus;
 using Microsoft.Extensions.Options;
-using HB.FullStack.Common.ApiClient;
 using HB.FullStack.Common.Test;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.IO;
+using HB.FullStack.Database.Implements;
+using HB.FullStack.Database.Config;
+using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client.Abstractions;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
 
@@ -38,7 +46,7 @@ namespace HB.FullStack.BaseTest
 
         public static IDatabase Db { get; set; } = null!;
 
-        public static IDbSettingManager DbSettingManager { get; set; } = null!;
+        public static IDbSchemaManager DbSettingManager { get; set; } = null!;
 
         public static ITransaction Trans { get; set; } = null!;
 
@@ -83,7 +91,7 @@ namespace HB.FullStack.BaseTest
 
         public static IApiClient ApiClient { get; set; } = null!;
 
-        public static IPreferenceProvider PreferenceProvider { get; set; } = null!;
+        public static ITokenPreferences PreferenceProvider { get; set; } = null!;
 
         #endregion
 
@@ -96,28 +104,25 @@ namespace HB.FullStack.BaseTest
             #region Db
 
             Db = ServiceProvider.GetRequiredService<IDatabase>();
-            DbSettingManager = ServiceProvider.GetRequiredService<IDbSettingManager>();
+            DbSettingManager = ServiceProvider.GetRequiredService<IDbSchemaManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
-            //初始化 DbSchema_Mysql
             await DropSysInfoTableFirstForTest();
 
-            await Db.InitializeAsync(DbSchema_Mysql, null, null, null).ConfigureAwait(false);
-
-            //初始化 DbSchema_Sqlite
             var SqliteDbFileName = $"s{TimeUtil.UtcNowUnixTimeSeconds}{SecurityUtil.CreateRandomString(6)}.db";
             SqliteConnectionString = $"Data Source={SqliteDbFileName}";
 
-            await Db.InitializeAsync(DbSchema_Sqlite, SqliteConnectionString, null, null).ConfigureAwait(false);
+            //这里会初始化所有数据库
+            await Db.InitializeAsync(new DbInitContext[] { new DbInitContext { DbSchemaName = DbSchema_Sqlite, ConnectionString = SqliteConnectionString } }).ConfigureAwait(false);
 
             #endregion
 
             #region Cache
 
             Cache = ServiceProvider.GetRequiredService<ICache>();
-            RedisConnection = StackExchange.Redis.ConnectionMultiplexer.Connect(Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]);
+            RedisConnection = StackExchange.Redis.ConnectionMultiplexer.Connect(Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]!);
             RedisDbNumber = Convert.ToInt32(Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
-            ApplicationName = Configuration["RedisCache:ApplicationName"];
+            ApplicationName = Configuration["RedisCache:ApplicationName"]!;
 
             #endregion
 
@@ -145,7 +150,7 @@ namespace HB.FullStack.BaseTest
 
             ApiClient = ServiceProvider.GetRequiredService<IApiClient>();
 
-            PreferenceProvider = ServiceProvider.GetRequiredService<IPreferenceProvider>();
+            PreferenceProvider = ServiceProvider.GetRequiredService<ITokenPreferences>();
 
             #endregion
 
@@ -157,7 +162,7 @@ namespace HB.FullStack.BaseTest
 
             var mysqlEngine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetConnectionString(DbSchema_Mysql, true), new EngineCommand(sql));
+            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
         }
 
         [AssemblyCleanup]
@@ -187,7 +192,7 @@ namespace HB.FullStack.BaseTest
             Configuration = configurationBuilder.Build();
 
 
-            DatabaseOptions dbOptions = new DatabaseOptions();
+            DbOptions dbOptions = new DbOptions();
 
             Configuration.GetSection("Database").Bind(dbOptions);
 
@@ -207,19 +212,23 @@ namespace HB.FullStack.BaseTest
                 .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
                 .AddMemoryLock()
                 .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"))
-                .AddSingleton<IPreferenceProvider, PreferenceProviderStub>()
+                .AddSingleton<ITokenPreferences, PreferenceProviderStub>()
                 .AddApiClient(options =>
                 {
                     options.HttpClientTimeout = TimeSpan.FromSeconds(100);
 
-                    options.SiteSettings.Add(new SiteSetting
+                    options.TokenSiteSetting = new SiteSetting
+                    {
+                        BaseUrl = new Uri($"http://localhost:{Port}/api/")
+                    };
+                    options.OtherSiteSettings.Add(new SiteSetting
                     {
                         SiteName = ApiEndpointName,
                         Version = ApiVersion,
                         BaseUrl = new Uri($"http://localhost:{Port}/api/"),
                         Endpoints = new List<ResEndpoint> { }
                     });
-                }); 
+                });
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 

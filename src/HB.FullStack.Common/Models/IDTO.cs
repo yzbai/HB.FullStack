@@ -8,5 +8,7 @@
 
 namespace HB.FullStack.Common
 {
-    public interface IDTO : IValidatableObject { }
+    public interface IDTO  { }
+
+    public interface IValidatableDTO : IDTO, IValidatableObject { }
 }

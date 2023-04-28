@@ -1,33 +1,35 @@
-﻿using HB.FullStack.Database.DbModels;
+﻿using HB.FullStack.Common.Shared;
+using HB.FullStack.Database.DbModels;
 
 using System;
 
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
+    //TODO: 改用KVStore
     public class UserActivity : TimestampGuidDbModel
     {
-        [ForeignKey(typeof(User), false)]
+        [DbForeignKey(typeof(User), false)]
         public Guid? UserId { get; set; }
 
-        [ForeignKey(typeof(SignInToken), false)]
-        public Guid? SignInTokenId { get; set; }
+        [DbForeignKey(typeof(TokenCredential), false)]
+        public Guid? SignInCredentialId { get; set; }
 
         public string? Ip { get; set; }
 
-        [DbModelProperty(MaxLength = LengthConventions.MAX_URL_LENGTH)]
+        [DbField(MaxLength = SharedNames.Length.MAX_URL_LENGTH)]
         public string? Url { get; set; }
 
-        [DbModelProperty(MaxLength = 10)]
+        [DbField(MaxLength = 10)]
         public string? HttpMethod { get; set; }
 
-        [DbModelProperty(MaxLength = LengthConventions.MAX_ARGUMENTS_LENGTH)]
+        [DbField(MaxLength = SharedNames.Length.MAX_ARGUMENTS_LENGTH)]
         public string? Arguments { get; set; }
 
         public int? ResultStatusCode { get; set; }
 
         public string? ResultType { get; set; }
 
-        [DbModelProperty(MaxLength = LengthConventions.MAX_RESULT_ERROR_LENGTH)]
+        [DbField(MaxLength = SharedNames.Length.MAX_RESULT_ERROR_LENGTH)]
         public string? ResultError { get; set; }
     }
 }

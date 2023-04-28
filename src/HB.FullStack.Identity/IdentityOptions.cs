@@ -5,20 +5,19 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HB.FullStack.Identity
+namespace HB.FullStack.Server.Identity
 {
     public class IdentityOptions : IOptions<IdentityOptions>
     {
-        public IdentityOptions Value
-        { get { return this; } }
+        public IdentityOptions Value => this;
 
-        /// <summary>
-        /// 面向用户的要求
-        /// </summary>
-        public SignInOptions SignInOptions { get; set; } = new SignInOptions();
+        public SignInSettings SignInSettings { get; set; } = new SignInSettings();
 
-        #region Jwt Options;
+        public JwtSettings JwtSettings { get; set; } = new JwtSettings();
+    }
 
+    public class JwtSettings
+    {
         public bool NeedAudienceToBeChecked { get; set; } = true;
 
         /// <summary>
@@ -52,22 +51,20 @@ namespace HB.FullStack.Identity
         public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; } = new OpenIdConnectConfiguration();
 
         /// <summary>
-        /// 连续两次请求Refresh最小时间间隔, 应该小于AccessToken的过期时间<see cref="SignInOptions.AccessTokenExpireTimeSpan"/>
+        /// 连续两次请求Refresh最小时间间隔, 应该小于AccessToken的过期时间<see cref="SignInSettings.AccessTokenExpireTimeSpan"/>
         /// </summary>
         public TimeSpan RefreshIntervalTimeSpan { get; set; } = TimeSpan.FromSeconds(30);
 
-        #endregion
     }
 
-    public class SignInOptions
+    public class SignInSettings
     {
         public TimeSpan RefreshTokenLongExpireTimeSpan { get; set; } = TimeSpan.FromDays(365);
         public TimeSpan RefreshTokenShortExpireTimeSpan { get; set; } = TimeSpan.FromDays(1);
-
-        /// <summary>
-        /// AccessToken过期时间，即每隔多少时间就会重新Refresh
-        /// </summary>
         public TimeSpan AccessTokenExpireTimeSpan { get; set; } = TimeSpan.FromMinutes(5);
+
+        #region LoginControl
+
         public TimeSpan LockoutTimeSpan { get; set; } = TimeSpan.FromHours(6);
         public bool RequiredMaxFailedCountCheck { get; set; } = true;
         public bool RequiredLockoutCheck { get; set; } = true;
@@ -77,14 +74,17 @@ namespace HB.FullStack.Identity
         public int MaxFailedCount { get; set; } = 4;
         public int AccessFailedRecoveryDays { get; set; } = 1;
         public int LockoutAfterAccessFailedCount { get; set; } = 4;
-        public bool AllowOnlyOneAppClient { get; set; } = true;
+
+        #endregion
+
+        public bool AllowRegisterByLoginName { get; set; }
     }
 
     //public class IdentityOptions : IOptions<IdentityOptions>
     //{
     //    public IdentityOptions Value { get { return this; } }
 
-    //TODO: 考虑是否需要在SecurityStamp改变后，删除SignInToken？
+    //TODO: 考虑是否需要在SecurityStamp改变后，删除SignInCredential？
     //public IdentityEvents Events { get; set; } = new IdentityEvents();
 
     /// <summary>

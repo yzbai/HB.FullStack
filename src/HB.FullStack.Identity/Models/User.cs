@@ -1,11 +1,10 @@
-﻿using HB.FullStack.Database.DbModels;
+﻿using HB.FullStack.Common.Shared;
+using HB.FullStack.Database.DbModels;
 
 using System;
 using System.ComponentModel.DataAnnotations;
 
-using static HB.FullStack.Identity.LengthConventions;
-
-namespace HB.FullStack.Identity.Models
+namespace HB.FullStack.Server.Identity.Models
 {
     /// <summary>
     /// 通用用户类，只是登陆注册信息，不包含任何附加信息，请另行创建Profile类来存储用户其他信息
@@ -13,7 +12,7 @@ namespace HB.FullStack.Identity.Models
     public class User : TimestampGuidDbModel
     {
         [Required]
-        [Guid32String(NotNull = true)]
+        [DbGuid32StringField(NotNull = true)]
         public string SecurityStamp { get; set; } = default!;
 
         [Password]
@@ -24,7 +23,7 @@ namespace HB.FullStack.Identity.Models
         /// 唯一, 可为空，一旦不为空后不可修改,注意和NickName区分,这里实为LoginName
         /// </summary>
         [LoginName]
-        [DbModelProperty(MaxLength = MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
+        [DbField(MaxLength = SharedNames.Length.MAX_USER_LOGIN_NAME_LENGTH, Unique = true)]
         public string? LoginName { get; set; }
 
         /// <summary>
@@ -32,14 +31,14 @@ namespace HB.FullStack.Identity.Models
         /// 唯一
         /// </summary>
         [Mobile]
-        [DbModelProperty(MaxLength = MAX_USER_MOBILE_LENGTH, Unique = true)]
+        [DbField(MaxLength = SharedNames.Length.MAX_USER_MOBILE_LENGTH, Unique = true)]
         public string? Mobile { get; set; }
 
         /// <summary>
         /// 唯一，可为空
         /// </summary>
         [EmailAddress]
-        [DbModelProperty(MaxLength = MAX_USER_EMAIL_LENGTH, Unique = true)]
+        [DbField(MaxLength = SharedNames.Length.MAX_USER_EMAIL_LENGTH, Unique = true)]
         public string? Email { get; set; }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace HB.FullStack.Identity.Models
             LoginName = loginName;
             Mobile = mobile;
             Email = email;
-            PasswordHash = password == null ? null : SecurityUtil.EncryptPwdWithSalt(password, SecurityStamp);
+            PasswordHash = password == null ? null : SecurityUtil.EncryptPasswordWithSalt(password, SecurityStamp);
             MobileConfirmed = mobileConfirmed;
             EmailConfirmed = emailConfirmed;
         }

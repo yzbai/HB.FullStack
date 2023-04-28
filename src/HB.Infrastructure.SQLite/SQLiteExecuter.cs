@@ -3,7 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
-
+using HB.FullStack.Database.Config;
 using Microsoft.Data.Sqlite;
 
 namespace HB.Infrastructure.SQLite
@@ -148,13 +148,13 @@ namespace HB.Infrastructure.SQLite
             {
                 if (sEx.SqliteExtendedErrorCode == 1555)
                 {
-                    return DatabaseExceptions.DuplicateKeyError(command.CommandText, ex);
+                    return DbExceptions.DuplicateKeyError(command.CommandText, ex);
                 }
 
-                return DatabaseExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
+                return DbExceptions.SQLiteExecuterError(command.CommandText, sEx.Message, sEx.SqliteErrorCode, sEx.SqliteExtendedErrorCode, ex);
             }
 
-            return DatabaseExceptions.SQLiteUnKownExecuterError(command.CommandText, ex);
+            return DbExceptions.SQLiteUnKownExecuterError(command.CommandText, ex);
         }
     }
 }

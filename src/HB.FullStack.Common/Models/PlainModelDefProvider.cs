@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
+using HB.FullStack.Common.PropertyTrackable;
+
 namespace HB.FullStack.Common.Models
 {
     internal class PlainModelDefProvider : IModelDefProvider
@@ -15,7 +17,7 @@ namespace HB.FullStack.Common.Models
 
         private static ModelDef? CreateModelDef(Type type)
         {
-            if (!typeof(Model).IsAssignableFrom(type))
+            if (!typeof(IModel).IsAssignableFrom(type))
             {
                 return null;
             }
@@ -25,6 +27,7 @@ namespace HB.FullStack.Common.Models
                 Kind = ModelKind.Plain,
                 ModelFullName = type.FullName!,
                 ModelType = type,
+                IsPropertyTrackable = type.IsAssignableTo(typeof(IPropertyTrackableObject))
             };
 
             foreach (var property in type.GetProperties())

@@ -1,4 +1,4 @@
-﻿using HB.FullStack.Common.Api;
+﻿
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -11,12 +11,12 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.WebApi.ApiKeyAuthentication
+namespace HB.FullStack.Server.WebLib.ApiKeyAuthentication
 {
-    public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyOptions>
+    public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
     {
         public ApiKeyAuthenticationHandler(
-            IOptionsMonitor<ApiKeyOptions> options,
+            IOptionsMonitor<ApiKeyAuthenticationOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock) : base(options, logger, encoder, clock)
