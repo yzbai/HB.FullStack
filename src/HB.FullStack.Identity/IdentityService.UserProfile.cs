@@ -8,6 +8,7 @@ using HB.FullStack.Common.Shared.Context;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
 using HB.FullStack.Server.Identity.Models;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Server.Identity
 {
@@ -36,7 +37,7 @@ namespace HB.FullStack.Server.Identity
                     await _userProfileRepo.AddAsync(userProfile,lastUser, trans).ConfigureAwait(false);
                 }
 
-                await _transaction.CommitAsync(trans).ConfigureAwait(false);
+                await trans.CommitAsync().ConfigureAwait(false);
 
                 return userProfile;
             }
@@ -45,6 +46,24 @@ namespace HB.FullStack.Server.Identity
                 await trans.RollbackAsync().ConfigureAwait(false);
                 throw;
             }
+        }
+
+        public async Task UpdateUserProfileAsync(PropertyChangePack cp, string lastUser)
+        {
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserProfile>().ConfigureAwait(false);
+
+            try
+            {
+                await _userProfileRepo.UpdateProperties<UserProfile>(cp, lastUser, trans);
+
+                await trans.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await trans.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
+
         }
     }
 }

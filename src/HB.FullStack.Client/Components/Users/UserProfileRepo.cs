@@ -14,6 +14,7 @@ using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Components.Sync;
 using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.Logging;
@@ -32,9 +33,7 @@ namespace HB.FullStack.Client.Components.Users
             ITokenPreferences clientPreferences) : base(logger, clientModelSettingFactory, database, apiClient, syncManager, clientEvents, clientPreferences)
         { }
 
-        //protected override Users ToModel(UserProfileRes res) => ResMapper.ToUserProfile(res);
 
-        //protected override UserProfileRes ToResource(Users model) => ResMapper.ToUserProfileRes(model);
 
         internal Task<UserProfile?> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext, GetSetMode getMode = GetSetMode.Mixed, IfUseLocalData<UserProfile>? ifUseLocalData = null)
         {
@@ -42,7 +41,7 @@ namespace HB.FullStack.Client.Components.Users
                 localWhere: userProfile => userProfile.UserId == userId,
                 remoteRequest: new UserProfileResGetByUserIdRequest(userId),
                 transactionContext: transactionContext,
-                getMode: getMode, 
+                getMode: getMode,
                 ifUseLocalData: ifUseLocalData);
         }
 
@@ -56,9 +55,18 @@ namespace HB.FullStack.Client.Components.Users
                 ifUseLocalData: ifUseLocalData);
         }
 
-        protected override Task<IEnumerable<UserProfile>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request)
+        protected override async Task<IEnumerable<UserProfile>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request)
         {
-            throw new NotImplementedException();
+            List<UserProfile> userProfiles = new List<UserProfile>();
+
+            UserProfileRes? res = await apiClient.GetAsync<UserProfileRes>(request).ConfigureAwait(false);
+
+            if (res != null)
+            {
+                userProfiles.Add(ToModel(res));
+            }
+
+            return userProfiles;
         }
 
         protected override Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<UserProfile> models)
@@ -66,14 +74,33 @@ namespace HB.FullStack.Client.Components.Users
             throw new NotImplementedException();
         }
 
-        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> cps)
+        protected override async Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> cps)
         {
-            throw new NotImplementedException();
+            foreach (PropertyChangePack cp in cps)
+            {
+                PatchRequest<UserProfileRes> patchRequest = new PatchRequest<UserProfileRes>(cp);
+
+                await apiClient.SendAsync(patchRequest).ConfigureAwait(false);
+            }
         }
 
         protected override Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<UserProfile> models)
         {
             throw new NotImplementedException();
+        }
+
+        private static UserProfile ToModel(UserProfileRes res)
+        {
+            return new UserProfile
+            {
+                Id = res.Id,
+                UserId = res.UserId,
+                Level = res.Level,
+                NickName = res.NickName,
+                Gender = res.Gender,
+                BirthDay = res.BirthDay,
+                AvatarFileName = res.AvatarFileName
+            };
         }
     }
 }

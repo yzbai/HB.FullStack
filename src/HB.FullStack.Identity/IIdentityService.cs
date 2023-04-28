@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Server.Identity.Context;
 using HB.FullStack.Server.Identity.Models;
@@ -32,6 +34,8 @@ namespace HB.FullStack.Server.Identity
 
         Task<UserProfile> GetUserProfileByUserIdAsync(Guid userId, string lastUser);
 
+        Task UpdateUserProfileAsync(PropertyChangePack cp, string lastUser);
+
         #endregion
 
         #region Role
@@ -46,6 +50,7 @@ namespace HB.FullStack.Server.Identity
 
         Task RecordUserActivityAsync(Guid? signInCredentialId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
         
+
         #endregion
     }
 }
