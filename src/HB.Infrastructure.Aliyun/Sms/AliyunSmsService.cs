@@ -128,7 +128,7 @@ namespace HB.Infrastructure.Aliyun.Sms
 
         public async Task<bool> ValidateAsync(string mobile, string code)
         {
-            if (string.IsNullOrWhiteSpace(code) || code.Length != _options.TemplateIdentityValidation.CodeLength || !ValidationMethods.IsAllNumber(code))
+            if (string.IsNullOrWhiteSpace(code) || !ValidationMethods.IsAllNumber(code))
             {
                 return false;
             }

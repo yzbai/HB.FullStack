@@ -27,7 +27,7 @@ namespace HB.FullStack.Server.Identity.Repos
 
         internal Task<UserProfile?> GetByUserIdAsync(Guid userId, TransactionContext trans)
         {
-            throw new NotImplementedException();
+            return DbReader.ScalarAsync<UserProfile>(up => up.UserId == userId, trans);
         }
     }
 }

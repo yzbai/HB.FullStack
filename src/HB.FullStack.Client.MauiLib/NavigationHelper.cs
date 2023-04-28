@@ -60,6 +60,8 @@ namespace HB.FullStack.Client.MauiLib
             Routing.RegisterRoute(nameof(SmsVerifyPage), typeof(SmsVerifyPage));
             Routing.RegisterRoute(nameof(UserProfileUpdatePage), typeof(UserProfileUpdatePage));
             Routing.RegisterRoute(nameof(IntroducePage), typeof(IntroducePage));
+
+           
         }
 
         /// <summary>

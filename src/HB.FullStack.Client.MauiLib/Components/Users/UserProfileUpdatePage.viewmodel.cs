@@ -40,6 +40,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         private ObservableTask<string?>? _avatarFileTask;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(UpdateProfileCommand))]
         private string? _nickName;
 
 

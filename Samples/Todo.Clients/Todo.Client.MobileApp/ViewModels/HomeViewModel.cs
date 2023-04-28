@@ -40,11 +40,14 @@ namespace Todo.Client.MobileApp.ViewModels
             try
             {
                 await _userService.LogoutAsync();
+
             }
             catch(Exception ex)
             {
                 Currents.ShowToast(ex.Message);
             }
+
+            await NavigationHelper.GotoLoginPageAsync();
         }
     }
 }

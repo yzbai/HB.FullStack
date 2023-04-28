@@ -26,7 +26,7 @@ namespace HB.FullStack.Server.Identity
                 {
                     userProfile = new UserProfile
                     {
-                        Id = userId,
+                        UserId = userId,
                         Level = null,
                         NickName = Conventions.GetRandomNickName(),
                         Gender = null,

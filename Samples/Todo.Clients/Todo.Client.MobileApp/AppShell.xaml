@@ -10,5 +10,5 @@
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate pages:HomePage}"
-        Route="MainPage" />
+        Route="HomePage" />
 </base:BaseShell>

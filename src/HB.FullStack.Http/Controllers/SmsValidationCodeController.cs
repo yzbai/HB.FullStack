@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
+using AsyncAwaitBestPractices;
+
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Server.Services;
@@ -46,9 +48,16 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             //TODO: 同一用户的罚时操作？比如同一手机号，连续请求5次以上？
 
+#if DEBUG
+            _smsService.SendValidationCodeAsync(mobile, "1111", int.MaxValue).SafeFireAndForget();
+
+            return Ok(new SmsValidationCodeRes { Length = 4 });
+#else
+
             int smsCodeLength = _smsService.SendValidationCode(mobile);
 
             return Ok(new SmsValidationCodeRes { Length = smsCodeLength });
+#endif
         }
     }
 }

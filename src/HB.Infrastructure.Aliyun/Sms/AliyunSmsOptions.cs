@@ -47,12 +47,12 @@ namespace HB.Infrastructure.Aliyun.Sms
         public string ParamCode { get; set; } = null!;
 
         [DisallowNull, NotNull]
-        public int CodeLength { get; set; } = 6;
+        public int CodeLength { get; set; } = 4;
 
         [DisallowNull, NotNull]
         public string ParamProductValue { get; set; } = null!;
 
         [DisallowNull, NotNull]
-        public int ExpireMinutes { get; set; } = 2;
+        public int ExpireMinutes { get; set; } = 10;
     }
 }

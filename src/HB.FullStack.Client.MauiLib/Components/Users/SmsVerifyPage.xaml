@@ -7,9 +7,16 @@
     xmlns:behaviors="clr-namespace:HB.FullStack.Client.MauiLib.Behaviors"
     xmlns:components="clr-namespace:HB.FullStack.Client.MauiLib.Components"
     xmlns:controls="clr-namespace:HB.FullStack.Client.MauiLib.Controls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     Title="SmsVerifyPage"
     x:DataType="components:SmsVerifyViewModel"
     x:TypeArguments="components:SmsVerifyViewModel">
+    <base:BasePage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <toolkit:IntToBoolConverter x:Key="IntToBoolConverter" />
+        </ResourceDictionary>
+    </base:BasePage.Resources>
     <VerticalStackLayout>
         <Label
             Margin="20,80,20,0"
