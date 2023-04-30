@@ -48,13 +48,6 @@ namespace HB.FullStack.KVStore
             return GetModelKey(item, modelDef);
         }
 
-        public async Task<T?> GetAsync<T>(string key) where T : KVStoreModel, new()
-        {
-            IEnumerable<T?> ts = await GetAsync<T>(new string[] { key }).ConfigureAwait(false);
-
-            return ts.Any() ? ts.ElementAt(0) : null;
-        }
-
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreModel, new()
         {
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
@@ -89,11 +82,6 @@ namespace HB.FullStack.KVStore
             {
                 throw Exceptions.Unkown(type: typeof(T).FullName, storeName: modelDef.KVStoreName, key: null, innerException: ex);
             }
-        }
-
-        public Task AddAsync<T>(T item, string lastUser) where T : KVStoreModel, new()
-        {
-            return AddAsync(new T[] { item }, lastUser);
         }
 
         /// <summary>
@@ -133,11 +121,6 @@ namespace HB.FullStack.KVStore
                 //TODO: 要像数据库那样Restore吗？
                 throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, items, ex);
             }
-        }
-
-        public Task UpdateAsync<T>(T item, string lastUser) where T : KVStoreModel, new()
-        {
-            return UpdateAsync(new T[] { item }, lastUser);
         }
 
         /// <summary>
@@ -194,11 +177,6 @@ namespace HB.FullStack.KVStore
             {
                 throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, null, ex);
             }
-        }
-
-        public Task DeleteAsync<T>(string key, long timestamp) where T : KVStoreModel, new()
-        {
-            return DeleteAsync<T>(new string[] { key }, new long[] { timestamp });
         }
 
         /// <summary>
