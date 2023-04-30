@@ -14,13 +14,10 @@ namespace HB.FullStack.KVStore
         
         Task<T?> GetAsync<T>(string key) where T : KVStoreModel, new();
 
-        
-        Task<T?> GetAsync<T>(long key) where T : KVStoreModel, new()
-        {
-            return GetAsync<T>(key.ToString(Globals.Culture));
-        }
 
-        
+        Task<T?> GetAsync<T>(long key) where T : KVStoreModel, new() => GetAsync<T>(key.ToString(Globals.Culture));
+
+
         Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreModel, new();
 
         
@@ -49,7 +46,6 @@ namespace HB.FullStack.KVStore
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
         Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<long> timestamps) where T : KVStoreModel, new();
-
 
         
         Task DeleteAllAsync<T>() where T : KVStoreModel, new();
