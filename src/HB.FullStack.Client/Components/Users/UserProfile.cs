@@ -9,26 +9,33 @@ using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.ClientModels;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Common.Shared.Context;
 
 namespace HB.FullStack.Client.Components.Users
 {
     [ClientModelSetting(expiryTimeType: ExpiryTimeType.Tiny, allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
-    public class UserProfile : ClientDbModel
+    public partial class UserProfile : ClientDbModel
     {
         [NoEmptyGuid]
-        public Guid UserId { get; set; }
+        [TrackProperty]
+        private Guid _userId;
 
-        public string? Level { get; set; }
+        [TrackProperty]
+        private string? _level;
 
         [NickName(CanBeNull = false)]
-        public string NickName { get; set; } = null!;
+        [TrackProperty]
+        private string _nickName = null!;
 
-        public Gender? Gender { get; set; }
+        [TrackProperty]
+        private Gender? _gender;
 
-        public DateOnly? BirthDay { get; set; }
+        [TrackProperty]
+        private DateOnly? _birthDay;
 
-        public string? AvatarFileName { get; set; }
+        [TrackProperty]
+        private string? _avatarFileName;
 
     }
 }
