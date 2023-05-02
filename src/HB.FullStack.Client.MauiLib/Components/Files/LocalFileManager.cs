@@ -58,7 +58,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         {
             string tempFileName = GetRandomFileName(fileExtension);
             //return GetLocalFullPath(CurrentUserTempDirectory, tempFileName);
-            return Path.Combine(PathRoot, "temp", tempFileName);
+            return Path.Combine(FileSystem.CacheDirectory, tempFileName);
         }
 
         /// <summary>

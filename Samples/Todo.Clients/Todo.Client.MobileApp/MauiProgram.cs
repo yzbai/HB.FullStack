@@ -5,6 +5,7 @@
  */
 
 using System.IO;
+using System.Reflection;
 
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
@@ -14,6 +15,7 @@ using HB.FullStack.Client.MauiLib.Components;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls.Hosting;
@@ -23,6 +25,19 @@ using Todo.Shared;
 
 namespace Todo.Client.MobileApp
 {
+    public class ConstantSettings
+    {
+        public string SITE_TODO_SERVER_MAIN { get; set; } = null!;
+        public string SITE_TODO_SERVER_MAIN_BASE_URL { get; set; } = null!;
+        public string DB_SCHEMA_MAIN { get; set; } = null!;
+        public string DB_SCHEMA_MAIN_FILE { get; set; } = null!;
+        public string DB_SCHEMA_USER { get; set; } = null!;
+        public string DB_SCHEMA_USER_FILE { get; set; } = null!;
+        public string ALIYUN_OSS_ENDPOINT { get; set; } = null!;
+        public string ALIYUN_OSS_BUCKET_NAME { get; set; } = null!;
+        public string TECENET_CAPTCHA_APP_ID { get; set; } = null!;
+    }
+
     /// <summary>
     /// 事件综合:
     /// 1. Application Events - PlatformApplication
@@ -39,21 +54,10 @@ namespace Todo.Client.MobileApp
 
     public static class MauiProgram
     {
-        public const string SITE_TODO_SERVER_MAIN = "Todo.Server.Main";
-        public const string SITE_TODO_SERVER_MAIN_BASE_URL = "https://localhost:7157/api/";
-
-        public const string DB_SCHEMA_MAIN = "TodoMain";
-        public const string DB_SCHEMA_MAIN_FILE = "TodoMain.db";
-        public const string DB_SCHEMA_USER = "TodoUser_{0}";
-        public const string DB_SCHEMA_USER_FILE = "TodoUser_{0}.db";
-
-        private const string ALIYUN_OSS_ENDPOINT = "oss-cn-hangzhou.aliyuncs.com";
-        private const string ALIYUN_OSS_BUCKET_NAME = "mycolorfultime-private-dev";
-
-        private const string TECENET_CAPTCHA_APP_ID = "2029147713";
-
         public static MauiApp CreateMauiApp()
         {
+            ConstantSettings constantSettings = GetConstantSettings();
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
@@ -65,14 +69,14 @@ namespace Todo.Client.MobileApp
                     {
                         dbOptions.DbSchemas.Add(new DbSchema
                         {
-                            Name = DB_SCHEMA_MAIN,
+                            Name = constantSettings.DB_SCHEMA_MAIN,
                             EngineType = DbEngineType.SQLite,
                             Version = 1,
-                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.AppDataDirectory, DB_SCHEMA_MAIN_FILE)}")
+                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.AppDataDirectory, constantSettings.DB_SCHEMA_MAIN_FILE)}")
                         });
                         dbOptions.DbSchemas.Add(new DbSchema
                         {
-                            Name = DB_SCHEMA_USER,
+                            Name = constantSettings.DB_SCHEMA_USER,
                             EngineType = DbEngineType.SQLite,
                             Version = 1
                             //不提供ConnectionString，在登录后再提供.每一个用户，一个数据库文件
@@ -88,14 +92,14 @@ namespace Todo.Client.MobileApp
 
                         apiClientOptions.TokenSiteSetting = new SiteSetting
                         {
-                            SiteName = SITE_TODO_SERVER_MAIN,
-                            BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)
+                            SiteName = constantSettings.SITE_TODO_SERVER_MAIN,
+                            BaseUrl = new Uri(constantSettings.SITE_TODO_SERVER_MAIN_BASE_URL)
                         };
                     },
                     fileManagerOptions =>
                     {
-                        fileManagerOptions.AliyunOssEndpoint = ALIYUN_OSS_ENDPOINT;
-                        fileManagerOptions.AliyunOssBucketName = ALIYUN_OSS_BUCKET_NAME;
+                        fileManagerOptions.AliyunOssEndpoint = constantSettings.ALIYUN_OSS_ENDPOINT;
+                        fileManagerOptions.AliyunOssBucketName = constantSettings.ALIYUN_OSS_BUCKET_NAME;
                         fileManagerOptions.DirectoryDescriptions = DirectorySettings.Descriptions.All;
                         fileManagerOptions.DirectoryPermissions = DirectorySettings.DirectoryPermissions.All;
                     },
@@ -106,7 +110,7 @@ namespace Todo.Client.MobileApp
                     mauiInitOptions =>
                     {
                         mauiInitOptions.DefaultAvatarFileName = "default_avatar.png";
-                        mauiInitOptions.IntoduceContents = new IntroduceContent[] 
+                        mauiInitOptions.IntoduceContents = new IntroduceContent[]
                         {
                             new IntroduceContent{ ImageSource="introduce_1.png", IsLastPage = false},
                             new IntroduceContent{ ImageSource="introduce_2.png", IsLastPage = false},
@@ -114,7 +118,7 @@ namespace Todo.Client.MobileApp
                             new IntroduceContent{ ImageSource="introduce_4.png", IsLastPage = true},
                         };
                     },
-                    tCaptchaAppId: TECENET_CAPTCHA_APP_ID)
+                    tCaptchaAppId: constantSettings.TECENET_CAPTCHA_APP_ID)
                 .UseTodoApp(todoAppOptions => { })
                 .ConfigureLifecycleEvents(lifecycleBuilder => { })
                 .ConfigureFonts(fonts =>
@@ -124,6 +128,29 @@ namespace Todo.Client.MobileApp
                 });
 
             return builder.Build();
+
+            static ConstantSettings GetConstantSettings()
+            {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+
+                using Stream appsettingsStream = assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.json").ThrowIfNull("no appsettings.json");
+                using Stream? appsettingsDevelopmentStream = Currents.IsDebug ?
+                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Debug.json") :
+                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Release.json");
+
+                var configBuilder = new ConfigurationBuilder().AddJsonStream(appsettingsStream);
+
+                if (appsettingsDevelopmentStream != null)
+                {
+                    configBuilder.AddJsonStream(appsettingsDevelopmentStream);
+                }
+
+                ConstantSettings configSettings = new ConstantSettings();
+
+                configBuilder.Build().Bind(configSettings);
+
+                return configSettings;
+            }
         }
 
         public static MauiAppBuilder UseTodoApp(this MauiAppBuilder builder, Action<TodoAppOptions> configTodoAppOptions)
