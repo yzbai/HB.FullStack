@@ -19,8 +19,8 @@ namespace HB.FullStack.Client.Abstractions
     {
         void Initialize();
 
-        #region Device - Network
-
+        #region Device - Network(ServerConnection)
+        
         bool NetworkIsReady { get; }
 
         //App启动，也会调用

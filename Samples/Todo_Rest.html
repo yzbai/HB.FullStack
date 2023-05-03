@@ -1,0 +1,9 @@
+@host = https://localhost:7157
+###
+GET {{host}}/.well-known/openid-configuration
+
+###
+GET {{host}}/.well-known/openid-configuration/jwks
+
+###
+GET {{host}}/health
