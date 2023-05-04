@@ -60,7 +60,7 @@ namespace TestProject1
 
             IList<B> list = new List<B>();
 
-            Assert.IsTrue(list is IEnumerable<object> e && e.Count() == 0);
+            Assert.IsTrue(list is IEnumerable<object> e && !e.Any());
 
             IEnumerable er = list;
 

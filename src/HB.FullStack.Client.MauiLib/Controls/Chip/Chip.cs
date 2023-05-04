@@ -312,7 +312,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
             {
                 if (!string.IsNullOrEmpty(GroupName) && Parent is Layout layout)
                 {
-                    foreach (View view in layout.Children)
+                    foreach (IView view in layout.Children)
                     {
                         if (view is Chip chip)
                         {

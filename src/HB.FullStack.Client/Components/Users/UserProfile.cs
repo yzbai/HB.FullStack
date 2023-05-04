@@ -10,7 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common.PropertyTrackable;
-
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.Components.Users
 {

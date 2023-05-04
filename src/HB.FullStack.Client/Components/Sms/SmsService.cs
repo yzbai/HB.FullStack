@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.ApiClient;
-
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Validate;
 
 using Microsoft.Extensions.Options;

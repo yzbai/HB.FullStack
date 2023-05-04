@@ -20,7 +20,7 @@ namespace HB.FullStack.CommonTests
     [TestClass]
     public class LoggerTests
     {
-        private ServiceProvider _serviceProvider;
+        private readonly ServiceProvider _serviceProvider;
 
         public LoggerTests()
         {

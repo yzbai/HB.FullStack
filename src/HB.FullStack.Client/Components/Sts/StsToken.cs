@@ -40,7 +40,7 @@ namespace HB.FullStack.Client.Components.Sts
 
     public static class StsTokenExtensions
     {
-        private static TimeSpan _gapTime = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan _gapTime = TimeSpan.FromMinutes(1);
 
         public static bool IsExpired(this StsToken token)
         {

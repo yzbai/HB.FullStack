@@ -7,11 +7,8 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.Shared
 {
-    public static class Conventions
+    public static partial class Conventions
     {
-
-        private const string RANDOM_NICK_NAME_REGEX = @"^User{1}\d{4,}$";
-
         public static string GetRandomNickName(string prefix = "User")
         {
             return prefix + TimeUtil.UtcNowUnixTimeMilliseconds;
@@ -19,12 +16,15 @@ namespace HB.FullStack.Common.Shared
 
         public static bool IsARandomNickName(string nickName)
         {
-            return nickName.IsNotNullOrEmpty() && Regex.IsMatch(nickName, RANDOM_NICK_NAME_REGEX);
+            return nickName.IsNotNullOrEmpty() && RandomNickNameRegex().IsMatch(nickName);
         }
 
         public static string GetLastUser(Guid? userId, string? mobile, string? clientId)
         {
             return $"u:{userId}-m:{mobile}-d:{clientId}";
         }
+
+        [GeneratedRegex("^User{1}\\d{4,}$")]
+        private static partial Regex RandomNickNameRegex();
     }
 }

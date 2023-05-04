@@ -12,7 +12,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
 {
     public class HybridWebViewClient : MauiWebViewClient
     {
-        private HybridWebViewHandler _handler;
+        private readonly HybridWebViewHandler _handler;
 
         public HybridWebViewClient(HybridWebViewHandler handler) : base(handler)
         {

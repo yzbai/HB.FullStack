@@ -22,7 +22,7 @@ namespace HB.FullStack.Cache
             return _defDict.GetOrAdd(type, type => CreateModelDef(type));
         }
 
-        private CacheModelDef? CreateModelDef(Type modelType)
+        private static CacheModelDef? CreateModelDef(Type modelType)
         {
             CacheModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheModelAttribute>();
 

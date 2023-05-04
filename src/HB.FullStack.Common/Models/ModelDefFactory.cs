@@ -6,7 +6,7 @@ namespace HB.FullStack.Common.Models
     internal class ModelDefFactory : IModelDefFactory
     {
         private readonly IEnumerable<IModelDefProvider> _providers;
-        private Dictionary<ModelKind, List<IModelDefProvider>> _providerDict = new Dictionary<ModelKind, List<IModelDefProvider>>();
+        private readonly Dictionary<ModelKind, List<IModelDefProvider>> _providerDict = new Dictionary<ModelKind, List<IModelDefProvider>>();
 
         public ModelDefFactory(IEnumerable<IModelDefProvider> providers)
         {

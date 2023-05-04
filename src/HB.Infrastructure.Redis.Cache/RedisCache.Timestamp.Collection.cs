@@ -260,8 +260,10 @@ return data[3]";
             {
                 //Prepare RedisKeys
                 int itemCount = itemKeys.Count();
-                List<RedisKey> redisKeys = new List<RedisKey>(itemCount + 1);
-                redisKeys[0] = GetRealKey("", collectionKey);
+                List<RedisKey> redisKeys = new List<RedisKey>(itemCount + 1)
+                {
+                    [0] = GetRealKey("", collectionKey)
+                };
 
                 foreach (var itemKey in itemKeys)
                 {

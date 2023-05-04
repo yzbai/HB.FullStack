@@ -83,7 +83,7 @@ namespace System
         /// <param name="seprator"></param>
         /// <returns></returns>
 
-        [return: NotNullIfNotNull("ts")]
+        [return: NotNullIfNotNull(nameof(ts))]
         public static string? ToJoinedString(this IEnumerable? ts, string? seprator, string? nullReplacement = null)
         {
             if (ts == null)

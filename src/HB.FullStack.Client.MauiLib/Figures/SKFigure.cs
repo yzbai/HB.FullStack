@@ -291,7 +291,7 @@ namespace HB.FullStack.Client.MauiLib.Figures
 
                         CancelLongTap(args);
 
-                        figureTouchInfo.FirstMove = figureTouchInfo.FirstMove == null ? true : false;
+                        figureTouchInfo.FirstMove = figureTouchInfo.FirstMove == null;
 
                         if (_fingerTouchInfos.Count == 1)
                         {

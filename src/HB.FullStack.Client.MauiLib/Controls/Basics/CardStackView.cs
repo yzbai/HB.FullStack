@@ -118,7 +118,7 @@ namespace HB.FullStack.Client.MauiLib.Controls
 
             //交换
             _cards[index] = _lastCard;
-            _cards[_cards.Count - 1] = card;
+            _cards[^1] = card;
 
             _root.Children.Clear();
 

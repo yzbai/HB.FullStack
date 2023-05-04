@@ -9,7 +9,7 @@ namespace HB.FullStack.Client.MauiLib.Platforms
 {
     public class DebugOnlyHttpMessageHandler : HttpClientHandler
     {
-        private string _bypassHost;
+        private readonly string _bypassHost;
         public DebugOnlyHttpMessageHandler(string bypassHost)
         {
             _bypassHost = bypassHost;
