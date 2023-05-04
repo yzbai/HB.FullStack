@@ -175,7 +175,7 @@ namespace HB.FullStack.Client.Base
             }
 
             //如果没有联网，但允许离线读，被迫使用离线数据
-            if (!_clientEvents.NetworkIsReady)
+            if (!_clientEvents.ServerConnected)
             {
                 if (ClientModelSetting.AllowOfflineRead)
                 {
@@ -238,7 +238,7 @@ namespace HB.FullStack.Client.Base
 
             try
             {
-                if (!_clientEvents.NetworkIsReady)
+                if (!_clientEvents.ServerConnected)
                 {
                     if (ClientModelSetting.AllowOfflineAdd)
                     {
@@ -277,7 +277,7 @@ namespace HB.FullStack.Client.Base
 
             try
             {
-                if (!_clientEvents.NetworkIsReady)
+                if (!_clientEvents.ServerConnected)
                 {
                     if (ClientModelSetting.AllowOfflineUpdate)
                     {
@@ -309,7 +309,7 @@ namespace HB.FullStack.Client.Base
 
             try
             {
-                if (!_clientEvents.NetworkIsReady)
+                if (!_clientEvents.ServerConnected)
                 {
                     if (ClientModelSetting.AllowOfflineDelete)
                     {

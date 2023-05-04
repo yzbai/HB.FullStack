@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
+
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client.Components.HealthCheck;
 using HB.FullStack.Common;
+using HB.FullStack.Common.Shared;
 
 using Microsoft.Maui.Networking;
-
-using static Microsoft.Maui.ApplicationModel.Permissions;
 
 namespace HB.FullStack.Client.MauiLib
 {
@@ -19,12 +18,18 @@ namespace HB.FullStack.Client.MauiLib
     public class MauiClientEvents : IClientEvents
     {
         private readonly WeakAsyncEventManager _eventManager = new WeakAsyncEventManager();
+        private readonly IApiClient _apiClient;
+
+        public MauiClientEvents(IApiClient apiClient)
+        {
+            _apiClient = apiClient;
+        }
 
         public void Initialize()
         {
             Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
 
-            OnNetworkChanged(Connectivity.Current.NetworkAccess);
+            OnNetworkChangedAsync().SafeFireAndForget();
         }
 
         public void Close()
@@ -34,51 +39,53 @@ namespace HB.FullStack.Client.MauiLib
 
         #region Network
 
-        public bool NetworkIsReady => Connectivity.Current.NetworkAccess == NetworkAccess.Internet;
+        public bool ServerConnected { get; set; }
 
-        public event Func<Task>? NetworkResumed
+        public event Func<Task>? ServerConnectResumed
         {
-            add => _eventManager.Add(value, nameof(NetworkResumed));
-            remove => _eventManager.Remove(value, nameof(NetworkResumed));
+            add => _eventManager.Add(value, nameof(ServerConnectResumed));
+            remove => _eventManager.Remove(value, nameof(ServerConnectResumed));
         }
 
-        public event Func<Task>? NetworkFailed
+        public event Func<Task>? ServerConnectFailed
         {
-            add => _eventManager.Add(value, nameof(NetworkFailed));
-            remove => _eventManager.Remove(value, nameof(NetworkFailed));
+            add => _eventManager.Add(value, nameof(ServerConnectFailed));
+            remove => _eventManager.Remove(value, nameof(ServerConnectFailed));
         }
 
-        private void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
+        public async Task OnServerConnectResumed()
         {
-            OnNetworkChanged(e.NetworkAccess);
+            await _eventManager.RaiseEventAsync(nameof(ServerConnectResumed));
         }
 
-        private void OnNetworkChanged(NetworkAccess networkAccess)
+        public async Task OnServerConnectFailed()
         {
-            if (networkAccess == NetworkAccess.Internet)
+            await _eventManager.RaiseEventAsync(nameof(ServerConnectFailed));
+        }
+
+        private async void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
+        {
+            await OnNetworkChangedAsync();
+        }
+
+        private async Task OnNetworkChangedAsync()
+        {
+            if (Connectivity.Current.NetworkAccess != NetworkAccess.None)
             {
-                OnNetworkResumed().SafeFireAndForget(ex =>
-                {
-                    //TODO: Deal with this
-                });
-            }
-            else
-            {
-                OnNetworkFailed().SafeFireAndForget(ex =>
-                {
-                    //TODO: Deal with this
-                });
-            }
-        }
+                ServerHealthRes? res = await _apiClient.GetAsync<ServerHealthRes>(new ServerHealthGetRequest());
 
-        public async Task OnNetworkResumed()
-        {
-            await _eventManager.RaiseEventAsync(nameof(NetworkResumed));
-        }
+                if (res?.ServerHealthy == ServerHealthy.UP)
+                {
+                    ServerConnected = true;
+                    await OnServerConnectResumed();
+                    return;
+                }
+            }
 
-        public async Task OnNetworkFailed()
-        {
-            await _eventManager.RaiseEventAsync(nameof(NetworkFailed));
+            ServerConnected = false;
+            await OnServerConnectFailed();
+
+            //TODO: 每隔15s尝试一次
         }
 
         #endregion

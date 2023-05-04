@@ -19,18 +19,18 @@ namespace HB.FullStack.Client.Abstractions
     {
         void Initialize();
 
-        #region Device - Network(ServerConnection)
+        #region  ServerConnection
         
-        bool NetworkIsReady { get; }
+        bool ServerConnected { get; }
 
         //App启动，也会调用
-        event Func<Task>? NetworkResumed;
+        event Func<Task>? ServerConnectResumed;
 
-        event Func<Task>? NetworkFailed;
+        event Func<Task>? ServerConnectFailed;
 
-        Task OnNetworkResumed();
+        Task OnServerConnectResumed();
 
-        Task OnNetworkFailed();
+        Task OnServerConnectFailed();
 
         #endregion
 

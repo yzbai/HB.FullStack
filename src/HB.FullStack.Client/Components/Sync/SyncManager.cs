@@ -35,7 +35,7 @@ namespace HB.FullStack.Client.Components.Sync
 
         public void Initialize()
         {
-            _clientEvents.NetworkResumed += () => ReSyncAsync();
+            _clientEvents.ServerConnectResumed += () => ReSyncAsync();
         }
 
         //判断是否正在进行同步操作
@@ -48,7 +48,7 @@ namespace HB.FullStack.Client.Components.Sync
 
         public async Task ReSyncAsync()
         {
-            if (!_clientEvents.NetworkIsReady)
+            if (!_clientEvents.ServerConnected)
             {
                 return;
             }
