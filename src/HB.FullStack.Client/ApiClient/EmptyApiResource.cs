@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public class EmptyApiResource : ApiResource
+    public class EmptyApiResource : SharedResource
     {
         public static EmptyApiResource Value { get; }
 

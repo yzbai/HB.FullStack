@@ -5,18 +5,13 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using HB.FullStack.Common.Models;
-using HB.FullStack.Common.Shared.Context;
 
-namespace HB.FullStack.Common.Shared.Resources
+namespace HB.FullStack.Common.Shared
 {
-    public class UserProfileRes : ApiResource
+    public class UserProfileRes : SharedResource
     {
         public Guid Id { get; set; }
 

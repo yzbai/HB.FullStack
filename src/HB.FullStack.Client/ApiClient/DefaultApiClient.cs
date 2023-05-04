@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Models;
-using HB.FullStack.Common.Shared.Resources;
+
 
 using Microsoft.Extensions.Options;
 
@@ -64,7 +64,7 @@ namespace HB.FullStack.Client.ApiClient
 
                 void AddResEndpointsFromCode()
                 {
-                    IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(ApiResource)));
+                    IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(SharedResource)));
 
                     foreach (Type resType in resTypes)
                     {

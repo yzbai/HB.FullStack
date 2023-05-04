@@ -14,7 +14,7 @@ using HB.FullStack.Client.Components.Sms;
 using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Client.MauiLib.Controls;
 using HB.FullStack.Client.MauiLib.Startup;
-using HB.FullStack.Common.Shared.Resources;
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Common.Validate;
 
 using Microsoft.Extensions.Options;

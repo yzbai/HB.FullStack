@@ -23,7 +23,7 @@ namespace HB.FullStack.Client.ApiClient
             return request;
         }
 
-        public static GetRequest Include<TRes>(this GetRequest request) where TRes : ApiResource
+        public static GetRequest Include<TRes>(this GetRequest request) where TRes : SharedResource
         {
             return request.Include(typeof(TRes).Name);
         }
@@ -35,7 +35,7 @@ namespace HB.FullStack.Client.ApiClient
             return request;
         }
 
-        public static GetRequest OrderBy<T>(this GetRequest request, Expression<Func<T, object>> orderByExp) where T : ApiResource
+        public static GetRequest OrderBy<T>(this GetRequest request, Expression<Func<T, object>> orderByExp) where T : SharedResource
         {
 
             string orderByPropertyName = ((MemberExpression)orderByExp.Body).Member.Name;

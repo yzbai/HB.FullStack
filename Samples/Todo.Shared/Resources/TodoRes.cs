@@ -7,7 +7,7 @@ using HB.FullStack.Common.Models;
 
 namespace Todo.Shared.Resources
 {
-    public class TodoRes : ApiResource
+    public class TodoRes : SharedResource
     {
         public Guid Id { get; set; }
 

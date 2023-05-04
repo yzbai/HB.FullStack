@@ -18,7 +18,7 @@ namespace HB.FullStack.Client.MauiLib.Components
 {
     public static class ApiClientCaptchaExtensions
     {
-        public static async Task<T?> GetWithCaptchaCheckAsync<T>(this IApiClient apiClient, ApiRequest request, CancellationToken? cancellationToken = null) where T : ApiResource
+        public static async Task<T?> GetWithCaptchaCheckAsync<T>(this IApiClient apiClient, ApiRequest request, CancellationToken? cancellationToken = null) where T : SharedResource
         {
             try
             {

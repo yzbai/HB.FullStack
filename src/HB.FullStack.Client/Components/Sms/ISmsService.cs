@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
-using HB.FullStack.Common.Shared.Resources;
+
+using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.Components.Sms
 {

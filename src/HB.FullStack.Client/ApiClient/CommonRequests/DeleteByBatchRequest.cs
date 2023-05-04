@@ -11,7 +11,7 @@ namespace HB.FullStack.Client.ApiClient
     /// DELETE /Model/ByBatch
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class DeleteByBatchRequest<T> : ApiRequest where T : ApiResource
+    public sealed class DeleteByBatchRequest<T> : ApiRequest where T : SharedResource
     {
         [IdBarrier]
         [CollectionMemeberValidated(CanBeNullOrEmpty = false)]

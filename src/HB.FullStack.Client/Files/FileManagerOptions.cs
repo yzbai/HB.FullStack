@@ -18,7 +18,7 @@ namespace HB.FullStack.Client.Files
 {
     public class FileManagerOptions : IOptions<FileManagerOptions>
     {
-        //[ApiResource(Endpoints.MAIN_API, Versions.V1, ApiAuthType.Jwt, Names.AliyunStsTokens)]
+        //[SharedResource(Endpoints.MAIN_API, Versions.V1, ApiAuthType.Jwt, Names.AliyunStsTokens)]
 
         #region Aliyun
 

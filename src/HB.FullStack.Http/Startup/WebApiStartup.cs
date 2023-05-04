@@ -164,7 +164,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             services.AddSwaggerGen();
 
             //Healthy Check
-            services.AddHealthChecks();
+            //services.AddHealthChecks();
 
             //Proxy
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -286,7 +286,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             }
 
             //TODO: 使用RateLimiting
-            app.UseHealthChecks("/health");
+            //app.UseHealthChecks("/health");
 
             app
                 .UseExceptionController()

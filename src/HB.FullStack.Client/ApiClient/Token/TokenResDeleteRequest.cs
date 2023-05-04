@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Resources;
+
 
 namespace HB.FullStack.Client.ApiClient
 {

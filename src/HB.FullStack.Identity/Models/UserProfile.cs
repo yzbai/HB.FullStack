@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Context;
+
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models

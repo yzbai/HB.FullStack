@@ -4,7 +4,7 @@ using HB.FullStack.Common.Models;
 namespace HB.FullStack.CommonTests.Data
 {
 
-    public class BookRes : ApiResource
+    public class BookRes : SharedResource
     {
         public string? Name { get; set; }
 

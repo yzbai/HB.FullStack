@@ -1,9 +1,9 @@
 ﻿using System;
 using HB.FullStack.Common.Models;
 
-namespace HB.FullStack.Common.Shared.Resources
+namespace HB.FullStack.Common.Shared
 {
-    public class StsTokenRes : ApiResource
+    public class StsTokenRes : SharedResource
     {
         public Guid UserId { get; set; }
 

@@ -12,7 +12,7 @@ using AsyncAwaitBestPractices;
 
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Resources;
+
 
 namespace HB.FullStack.Client.ApiClient
 {

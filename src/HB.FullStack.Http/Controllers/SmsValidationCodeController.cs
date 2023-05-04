@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Server.Services;
 
 using Microsoft.AspNetCore.Authorization;

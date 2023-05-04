@@ -28,7 +28,7 @@ namespace HB.FullStack.CommonTests.ApiClient
         public async Task GetAsyncTest()
         {
             PreferenceProvider.OnTokenFetched(
-                new Common.Shared.Resources.TokenRes {
+                new Common.Shared.TokenRes {
                 UserId = Guid.NewGuid(),
                 TokenCreatedTime =  DateTimeOffset.Now,
                 Mobile = null,

@@ -13,7 +13,7 @@ using HB.FullStack.Client.Abstractions;
 
 namespace HB.FullStack.Client.Base
 {
-    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : ApiResource
+    public abstract class BaseFileRepo<TRes> : BaseRepo where TRes : SharedResource
     {
         public TokenRefreshHttpClientHandler AutoRefreshedHttpClientHandler { get; }
 

@@ -34,7 +34,7 @@ namespace HB.FullStack.Client.ApiClient
         public GetRequest(string resName) : base(resName, ApiMethod.Get, null, null) { }
     }
 
-    public class GetRequest<T> : GetRequest where T : ApiResource
+    public class GetRequest<T> : GetRequest where T : SharedResource
     {
         public GetRequest() : base(typeof(T).Name) { }
     }

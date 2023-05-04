@@ -9,7 +9,7 @@ namespace HB.FullStack.Server.WebLib
 {
 
     [ModelBinder(BinderType = typeof(FileUpdateServerSideRequestModelBinder))]
-    public class UploadServerSideRequest<T>  where T : ApiResource
+    public class UploadServerSideRequest<T>  where T : SharedResource
     {
         public UploadServerSideRequest() { }
 

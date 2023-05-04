@@ -17,7 +17,7 @@ using HB.FullStack.Database;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using HB.FullStack.Common.Shared.Resources;
+
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Files;

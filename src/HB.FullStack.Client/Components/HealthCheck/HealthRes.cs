@@ -8,7 +8,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Client.Components.HealthCheck
 {
-    public class HealthRes : ApiResource
+    public class HealthRes : SharedResource
     {
 
     }

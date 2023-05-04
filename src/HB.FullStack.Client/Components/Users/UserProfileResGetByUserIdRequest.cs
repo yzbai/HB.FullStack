@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Resources;
+
 
 namespace HB.FullStack.Client.Components.Users
 {

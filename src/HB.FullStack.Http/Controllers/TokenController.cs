@@ -9,7 +9,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.Shared;
-using HB.FullStack.Common.Shared.Resources;
 using HB.FullStack.Server.Identity;
 using HB.FullStack.Server.Identity.Context;
 using HB.FullStack.Server.Services;
