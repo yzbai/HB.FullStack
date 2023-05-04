@@ -85,10 +85,12 @@ namespace Todo.Client.MobileApp
                     },
                     apiClientOptions =>
                     {
-                        if (Currents.IsDebug)
-                        {
-                            apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
-                        }
+                        //if (Currents.IsDebug)
+                        //{
+                        //    apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
+                        //}
+
+                        apiClientOptions.HttpClientTimeout = TimeSpan.FromSeconds(10);
 
                         apiClientOptions.TokenSiteSetting = new SiteSetting
                         {

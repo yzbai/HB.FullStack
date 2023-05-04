@@ -9,8 +9,7 @@ using HB.FullStack.Client.Components.HealthCheck;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Shared;
 
-using IdentityLookup;
-
+using Microsoft.Maui.Dispatching;
 using Microsoft.Maui.Networking;
 
 namespace HB.FullStack.Client.MauiLib
@@ -41,6 +40,8 @@ namespace HB.FullStack.Client.MauiLib
 
         #region SeverConnection
 
+        private IDispatcherTimer? _serverConnectCheckTimer = null;
+
         public bool ServerConnected { get; set; }
 
         public event Func<Task>? ServerConnectResumed
@@ -57,17 +58,49 @@ namespace HB.FullStack.Client.MauiLib
 
         private async Task OnServerConnectResumed()
         {
+            if (_serverConnectCheckTimer != null)
+            {
+                _serverConnectCheckTimer.Stop();
+                _serverConnectCheckTimer = null;
+            }
+
             ServerConnected = true;
             await _eventManager.RaiseEventAsync(nameof(ServerConnectResumed));
         }
+
+        private readonly object _lockObj = new object();
 
         private async Task OnServerConnectFailed()
         {
             ServerConnected = false;
             await _eventManager.RaiseEventAsync(nameof(ServerConnectFailed));
 
-            //Start to monitor the network
-             Currents.Dispatcher.CreateTimer();
+            //TODO: Start to monitor the network
+
+            if (_serverConnectCheckTimer == null)
+            {
+                lock (_lockObj)
+                {
+                    if (_serverConnectCheckTimer == null)
+                    {
+                        _serverConnectCheckTimer = Currents.Page.Dispatcher.CreateTimer();
+
+                        _serverConnectCheckTimer.Interval = TimeSpan.FromSeconds(15);
+                        _serverConnectCheckTimer.IsRepeating = true;
+                        _serverConnectCheckTimer.Tick += async (_, _) =>
+                        {
+                            bool connected = await TryConnectServerAsync();
+
+                            if(connected)
+                            {
+                                await OnServerConnectResumed();
+                            }
+                        };
+
+                        _serverConnectCheckTimer.Start();
+                    }
+                }
+            }
         }
 
         private async void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
@@ -75,7 +108,7 @@ namespace HB.FullStack.Client.MauiLib
             await OnNetworkChangedAsync();
         }
 
-        private async Task OnNetworkChangedAsync()
+        private async Task<bool> TryConnectServerAsync()
         {
             if (Connectivity.Current.NetworkAccess != NetworkAccess.None)
             {
@@ -85,21 +118,38 @@ namespace HB.FullStack.Client.MauiLib
 
                     if (res?.ServerHealthy == ServerHealthy.UP)
                     {
-                        await OnServerConnectResumed();
-                        return;
+                        return true;
                     }
                 }
-                catch 
+                catch
                 {
-                    await OnServerConnectFailed(); 
-                    return;
+                    return false;
                 }
             }
 
-            await OnServerConnectFailed();
-
-            //TODO: 每隔15s尝试一次
+            return false;
         }
+
+        private async Task OnNetworkChangedAsync()
+        {
+
+            bool connected = await TryConnectServerAsync();
+
+            if (connected)
+            {
+                await OnServerConnectResumed();
+            }
+            else
+            {
+                await OnServerConnectFailed();
+            }
+        }
+
+        public async Task ReportServerConnectFailedAsync()
+        {
+            await OnServerConnectFailed();
+        }
+
 
         #endregion
 

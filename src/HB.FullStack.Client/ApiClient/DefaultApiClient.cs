@@ -256,7 +256,7 @@ namespace HB.FullStack.Client.ApiClient
 
             HttpClient httpClient = _httpClientFactory.CreateClient(httpClientName);
 
-            httpClient.Timeout = ApiClientOptions.HttpClientTimeout;
+            //httpClient.Timeout = ApiClientOptions.HttpClientTimeout;
 
             return httpClient;
         }

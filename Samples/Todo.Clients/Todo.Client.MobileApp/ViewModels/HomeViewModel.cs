@@ -12,6 +12,7 @@ using HB.FullStack.Client.MauiLib.Base;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.ApplicationModel;
 
 namespace Todo.Client.MobileApp.ViewModels
 {
@@ -48,6 +49,12 @@ namespace Todo.Client.MobileApp.ViewModels
             }
 
             await NavigationHelper.GotoLoginPageAsync();
+        }
+
+        [RelayCommand]
+        private void ShowSettingsUI()
+        {
+            AppInfo.Current.ShowSettingsUI();
         }
     }
 }

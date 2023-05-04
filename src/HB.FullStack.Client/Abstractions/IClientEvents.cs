@@ -28,7 +28,7 @@ namespace HB.FullStack.Client.Abstractions
 
         event Func<Task>? ServerConnectFailed;
 
-        void ReportServerConnectFailed();
+        Task ReportServerConnectFailedAsync();
 
         #endregion
 

@@ -120,7 +120,8 @@ namespace HB.FullStack.Client.MauiLib
 
         public static INavigation Navigation => Shell.Current.Navigation;
 
-        public static IDispatcher Dispatcher => Page.Dispatcher;
+        //https://github.com/dotnet/maui/discussions/7518
+        //public static IDispatcher Dispatcher => Page.Dispatcher;
 
         public static PopupSizeConstants PopupSizeConstants => _popupSizeConstants ??= Services.GetRequiredService<PopupSizeConstants>();
 

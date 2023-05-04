@@ -26,6 +26,7 @@ namespace HB.FullStack.Client.MauiLib.Components
     {
         private readonly ISmsService _smsService;
         private readonly IUserService _userService;
+        private readonly IDispatcher _dispatcher;
         private bool _isAppearing;
 
         [ObservableProperty]
@@ -40,10 +41,11 @@ namespace HB.FullStack.Client.MauiLib.Components
         [ObservableProperty]
         private int _countingDownNumber = 60;
 
-        public SmsVerifyViewModel(ISmsService smsService, IUserService userService)
+        public SmsVerifyViewModel(ISmsService smsService, IUserService userService, IDispatcher dispatcher)
         {
             _smsService = smsService;
             _userService = userService;
+            _dispatcher = dispatcher;
         }
 
         public override Task OnPageAppearingAsync()
@@ -117,7 +119,7 @@ namespace HB.FullStack.Client.MauiLib.Components
         {
             CountingDownNumber = 60;
 
-            Currents.Dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
+            _dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
                 CountingDownNumber--;
 

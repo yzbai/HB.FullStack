@@ -45,6 +45,12 @@
                 Command="{Binding LogoutCommand}"
                 HorizontalOptions="Center"
                 Text="Logout" />
+
+            <Button
+                x:Name="ShowSettingsUI"
+                Command="{Binding ShowSettingsUICommand}"
+                HorizontalOptions="Center"
+                Text="Show Settings UI" />
         </VerticalStackLayout>
     </ScrollView>
 </base:BasePage>
