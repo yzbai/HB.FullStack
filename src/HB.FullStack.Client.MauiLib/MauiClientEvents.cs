@@ -9,6 +9,8 @@ using HB.FullStack.Client.Components.HealthCheck;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Shared;
 
+using IdentityLookup;
+
 using Microsoft.Maui.Networking;
 
 namespace HB.FullStack.Client.MauiLib
@@ -37,7 +39,7 @@ namespace HB.FullStack.Client.MauiLib
             Connectivity.ConnectivityChanged -= Connectivity_ConnectivityChanged;
         }
 
-        #region Network
+        #region SeverConnection
 
         public bool ServerConnected { get; set; }
 
@@ -53,14 +55,19 @@ namespace HB.FullStack.Client.MauiLib
             remove => _eventManager.Remove(value, nameof(ServerConnectFailed));
         }
 
-        public async Task OnServerConnectResumed()
+        private async Task OnServerConnectResumed()
         {
+            ServerConnected = true;
             await _eventManager.RaiseEventAsync(nameof(ServerConnectResumed));
         }
 
-        public async Task OnServerConnectFailed()
+        private async Task OnServerConnectFailed()
         {
+            ServerConnected = false;
             await _eventManager.RaiseEventAsync(nameof(ServerConnectFailed));
+
+            //Start to monitor the network
+             Currents.Dispatcher.CreateTimer();
         }
 
         private async void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
@@ -72,17 +79,23 @@ namespace HB.FullStack.Client.MauiLib
         {
             if (Connectivity.Current.NetworkAccess != NetworkAccess.None)
             {
-                ServerHealthRes? res = await _apiClient.GetAsync<ServerHealthRes>(new ServerHealthGetRequest());
-
-                if (res?.ServerHealthy == ServerHealthy.UP)
+                try
                 {
-                    ServerConnected = true;
-                    await OnServerConnectResumed();
+                    ServerHealthRes? res = await _apiClient.GetAsync<ServerHealthRes>(new ServerHealthGetRequest());
+
+                    if (res?.ServerHealthy == ServerHealthy.UP)
+                    {
+                        await OnServerConnectResumed();
+                        return;
+                    }
+                }
+                catch 
+                {
+                    await OnServerConnectFailed(); 
                     return;
                 }
             }
 
-            ServerConnected = false;
             await OnServerConnectFailed();
 
             //TODO: 每隔15s尝试一次

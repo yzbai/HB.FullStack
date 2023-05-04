@@ -52,9 +52,11 @@
 	<ItemGroup>
 	  <None Remove="ConstantSettings.Debug.json" />
 	  <None Remove="ConstantSettings.json" />
+	  <None Remove="ConstantSettings.Release.json" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="ConstantSettings.Release.json" />
 	  <EmbeddedResource Include="ConstantSettings.Debug.json" />
 	  <EmbeddedResource Include="ConstantSettings.json" />
 	</ItemGroup>

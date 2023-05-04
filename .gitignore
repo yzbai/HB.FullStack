@@ -355,3 +355,5 @@ src/Directory.Build.props
 src/Directory.Build.props
 *.props
 /Samples/Todo.Clients/Todo.Client.MobileApp/ConstantSettings.Debug.json
+/Samples/Todo.Clients/Todo.Client.MobileApp/ConstantSettingsRelease.json
+/Samples/Todo.Clients/Todo.Client.MobileApp/ConstantSettings.Release.json

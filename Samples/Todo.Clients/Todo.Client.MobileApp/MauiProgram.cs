@@ -133,10 +133,10 @@ namespace Todo.Client.MobileApp
             {
                 Assembly assembly = Assembly.GetExecutingAssembly();
 
-                using Stream appsettingsStream = assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.json").ThrowIfNull("no appsettings.json");
+                using Stream appsettingsStream = assembly.GetManifestResourceStream("Todo.Client.MobileApp.ConstantSettings.json").ThrowIfNull("no ConstantSettings.json");
                 using Stream? appsettingsDevelopmentStream = Currents.IsDebug ?
-                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Debug.json") :
-                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Release.json");
+                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.ConstantSettings.Debug.json") :
+                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.ConstantSettings.Release.json");
 
                 var configBuilder = new ConfigurationBuilder().AddJsonStream(appsettingsStream);
 
