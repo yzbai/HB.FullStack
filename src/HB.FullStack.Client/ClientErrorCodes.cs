@@ -59,7 +59,7 @@ namespace System
     {
         public static Exception AliyunStsTokenReturnNull()
         {
-            ClientException exception = new ClientException(ErrorCodes.AliyunStsTokenReturnNull, "AliyunStsTokenReturnNull");
+            ClientException exception = new ClientException(ErrorCodes.DirectoryTokenNotFound, "AliyunStsTokenReturnNull");
 
             return exception;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 
+using HB.FullStack.Server.WebLib.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,13 +25,14 @@ namespace HB.FullStack.Server.WebLib.Startup
         public bool UseAliyunSms { get; set; } = true;
 
         public Action<InitServiceOptions> ConfigureInitHostedServiceOptions { get; set; }
-
+        public Action<DirectoryTokenOptions> ConfigureDirectoryTokenOptions { get; }
         public Action<IServiceCollection> ConfigureServices { get; set; }
 
-        public WebApiStartupSettings(Action<IServiceCollection> configureServices, Action<InitServiceOptions> configureInitializationOptions)
+        public WebApiStartupSettings(Action<IServiceCollection> configureServices, Action<InitServiceOptions> configureInitializationOptions, Action<DirectoryTokenOptions> configureDirectoryTokenOptions)
         {
             ConfigureServices = configureServices;
             ConfigureInitHostedServiceOptions = configureInitializationOptions;
+            ConfigureDirectoryTokenOptions = configureDirectoryTokenOptions;
         }
 
     }

@@ -134,6 +134,9 @@ namespace HB.FullStack.Server.WebLib.Startup
                 services.AddAliyunSms(Configuration.GetSection(AliyunSms));
             }
 
+            //Direcotry
+
+
             //DataProtection
             services.AddDataProtectionWithCertInRedis(settings => Configuration.GetSection(DataProtection).Bind(settings));
 

@@ -50,15 +50,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="appsettings.json" />
 	  <None Remove="ConstantSettings.Debug.json" />
-	  <None Remove="ConstantSettings.json" />
 	  <None Remove="ConstantSettings.Release.json" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="ConstantSettings.Release.json" />
-	  <EmbeddedResource Include="ConstantSettings.Debug.json" />
-	  <EmbeddedResource Include="ConstantSettings.json" />
+	  <EmbeddedResource Include="appsettings.Release.json" />
+	  <EmbeddedResource Include="appsettings.Debug.json" />
+	  <EmbeddedResource Include="appsettings.json" />
 	</ItemGroup>
 
 	<ItemGroup>

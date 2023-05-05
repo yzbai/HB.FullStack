@@ -16,7 +16,7 @@ namespace Todo.Shared
         /// <summary>
         /// 有哪些目录权限
         /// </summary>
-        public static class DirectoryPermissions
+        public static class Permissions
         {
             public static readonly DirectoryPermission PUBLIC = new DirectoryPermission
             {
@@ -41,7 +41,7 @@ namespace Todo.Shared
             public static readonly DirectoryPermission CUSTOMERPRIVATE = new DirectoryPermission
             {
                 PermissionName = nameof(CUSTOMERPRIVATE),
-                TopDirectory = "customerprivate" + AliyunOssDirectorySeparatorChar + "{USER_ID_PLACE_HOLDER}",
+                TopDirectory = "customerprivate/{USER_ID_PLACE_HOLDER}",
                 //Regex = "^customerprivate[/\\]{USER_ID_PLACE_HOLDER}[/\\].*$",
                 ReadUserLevels = new List<string> { nameof(UserLevel.Normal), nameof(UserLevel.Vip) },
                 WriteUserLevels = new List<string> { nameof(UserLevel.Normal), nameof(UserLevel.Vip) },
@@ -69,49 +69,49 @@ namespace Todo.Shared
             {
                 DirectoryName = nameof(PUBLIC),
                 DirectoryPath = "public",
-                DirectoryPermissionName = DirectoryPermissions.PUBLIC.PermissionName,
+                DirectoryPermissionName = Permissions.PUBLIC.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(10)
             };
             public static readonly DirectoryDescription PUBLIC_AVATAR = new DirectoryDescription
             {
                 DirectoryName = nameof(PUBLIC_AVATAR),
                 DirectoryPath = "public" + Path.DirectorySeparatorChar + "avator",
-                DirectoryPermissionName = DirectoryPermissions.PUBLIC.PermissionName,
+                DirectoryPermissionName = Permissions.PUBLIC.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(1)
             };
             public static readonly DirectoryDescription CUSTOMER = new DirectoryDescription
             {
                 DirectoryName = nameof(CUSTOMER),
                 DirectoryPath = "customer",
-                DirectoryPermissionName = DirectoryPermissions.CUSTOMER.PermissionName,
+                DirectoryPermissionName = Permissions.CUSTOMER.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(10)
             };
             public static readonly DirectoryDescription CUSTOMER_TEMP = new DirectoryDescription
             {
                 DirectoryName = nameof(CUSTOMER_TEMP),
                 DirectoryPath = "customer" + Path.DirectorySeparatorChar + "temp",
-                DirectoryPermissionName = DirectoryPermissions.CUSTOMER.PermissionName,
+                DirectoryPermissionName = Permissions.CUSTOMER.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(10)
             };
             public static readonly DirectoryDescription SYSTEM = new DirectoryDescription
             {
                 DirectoryName = nameof(SYSTEM),
                 DirectoryPath = "system",
-                DirectoryPermissionName = DirectoryPermissions.CUSTOMER.PermissionName,
+                DirectoryPermissionName = Permissions.CUSTOMER.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(1)
             };
             public static readonly DirectoryDescription SYSTEM_THEME = new DirectoryDescription
             {
                 DirectoryName = nameof(SYSTEM_THEME),
                 DirectoryPath = "system" + Path.DirectorySeparatorChar + "theme",
-                DirectoryPermissionName = DirectoryPermissions.CUSTOMER.PermissionName,
+                DirectoryPermissionName = Permissions.CUSTOMER.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(1)
             };
             public static readonly DirectoryDescription CUSTOMERPRIVATE = new DirectoryDescription
             {
                 DirectoryName = nameof(CUSTOMERPRIVATE),
                 DirectoryPath = "customerprivate" + Path.DirectorySeparatorChar + "{USER_ID_PLACE_HOLDER}",
-                DirectoryPermissionName = DirectoryPermissions.CUSTOMERPRIVATE.PermissionName,
+                DirectoryPermissionName = Permissions.CUSTOMERPRIVATE.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(1),
                 IsPathContainsPlaceHolder = true,
                 PlaceHolderName = "{USER_ID_PLACE_HOLDER}"
@@ -120,11 +120,12 @@ namespace Todo.Shared
             {
                 DirectoryName = nameof(CUSTOMERPRIVATE_TEMP),
                 DirectoryPath = "customerprivate" + Path.DirectorySeparatorChar + "{USER_ID_PLACE_HOLDER}" + Path.DirectorySeparatorChar + "temp",
-                DirectoryPermissionName = DirectoryPermissions.CUSTOMERPRIVATE.PermissionName,
+                DirectoryPermissionName = Permissions.CUSTOMERPRIVATE.PermissionName,
                 ExpiryTime = TimeSpan.FromMinutes(1),
                 IsPathContainsPlaceHolder = true,
                 PlaceHolderName = "{USER_ID_PLACE_HOLDER}"
             };
+
             public static readonly IList<DirectoryDescription> All = new List<DirectoryDescription>
             {
                 PUBLIC,
@@ -141,17 +142,17 @@ namespace Todo.Shared
             };
         }
 
-        #region Directories - for easy use
+        public static class Directories
+        {
+            public static readonly Directory2 PUBLIC = Descriptions.PUBLIC.ToDirectory(null);
+            public static readonly Directory2 PUBLIC_AVATAR = Descriptions.PUBLIC_AVATAR.ToDirectory(null);
+            public static readonly Directory2 CUSTOMER = Descriptions.CUSTOMER.ToDirectory(null);
+            public static readonly Directory2 CUSTOMER_TEMP = Descriptions.CUSTOMER_TEMP.ToDirectory(null);
+            public static readonly Directory2 SYSTEM = Descriptions.SYSTEM.ToDirectory(null);
+            public static readonly Directory2 SYSTEM_THEME = Descriptions.SYSTEM_THEME.ToDirectory(null);
+            public static Directory2 CUSTOMERPRIVATE(Guid? userId) => Descriptions.CUSTOMERPRIVATE.ToDirectory(userId?.ToString());
+            public static Directory2 CUSTOMERPRIVATE_TEMP(Guid? userId) => Descriptions.CUSTOMERPRIVATE_TEMP.ToDirectory(userId?.ToString());
 
-        public static readonly Directory2 PUBLIC = Descriptions.PUBLIC.ToDirectory(null);
-        public static readonly Directory2 PUBLIC_AVATAR = Descriptions.PUBLIC_AVATAR.ToDirectory(null);
-        public static readonly Directory2 CUSTOMER = Descriptions.CUSTOMER.ToDirectory(null);
-        public static readonly Directory2 CUSTOMER_TEMP = Descriptions.CUSTOMER_TEMP.ToDirectory(null);
-        public static readonly Directory2 SYSTEM = Descriptions.SYSTEM.ToDirectory(null);
-        public static readonly Directory2 SYSTEM_THEME = Descriptions.SYSTEM_THEME.ToDirectory(null);
-        public static Directory2 CUSTOMERPRIVATE(Guid? userId) => Descriptions.CUSTOMERPRIVATE.ToDirectory(userId?.ToString());
-        public static Directory2 CUSTOMERPRIVATE_TEMP(Guid? userId) => Descriptions.CUSTOMERPRIVATE_TEMP.ToDirectory(userId?.ToString());
-
-        #endregion
+        }
     }
 }

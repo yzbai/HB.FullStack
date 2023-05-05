@@ -20,24 +20,23 @@ using Microsoft.Extensions.Options;
 
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Abstractions;
-using HB.FullStack.Client.Files;
 using HB.FullStack.Common.Shared;
 
-namespace HB.FullStack.Client.Components.Sts
+namespace HB.FullStack.Client.Files
 {
-    public class StsTokenRepo : BaseRepo<StsToken>
+    public class DirectoryTokenRepo : BaseRepo<DirectoryToken>
     {
-        private readonly ILogger<StsTokenRepo> _logger;
+        private readonly ILogger<DirectoryTokenRepo> _logger;
         private readonly FileManagerOptions _fileManagerOptions;
         private static readonly SemaphoreSlim _getStsTokenSemaphore = new SemaphoreSlim(1, 1);
 
         //TODO:有必要使用类似MonkeyCache全局Cache吗？
-        private readonly Dictionary<(string, bool, string?), StsToken?> _cachedAliyunStsTokenDict = new Dictionary<(string, bool, string?), StsToken?>();
+        private readonly Dictionary<(string, bool, string?), DirectoryToken?> _cachedDirectoryTokenDict = new Dictionary<(string, bool, string?), DirectoryToken?>();
 
         private readonly IDictionary<string, DirectoryPermission> _directoryPermissions = null!;
 
-        public StsTokenRepo(
-            ILogger<StsTokenRepo> logger,
+        public DirectoryTokenRepo(
+            ILogger<DirectoryTokenRepo> logger,
             IOptions<FileManagerOptions> fileManagerOptions,
             IClientModelSettingFactory clientModelSettingFactory,
             IDatabase database,
@@ -55,24 +54,24 @@ namespace HB.FullStack.Client.Components.Sts
 
         #region Overrides
 
-        protected override async Task<IEnumerable<StsToken>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request)
+        protected override async Task<IEnumerable<DirectoryToken>> GetFromRemoteAsync(IApiClient apiClient, ApiRequest request)
         {
-            if (request.ResName != nameof(StsTokenRes))
+            if (request.ResName != nameof(DirectoryTokenRes))
             {
-                throw ClientExceptions.UnSupportedResToModel(resName: request.ResName, modelName: nameof(StsToken));
+                throw ClientExceptions.UnSupportedResToModel(resName: request.ResName, modelName: nameof(DirectoryToken));
             }
 
-            IEnumerable<StsTokenRes>? resources = await apiClient.GetAsync<IEnumerable<StsTokenRes>>(request);
+            IEnumerable<DirectoryTokenRes>? resources = await apiClient.GetAsync<IEnumerable<DirectoryTokenRes>>(request);
 
             if (resources.IsNullOrEmpty())
             {
-                return Enumerable.Empty<StsToken>();
+                return Enumerable.Empty<DirectoryToken>();
             }
 
             return resources.Select(Mapping.ToStsToken);
         }
 
-        protected override Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<StsToken> models)
+        protected override Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<DirectoryToken> models)
         {
             throw new NotImplementedException();
         }
@@ -82,14 +81,14 @@ namespace HB.FullStack.Client.Components.Sts
             throw new NotImplementedException();
         }
 
-        protected override Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<StsToken> models)
+        protected override Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<DirectoryToken> models)
         {
             throw new NotImplementedException();
         }
 
         #endregion
 
-        public async Task<StsToken?> GetByDirectoryPermissionNameAsync(
+        public async Task<DirectoryToken?> GetByDirectoryPermissionNameAsync(
             Guid? userId,
             string directoryPermissionName,
             bool needWritePermission,
@@ -122,7 +121,7 @@ namespace HB.FullStack.Client.Components.Sts
             //check 2 : UserLevel Check
             try
             {
-                if (_cachedAliyunStsTokenDict.TryGetValue((directoryPermissionName, needWritePermission, placeHolderValue), out StsToken? cachedToken))
+                if (_cachedDirectoryTokenDict.TryGetValue((directoryPermissionName, needWritePermission, placeHolderValue), out DirectoryToken? cachedToken))
                 {
                     if (cachedToken == null)
                     {
@@ -142,24 +141,24 @@ namespace HB.FullStack.Client.Components.Sts
                         else
                         {
                             _logger.LogDebug("找到找到已经过期的 AliyunStsToken缓存，移除。 directoryPermissionName: {DirectoryPermissionName}, needWrite:{DirectoryPermissionName}", directoryPermissionName, needWritePermission);
-                            _cachedAliyunStsTokenDict.Remove((directoryPermissionName, needWritePermission, placeHolderValue));
+                            _cachedDirectoryTokenDict.Remove((directoryPermissionName, needWritePermission, placeHolderValue));
                         }
                     }
                 }
 
-                StsToken? token = await GetFirstOrDefaultAsync(
+                DirectoryToken? token = await GetFirstOrDefaultAsync(
                     localWhere: token => token.UserId == userId && token.DirectoryPermissionName == directoryPermissionName,
-                    remoteRequest: new StsTokenResGetByDirectoryPermissionNameRequest(directoryPermissionName, placeHolderValue, !needWritePermission),
+                    remoteRequest: new DirectoryTokenResGetByDirectoryPermissionNameRequest(directoryPermissionName, placeHolderValue, !needWritePermission),
                     transactionContext: transactionContext,
                     getMode: GetSetMode.Mixed,
                     ifUseLocalData: (_, tokens) =>
                     {
-                        StsToken? token = tokens.FirstOrDefault();
+                        DirectoryToken? token = tokens.FirstOrDefault();
 
                         return token != null && !token.IsExpired();
                     });
 
-                _cachedAliyunStsTokenDict[(directoryPermissionName, needWritePermission, placeHolderValue)] = token;
+                _cachedDirectoryTokenDict[(directoryPermissionName, needWritePermission, placeHolderValue)] = token;
 
                 return token;
             }
@@ -171,9 +170,9 @@ namespace HB.FullStack.Client.Components.Sts
 
         private class Mapping
         {
-            public static StsToken ToStsToken(StsTokenRes res)
+            public static DirectoryToken ToStsToken(DirectoryTokenRes res)
             {
-                return new StsToken
+                return new DirectoryToken
                 {
                     UserId = res.UserId,
                     SecurityToken = res.SecurityToken,

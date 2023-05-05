@@ -4,9 +4,9 @@ using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.Shared;
 
 
-namespace HB.FullStack.Client.Components.Sts
+namespace HB.FullStack.Client.Files
 {
-    public class StsTokenResGetByDirectoryPermissionNameRequest : ApiRequest //GetRequest<StsTokenRes>
+    public class DirectoryTokenResGetByDirectoryPermissionNameRequest : ApiRequest //GetRequest<DirectoryTokenRes>
     {
         [Required]
         [RequestQuery]
@@ -18,8 +18,8 @@ namespace HB.FullStack.Client.Components.Sts
         [RequestQuery]
         public bool ReadOnly { get; set; }
 
-        public StsTokenResGetByDirectoryPermissionNameRequest(string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly)
-            : base(nameof(StsTokenRes), ApiMethod.Get, null, SharedNames.Conditions.ByDirectoryPermissionName)
+        public DirectoryTokenResGetByDirectoryPermissionNameRequest(string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly)
+            : base(nameof(DirectoryTokenRes), ApiMethod.Get, null, SharedNames.Conditions.ByDirectoryPermissionName)
         {
             DirectoryPermissionName = directoryPermissionName;
             RegexPlaceHolderValue = regexPlaceHolderValue;

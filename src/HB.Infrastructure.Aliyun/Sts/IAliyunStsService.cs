@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using HB.FullStack.Server.Services;
+
 namespace HB.Infrastructure.Aliyun.Sts
 {
     public interface IAliyunStsService

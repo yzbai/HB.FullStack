@@ -64,7 +64,7 @@
         public static ErrorCode ClientError = new ErrorCode(nameof(ClientError), "");
         public static ErrorCode Timeout = new ErrorCode(nameof(Timeout), "");
         public static ErrorCode RequestCanceled = new ErrorCode(nameof(RequestCanceled), "");
-        public static ErrorCode AliyunStsTokenReturnNull = new ErrorCode(nameof(AliyunStsTokenReturnNull), "");
+        public static ErrorCode DirectoryTokenNotFound = new ErrorCode(nameof(DirectoryTokenNotFound), "");
         public static ErrorCode AliyunOssPutObjectError = new ErrorCode(nameof(AliyunOssPutObjectError), "");
         public static ErrorCode TokenRefreshError = new ErrorCode(nameof(TokenRefreshError), "");
         public static ErrorCode UserActivityFilterError = new ErrorCode(nameof(UserActivityFilterError), "");

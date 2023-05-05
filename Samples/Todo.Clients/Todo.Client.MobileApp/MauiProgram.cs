@@ -103,7 +103,7 @@ namespace Todo.Client.MobileApp
                         fileManagerOptions.AliyunOssEndpoint = constantSettings.ALIYUN_OSS_ENDPOINT;
                         fileManagerOptions.AliyunOssBucketName = constantSettings.ALIYUN_OSS_BUCKET_NAME;
                         fileManagerOptions.DirectoryDescriptions = DirectorySettings.Descriptions.All;
-                        fileManagerOptions.DirectoryPermissions = DirectorySettings.DirectoryPermissions.All;
+                        fileManagerOptions.DirectoryPermissions = DirectorySettings.Permissions.All;
                     },
                     clientOptions =>
                     {
@@ -135,10 +135,10 @@ namespace Todo.Client.MobileApp
             {
                 Assembly assembly = Assembly.GetExecutingAssembly();
 
-                using Stream appsettingsStream = assembly.GetManifestResourceStream("Todo.Client.MobileApp.ConstantSettings.json").ThrowIfNull("no ConstantSettings.json");
+                using Stream appsettingsStream = assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.json").ThrowIfNull("no appsettings.json");
                 using Stream? appsettingsDevelopmentStream = Currents.IsDebug ?
-                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.ConstantSettings.Debug.json") :
-                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.ConstantSettings.Release.json");
+                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Debug.json") :
+                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Release.json");
 
                 var configBuilder = new ConfigurationBuilder().AddJsonStream(appsettingsStream);
 

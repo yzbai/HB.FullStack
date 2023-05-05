@@ -1,9 +1,12 @@
 ﻿using System;
-using HB.FullStack.Common.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace HB.FullStack.Common.Shared
+namespace HB.FullStack.Server.WebLib.Services
 {
-    public class StsTokenRes : SharedResource
+    public class DirectoryToken
     {
         public Guid UserId { get; set; }
 
@@ -22,10 +25,5 @@ namespace HB.FullStack.Common.Shared
 
         public bool ReadOnly { get; set; }
 
-        //protected override int GetChildHashCode()
-        //{
-        //    return HashCode.Combine(UserId, SecurityToken, AccessKeyId, AccessKeySecret, ExpirationAt, DirectoryPermissionName, ReadOnly);
-        //}
     }
-
 }

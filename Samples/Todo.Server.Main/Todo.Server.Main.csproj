@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HB.FullStack.Http\HB.FullStack.Server.WebLib.csproj" />
+    <ProjectReference Include="..\Todo.Shared\Todo.Shared.csproj" />
   </ItemGroup>
 
 </Project>

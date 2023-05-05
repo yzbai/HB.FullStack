@@ -16,7 +16,6 @@ using Aliyun.OSS.Common.Authentication;
 
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Components.KVManager;
-using HB.FullStack.Client.Components.Sts;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
@@ -31,7 +30,7 @@ namespace HB.FullStack.Client.Files
         private readonly ILocalFileManager _localFileManager;
         private readonly ITokenPreferences _clientPreferences;
         private readonly IDbSimpleLocker _dbLocker;
-        private readonly StsTokenRepo _aliyunStsTokenRepo;
+        private readonly DirectoryTokenRepo _aliyunStsTokenRepo;
         private readonly FileManagerOptions _options;
         private readonly Dictionary<string, DirectoryDescription> _directories;
         private readonly ObjectPool<IOss> _ossPool;
@@ -42,7 +41,7 @@ namespace HB.FullStack.Client.Files
             ILocalFileManager localFileManager,
             ITokenPreferences preferenceProvider,
             IDbSimpleLocker dbLocker,
-            StsTokenRepo aliyunStsTokenRepo)
+            DirectoryTokenRepo aliyunStsTokenRepo)
         {
             _options = options.Value;
             _logger = logger;
@@ -59,7 +58,7 @@ namespace HB.FullStack.Client.Files
 
         private async Task<IOss> RentOssClientAsync(string directoryPermissionName, bool needWrite, string? placeHolderValue, bool recheckPermissionForced = false)
         {
-            StsToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryPermissionNameAsync(
+            DirectoryToken? stsToken = await _aliyunStsTokenRepo.GetByDirectoryPermissionNameAsync(
                 _clientPreferences.UserId,
                 directoryPermissionName,
                 needWrite,
