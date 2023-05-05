@@ -56,8 +56,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="appsettings.Release.json" />
-	  <EmbeddedResource Include="appsettings.Debug.json" />
+	  <EmbeddedResource Include="appsettings.Production.json" />
+	  <EmbeddedResource Include="appsettings.Development.json" />
 	  <EmbeddedResource Include="appsettings.json" />
 	</ItemGroup>
 

@@ -4,7 +4,9 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using CommunityToolkit.Maui;
@@ -12,6 +14,7 @@ using CommunityToolkit.Maui.Markup;
 
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.MauiLib.Components;
+using HB.FullStack.Common.Files;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 
@@ -22,22 +25,10 @@ using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.LifecycleEvents;
 
 using Todo.Shared;
+using Todo.Shared.Resources;
 
 namespace Todo.Client.MobileApp
 {
-    public class ConstantSettings
-    {
-        public string SITE_TODO_SERVER_MAIN { get; set; } = null!;
-        public string SITE_TODO_SERVER_MAIN_BASE_URL { get; set; } = null!;
-        public string DB_SCHEMA_MAIN { get; set; } = null!;
-        public string DB_SCHEMA_MAIN_FILE { get; set; } = null!;
-        public string DB_SCHEMA_USER { get; set; } = null!;
-        public string DB_SCHEMA_USER_FILE { get; set; } = null!;
-        public string ALIYUN_OSS_ENDPOINT { get; set; } = null!;
-        public string ALIYUN_OSS_BUCKET_NAME { get; set; } = null!;
-        public string TECENET_CAPTCHA_APP_ID { get; set; } = null!;
-    }
-
     /// <summary>
     /// 事件综合:
     /// 1. Application Events - PlatformApplication
@@ -56,7 +47,8 @@ namespace Todo.Client.MobileApp
     {
         public static MauiApp CreateMauiApp()
         {
-            ConstantSettings constantSettings = GetConstantSettings();
+            AppSettings appSettings = AppSettings.GetAppSettings(Currents.Environment);
+            SharedSettings sharedSettings = SharedSettings.GetSharedSettings(Currents.Environment);
 
             var builder = MauiApp.CreateBuilder();
             builder
@@ -69,14 +61,14 @@ namespace Todo.Client.MobileApp
                     {
                         dbOptions.DbSchemas.Add(new DbSchema
                         {
-                            Name = constantSettings.DB_SCHEMA_MAIN,
+                            Name = appSettings.DB_SCHEMA_MAIN,
                             EngineType = DbEngineType.SQLite,
                             Version = 1,
-                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.AppDataDirectory, constantSettings.DB_SCHEMA_MAIN_FILE)}")
+                            ConnectionString = new ConnectionString($"Data Source={Path.Combine(Currents.AppDataDirectory, appSettings.DB_SCHEMA_MAIN_FILE)}")
                         });
                         dbOptions.DbSchemas.Add(new DbSchema
                         {
-                            Name = constantSettings.DB_SCHEMA_USER,
+                            Name = appSettings.DB_SCHEMA_USER,
                             EngineType = DbEngineType.SQLite,
                             Version = 1
                             //不提供ConnectionString，在登录后再提供.每一个用户，一个数据库文件
@@ -94,20 +86,20 @@ namespace Todo.Client.MobileApp
 
                         apiClientOptions.TokenSiteSetting = new SiteSetting
                         {
-                            SiteName = constantSettings.SITE_TODO_SERVER_MAIN,
-                            BaseUrl = new Uri(constantSettings.SITE_TODO_SERVER_MAIN_BASE_URL)
+                            SiteName = appSettings.SITE_TODO_SERVER_MAIN,
+                            BaseUrl = new Uri(appSettings.SITE_TODO_SERVER_MAIN_BASE_URL)
                         };
                     },
                     fileManagerOptions =>
                     {
-                        fileManagerOptions.AliyunOssEndpoint = constantSettings.ALIYUN_OSS_ENDPOINT;
-                        fileManagerOptions.AliyunOssBucketName = constantSettings.ALIYUN_OSS_BUCKET_NAME;
-                        fileManagerOptions.DirectoryDescriptions = DirectorySettings.Descriptions.All;
-                        fileManagerOptions.DirectoryPermissions = DirectorySettings.Permissions.All;
+                        fileManagerOptions.AliyunOssEndpoint = appSettings.ALIYUN_OSS_ENDPOINT;
+                        fileManagerOptions.AliyunOssBucketName = appSettings.ALIYUN_OSS_BUCKET_NAME;
+                        fileManagerOptions.DirectoryDescriptions = sharedSettings.DirectoryDescriptions;
+                        fileManagerOptions.DirectoryPermissions = sharedSettings.DirectoryPermissions;
                     },
                     clientOptions =>
                     {
-                        clientOptions.AvatarDirectory = DirectorySettings.PUBLIC_AVATAR;
+                        clientOptions.AvatarDirectory = sharedSettings.DirectoryDescriptions.First(d => d.DirectoryName == "PUBLIC_AVATAR").ToDirectory(null);
                     },
                     mauiInitOptions =>
                     {
@@ -120,7 +112,7 @@ namespace Todo.Client.MobileApp
                             new IntroduceContent{ ImageSource="introduce_4.png", IsLastPage = true},
                         };
                     },
-                    tCaptchaAppId: constantSettings.TECENET_CAPTCHA_APP_ID)
+                    tCaptchaAppId: appSettings.TECENET_CAPTCHA_APP_ID)
                 .UseTodoApp(todoAppOptions => { })
                 .ConfigureLifecycleEvents(lifecycleBuilder => { })
                 .ConfigureFonts(fonts =>
@@ -130,29 +122,6 @@ namespace Todo.Client.MobileApp
                 });
 
             return builder.Build();
-
-            static ConstantSettings GetConstantSettings()
-            {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-
-                using Stream appsettingsStream = assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.json").ThrowIfNull("no appsettings.json");
-                using Stream? appsettingsDevelopmentStream = Currents.IsDebug ?
-                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Debug.json") :
-                    assembly.GetManifestResourceStream("Todo.Client.MobileApp.appsettings.Release.json");
-
-                var configBuilder = new ConfigurationBuilder().AddJsonStream(appsettingsStream);
-
-                if (appsettingsDevelopmentStream != null)
-                {
-                    configBuilder.AddJsonStream(appsettingsDevelopmentStream);
-                }
-
-                ConstantSettings configSettings = new ConstantSettings();
-
-                configBuilder.Build().Bind(configSettings);
-
-                return configSettings;
-            }
         }
 
         public static MauiAppBuilder UseTodoApp(this MauiAppBuilder builder, Action<TodoAppOptions> configTodoAppOptions)

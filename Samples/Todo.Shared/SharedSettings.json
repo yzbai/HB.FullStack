@@ -1,0 +1,100 @@
+{
+  "DirectoryDescriptions": [
+    {
+      "DirectoryName": "PUBLIC",
+      "DirectoryPath": "public",
+      "DirectoryPermissionName": "PUBLIC",
+      "ExpiryTime": "00:10:00",
+      "IsPathContainsPlaceHolder": false,
+      "PlaceHolderName": null
+    },
+    {
+      "DirectoryName": "PUBLIC_AVATAR",
+      "DirectoryPath": "public\\avator",
+      "DirectoryPermissionName": "PUBLIC",
+      "ExpiryTime": "00:01:00",
+      "IsPathContainsPlaceHolder": false,
+      "PlaceHolderName": null
+    },
+    {
+      "DirectoryName": "CUSTOMER",
+      "DirectoryPath": "customer",
+      "DirectoryPermissionName": "CUSTOMER",
+      "ExpiryTime": "00:10:00",
+      "IsPathContainsPlaceHolder": false,
+      "PlaceHolderName": null
+    },
+    {
+      "DirectoryName": "CUSTOMER_TEMP",
+      "DirectoryPath": "customer\\temp",
+      "DirectoryPermissionName": "CUSTOMER",
+      "ExpiryTime": "00:10:00",
+      "IsPathContainsPlaceHolder": false,
+      "PlaceHolderName": null
+    },
+    {
+      "DirectoryName": "SYSTEM",
+      "DirectoryPath": "system",
+      "DirectoryPermissionName": "CUSTOMER",
+      "ExpiryTime": "00:01:00",
+      "IsPathContainsPlaceHolder": false,
+      "PlaceHolderName": null
+    },
+    {
+      "DirectoryName": "SYSTEM_THEME",
+      "DirectoryPath": "system\\theme",
+      "DirectoryPermissionName": "CUSTOMER",
+      "ExpiryTime": "00:01:00",
+      "IsPathContainsPlaceHolder": false,
+      "PlaceHolderName": null
+    },
+    {
+      "DirectoryName": "CUSTOMERPRIVATE",
+      "DirectoryPath": "customerprivate\\{USER_ID_PLACE_HOLDER}",
+      "DirectoryPermissionName": "CUSTOMERPRIVATE",
+      "ExpiryTime": "00:01:00",
+      "IsPathContainsPlaceHolder": true,
+      "PlaceHolderName": "{USER_ID_PLACE_HOLDER}"
+    },
+    {
+      "DirectoryName": "CUSTOMERPRIVATE_TEMP",
+      "DirectoryPath": "customerprivate\\{USER_ID_PLACE_HOLDER}\\temp",
+      "DirectoryPermissionName": "CUSTOMERPRIVATE",
+      "ExpiryTime": "00:01:00",
+      "IsPathContainsPlaceHolder": true,
+      "PlaceHolderName": "{USER_ID_PLACE_HOLDER}"
+    }
+  ],
+  "DirectoryPermissions": [
+    {
+      "PermissionName": "PUBLIC",
+      "TopDirectory": "public",
+      "ReadUserLevels": [ "UnRegistered", "Normal", "Vip" ],
+      "WriteUserLevels": [ "UnRegistered", "Normal", "Vip" ],
+      "ExpiryTime": "01:00:00",
+      "ContainsPlaceHoder": false,
+      "PlaceHolderName": null,
+      "IsUserPrivate": false
+    },
+    {
+      "PermissionName": "CUSTOMER",
+      "TopDirectory": "customer",
+      "ReadUserLevels": [ "Normal", "Vip" ],
+      "WriteUserLevels": [ "Normal", "Vip" ],
+      "ExpiryTime": "01:00:00",
+      "ContainsPlaceHoder": false,
+      "PlaceHolderName": null,
+      "IsUserPrivate": false
+    },
+    {
+      "PermissionName": "CUSTOMERPRIVATE",
+      "TopDirectory": "customerprivate/{USER_ID_PLACE_HOLDER}",
+      "ReadUserLevels": [ "Normal", "Vip" ],
+      "WriteUserLevels": [ "Normal", "Vip" ],
+      "ExpiryTime": "01:00:00",
+      "ContainsPlaceHoder": true,
+      "PlaceHolderName": "{USER_ID_PLACE_HOLDER}",
+      "IsUserPrivate": true
+    }
+  ]
+}

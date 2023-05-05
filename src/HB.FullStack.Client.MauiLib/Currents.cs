@@ -30,8 +30,8 @@ namespace HB.FullStack.Client.MauiLib
     /// </summary>
     public static class Currents
     {
-        private const string DEBUG = nameof(DEBUG);
-        private const string RELEASE = nameof(RELEASE);
+        private const string Development = nameof(Development);
+        private const string Production = nameof(Production);
 
         //private static IConfiguration? _configuration;
         private static PopupSizeConstants? _popupSizeConstants;
@@ -40,46 +40,14 @@ namespace HB.FullStack.Client.MauiLib
 
         public static string Environment =>
 #if DEBUG
-    DEBUG;
+    Development;
 
 #endif
 #if RELEASE
-    RELEASE;
+    Production;
 #endif
 
-        public static bool IsDebug => Environment == DEBUG;
-
-        ///// <summary>
-        ///// 要确保在App项目中调用
-        ///// </summary>
-        //public static IConfiguration Configuration
-        //{
-        //    get
-        //    {
-        //        if (_configuration != null)
-        //        {
-        //            return _configuration;
-        //        }
-
-        //        string appsettingsFile = $"appsettings.{Environment}.json";
-        //        Assembly assembly = Assembly.GetCallingAssembly();
-
-        //        string fileName = $"{assembly.FullName!.Split(',')[0]}.{appsettingsFile}";
-
-        //        using Stream? resFileStream = assembly.GetManifestResourceStream(fileName);
-
-        //        IConfigurationBuilder builder = new ConfigurationBuilder();
-
-        //        if (resFileStream != null)
-        //        {
-        //            builder.AddJsonStream(resFileStream);
-        //        }
-
-        //        _configuration = builder.Build();
-
-        //        return _configuration;
-        //    }
-        //}
+        public static bool IsDevelopment => Environment == Development;
 
         public static IServiceProvider Services => IPlatformApplication.Current!.Services;
 

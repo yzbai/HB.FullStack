@@ -16,8 +16,8 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\HB.FullStack.Database\HB.FullStack.Database.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\HB.FullStack.Common\HB.FullStack.Common.csproj" />
+	</ItemGroup>
 
 </Project>
