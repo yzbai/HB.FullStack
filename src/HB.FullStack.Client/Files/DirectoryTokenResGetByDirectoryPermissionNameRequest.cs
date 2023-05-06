@@ -13,7 +13,7 @@ namespace HB.FullStack.Client.Files
         public string DirectoryPermissionName { get; set; } = null!;
 
         [RequestQuery]
-        public string? RegexPlaceHolderValue { get; set; }
+        public string? PlaceHolderValue { get; set; }
 
         [RequestQuery]
         public bool ReadOnly { get; set; }
@@ -22,7 +22,7 @@ namespace HB.FullStack.Client.Files
             : base(nameof(DirectoryTokenRes), ApiMethod.Get, null, SharedNames.Conditions.ByDirectoryPermissionName)
         {
             DirectoryPermissionName = directoryPermissionName;
-            RegexPlaceHolderValue = regexPlaceHolderValue;
+            PlaceHolderValue = regexPlaceHolderValue;
             ReadOnly = readOnly;
         }
     }

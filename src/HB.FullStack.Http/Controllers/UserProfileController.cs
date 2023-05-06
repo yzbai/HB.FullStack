@@ -45,7 +45,6 @@ namespace HB.FullStack.Server.WebLib.Controllers
             {
                 Id = obj.Id,
                 UserId = obj.UserId,
-                Level = obj.Level,
                 NickName = obj.NickName,
                 Gender = obj.Gender,
                 BirthDay = obj.BirthDay,

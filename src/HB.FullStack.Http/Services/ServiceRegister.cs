@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class StsTokenServiceServiceRegister
     {
-        public static IServiceCollection AddDirectoryTokenService(this IServiceCollection services, Action<DirectoryTokenOptions> configDirectoryOptions)
+        public static IServiceCollection AddDirectoryTokenService(this IServiceCollection services, Action<DirectoryOptions> configDirectoryOptions)
         {
             services.Configure(configDirectoryOptions);
 

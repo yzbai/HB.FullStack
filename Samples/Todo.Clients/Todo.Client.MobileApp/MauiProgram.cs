@@ -92,8 +92,8 @@ namespace Todo.Client.MobileApp
                     },
                     fileManagerOptions =>
                     {
-                        fileManagerOptions.AliyunOssEndpoint = appSettings.ALIYUN_OSS_ENDPOINT;
-                        fileManagerOptions.AliyunOssBucketName = appSettings.ALIYUN_OSS_BUCKET_NAME;
+                        fileManagerOptions.AliyunOssEndpoint = sharedSettings.AliyunOssEndpoint;
+                        fileManagerOptions.AliyunOssBucketName = sharedSettings.AliyunOssBucketName;
                         fileManagerOptions.DirectoryDescriptions = sharedSettings.DirectoryDescriptions;
                         fileManagerOptions.DirectoryPermissions = sharedSettings.DirectoryPermissions;
                     },

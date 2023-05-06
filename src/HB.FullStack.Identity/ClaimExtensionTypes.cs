@@ -2,9 +2,10 @@
 {
     public static class ClaimExtensionTypes
     {
+        
         //public const string ROLE = ClaimsIdentity.DefaultRoleClaimType;
 
-        public const string SIGN_IN_CREDENTIAL_ID = "HB.SignInCredentialId";
+        public const string TOKEN_CREDENTIAL_ID = "HB.TokenCredentialId";
 
 
         public const string SECURITY_STAMP = "HB.SecurityStamp";
@@ -17,6 +18,8 @@
         public const string CLIENT_ID = "HB.ClientId";
 
         public const string API_KEY_NAME = "HB.ApiKeyName";
+
+        public const string USER_LEVEL = "HB.UserLevel";
 
         //public const string Code = ClaimsIdentity.DefaultNameClaimType;
 

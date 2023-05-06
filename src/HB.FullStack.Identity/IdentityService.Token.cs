@@ -30,7 +30,7 @@ namespace HB.FullStack.Server.Identity
 
         private readonly UserRepo _userRepo;
         private readonly UserProfileRepo _userProfileRepo;
-        private readonly TokenCredentialRepo _signInCredentialRepo;
+        private readonly TokenCredentialRepo _tokenCredentialRepo;
         private readonly UserClaimRepo _userClaimRepo;
         private readonly LoginControlRepo _userLoginControlRepo;
         private readonly RoleRepo _roleRepo;
@@ -68,7 +68,7 @@ namespace HB.FullStack.Server.Identity
             _userProfileRepo = userProfileRepo;
             _userClaimRepo = userClaimRepo;
             _userLoginControlRepo = userLoginControlRepo;
-            _signInCredentialRepo = signInCredentialRepo;
+            _tokenCredentialRepo = signInCredentialRepo;
             _roleRepo = roleRepo;
             _userActivityModelRepo = userActivityModelRepo;
 
@@ -145,16 +145,16 @@ namespace HB.FullStack.Server.Identity
                     deviceType: context.DeviceInfos.Type
                 );
 
-                await _signInCredentialRepo.AddAsync(tokenCredential, lastUser, transactionContext).ConfigureAwait(false);
+                await _tokenCredentialRepo.AddAsync(tokenCredential, lastUser, transactionContext).ConfigureAwait(false);
 
                 //构造 Jwt
                 string accessToken = await ConstructAccessTokenAsync(user, tokenCredential, context.Audience, transactionContext).ConfigureAwait(false);
 
-                Token signInReceipt = new Token(accessToken, tokenCredential.RefreshToken, user);
+                Token token = new Token(accessToken, tokenCredential.RefreshToken, user);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return signInReceipt;
+                return token;
             }
             catch
             {
@@ -285,28 +285,28 @@ namespace HB.FullStack.Server.Identity
             ClaimsPrincipal claimsPrincipal = EnsureClaimsPrincipal(context);
 
             Guid userId = claimsPrincipal.GetUserId() ?? throw IdentityExceptions.RefreshSignInReceiptError("UserId验证不通过", null, context);
-            Guid signInCredentialId = claimsPrincipal.GetSignInCredentialId() ?? throw IdentityExceptions.RefreshSignInReceiptError("SignInCredentialId验证不通过", null, context);
+            Guid tokenCredentialId = claimsPrincipal.GetTokenCredentialId() ?? throw IdentityExceptions.RefreshSignInReceiptError("SignInCredentialId验证不通过", null, context);
 
             //TokenCredential 验证
             User? user;
-            TokenCredential? signInCredential = null;
+            TokenCredential? tokenCredential = null;
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
 
             try
             {
-                signInCredential = await _signInCredentialRepo.GetByIdAsync(signInCredentialId, transactionContext).ConfigureAwait(false);
+                tokenCredential = await _tokenCredentialRepo.GetByIdAsync(tokenCredentialId, transactionContext).ConfigureAwait(false);
 
-                if (signInCredential == null ||
-                    signInCredential.Blacked ||
-                    signInCredential.RefreshToken != context.RefreshToken ||
-                    signInCredential.ClientId != context.ClientInfos.ClientId ||
-                    signInCredential.UserId != userId)
+                if (tokenCredential == null ||
+                    tokenCredential.Blacked ||
+                    tokenCredential.RefreshToken != context.RefreshToken ||
+                    tokenCredential.ClientId != context.ClientInfos.ClientId ||
+                    tokenCredential.UserId != userId)
                 {
-                    throw IdentityExceptions.RefreshSignInReceiptError("SignInCredential验证不通过", null, new { signInCredential?.Blacked, signInCredential?.ClientId, signInCredential?.UserId });
+                    throw IdentityExceptions.RefreshSignInReceiptError("SignInCredential验证不通过", null, new { tokenCredential?.Blacked, tokenCredential?.ClientId, tokenCredential?.UserId });
                 }
 
                 //验证SignInCredential过期问题,即RefreshToken是否过期
-                if (signInCredential.ExpireAt < TimeUtil.UtcNow)
+                if (tokenCredential.ExpireAt < TimeUtil.UtcNow)
                 {
                     throw IdentityExceptions.RefreshSignInReceiptError("SignInCredential过期", null, null);
                 }
@@ -320,25 +320,25 @@ namespace HB.FullStack.Server.Identity
                 }
 
                 // 更新SignInCredential
-                signInCredential.RefreshCount++;
-                signInCredential.RefreshToken = SecurityUtil.CreateUniqueToken();
+                tokenCredential.RefreshCount++;
+                tokenCredential.RefreshToken = SecurityUtil.CreateUniqueToken();
 
-                await _signInCredentialRepo.UpdateAsync(signInCredential, lastUser, transactionContext).ConfigureAwait(false);
+                await _tokenCredentialRepo.UpdateAsync(tokenCredential, lastUser, transactionContext).ConfigureAwait(false);
 
                 // 发布新的AccessToken
-                string accessToken = await ConstructAccessTokenAsync(user, signInCredential, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
+                string accessToken = await ConstructAccessTokenAsync(user, tokenCredential, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new Token(accessToken, signInCredential.RefreshToken, user);
+                return new Token(accessToken, tokenCredential.RefreshToken, user);
             }
             catch
             {
                 await _transaction.RollbackAsync(transactionContext).ConfigureAwait(false);
 
-                if (signInCredential != null)
+                if (tokenCredential != null)
                 {
-                    await _signInCredentialRepo.DeleteAsync(signInCredential, lastUser, null).ConfigureAwait(false);
+                    await _tokenCredentialRepo.DeleteAsync(tokenCredential, lastUser, null).ConfigureAwait(false);
                 }
 
                 throw;
@@ -385,11 +385,11 @@ namespace HB.FullStack.Server.Identity
 
             try
             {
-                TokenCredential? signInCredential = await _signInCredentialRepo.GetByIdAsync(signInCredentialId, transContext).ConfigureAwait(false);
+                TokenCredential? signInCredential = await _tokenCredentialRepo.GetByIdAsync(signInCredentialId, transContext).ConfigureAwait(false);
 
                 if (signInCredential != null)
                 {
-                    await _signInCredentialRepo.DeleteAsync(signInCredential, lastUser, transContext).ConfigureAwait(false);
+                    await _tokenCredentialRepo.DeleteAsync(signInCredential, lastUser, transContext).ConfigureAwait(false);
                 }
                 else
                 {
@@ -457,7 +457,7 @@ namespace HB.FullStack.Server.Identity
 
         private async Task DeleteTokenCredentialsAsync(SignInExclusivity logOffType, Guid userId, DeviceIdiom idiom, string lastUser, TransactionContext transactionContext)
         {
-            IEnumerable<TokenCredential> resultList = await _signInCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
+            IEnumerable<TokenCredential> resultList = await _tokenCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
 
             IEnumerable<TokenCredential> toDeletes = logOffType switch
             {
@@ -467,7 +467,7 @@ namespace HB.FullStack.Server.Identity
                 _ => new List<TokenCredential>()
             };
 
-            await _signInCredentialRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
+            await _tokenCredentialRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
         private async Task<string> ConstructAccessTokenAsync(User user, TokenCredential signInCredential, string audience, TransactionContext transactionContext)
@@ -484,7 +484,7 @@ namespace HB.FullStack.Server.Identity
 
             return jwt;
 
-            async Task<IEnumerable<Claim>> GetClaimsAsync(User user, TokenCredential signInCredential)
+            async Task<IEnumerable<Claim>> GetClaimsAsync(User user, TokenCredential tokenCredential)
             {
                 IEnumerable<Role> roles = await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
                 IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
@@ -493,16 +493,14 @@ namespace HB.FullStack.Server.Identity
                 {
                     new Claim(ClaimExtensionTypes.USER_ID, user.Id.ToString()),
                     new Claim(ClaimExtensionTypes.SECURITY_STAMP, user.SecurityStamp),
-                    new Claim(ClaimExtensionTypes.SIGN_IN_CREDENTIAL_ID, signInCredential.Id.ToString()),
-                    new Claim(ClaimExtensionTypes.CLIENT_ID, signInCredential.ClientId),
+                    new Claim(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID, tokenCredential.Id.ToString()),
+                    new Claim(ClaimExtensionTypes.CLIENT_ID, tokenCredential.ClientId),
                 };
 
                 foreach (UserClaim item in userClaims)
                 {
-                    if (item.AddToJwt)
-                    {
-                        claims.Add(new Claim(item.ClaimType, item.ClaimValue));
-                    }
+                    //if (item.AddToJwt)
+                    claims.Add(new Claim(item.ClaimType, item.ClaimValue));
                 }
 
                 foreach (Role item in roles)

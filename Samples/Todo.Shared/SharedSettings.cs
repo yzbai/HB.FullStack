@@ -13,6 +13,10 @@ namespace Todo.Shared
 {
     public class SharedSettings
     {
+        public string AliyunOssEndpoint { get; set; } = null!;
+
+        public string AliyunOssBucketName { get; set; } = null!;    
+
         public IList<DirectoryDescription> DirectoryDescriptions { get; set; } = new List<DirectoryDescription>();
 
         public IList<DirectoryPermission> DirectoryPermissions { get; set; } = new List<DirectoryPermission>();

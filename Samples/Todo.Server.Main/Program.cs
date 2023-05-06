@@ -13,6 +13,8 @@ internal class Program
             initHostOptions => { },
             directoryOptions =>
             {
+                directoryOptions.AliyunOssEndpoint = sharedSettings.AliyunOssEndpoint;
+                directoryOptions.AliyunOssBucketName = sharedSettings.AliyunOssBucketName;
                 directoryOptions.DirectoryDescriptions = sharedSettings.DirectoryDescriptions;
                 directoryOptions.DirectoryPermissions = sharedSettings.DirectoryPermissions;
             }));

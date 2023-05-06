@@ -43,7 +43,7 @@ namespace Microsoft.Maui.Hosting
             ConfigureGlobalException();
 
             //Logging
-            if (Currents.IsDebug)
+            if (Currents.IsDevelopment)
             {
                 builder.Logging.AddDebug().AddFilter("HB", LogLevel.Trace);
                 //builder.Services.AddLogging(loggingBuilder => { loggingBuilder.AddDebug().AddFilter("HB", LogLevel.Trace); });

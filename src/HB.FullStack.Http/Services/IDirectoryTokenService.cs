@@ -11,6 +11,6 @@ namespace HB.FullStack.Server.WebLib.Services
 {
     public interface IDirectoryTokenService
     {
-        Task<DirectoryToken?> GetDirectoryTokenAsync(Guid userId, string directoryPermissionName, string? regexPlaceHolderValue, bool readOnly, string lastUser);
+        DirectoryToken? GetDirectoryToken(Guid requestUserId, string? userLevel, string directoryPermissionName, string? placeHolderValue, bool readOnly);
     }
 }

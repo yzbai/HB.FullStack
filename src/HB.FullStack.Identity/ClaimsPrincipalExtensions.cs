@@ -30,6 +30,11 @@ namespace System
             return new Guid(strUserId);
         }
 
+        public static string? GetUserLevel(this ClaimsPrincipal principal)
+        {
+            return principal.GetClaimValue(ClaimExtensionTypes.USER_LEVEL);
+        }
+
         public static string? GetUserSecurityStamp(this ClaimsPrincipal principal)
         {
             return principal.GetClaimValue(ClaimExtensionTypes.SECURITY_STAMP);
@@ -40,9 +45,9 @@ namespace System
             return principal.GetClaimValue(ClaimExtensionTypes.AUDIENCE);
         }
 
-        public static Guid? GetSignInCredentialId(this ClaimsPrincipal principal)
+        public static Guid? GetTokenCredentialId(this ClaimsPrincipal principal)
         {
-            string? str = principal.GetClaimValue(ClaimExtensionTypes.SIGN_IN_CREDENTIAL_ID);
+            string? str = principal.GetClaimValue(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID);
 
             return str.IsNullOrEmpty() ? null : new Guid(str);
         }

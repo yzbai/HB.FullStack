@@ -17,8 +17,6 @@ namespace HB.FullStack.Server.Identity.Models
         [DbForeignKey(typeof(User), true)]
         public Guid UserId { get; set; }
 
-        public string? Level { get; set; }
-
         [NickName(CanBeNull = false)]
         public string NickName { get; set; } = null!;
 

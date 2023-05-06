@@ -28,7 +28,7 @@ namespace HB.FullStack.Server.WebLib.Filters
         {
             try
             {
-                Guid? signInCredentialId = context.HttpContext?.User?.GetSignInCredentialId();
+                Guid? signInCredentialId = context.HttpContext?.User?.GetTokenCredentialId();
                 Guid? userId = context.HttpContext?.User?.GetUserId();
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();

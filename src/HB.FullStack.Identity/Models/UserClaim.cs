@@ -6,6 +6,9 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
 {
+    /// <summary>
+    /// 打包到Token里的信息，客户端不知
+    /// </summary>
     public class UserClaim : TimestampGuidDbModel
     {
         [NoEmptyGuid]
@@ -18,6 +21,6 @@ namespace HB.FullStack.Server.Identity.Models
         [DbField(MaxLength = SharedNames.Length.MAX_USER_CLAIM_VALUE_LENGTH, NotNull = true)]
         public string ClaimValue { get; set; } = default!;
 
-        public bool AddToJwt { get; set; }
+        //public bool AddToJwt { get; set; }
     }
 }

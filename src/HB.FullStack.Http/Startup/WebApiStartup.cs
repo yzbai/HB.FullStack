@@ -93,49 +93,18 @@ namespace HB.FullStack.Server.WebLib.Startup
             services.AddMemoryLock();
             services.AddIdGen(Configuration.GetSection(IdGen));
 
-            if (settings.UseDistributedLock)
-            {
-                services.AddSingleRedisDistributedLock(Configuration.GetSection(RedisLock));
-            }
-
-            if (settings.UseKVStore)
-            {
-                services.AddRedisKVStore(Configuration.GetSection(RedisKVStore));
-            }
-
-            if (settings.UseCache)
-            {
-                services.AddRedisCache(Configuration.GetSection(RedisCache));
-            }
-
-            if (settings.UseEventBus)
-            {
-                services.AddRedisEventBus(Configuration.GetSection(RedisEventBus));
-            }
-
-            if (settings.UseDatabase)
-            {
-                services.AddDatabase(Configuration.GetSection(Database), builder => builder.AddMySQL());
-            }
-
-            if (settings.UseIdentity)
-            {
-                services.AddIdentity(Configuration.GetSection(Identity));
-            }
-
-            if (settings.UseCaptha)
-            {
-                services.AddTCaptha(Configuration.GetSection(TCaptha));
-            }
-
-            if (settings.UseAliyunSms)
-            {
-                services.AddAliyunSts(Configuration.GetSection(AliyunSts));
-                services.AddAliyunSms(Configuration.GetSection(AliyunSms));
-            }
+            services.AddSingleRedisDistributedLock(Configuration.GetSection(RedisLock));
+            services.AddRedisKVStore(Configuration.GetSection(RedisKVStore));
+            services.AddRedisCache(Configuration.GetSection(RedisCache));
+            services.AddRedisEventBus(Configuration.GetSection(RedisEventBus));
+            services.AddDatabase(Configuration.GetSection(Database), builder => builder.AddMySQL());
+            services.AddIdentity(Configuration.GetSection(Identity));
+            services.AddTCaptha(Configuration.GetSection(TCaptha));
+            services.AddAliyunSts(Configuration.GetSection(AliyunSts));
+            services.AddAliyunSms(Configuration.GetSection(AliyunSms));
 
             //Direcotry
-
+            services.AddDirectoryTokenService(settings.ConfigureDirectoryOptions);
 
             //DataProtection
             services.AddDataProtectionWithCertInRedis(settings => Configuration.GetSection(DataProtection).Bind(settings));
@@ -188,7 +157,7 @@ namespace HB.FullStack.Server.WebLib.Startup
 
             //InitService
             services
-                .Configure(settings.ConfigureInitHostedServiceOptions)
+                .Configure(settings.ConfigureInitServiceOptions)
                 .AddHostedService<InitService>();
 
             //User Settings

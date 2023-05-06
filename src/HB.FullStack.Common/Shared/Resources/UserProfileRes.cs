@@ -18,8 +18,6 @@ namespace HB.FullStack.Common.Shared
         [NoEmptyGuid]
         public Guid UserId { get; set; }
 
-        public string? Level { get; set; }
-
         [NickName(CanBeNull = false)]
         public string NickName { get; set; } = null!;
 

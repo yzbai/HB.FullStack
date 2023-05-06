@@ -1,4 +1,7 @@
 {
+  "AliyunOssEndpoint": "oss-cn-hangzhou.aliyuncs.com",
+  "AliyunOssBucketName": "mycolorfultime-private-dev",
+
   "DirectoryDescriptions": [
     {
       "DirectoryName": "PUBLIC",

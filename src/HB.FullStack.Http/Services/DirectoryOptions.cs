@@ -6,9 +6,14 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Server.WebLib.Services
 {
-    public class DirectoryTokenOptions : IOptions<DirectoryTokenOptions>
+    public class DirectoryOptions : IOptions<DirectoryOptions>
     {
-        public DirectoryTokenOptions Value => this;
+        public DirectoryOptions Value => this;
+
+
+        public string AliyunOssEndpoint { get; set; } = "oss-cn-hangzhou.aliyuncs.com";
+
+        public string AliyunOssBucketName { get; set; } = null!;
 
         public IList<DirectoryDescription> DirectoryDescriptions { get; set; } = new List<DirectoryDescription>();
 

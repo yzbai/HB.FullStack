@@ -19,8 +19,6 @@ namespace Todo.Client.MobileApp
         public string DB_SCHEMA_MAIN_FILE { get; set; } = null!;
         public string DB_SCHEMA_USER { get; set; } = null!;
         public string DB_SCHEMA_USER_FILE { get; set; } = null!;
-        public string ALIYUN_OSS_ENDPOINT { get; set; } = null!;
-        public string ALIYUN_OSS_BUCKET_NAME { get; set; } = null!;
         public string TECENET_CAPTCHA_APP_ID { get; set; } = null!;
 
 

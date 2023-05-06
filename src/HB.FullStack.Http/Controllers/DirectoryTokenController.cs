@@ -27,24 +27,24 @@ namespace HB.FullStack.Server.WebLib.Controllers
         //Rule: 确保LastUser被正确获取
         [HttpGet(SharedNames.Conditions.ByDirectoryPermissionName)]
         [ProducesResponseType(typeof(DirectoryTokenRes), 200)]
-        public async Task<IActionResult> GetByDirectoryPermissionNameAsync(
+        public IActionResult GetByDirectoryPermissionName(
             [Required] string directoryPermissionName,
-                       string? regexPlaceHolderValue,
+                       string? placeHolderValue,
             [Required] bool readOnly)
         {
-            DirectoryToken? stsTokenRes = await _directoryTokenService.GetDirectoryTokenAsync(
-                User.GetUserId().GetValueOrDefault(),
+            DirectoryToken? directoryToken = _directoryTokenService.GetDirectoryToken(
+                User.GetUserId()!.Value,
+                User.GetUserLevel(),
                 directoryPermissionName,
-                regexPlaceHolderValue,
-                readOnly,
-                User.GetLastUser()).ConfigureAwait(false);
+                placeHolderValue,
+                readOnly);
 
-            if (stsTokenRes == null)
+            if (directoryToken == null)
             {
                 return Error(ErrorCodes.DirectoryTokenNotFound);
             }
 
-            return Ok(ToRes(stsTokenRes));
+            return Ok(ToRes(directoryToken));
         }
 
         //TODO: 需要不需要对匿名开放StsToken 获取？ public 图片怎么获取？

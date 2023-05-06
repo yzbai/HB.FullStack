@@ -24,6 +24,8 @@ namespace HB.FullStack.Client.Abstractions
 
         Guid? UserId { get; }
 
+        string? UserLevel { get; }
+
         string? Mobile { get; }
 
         string? LoginName { get; }
