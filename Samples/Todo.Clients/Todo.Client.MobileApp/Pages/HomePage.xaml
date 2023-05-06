@@ -51,6 +51,7 @@
                 Command="{Binding ShowSettingsUICommand}"
                 HorizontalOptions="Center"
                 Text="Show Settings UI" />
+            <Button x:Name="UpdateUserProfileBtn" Command="{Binding GotoUserProfileUpdatePageCommand}" Text="Go to UserProfile"/>
         </VerticalStackLayout>
     </ScrollView>
 </base:BasePage>

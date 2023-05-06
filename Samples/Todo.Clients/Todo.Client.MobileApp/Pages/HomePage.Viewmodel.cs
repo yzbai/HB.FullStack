@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Components.Users;
 using HB.FullStack.Client.MauiLib.Base;
+using HB.FullStack.Client.MauiLib.Components;
 using HB.FullStack.Common.Files;
 
 using Microsoft.Extensions.Logging;
@@ -55,6 +56,12 @@ namespace Todo.Client.MobileApp.ViewModels
         private void ShowSettingsUI()
         {
             AppInfo.Current.ShowSettingsUI();
+        }
+
+        [RelayCommand]
+        private async void GotoUserProfileUpdatePage()
+        {
+            await Currents.Shell.GoToAsync(nameof(UserProfileUpdatePage));
         }
     }
 }

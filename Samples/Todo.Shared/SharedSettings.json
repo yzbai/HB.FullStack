@@ -72,8 +72,8 @@
     {
       "PermissionName": "PUBLIC",
       "TopDirectory": "public",
-      "ReadUserLevels": [ "UnRegistered", "Normal", "Vip" ],
-      "WriteUserLevels": [ "UnRegistered", "Normal", "Vip" ],
+      "ReadUserLevels": [ "", "Normal", "Vip" ],
+      "WriteUserLevels": [ "", "Normal", "Vip" ],
       "ExpiryTime": "01:00:00",
       "ContainsPlaceHoder": false,
       "PlaceHolderName": null,
@@ -82,8 +82,8 @@
     {
       "PermissionName": "CUSTOMER",
       "TopDirectory": "customer",
-      "ReadUserLevels": [ "Normal", "Vip" ],
-      "WriteUserLevels": [ "Normal", "Vip" ],
+      "ReadUserLevels": [ "", "Normal", "Vip" ],
+      "WriteUserLevels": [ "", "Normal", "Vip" ],
       "ExpiryTime": "01:00:00",
       "ContainsPlaceHoder": false,
       "PlaceHolderName": null,
@@ -92,8 +92,8 @@
     {
       "PermissionName": "CUSTOMERPRIVATE",
       "TopDirectory": "customerprivate/{USER_ID_PLACE_HOLDER}",
-      "ReadUserLevels": [ "Normal", "Vip" ],
-      "WriteUserLevels": [ "Normal", "Vip" ],
+      "ReadUserLevels": [ "", "Normal", "Vip" ],
+      "WriteUserLevels": [ "", "Normal", "Vip" ],
       "ExpiryTime": "01:00:00",
       "ContainsPlaceHoder": true,
       "PlaceHolderName": "{USER_ID_PLACE_HOLDER}",

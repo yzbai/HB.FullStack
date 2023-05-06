@@ -33,8 +33,6 @@ namespace HB.FullStack.Client.Components.Users
             ITokenPreferences clientPreferences) : base(logger, clientModelSettingFactory, database, apiClient, syncManager, clientEvents, clientPreferences)
         { }
 
-
-
         internal Task<UserProfile?> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext, GetSetMode getMode = GetSetMode.Mixed, IfUseLocalData<UserProfile>? ifUseLocalData = null)
         {
             return GetFirstOrDefaultAsync(

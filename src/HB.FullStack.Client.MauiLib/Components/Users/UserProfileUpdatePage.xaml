@@ -9,7 +9,7 @@
     Title="RegisterProfilePage"
     x:DataType="components:UserProfileUpdateViewModel"
     x:TypeArguments="components:UserProfileUpdateViewModel"
-    DisableBackButton="True"
+    DisableBackButton="False"
     IsNavBarVisible="True">
     <StackLayout
         Margin="0,-120,0,0"

@@ -82,7 +82,7 @@ namespace Todo.Client.MobileApp
                         //    apiClientOptions.HttpClientTimeout = TimeSpan.FromMinutes(15);
                         //}
 
-                        apiClientOptions.HttpClientTimeout = TimeSpan.FromSeconds(10);
+                        apiClientOptions.HttpClientTimeout = TimeSpan.FromSeconds(1000);
 
                         apiClientOptions.TokenSiteSetting = new SiteSetting
                         {
