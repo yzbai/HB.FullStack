@@ -18,6 +18,8 @@ namespace HB.FullStack.Common.Shared
     {
         public Guid UserId { get; set; }
 
+        public string? UserLevel { get; set; }
+
         public string? Mobile { get; set; }
 
         public string? LoginName { get; set; }

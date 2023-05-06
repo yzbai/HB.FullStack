@@ -95,7 +95,6 @@ namespace HB.FullStack.Client.Components.Users
             {
                 Id = res.Id,
                 UserId = res.UserId,
-                Level = res.Level,
                 NickName = res.NickName,
                 Gender = res.Gender,
                 BirthDay = res.BirthDay,

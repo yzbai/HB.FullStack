@@ -16,6 +16,8 @@ namespace HB.FullStack.Server.Identity
     {
         public Guid UserId { get; set; }
 
+        public string? UserLevel { get; set; }
+
         public string? Mobile { get; set; }
 
         public string? LoginName { get; set; }
@@ -39,6 +41,7 @@ namespace HB.FullStack.Server.Identity
 
         public Token(string accessToken, string refreshToken, User user)
         {
+            UserLevel = user.UserLevel;
             AccessToken = accessToken;
             RefreshToken = refreshToken;
             UserId = user.Id;

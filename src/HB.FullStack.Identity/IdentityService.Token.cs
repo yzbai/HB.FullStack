@@ -252,7 +252,7 @@ namespace HB.FullStack.Server.Identity
 
                         if (user == null && signInBySms.RegisterIfNotExists)
                         {
-                            user = await CreateUserAsync(signInBySms.Mobile, null, null, null, true, false, lastUser, transactionContext).ConfigureAwait(false);
+                            user = await CreateUserAsync(null, signInBySms.Mobile, null, null, null, true, false, lastUser, transactionContext).ConfigureAwait(false);
                         }
                         break;
 
@@ -546,7 +546,7 @@ namespace HB.FullStack.Server.Identity
             return userLoginControl;
         }
 
-        private async Task<User> CreateUserAsync(string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
+        private async Task<User> CreateUserAsync(string? userLevel, string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
             ThrowIf.NotEmail(email, nameof(email), true);
@@ -576,7 +576,7 @@ namespace HB.FullStack.Server.Identity
                     throw IdentityExceptions.IdentityAlreadyTaken(mobile: mobile, email: email, loginName: loginName);
                 }
 
-                User user = new User(loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
+                User user = new User(userLevel, loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
 
                 await _userRepo.AddAsync(user, lastUser, transContext).ConfigureAwait(false);
 

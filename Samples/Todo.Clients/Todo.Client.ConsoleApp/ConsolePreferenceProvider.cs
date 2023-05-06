@@ -65,5 +65,7 @@ namespace Todo.Client.ConsoleApp
         {
             throw new NotImplementedException();
         }
+
+        public string? UserLevel { get; set; }
     }
 }

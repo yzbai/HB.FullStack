@@ -36,6 +36,8 @@ namespace HB.FullStack.Client.MauiLib
 
         public Guid? UserId { get => TokenPreferences.UserId; }
 
+        public string? UserLevel { get => TokenPreferences.UserLevel; }
+
         public string? Mobile { get => TokenPreferences.Mobile; }
 
         public string? LoginName { get => TokenPreferences.LoginName; }
@@ -66,6 +68,7 @@ namespace HB.FullStack.Client.MauiLib
     internal static class TokenPreferences
     {
         public const string PREFERENCE_NAME_USERID = "wjUfoxCi";
+        public const string PREFERENCE_NAME_USER_LEVEL = "wdyz0xCi";
         public const string PREFERENCE_NAME_TOKEN_CREATETIME = "WMIliRIP";
         public const string PREFERENCE_NAME_MOBILE = "H8YA3d5aj";
         public const string PREFERENCE_NAME_MOBILE_CONFIRMED = "H8xAsedxaj";
@@ -82,6 +85,8 @@ namespace HB.FullStack.Client.MauiLib
         private static bool _tokenCreateTimeFirstRead = true;
         private static string? _mobile;
         private static bool _mobileFirstRead = true;
+        private static string? _userLevel;
+        private static bool _userLevelFirstRead = true;
         private static string? _loginName;
         private static bool _loginNameFirstRead = true;
         private static string? _email;
@@ -164,6 +169,28 @@ namespace HB.FullStack.Client.MauiLib
                 if (_mobile.IsNotNullOrEmpty())
                 {
                     PreferenceHelper.Set(PREFERENCE_NAME_MOBILE, _mobile);
+                }
+            }
+        }
+
+        public static string? UserLevel
+        {
+            get
+            {
+                if (_userLevelFirstRead && _userLevel.IsNullOrEmpty())
+                {
+                    _userLevelFirstRead = false;
+                    _userLevel = PreferenceHelper.Get(PREFERENCE_NAME_USER_LEVEL);
+                }
+                return _userLevel;
+            }
+            private set
+            {
+                _userLevel = value;
+
+                if (_userLevel.IsNotNullOrEmpty())
+                {
+                    PreferenceHelper.Set(PREFERENCE_NAME_USER_LEVEL, _userLevel);
                 }
             }
         }
@@ -330,6 +357,7 @@ namespace HB.FullStack.Client.MauiLib
         public static void SetToken(TokenRes tokenRes)
         {
             UserId = tokenRes.UserId;
+            UserLevel = tokenRes.UserLevel;
             Mobile = tokenRes.Mobile;
             LoginName = tokenRes.LoginName;
             Email = tokenRes.Email;

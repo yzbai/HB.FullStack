@@ -37,13 +37,13 @@ namespace HB.FullStack.Server.Identity
                         }
 
                         //TODO: 安全检查，一般不建议使用LoginName和Password进行注册
-                        user = await CreateUserAsync(null, null, registerByLoginName.LoginName, registerByLoginName.Password, false, false, lastUser, transContext).ConfigureAwait(false);
+                        user = await CreateUserAsync(null, null, null, registerByLoginName.LoginName, registerByLoginName.Password, false, false, lastUser, transContext).ConfigureAwait(false);
 
                         break;
                     case RegisterBySms registerBySms:
                         await EnsureValidSmsCode(registerBySms, lastUser).ConfigureAwait(false);
 
-                        user = await CreateUserAsync(registerBySms.Mobile, null, null, null, true, false, lastUser, transContext).ConfigureAwait(false);
+                        user = await CreateUserAsync(null, registerBySms.Mobile, null, null, null, true, false, lastUser, transContext).ConfigureAwait(false);
                         break;
                     default:
                         break;

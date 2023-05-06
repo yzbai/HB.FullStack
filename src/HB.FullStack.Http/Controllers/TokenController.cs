@@ -87,9 +87,9 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             RefreshContext context = new RefreshContext(accessToken, refreshToken, clientInfos);
 
-            Token signInReceipt = await _identityService.RefreshTokenAsync(context, lastUser).ConfigureAwait(false);
+            Token token = await _identityService.RefreshTokenAsync(context, lastUser).ConfigureAwait(false);
 
-            TokenRes res = ToRes(signInReceipt);
+            TokenRes res = ToRes(token);
 
             return Ok(res);
         }
@@ -130,6 +130,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
             return new TokenRes
             {
                 UserId = obj.UserId,
+                UserLevel = obj.UserLevel,
                 Mobile = obj.Mobile,
                 LoginName = obj.LoginName,
                 Email = obj.Email,

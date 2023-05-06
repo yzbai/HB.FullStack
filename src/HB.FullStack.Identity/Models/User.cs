@@ -11,6 +11,8 @@ namespace HB.FullStack.Server.Identity.Models
     /// </summary>
     public class User : TimestampGuidDbModel
     {
+        public string? UserLevel { get; set; }
+
         [Required]
         [DbGuid32StringField(NotNull = true)]
         public string SecurityStamp { get; set; } = default!;
@@ -60,8 +62,9 @@ namespace HB.FullStack.Server.Identity.Models
         {
         }
 
-        public User(string? loginName, string? mobile, string? email, string? password, bool mobileConfirmed, bool emailConfirmed)
+        public User(string? userLevel, string? loginName, string? mobile, string? email, string? password, bool mobileConfirmed, bool emailConfirmed)
         {
+            UserLevel = userLevel;
             SecurityStamp = SecurityUtil.CreateUniqueToken();
             LoginName = loginName;
             Mobile = mobile;
