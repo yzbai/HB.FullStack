@@ -73,6 +73,18 @@ namespace HB.FullStack.Client.Base
 
         #region 获取 - 发生在Syncing之后 - 从服务器上获取整体后，更新整体
 
+        protected async Task<TModel?> GetFirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> localWhere,
+            ApiRequest remoteRequest,
+            TransactionContext? transactionContext,
+            GetSetMode getMode,
+            IfUseLocalData<TModel>? ifUseLocalData = null)
+        {
+            IEnumerable<TModel> models = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
+
+            return models.FirstOrDefault();
+        }
+
         protected async Task<IEnumerable<TModel>> GetAsync(
             Expression<Func<TModel, bool>> localWhere,
             ApiRequest remoteRequest,
@@ -83,6 +95,8 @@ namespace HB.FullStack.Client.Base
             _syncManager.WaitUntilNotSyncing();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
+
+            StartTrack(locals);
 
             //如果强制获取本地，则返回本地
             if (getMode == GetSetMode.LocalForced)
@@ -107,6 +121,8 @@ namespace HB.FullStack.Client.Base
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
 
+            StartTrack(locals);
+
             //如果强制获取本地，则返回本地
             if (getMode == GetSetMode.LocalForced)
             {
@@ -118,18 +134,6 @@ namespace HB.FullStack.Client.Base
                 () => SyncGetAsync(locals, remoteRequest, transactionContext, getMode, ifUseLocalData ?? DefaultIfUseLocalData),
                 onException,
                 continueOnCapturedContext);
-        }
-
-        protected async Task<TModel?> GetFirstOrDefaultAsync(
-            Expression<Func<TModel, bool>> localWhere,
-            ApiRequest remoteRequest,
-            TransactionContext? transactionContext,
-            GetSetMode getMode,
-            IfUseLocalData<TModel>? ifUseLocalData = null)
-        {
-            IEnumerable<TModel> models = await GetAsync(localWhere, remoteRequest, transactionContext, getMode, ifUseLocalData).ConfigureAwait(false);
-
-            return models.FirstOrDefault();
         }
 
         protected async Task<ObservableTask<TModel?>> GetFirstOrDefaultObservableTaskAsync(
@@ -144,6 +148,8 @@ namespace HB.FullStack.Client.Base
             _syncManager.WaitUntilNotSyncing();
 
             IEnumerable<TModel> locals = await Database.RetrieveAsync(localWhere, null).ConfigureAwait(false);
+
+            StartTrack(locals);
 
             //如果强制获取本地，则返回本地
             if (getMode == GetSetMode.LocalForced)
@@ -208,6 +214,8 @@ namespace HB.FullStack.Client.Base
 
             _logger.LogDebug("重新添加远程数据到本地数据库, Type:{Type}", typeof(TModel).Name);
 
+            StartTrack(remotes);
+
             return remotes;
 
             #endregion
@@ -225,9 +233,6 @@ namespace HB.FullStack.Client.Base
 
         #region 更改 - 发生在Syncing之后
 
-        /// <summary>
-        /// 操作Model整体
-        /// </summary>
         public async Task AddAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
@@ -238,6 +243,7 @@ namespace HB.FullStack.Client.Base
 
             try
             {
+                //Network First
                 if (!_clientEvents.ServerConnected)
                 {
                     if (ClientModelSetting.AllowOfflineAdd)
@@ -259,6 +265,9 @@ namespace HB.FullStack.Client.Base
 
                 //Local
                 await Database.AddAsync(models, "", transactionContext).ConfigureAwait(false);
+
+                //Clear Tracks
+                ClearPropertyTracks(models);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.DuplicateKeyEntry)
             {
@@ -277,6 +286,7 @@ namespace HB.FullStack.Client.Base
 
             try
             {
+                //Network First
                 if (!_clientEvents.ServerConnected)
                 {
                     if (ClientModelSetting.AllowOfflineUpdate)
@@ -293,13 +303,18 @@ namespace HB.FullStack.Client.Base
                     await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
                 }
 
+                //Local
                 await Database.UpdatePropertiesAsync<TModel>(changedPacks, "", transactionContext).ConfigureAwait(false);
+                
+                //Clear Tracks
+                ClearPropertyTracks(models);
             }
             catch (ErrorCodeException ex) when (ex.ErrorCode == ErrorCodes.ConcurrencyConflict)
             {
                 //TODO:处理冲突, 是不是需要区分来自于网络还是本地Batch
             }
         }
+
 
         public async Task DeleteAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
         {
@@ -334,5 +349,26 @@ namespace HB.FullStack.Client.Base
         }
 
         #endregion
+        private static void ClearPropertyTracks(IEnumerable<TModel> models)
+        {
+            foreach (TModel model in models)
+            {
+                if (model is IPropertyTrackableObject trackableObject)
+                {
+                    model.Clear();
+                }
+            }
+        }
+
+        private void StartTrack(IEnumerable<TModel> models)
+        {
+            foreach (TModel model in models)
+            {
+                if (model is IPropertyTrackableObject trackableObject)
+                {
+                    model.StartTrack();
+                }
+            }
+        }
     }
 }
