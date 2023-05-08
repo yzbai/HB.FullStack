@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Server.WebLib.Middlewares
 {
+    //TODO: Add asp.net core offical RateLimiter
     public class RateLimitMiddleware : IMiddleware
     {
         private readonly ILogger<RateLimitMiddleware> _logger;

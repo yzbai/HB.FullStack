@@ -16,6 +16,8 @@ namespace HB.FullStack.Server.WebLib.Controllers
     public class ServerHealthController : BaseController
     {
         [AllowAnonymous]
+        //TODO: implement AllowExpiredTokenAttribute
+        //[AllowExpiredToken]
         [HttpGet]
         public IActionResult Get()
         {

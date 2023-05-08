@@ -130,6 +130,7 @@ namespace HB.FullStack.Client.MauiLib.Components
             }
             catch (Exception ex)
             {
+                _oldNickName = null;
                 OnExceptionDisplay(ex, "抱歉，更新信息出错，请稍后再试。");
             }
 

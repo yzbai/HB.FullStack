@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using HB.FullStack.Common.Shared;
+
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Primitives;
+
 using System;
 using System.Collections.Generic;
 
@@ -139,5 +142,19 @@ namespace System
             }
         }
 
+        public static string? GetClientId(this HttpContext httpContext)
+        {
+            return httpContext.Request.GetHeaderValueAs<string>(SharedNames.Client.CLIENT_ID);
+        }
+
+        public static string? GetClientVersion(this HttpContext httpContext)
+        {
+            return httpContext.Request.GetHeaderValueAs<string>(SharedNames.Client.CLIENT_VERSION);
+        }
+
+        public static string? GetTimestamp(this HttpContext httpContext)
+        {
+            return httpContext.Request.GetValue(SharedNames.Client.TIMESTAMP);
+        }
     }
 }

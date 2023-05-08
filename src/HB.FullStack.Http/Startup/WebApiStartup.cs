@@ -29,6 +29,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using HB.FullStack.Server.WebLib.Controllers;
 using HB.FullStack.Common.Shared;
+using HB.FullStack.Server.WebLib.Middlewares;
 
 namespace HB.FullStack.Server.WebLib.Startup
 {
@@ -154,6 +155,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             services.AddScoped<UserActivityFilter>();
             services.AddScoped<CapthcaCheckFilter>();
             services.AddScoped<CheckCommonResourceTokenFilter>();
+            services.AddTransient<SecurityMiddleware>();
 
             //InitService
             services
@@ -162,91 +164,8 @@ namespace HB.FullStack.Server.WebLib.Startup
 
             //User Settings
             settings.ConfigureServices(services);
-        }
 
 
-        static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
-        {
-            DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
-            action(dataProtectionSettings);
-
-            string redisKey = $"{dataProtectionSettings.ApplicationName}_{EnvironmentUtil.AspNetCoreEnvironment}_dpk";
-
-            X509Certificate2 certificate2 = CertificateUtil.GetCertificateFromSubjectOrFile(
-                dataProtectionSettings.CertificateSubject,
-                dataProtectionSettings.CertificateFileName,
-                dataProtectionSettings.CertificateFilePassword);
-
-            ConfigurationOptions redisConfigurationOptions = ConfigurationOptions.Parse(dataProtectionSettings.RedisConnectString);
-            redisConfigurationOptions.AllowAdmin = false;
-
-            Policy
-                .Handle<RedisConnectionException>()
-                .WaitAndRetryForever(
-                            count => TimeSpan.FromSeconds(5 + count * 2),
-                            (exception, retryCount, timeSpan) =>
-                            {
-                                RedisConnectionException ex = (RedisConnectionException)exception;
-                                Log.Fatal(
-                                    exception,
-                                    $"DataProtection : Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {dataProtectionSettings.RedisConnectString} : {redisKey};"
-                                );
-                            })
-                .Execute(() =>
-                {
-                    ConnectionMultiplexer redisMultiplexer = ConnectionMultiplexer.Connect(redisConfigurationOptions);
-
-                    services
-                        .AddDataProtection()
-                        .SetApplicationName(dataProtectionSettings.ApplicationName)
-                        .ProtectKeysWithCertificate(certificate2)
-                        .PersistKeysToStackExchangeRedis(redisMultiplexer, redisKey);
-                });
-
-            return services;
-        }
-
-        static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
-        {
-            Assembly webAssembly = typeof(GlobalExceptionController).Assembly;
-            Assembly serverAssembly = typeof(WebApiStartup).Assembly;
-
-            //authenticationBuilder.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
-
-            services
-                .AddControllers(options =>
-                {
-                    if (addAuthentication)
-                    {
-                        //need authenticated by default. no need add [Authorize] everywhere
-                        AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                        options.Filters.Add(new AuthorizeFilter(policy));
-
-                        //options.Filters
-                        options.Filters.AddService<UserActivityFilter>();
-                    }
-                })
-                .AddJsonOptions(options =>
-                {
-                    SerializeUtil.Configure(options.JsonSerializerOptions);
-                })
-                .ConfigureApiBehaviorOptions(apiBehaviorOptions =>
-                {
-                    apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
-                    {
-                        ErrorCode errorCode = ErrorCodes.ModelValidationError.WithMessage(actionContext.ModelState.GetErrors());
-
-                        return new BadRequestObjectResult(errorCode)
-                        {
-                            ContentTypes = { "application/problem+json" }
-                        };
-                    };
-                })
-                .PartManager.ApplicationParts.AddRange(new AssemblyPart[] { new AssemblyPart(webAssembly), new AssemblyPart(serverAssembly) });
-
-            services.AddEndpointsApiExplorer();
-
-            return services;
         }
 
         private static void ConfigureApplication(WebApplication app, WebApiStartupSettings settings)
@@ -259,6 +178,8 @@ namespace HB.FullStack.Server.WebLib.Startup
 
             //TODO: 使用RateLimiting
             //app.UseHealthChecks("/health");
+
+            app.UseMiddleware<SecurityMiddleware>();
 
             app
                 .UseExceptionController()
@@ -315,6 +236,89 @@ namespace HB.FullStack.Server.WebLib.Startup
             //.net 6
             app.MapControllers();
         }
+        static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
+        {
+            DataProtectionSettings dataProtectionSettings = new DataProtectionSettings();
+            action(dataProtectionSettings);
+
+            string redisKey = $"{dataProtectionSettings.ApplicationName}_{EnvironmentUtil.AspNetCoreEnvironment}_dpk";
+
+            X509Certificate2 certificate2 = CertificateUtil.GetCertificateFromSubjectOrFile(
+                dataProtectionSettings.CertificateSubject,
+                dataProtectionSettings.CertificateFileName,
+                dataProtectionSettings.CertificateFilePassword);
+
+            ConfigurationOptions redisConfigurationOptions = ConfigurationOptions.Parse(dataProtectionSettings.RedisConnectString);
+            redisConfigurationOptions.AllowAdmin = false;
+
+            Policy
+                .Handle<RedisConnectionException>()
+                .WaitAndRetryForever(
+                            count => TimeSpan.FromSeconds(5 + count * 2),
+                            (exception, retryCount, timeSpan) =>
+                            {
+                                RedisConnectionException ex = (RedisConnectionException)exception;
+                                Log.Fatal(
+                                    exception,
+                                    $"DataProtection : Try {retryCount}th times. Wait For {timeSpan.TotalSeconds} seconds. Redis Can not connect {dataProtectionSettings.RedisConnectString} : {redisKey};"
+                                );
+                            })
+                .Execute(() =>
+                {
+                    ConnectionMultiplexer redisMultiplexer = ConnectionMultiplexer.Connect(redisConfigurationOptions);
+
+                    services
+                        .AddDataProtection()
+                        .SetApplicationName(dataProtectionSettings.ApplicationName)
+                        .ProtectKeysWithCertificate(certificate2)
+                        .PersistKeysToStackExchangeRedis(redisMultiplexer, redisKey);
+                });
+
+            return services;
+        }
+
+        static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
+        {
+            Assembly webAssembly = typeof(GlobalExceptionController).Assembly;
+            Assembly serverAssembly = typeof(WebApiStartup).Assembly;
+
+            //authenticationBuilder.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
+
+            services
+                .AddControllers(options =>
+                {
+                    if (addAuthentication)
+                    {
+                        //need authenticated by default. no need add [Authorize] everywhere
+                        AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                        //options.Filters.Add(new AuthorizeFilter(policy));
+
+                        //options.Filters
+                        options.Filters.AddService<UserActivityFilter>();
+                    }
+                })
+                .AddJsonOptions(options =>
+                {
+                    SerializeUtil.Configure(options.JsonSerializerOptions);
+                })
+                .ConfigureApiBehaviorOptions(apiBehaviorOptions =>
+                {
+                    apiBehaviorOptions.InvalidModelStateResponseFactory = actionContext =>
+                    {
+                        ErrorCode errorCode = ErrorCodes.ModelValidationError.WithMessage(actionContext.ModelState.GetErrors());
+
+                        return new BadRequestObjectResult(errorCode)
+                        {
+                            ContentTypes = { "application/problem+json" }
+                        };
+                    };
+                })
+                .PartManager.ApplicationParts.AddRange(new AssemblyPart[] { new AssemblyPart(webAssembly), new AssemblyPart(serverAssembly) });
+
+            services.AddEndpointsApiExplorer();
+
+            return services;
+        }
 
         #region Jwt Actions
 
@@ -350,18 +354,17 @@ namespace HB.FullStack.Server.WebLib.Startup
             //验证Body 中的ClientId 与 JWT 中的ClientId 是否一致
             string? jwtClientId = c.Principal?.GetClientId();
 
-            string? requestClientId = c.HttpContext.Request.GetHeaderValueAs<string>(SharedNames.Client.CLIENT_ID);
+            string? headerClientId = c.HttpContext.GetClientId();
 
-            requestClientId ??= c.HttpContext.Request.GetValue(SharedNames.Client.CLIENT_ID);
-
-            if (!string.IsNullOrWhiteSpace(jwtClientId) && jwtClientId.Equals(requestClientId, Globals.ComparisonIgnoreCase))
+            if (jwtClientId.IsNotNullOrEmpty() && jwtClientId.Equals(headerClientId, Globals.ComparisonIgnoreCase))
             {
                 return Task.CompletedTask;
             }
 
             c.Fail("Token ClientId do not match Request ClientId");
 
-            Log.Warning($"ClientId:{requestClientId} do not match Request ClientId : {jwtClientId}");
+            //TODO: log more security infos
+            Log.Warning($"ClientId:{headerClientId} do not match Request ClientId : {jwtClientId}");
 
             return Task.CompletedTask;
         }

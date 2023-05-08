@@ -41,5 +41,12 @@ namespace System
 
             return ex;
         }
+
+        internal static Exception SecurityCheck()
+        {
+            WebException ex = new WebException(ErrorCodes.SecurityCheck, nameof(SecurityCheck), null, null);
+
+            return ex;
+        }
     }
 }

@@ -1,7 +1,11 @@
 ﻿namespace System
 {
+    //TODO: 做成继承，分散在各个库中
     public static partial class ErrorCodes
     {
+
+        public static readonly ErrorCode SecurityCheck = new ErrorCode(nameof(SecurityCheck), "");
+        
         public static readonly ErrorCode ModelDefError = new ErrorCode(nameof(ModelDefError), "");
 
         public static readonly ErrorCode CertNotInPackage = new ErrorCode(nameof(CertNotInPackage), "证书没有打包在程序里，将试图在服务器中寻找");
