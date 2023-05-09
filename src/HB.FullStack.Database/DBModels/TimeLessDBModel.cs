@@ -12,7 +12,7 @@ using HB.FullStack.Common.PropertyTrackable;
 namespace HB.FullStack.Database.DbModels
 {
     /// <summary>
-    /// 适合不怎么冲突的Model,各字段独立
+    /// 使用新旧值比较实现版本冲突检测
     /// </summary>
     public abstract class TimelessDbModel : DbModel
     {

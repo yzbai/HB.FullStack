@@ -10,11 +10,6 @@ namespace HB.FullStack.Database
     {
         public object? Id { get; set; }
 
-        ///// <summary>
-        ///// 制定新的NewTimestamp，否则会自动使用当前最新的时间戳
-        ///// </summary>
-        //public long? NewTimestamp { get; set; }
-
         public IList<string> PropertyNames { get; set; } = new List<string>();
 
         public IList<object?> NewPropertyValues { get; set; } = new List<object?>();

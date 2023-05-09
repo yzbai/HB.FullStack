@@ -300,6 +300,9 @@ namespace HB.FullStack.Client.Base
                 }
                 else
                 {
+                    //TODO: 处理ErrorCodes.ConcurrencyConflict, 也有可能需要service层，或者Vm层由用户决定； 或者就后来者居上
+                    //TODO: 比如有些数据，就是后来者居上，有些数据不行
+
                     await UpdateToRemoteAsync(ApiClient, changedPacks).ConfigureAwait(false);
                 }
 

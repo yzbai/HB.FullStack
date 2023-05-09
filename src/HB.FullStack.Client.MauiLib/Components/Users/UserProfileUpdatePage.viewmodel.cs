@@ -83,6 +83,7 @@ namespace HB.FullStack.Client.MauiLib.Components
                     }
                 }, TaskScheduler.Default).SafeFireAndForget(ex =>
                 {
+                    //TODO: backwards if error
                     OnExceptionDisplay(ex, "获取您的用户名出错。");
                 });
             }

@@ -38,6 +38,8 @@ namespace HB.FullStack.Server.WebLib.Middlewares
 
                 CheckIpRate(ip);
 
+                //TODO: IP 白名单， 用于服务器之间的沟通
+
                 //TODO: clientId & IP , clientID & 地理位置
 
                 //TODO: SecurityCheck Here
@@ -46,7 +48,7 @@ namespace HB.FullStack.Server.WebLib.Middlewares
                 string? clientVersion = context.GetClientVersion();
                 string? timestamp = context.GetTimestamp();
 
-                CheckClientIdAndVersion(clientId, clientVersion);
+                CheckClientIdAndVersion(ip, clientId, clientVersion);
 
                 Guid? tokenCredentialId = context.User?.GetTokenCredentialId();
                 Guid? userId = context.User?.GetUserId();
@@ -69,12 +71,12 @@ namespace HB.FullStack.Server.WebLib.Middlewares
 
         }
 
-        private void CheckClientIdAndVersion(string? clientId, string? clientVersion)
+        private void CheckClientIdAndVersion(string? ip, string? clientId, string? clientVersion)
         {
             if (clientVersion.IsNullOrEmpty() || clientId.IsNullOrEmpty())
             {
                 //TODO: 完善这个
-                throw WebExceptions.SecurityCheck();
+                //throw WebExceptions.SecurityCheck();
             }
 
             //TODO: 过滤适应的clientversion

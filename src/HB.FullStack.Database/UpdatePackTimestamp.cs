@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Database
 {
+    /// <summary>
+    /// 使用Timestamp来解决冲突的更新包
+    /// </summary>
     public class UpdatePackTimestamp
     {
         [Required]

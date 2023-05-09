@@ -19,6 +19,7 @@ namespace HB.FullStack.Client.Components.Users
     {
         [NoEmptyGuid]
         [TrackProperty]
+        [AddtionalProperty]
         private Guid _userId;
 
         [TrackProperty]

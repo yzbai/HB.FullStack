@@ -19,9 +19,11 @@ namespace HB.FullStack.Common.PropertyTrackable
         public JsonElement NewValue { get; set; }
 
         [JsonConstructor]
-        public PropertyChange(string name, object? oldValue, object? newValue)
+        public PropertyChange() { }
+
+        public PropertyChange(string propertyName, object? oldValue, object? newValue)
         {
-            PropertyName = name;
+            PropertyName = propertyName;
 
             OldValue = SerializeUtil.ToJsonElement(oldValue);
             NewValue = SerializeUtil.ToJsonElement(newValue);

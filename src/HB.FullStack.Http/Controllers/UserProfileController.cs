@@ -31,7 +31,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
             return Ok(ToRes(userProfile));
         }
 
-        [HttpPut]
+        [HttpPatch]
         public async Task<IActionResult> UpdateUserProfile([FromBody][Required]PropertyChangePack cp)
         {
             await _identityService.UpdateUserProfileAsync(cp, User.GetLastUser()).ConfigureAwait(false);

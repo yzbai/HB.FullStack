@@ -8,7 +8,7 @@ using HB.FullStack.Common.PropertyTrackable;
 namespace HB.FullStack.Database.DbModels
 {
     /// <summary>
-    /// 使用timestamp做行乐观锁，适合所有字段整体不独立改变
+    /// 使用timestamp 或者新旧值，实现版本冲突检测
     /// </summary>
     public abstract class TimestampDbModel : DbModel, ITimestampModel
     {

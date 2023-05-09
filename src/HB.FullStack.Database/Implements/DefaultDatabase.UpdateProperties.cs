@@ -118,7 +118,7 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        #region Timeless
+        #region Timeless - using old new value compare
 
         public Task UpdatePropertiesAsync<T>(UpdatePackTimeless updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new()
         {
@@ -223,24 +223,24 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        #region PropertyChangePack
+        #region PropertyChangePack - Timeless
 
         public async Task UpdatePropertiesAsync<T>(PropertyChangePack changedPack, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            if (modelDef.IsTimestampDBModel)
-            {
-                UpdatePackTimestamp updatePack = changedPack.ToUpdatePackTimestamp(modelDef);
+            //if (modelDef.IsTimestampDBModel)
+            //{
+            //    UpdatePackTimestamp updatePack = changedPack.ToUpdatePackTimestamp(modelDef);
 
-                await UpdatePropertiesTimestampAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
-            }
-            else
-            {
-                UpdatePackTimeless updatePack = changedPack.ToUpdatePackTimeless(modelDef);
+            //    await UpdatePropertiesTimestampAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
+            //}
+            //else
+            //{
+            UpdatePackTimeless updatePack = changedPack.ToUpdatePackTimeless(modelDef);
 
-                await UpdatePropertiesTimelessAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
-            }
+            await UpdatePropertiesTimelessAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
+            //}
         }
 
         public Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
@@ -257,19 +257,23 @@ namespace HB.FullStack.Database
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            if (modelDef.IsTimestampDBModel)
-            {
-                return UpdatePropertiesTimestampAsync(modelDef, changedPacks.Select(cp => cp.ToUpdatePackTimestamp(modelDef)).ToList(), lastUser, transContext);
+            //if (modelDef.IsTimestampDBModel)
+            //{
+            //    return UpdatePropertiesTimestampAsync(modelDef, changedPacks.Select(cp => cp.ToUpdatePackTimestamp(modelDef)).ToList(), lastUser, transContext);
 
-            }
-            else
-            {
-                return UpdatePropertiesTimelessAsync(modelDef, changedPacks.Select(cp => cp.ToUpdatePackTimeless(modelDef)).ToList(), lastUser, transContext);
-            }
+            //}
+            //else
+            //{
+            return UpdatePropertiesTimelessAsync(modelDef, changedPacks.Select(cp => cp.ToUpdatePackTimeless(modelDef)).ToList(), lastUser, transContext);
+            //}
         }
 
         #endregion
 
-        
+        #region Update Properties without any conflict check
+
+        //TODO: Update Properties without any conflict check
+
+        #endregion
     }
 }
