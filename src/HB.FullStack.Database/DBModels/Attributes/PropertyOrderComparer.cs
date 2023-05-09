@@ -26,7 +26,8 @@ namespace HB.FullStack.Database.DbModels
 
             if (xAttr == null && yAttr == null)
             {
-                return 0;
+                return x.Name.CompareTo(y.Name);
+                //return 0;
             }
             else if (xAttr == null)
             {
@@ -51,7 +52,7 @@ namespace HB.FullStack.Database.DbModels
                 nameof(TimestampDbModel.LastUser) => new DbFieldAttribute(1),
                 nameof(TimestampDbModel.Timestamp) => new DbFieldAttribute(2),
                 nameof(TimestampDbModel.Deleted) => new DbFieldAttribute(3),
-                //nameof(DbModel.CreateTime) => new DbFieldAttribute(6),
+                "LastTime" => new DbFieldAttribute(4),
                 _ => null
             };
         }

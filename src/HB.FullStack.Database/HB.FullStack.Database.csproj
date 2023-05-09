@@ -20,6 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
 		<ProjectReference Include="..\HB.FullStack.Database.SourceGenerators\HB.FullStack.Database.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
