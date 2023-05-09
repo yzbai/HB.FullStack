@@ -76,7 +76,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdatePackTimestamp updatePack = new UpdatePackTimestamp
+            TimestampUpdatePack updatePack = new TimestampUpdatePack
             {
                 Id = model.Id,
                 OldTimestamp = model.Timestamp,
@@ -101,7 +101,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var models = Mocker.MockTimestampList(3);
             await Db.AddAsync(models, "", null);
 
-            var updatePacks = new List<UpdatePackTimestamp>();
+            var updatePacks = new List<TimestampUpdatePack>();
 
             foreach (var model in models)
             {
@@ -111,7 +111,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
                 long newTimestamp = TimeUtil.Timestamp;
 
-                updatePacks.Add(new UpdatePackTimestamp
+                updatePacks.Add(new TimestampUpdatePack
                 {
                     Id = model.Id,
                     OldTimestamp = model.Timestamp,
@@ -142,7 +142,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdatePackTimeless updatePack = new UpdatePackTimeless
+            OldNewCompareUpdatePack updatePack = new OldNewCompareUpdatePack
             {
                 Id = model.Id,
                 PropertyNames = new string[] { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },
@@ -172,7 +172,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             int newAge = 10000;
             InnerModel? newInnerModel = null;
 
-            UpdatePackTimeless updatePack = new UpdatePackTimeless
+            OldNewCompareUpdatePack updatePack = new OldNewCompareUpdatePack
             {
                 Id = model.Id,
 
@@ -198,7 +198,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var models = Mocker.MockTimestampList(3);
             await Db.AddAsync(models, "", null);
 
-            var updatePacks = new List<UpdatePackTimeless>();
+            var updatePacks = new List<OldNewCompareUpdatePack>();
 
             foreach (var model in models)
             {
@@ -207,7 +207,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 InnerModel? newInnerModel = null;
                 long newTimestamp = TimeUtil.Timestamp;
 
-                var updatePack = new UpdatePackTimeless
+                var updatePack = new OldNewCompareUpdatePack
                 {
                     Id = model.Id,
                     PropertyNames = new string[] { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },

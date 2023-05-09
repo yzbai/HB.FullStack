@@ -9,8 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-
-using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Client.Components.Sync;
 using HB.FullStack.Common;
 using HB.FullStack.Client.ApiClient;

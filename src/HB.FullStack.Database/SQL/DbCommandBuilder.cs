@@ -330,7 +330,7 @@ namespace HB.FullStack.Database
 
         #region 更改 - UpdateProperties
 
-        public DbEngineCommand CreateUpdatePropertiesTimestampCommand(DbModelDef modelDef, UpdatePackTimestamp updatePack, string lastUser)
+        public DbEngineCommand CreateUpdatePropertiesTimestampCommand(DbModelDef modelDef, TimestampUpdatePack updatePack, string lastUser)
         {
             if (!modelDef.IsTimestampDBModel)
             {
@@ -368,7 +368,7 @@ namespace HB.FullStack.Database
                 parameters);
         }
 
-        public DbEngineCommand CreateBatchUpdatePropertiesTimestampCommand(DbModelDef modelDef, IList<UpdatePackTimestamp> updatePacks, string lastUser, bool needTrans)
+        public DbEngineCommand CreateBatchUpdatePropertiesTimestampCommand(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser, bool needTrans)
         {
             if (!modelDef.IsTimestampDBModel)
             {
@@ -384,7 +384,7 @@ namespace HB.FullStack.Database
 
             DbModelPropertyDef? timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
 
-            foreach (UpdatePackTimestamp updatePack in updatePacks)
+            foreach (TimestampUpdatePack updatePack in updatePacks)
             {
 
                 if (!updatePack.OldTimestamp.HasValue)
@@ -446,7 +446,7 @@ namespace HB.FullStack.Database
             return new DbEngineCommand(commandText, totalParameters);
         }
 
-        public DbEngineCommand CreateUpdatePropertiesTimelessCommand(DbModelDef modelDef, UpdatePackTimeless updatePack, string lastUser)
+        public DbEngineCommand CreateUpdatePropertiesTimelessCommand(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser)
         {
             if (modelDef.IsTimestampDBModel)
             {
@@ -484,7 +484,7 @@ namespace HB.FullStack.Database
             return new DbEngineCommand(sql, parameters);
         }
 
-        public DbEngineCommand CreateBatchUpdatePropertiesTimelessCommand(DbModelDef modelDef, IList<UpdatePackTimeless> updatePacks, string lastUser, bool needTrans)
+        public DbEngineCommand CreateBatchUpdatePropertiesTimelessCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, bool needTrans)
         {
             if (modelDef.IsTimestampDBModel)
             {
@@ -500,7 +500,7 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            foreach (UpdatePackTimeless updatePack in updatePacks)
+            foreach (OldNewCompareUpdatePack updatePack in updatePacks)
             {
                 List<string> curPropertyNames = new List<string>(updatePack.PropertyNames);
                 List<object?> curNewPropertyValues = new List<object?>(updatePack.NewPropertyValues);
@@ -635,7 +635,7 @@ namespace HB.FullStack.Database
             {
                 return CreateUpdatePropertiesTimestampCommand(
                     modelDef,
-                    new UpdatePackTimestamp
+                    new TimestampUpdatePack
                     {
                         Id = id,
                         OldTimestamp = oldTimestamp,
@@ -713,11 +713,11 @@ namespace HB.FullStack.Database
             {
                 List<string> propertyNames = new List<string> { nameof(DbModel.Deleted) };
                 List<object?> propertyValues = new List<object?> { true };
-                List<UpdatePackTimestamp> updatePacks = new List<UpdatePackTimestamp>();
+                List<TimestampUpdatePack> updatePacks = new List<TimestampUpdatePack>();
 
                 for (int i = 0; i < count; ++i)
                 {
-                    updatePacks.Add(new UpdatePackTimestamp
+                    updatePacks.Add(new TimestampUpdatePack
                     {
                         Id = ids[i],
                         OldTimestamp = oldTimestamps[i],

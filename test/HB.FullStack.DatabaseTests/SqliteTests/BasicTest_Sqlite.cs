@@ -33,7 +33,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             //update-fields
 
-            var updatePack = new UpdatePackTimestamp
+            var updatePack = new TimestampUpdatePack
             {
                 Id = book.Id,
                 OldTimestamp = book.Timestamp,

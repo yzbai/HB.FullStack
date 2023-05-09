@@ -7,7 +7,6 @@
 using System;
 
 using HB.FullStack.Client.Base;
-using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Client.Files

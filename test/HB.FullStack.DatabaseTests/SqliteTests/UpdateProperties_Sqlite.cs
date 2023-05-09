@@ -74,7 +74,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             long newTimestamp = TimeUtil.Timestamp;
 
-            UpdatePackTimestamp updatePack = new UpdatePackTimestamp
+            TimestampUpdatePack updatePack = new TimestampUpdatePack
             {
                 Id = model.Id,
                 OldTimestamp = model.Timestamp,
@@ -100,7 +100,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             await Db.AddAsync(models, "", null);
 
-            var updatePacks = new List<UpdatePackTimestamp>();
+            var updatePacks = new List<TimestampUpdatePack>();
 
             foreach (var model in models)
             {
@@ -110,7 +110,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
                 long newTimestamp = TimeUtil.Timestamp;
 
-                updatePacks.Add(new UpdatePackTimestamp
+                updatePacks.Add(new TimestampUpdatePack
                 {
                     Id = model.Id,
                     OldTimestamp = model.Timestamp,
@@ -139,7 +139,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             int newAge = 10000;
             InnerModel? newInnerModel = null;
 
-            UpdatePackTimeless updatePack = new UpdatePackTimeless
+            OldNewCompareUpdatePack updatePack = new OldNewCompareUpdatePack
             {
                 Id = model.Id,
                 PropertyNames = new[] { nameof(model.Name), nameof(model.Age), nameof(model.InnerModel) },

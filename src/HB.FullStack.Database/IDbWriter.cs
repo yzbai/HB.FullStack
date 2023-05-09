@@ -49,22 +49,22 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Update TimestampDbModel while using Timestamp method to solve conflict.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(UpdatePackTimestamp updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new();
+        Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new();
 
         /// <summary>
         /// Update TimestampDbModels while using Timestamp method to solve conflict.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(IList<UpdatePackTimestamp> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new();
+        Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new();
 
         /// <summary>
         /// Update TimelessDbModel while using old new value compare method to solve conflict.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(UpdatePackTimeless updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new();
+        Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new();
 
         /// <summary>
         /// Update TimelessDbModel while using old new value compare method to solve conflict.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(IList<UpdatePackTimeless> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimelessDbModel, new();
+        Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimelessDbModel, new();
 
         /// <summary>
         /// Update DbModel using PropertyChangePack, auto decide conflict solve method.

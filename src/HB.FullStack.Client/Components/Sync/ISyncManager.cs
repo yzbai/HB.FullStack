@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using HB.FullStack.Client.ClientModels;
+using HB.FullStack.Client.Base;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 

@@ -1,8 +1,9 @@
 ﻿using System;
 
 using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.Database.DbModels
+namespace HB.FullStack.Client.Base
 {
     [PropertyTrackableObject]
     public partial class ClientDbModel : TimelessGuidDbModel

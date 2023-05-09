@@ -84,7 +84,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             //update-fields
 
-            UpdatePackTimestamp updatePack = new UpdatePackTimestamp
+            TimestampUpdatePack updatePack = new TimestampUpdatePack
             {
                 Id = book.Id,
                 OldTimestamp = book.Timestamp,
@@ -130,7 +130,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             //update-fields
 
-            UpdatePackTimeless updatePack = new UpdatePackTimeless
+            OldNewCompareUpdatePack updatePack = new OldNewCompareUpdatePack
             {
                 Id = book.Id,
                 PropertyNames = new string[] { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },

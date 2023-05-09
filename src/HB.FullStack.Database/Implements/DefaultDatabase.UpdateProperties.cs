@@ -15,21 +15,21 @@ namespace HB.FullStack.Database
     {
         #region Timestamp
 
-        public Task UpdatePropertiesAsync<T>(UpdatePackTimestamp updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new()
+        public Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            return UpdatePropertiesTimestampAsync(modelDef, updatePack, lastUser, transContext);
+            return UpdatePropertiesUsingTimestampAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<UpdatePackTimestamp> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new()
+        public Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            return UpdatePropertiesTimestampAsync(modelDef, updatePacks, lastUser, transactionContext);
+            return UpdatePropertiesUsingTimestampAsync(modelDef, updatePacks, lastUser, transactionContext);
         }
 
-        private async Task UpdatePropertiesTimestampAsync(DbModelDef modelDef, UpdatePackTimestamp updatePack, string lastUser, TransactionContext? transContext)
+        private async Task UpdatePropertiesUsingTimestampAsync(DbModelDef modelDef, TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext)
         {
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable();
@@ -64,7 +64,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task UpdatePropertiesTimestampAsync(DbModelDef modelDef, IList<UpdatePackTimestamp> updatePacks, string lastUser, TransactionContext? transactionContext)
+        private async Task UpdatePropertiesUsingTimestampAsync(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext)
         {
             if (updatePacks.IsNullOrEmpty())
             {
@@ -73,7 +73,7 @@ namespace HB.FullStack.Database
 
             if (updatePacks.Count == 1)
             {
-                await UpdatePropertiesTimestampAsync(modelDef, updatePacks[0], lastUser, transactionContext).ConfigureAwait(false);
+                await UpdatePropertiesUsingTimestampAsync(modelDef, updatePacks[0], lastUser, transactionContext).ConfigureAwait(false);
                 return;
             }
 
@@ -120,21 +120,21 @@ namespace HB.FullStack.Database
 
         #region Timeless - using old new value compare
 
-        public Task UpdatePropertiesAsync<T>(UpdatePackTimeless updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new()
+        public Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            return UpdatePropertiesTimelessAsync(modelDef, updatePack, lastUser, transContext);
+            return UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<UpdatePackTimeless> updatePacks, string lastUser, TransactionContext? transactionContext = null) where T : TimelessDbModel, new()
+        public Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext = null) where T : TimelessDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            return UpdatePropertiesTimelessAsync(modelDef, updatePacks, lastUser, transactionContext);
+            return UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePacks, lastUser, transactionContext);
         }
 
-        private async Task UpdatePropertiesTimelessAsync(DbModelDef modelDef, UpdatePackTimeless updatePack, string lastUser, TransactionContext? transContext)
+        private async Task UpdatePropertiesUsingOldNewCompareAsync(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext)
         {
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable();
@@ -169,7 +169,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task UpdatePropertiesTimelessAsync(DbModelDef modelDef, IList<UpdatePackTimeless> updatePacks, string lastUser, TransactionContext? transactionContext = null)
+        private async Task UpdatePropertiesUsingOldNewCompareAsync(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext = null)
         {
             if (updatePacks.IsNullOrEmpty())
             {
@@ -178,7 +178,7 @@ namespace HB.FullStack.Database
 
             if (updatePacks.Count == 1)
             {
-                await UpdatePropertiesTimelessAsync(modelDef, updatePacks[0], lastUser, transactionContext);
+                await UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePacks[0], lastUser, transactionContext);
                 return;
             }
 
@@ -231,15 +231,15 @@ namespace HB.FullStack.Database
 
             //if (modelDef.IsTimestampDBModel)
             //{
-            //    UpdatePackTimestamp updatePack = changedPack.ToUpdatePackTimestamp(modelDef);
+            //    TimestampUpdatePack updatePack = changedPack.ToTimestampUpdatePack(modelDef);
 
-            //    await UpdatePropertiesTimestampAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
+            //    await UpdatePropertiesUsingTimestampAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
             //}
             //else
             //{
-            UpdatePackTimeless updatePack = changedPack.ToUpdatePackTimeless(modelDef);
+            OldNewCompareUpdatePack updatePack = changedPack.ToOldNewCompareUpdatePack(modelDef);
 
-            await UpdatePropertiesTimelessAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
+            await UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
             //}
         }
 
@@ -259,12 +259,12 @@ namespace HB.FullStack.Database
 
             //if (modelDef.IsTimestampDBModel)
             //{
-            //    return UpdatePropertiesTimestampAsync(modelDef, changedPacks.Select(cp => cp.ToUpdatePackTimestamp(modelDef)).ToList(), lastUser, transContext);
+            //    return UpdatePropertiesUsingTimestampAsync(modelDef, changedPacks.Select(cp => cp.ToTimestampUpdatePack(modelDef)).ToList(), lastUser, transContext);
 
             //}
             //else
             //{
-            return UpdatePropertiesTimelessAsync(modelDef, changedPacks.Select(cp => cp.ToUpdatePackTimeless(modelDef)).ToList(), lastUser, transContext);
+            return UpdatePropertiesUsingOldNewCompareAsync(modelDef, changedPacks.Select(cp => cp.ToOldNewCompareUpdatePack(modelDef)).ToList(), lastUser, transContext);
             //}
         }
 
