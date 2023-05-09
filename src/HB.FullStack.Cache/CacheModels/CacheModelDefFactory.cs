@@ -24,7 +24,7 @@ namespace HB.FullStack.Cache
 
         private static CacheModelDef? CreateModelDef(Type modelType)
         {
-            CacheModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheModelAttribute>();
+            CacheModelAttribute? cacheModelAttribute = modelType.GetCustomAttribute<CacheModelAttribute>(true);
 
             if (cacheModelAttribute == null)
             {
@@ -54,7 +54,7 @@ namespace HB.FullStack.Cache
             {
                 if (!foundkeyAttribute)
                 {
-                    CacheModelKeyAttribute? keyAttribute = propertyInfo.GetCustomAttribute<CacheModelKeyAttribute>();
+                    CacheModelKeyAttribute? keyAttribute = propertyInfo.GetCustomAttribute<CacheModelKeyAttribute>(true);
 
                     if (keyAttribute != null)
                     {
@@ -65,7 +65,7 @@ namespace HB.FullStack.Cache
                     }
                 }
 
-                CacheModelAltKeyAttribute? dimensionKeyAttribute = propertyInfo.GetCustomAttribute<CacheModelAltKeyAttribute>();
+                CacheModelAltKeyAttribute? dimensionKeyAttribute = propertyInfo.GetCustomAttribute<CacheModelAltKeyAttribute>(true);
 
                 if (dimensionKeyAttribute != null)
                 {

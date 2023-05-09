@@ -78,7 +78,7 @@ namespace HB.FullStack.Database.DbModels
 
                     string resultDbSchemaName = null!;
 
-                    DbTableAttribute? tableAttribute = type.GetCustomAttribute<DbTableAttribute>();
+                    DbTableAttribute? tableAttribute = type.GetCustomAttribute<DbTableAttribute>(true);
 
                     //来自Attribute
                     if (tableAttribute != null)
@@ -223,7 +223,7 @@ namespace HB.FullStack.Database.DbModels
                 }
 
                 //判断是否是主键
-                DbPrimaryKeyAttribute? primaryAttribute = propertyInfo.GetCustomAttribute<DbPrimaryKeyAttribute>(false);
+                DbPrimaryKeyAttribute? primaryAttribute = propertyInfo.GetCustomAttribute<DbPrimaryKeyAttribute>(true);
 
                 if (primaryAttribute != null)
                 {
@@ -237,7 +237,7 @@ namespace HB.FullStack.Database.DbModels
                 else
                 {
                     //判断是否外键
-                    DbForeignKeyAttribute? atts2 = propertyInfo.GetCustomAttribute<DbForeignKeyAttribute>(false);
+                    DbForeignKeyAttribute? atts2 = propertyInfo.GetCustomAttribute<DbForeignKeyAttribute>(true);
 
                     if (atts2 != null)
                     {

@@ -13,7 +13,7 @@ namespace System
 
             foreach (MethodInfo info in type.GetMethods())
             {
-                if (info.GetCustomAttribute<T>() != null)
+                if (info.GetCustomAttribute<T>(true) != null)
                 {
                     lst.Add(info);
                 }

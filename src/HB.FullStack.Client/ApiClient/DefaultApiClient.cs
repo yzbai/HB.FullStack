@@ -73,7 +73,7 @@ namespace HB.FullStack.Client.ApiClient
                         //直接把TokenSite作为默认
                         endpoint.SiteSetting = ApiClientOptions.TokenSiteSetting;
 
-                        ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>();
+                        ResEndpointAttribute? attr = resType.GetCustomAttribute<ResEndpointAttribute>(true);
 
                         if (attr != null)
                         {

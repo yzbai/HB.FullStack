@@ -5,14 +5,13 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
+using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Abstractions;
-using HB.FullStack.Client.ClientModels;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Client.Components.Sync
 {

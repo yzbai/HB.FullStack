@@ -53,7 +53,7 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TestMethod]
         public void TestAttributeForward()
         {
-            var attr = typeof(TestObject).GetProperty(nameof(TestObject.Id))?.GetCustomAttribute<AddtionalPropertyAttribute>();
+            var attr = typeof(TestObject).GetProperty(nameof(TestObject.Id))?.GetCustomAttribute<AddtionalPropertyAttribute>(true);
 
             Assert.IsNotNull(attr);
         }

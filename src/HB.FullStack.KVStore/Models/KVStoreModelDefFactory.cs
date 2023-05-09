@@ -50,7 +50,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
 
             foreach (var type in allModelTypes)
             {
-                KVStoreAttribute? attribute = type.GetCustomAttribute<KVStoreAttribute>();
+                KVStoreAttribute? attribute = type.GetCustomAttribute<KVStoreAttribute>(true);
 
                 filedDict.TryGetValue(type.FullName!, out KVStoreModelSchema? fileConfigured);
 
@@ -110,13 +110,13 @@ namespace HB.FullStack.KVStore.KVStoreModels
 
             foreach (PropertyInfo info in properties)
             {
-                KVStoreKeyAttribute? keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>();
+                KVStoreKeyAttribute? keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>(true);
 
                 if (keyAttr != null)
                 {
                     modelDef.KeyPropertyInfos.Add(keyAttr.Order, info);
                 }
-                else if (info.GetCustomAttribute<KVStoreBackupKeyAttribute>() != null)
+                else if (info.GetCustomAttribute<KVStoreBackupKeyAttribute>(true) != null)
                 {
                     backupKeyPropertyInfo = info;
                 }

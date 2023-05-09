@@ -6,4 +6,9 @@
     public class SharedResource : IDTO
     {
     }
+
+    public abstract class TimestampSharedResource : SharedResource
+    {
+        public abstract long Timestamp { get; set; }
+    }
 }

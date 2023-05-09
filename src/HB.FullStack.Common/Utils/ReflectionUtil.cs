@@ -117,12 +117,12 @@ namespace System
 
         public static PropertyInfo? GetPropertyInfoByAttribute<T>(this Type type) where T : Attribute
         {
-            return type.GetProperties().Where(p => p.GetCustomAttribute<T>() != null).FirstOrDefault();
+            return type.GetProperties().Where(p => p.GetCustomAttribute<T>(true) != null).FirstOrDefault();
         }
 
         public static IList<PropertyInfo> GetPropertyInfosByAttribute<T>(this Type type) where T : Attribute
         {
-            return type.GetProperties().Where(p => p.GetCustomAttribute<T>() != null).ToList();
+            return type.GetProperties().Where(p => p.GetCustomAttribute<T>(true) != null).ToList();
         }
 
     }
