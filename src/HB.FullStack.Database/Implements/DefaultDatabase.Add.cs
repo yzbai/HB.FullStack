@@ -195,7 +195,7 @@ namespace HB.FullStack.Database
 
         private static void PrepareBatchItems<T>(IEnumerable<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
         {
-            if (!modelDef.HasTimestamp)
+            if (!modelDef.IsTimestamp)
             {
                 return;
             }
@@ -217,7 +217,7 @@ namespace HB.FullStack.Database
 
         private static void RestoreBatchItems<T>(IEnumerable<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
         {
-            if (!modelDef.HasTimestamp)
+            if (!modelDef.IsTimestamp)
             {
                 return;
             }

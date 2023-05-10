@@ -1,10 +1,12 @@
-﻿namespace HB.FullStack.Database.DbModels
+﻿using System;
+
+namespace HB.FullStack.Database.DbModels
 {
-    public enum DbConflictCheckMethod
+    [Flags]
+    public enum DbConflictCheckMethods
     {
         None = 0,
-        Both = 1,
-        OldNewValueCompareOnly = 2,
-        TimestampOnly = 3
+        OldNewValueCompare = 1,
+        Timestamp = 2 
     }
 }

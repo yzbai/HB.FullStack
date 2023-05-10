@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
+using HB.FullStack.Common;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
@@ -18,7 +19,7 @@ namespace HB.FullStack.Database.Convert
         #region IDataReader Row To Model
 
         public static IList<T> ToDbModels<T>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedDataReaderRowToModelFunc(reader, modelDef, 0, reader.FieldCount, false);
 
@@ -35,8 +36,8 @@ namespace HB.FullStack.Database.Convert
         }
 
         public static IList<Tuple<TSource, TTarget?>> ToDbModels<TSource, TTarget>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef)
-            where TSource : DbModel, new()
-            where TTarget : DbModel, new()
+            where TSource : BaseDbModel, new()
+            where TTarget : BaseDbModel, new()
         {
             Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false);
             Func<IDbModelDefFactory, IDataReader, object?> targetFunc = GetCachedDataReaderRowToModelFunc(reader, targetModelDef, sourceModelDef.FieldCount, reader.FieldCount - sourceModelDef.FieldCount, true);
@@ -55,9 +56,9 @@ namespace HB.FullStack.Database.Convert
         }
 
         public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToDbModels<TSource, TTarget2, TTarget3>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
-            where TSource : DbModel, new()
-            where TTarget2 : DbModel, new()
-            where TTarget3 : DbModel, new()
+            where TSource : BaseDbModel, new()
+            where TTarget2 : BaseDbModel, new()
+            where TTarget3 : BaseDbModel, new()
         {
             Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false);
             Func<IDbModelDefFactory, IDataReader, object?> targetFunc1 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef1, sourceModelDef.FieldCount, targetModelDef1.FieldCount, true);
@@ -108,9 +109,9 @@ namespace HB.FullStack.Database.Convert
 
         #region Model To DbParameters
 
-        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, int number = 0) where T : DbModel, new()
+        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, int number = 0) where T : BaseDbModel, new()
         {
-            if (model is TimestampDbModel serverModel && serverModel.Timestamp <= 0)
+            if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
                 throw DbExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
@@ -131,9 +132,9 @@ namespace HB.FullStack.Database.Convert
         /// <summary>
         /// ToDbParameters. number为属性名的后缀数字
         /// </summary>
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, int number = 0) where T : DbModel, new()
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, int number = 0) where T : BaseDbModel, new()
         {
-            if (model is TimestampDbModel serverModel && serverModel.Timestamp <= 0)
+            if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
                 throw DbExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }

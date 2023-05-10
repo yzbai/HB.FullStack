@@ -7,8 +7,8 @@
 [assembly: InternalsVisibleTo("HB.FullStack.Repository")]
 namespace HB.FullStack.Common
 {
-    public interface ILongId
-    {
-        long Id { get; set; }
-    }
+    //public interface ILongId
+    //{
+    //    long Id { get; set; }
+    //}
 }

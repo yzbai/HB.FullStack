@@ -32,11 +32,11 @@ namespace HB.FullStack.Database.DbModels
 
         public string TableName { get; set; } = null!;
 
-        public bool HasTimestamp { get; set; }
-
-        public DbConflictCheckMethod ConflictCheckMethod { get; set; } = DbConflictCheckMethod.Both;
-
         public DbModelIdType IdType { get; set; }
+
+        public bool IsTimestamp { get; set; }
+
+        public DbConflictCheckMethods ConflictCheckMethods { get; set; } = DbConflictCheckMethods.OldNewValueCompare | DbConflictCheckMethods.Timestamp;
 
         /// <summary>
         /// 数据库是否可写
@@ -55,7 +55,7 @@ namespace HB.FullStack.Database.DbModels
 
         public string DbTableReservedName => _dbTableReservedName ??= SqlHelper.GetReserved(TableName, EngineType);
 
-        public string DeletedPropertyReservedName => _deletedPropertyReservedName ??= SqlHelper.GetReserved(nameof(DbModel.Deleted), EngineType);
+        public string DeletedPropertyReservedName => _deletedPropertyReservedName ??= SqlHelper.GetReserved(nameof(DbModel<long>.Deleted), EngineType);
 
         public IList<DbModelPropertyDef> ForeignKeyProperties => _foreignKeyProperties ??= PropertyDict.Values.Where(p => p.IsForeignKey).ToList();
 

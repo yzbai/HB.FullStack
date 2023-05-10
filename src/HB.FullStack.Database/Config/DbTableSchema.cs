@@ -17,7 +17,7 @@ namespace HB.FullStack.Database.Config
 
         public bool? ReadOnly { get; set; }
 
-        public DbConflictCheckMethod? ConflictCheckMethod { get; set; }
+        public DbConflictCheckMethods? ConflictCheckMethods { get; set; }
 
         public IList<DbFieldSchema> Fields { get; set; } = new List<DbFieldSchema>();
     }

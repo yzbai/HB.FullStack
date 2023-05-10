@@ -36,7 +36,7 @@ namespace HB.FullStack.Database.DbModels
         {
             _options = options.Value;
 
-            static bool typeCondition(Type t) => t.IsSubclassOf(typeof(DbModel)) && !t.IsAbstract;
+            static bool typeCondition(Type t) => t.IsSubclassOf(typeof(BaseDbModel)) && !t.IsAbstract;
 
             IEnumerable<Type> allModelTypes = _options.DbModelAssemblies.IsNullOrEmpty()
                 ? ReflectionUtil.GetAllTypeByCondition(typeCondition)
@@ -88,7 +88,7 @@ namespace HB.FullStack.Database.DbModels
                         resultDbSchemaName = tableAttribute.DbSchemaName;
                         resultTableSchema.TableName = tableAttribute.TableName ?? resultTableSchema.TableName;
                         resultTableSchema.ReadOnly = tableAttribute.ReadOnly ?? resultTableSchema.ReadOnly;
-                        resultTableSchema.ConflictCheckMethod = tableAttribute.ConflictCheckMethod;
+                        resultTableSchema.ConflictCheckMethods = tableAttribute.ConflictCheckMethods;
                     }
 
                     //来自Options, 覆盖Attribute
@@ -98,7 +98,7 @@ namespace HB.FullStack.Database.DbModels
                         resultTableSchema.TableName = optionTableSchemaEx.TableSchema.TableName ?? resultTableSchema.TableName;
                         resultTableSchema.ReadOnly = optionTableSchemaEx.TableSchema.ReadOnly ?? resultTableSchema.ReadOnly;
                         resultTableSchema.Fields = optionTableSchemaEx.TableSchema.Fields ?? resultTableSchema.Fields;
-                        resultTableSchema.ConflictCheckMethod = optionTableSchemaEx.TableSchema.ConflictCheckMethod ?? resultTableSchema.ConflictCheckMethod;
+                        resultTableSchema.ConflictCheckMethods = optionTableSchemaEx.TableSchema.ConflictCheckMethods ?? resultTableSchema.ConflictCheckMethods;
                     }
 
                     //做最后的检查，有可能两者都没有定义, 默认使用第一个
@@ -133,7 +133,7 @@ namespace HB.FullStack.Database.DbModels
                 }
             }
 
-            static DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchemaFromOptons, DbSchema dbSchemaFromOptions)
+            static DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchema, DbSchema dbSchema)
             {
                 DbModelDef modelDef = new DbModelDef
                 {
@@ -142,17 +142,17 @@ namespace HB.FullStack.Database.DbModels
                     ModelType = modelType,
                     IsPropertyTrackable = modelType.IsAssignableTo(typeof(IPropertyTrackableObject)),
 
-                    DbSchemaName = dbSchemaFromOptions.Name,
-                    EngineType = dbSchemaFromOptions.EngineType,
+                    DbSchemaName = dbSchema.Name,
+                    EngineType = dbSchema.EngineType,
 
-                    TableName = tableSchemaFromOptons.TableName,
-                    IdType = GetIdType(modelType),
-                    HasTimestamp = typeof(TimestampDbModel).IsAssignableFrom(modelType),
+                    TableName = tableSchema.TableName,
+                    //IdType = GetIdType(modelType),
+                    IsTimestamp = typeof(ITimestamp).IsAssignableFrom(modelType),
 
-                    IsWriteable = !(tableSchemaFromOptons.ReadOnly!.Value),
-
-                    ConflictCheckMethod = tableSchemaFromOptons.ConflictCheckMethod ?? DbConflictCheckMethod.Both
+                    IsWriteable = !(tableSchema.ReadOnly!.Value),
                 };
+
+                if(!modelDef.IsTimestamp && tableSchema)
 
                 //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
                 var orderedProperties = modelType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
@@ -172,14 +172,14 @@ namespace HB.FullStack.Database.DbModels
 
                         fieldAttribute = new DbFieldAttribute();
 
-                        if (propertyInfo.Name == nameof(TimestampDbModel.LastUser))
+                        if (propertyInfo.Name == nameof(DbModel2<long>.LastUser))
                         {
-                            fieldAttribute.MaxLength = dbSchemaFromOptions.MaxLastUserFieldLength;
+                            fieldAttribute.MaxLength = dbSchema.MaxLastUserFieldLength;
                         }
                     }
 
-                    DbFieldSchema? fieldSchemaFromOptions = tableSchemaFromOptons.Fields.FirstOrDefault(f => f.FieldName == propertyInfo.Name);
-                    DbModelPropertyDef propertyDef = CreatePropertyDef(modelDef, propertyInfo, fieldAttribute, fieldSchemaFromOptions, dbSchemaFromOptions);
+                    DbFieldSchema? fieldSchemaFromOptions = tableSchema.Fields.FirstOrDefault(f => f.FieldName == propertyInfo.Name);
+                    DbModelPropertyDef propertyDef = CreatePropertyDef(modelDef, propertyInfo, fieldAttribute, fieldSchemaFromOptions, dbSchema);
 
                     modelDef.FieldCount++;
 
@@ -196,6 +196,8 @@ namespace HB.FullStack.Database.DbModels
 
                 static DbModelIdType GetIdType(Type modelType)
                 {
+
+
                     if(typeof(IAutoIncrementId).IsAssignableFrom(modelType))
                     {
                         return DbModelIdType.AutoIncrementLongId;

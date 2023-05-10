@@ -7,9 +7,9 @@
 [assembly: InternalsVisibleTo("HB.FullStack.Repository")]
 namespace HB.FullStack.Common
 {
-    public interface ITimestampModel : IModel
+    public interface ITimestamp
     {
         //int Version { get; set; }
-        long Timestamp { get; set; }
+        long Timestamp { get;   }
     }
 }

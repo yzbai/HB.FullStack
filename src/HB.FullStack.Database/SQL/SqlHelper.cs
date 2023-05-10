@@ -146,7 +146,7 @@ namespace HB.FullStack.Database.SQL
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
 
-            if (modelDef.HasTimestamp)
+            if (modelDef.IsTimestamp)
             {
                 //TODO: 提高效率。简化所有的Version、LastTime、LastUser、Deleted、Id字段的 Property读取和DbReservedName使用
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
@@ -191,7 +191,7 @@ namespace HB.FullStack.Database.SQL
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
 
-            if (modelDef.HasTimestamp)
+            if (modelDef.IsTimestamp)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
                 
@@ -214,7 +214,7 @@ namespace HB.FullStack.Database.SQL
             args.Append(Invariant($"{lastUserProperty.DbReservedName}={DbParameterName_LastUser}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
 
             //如果是TimestampDBModel，强迫加上Timestamp字段
-            if (modelDef.HasTimestamp)
+            if (modelDef.IsTimestamp)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
 
@@ -247,7 +247,7 @@ namespace HB.FullStack.Database.SQL
             //TODO: 还是要查验一下found_rows的并发？
             string sql = $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
 
-            if (modelDef.HasTimestamp)
+            if (modelDef.IsTimestamp)
             {
                 //" SELECT {FoundUpdateMatchedRows_Statement(engineType)}, {timestampProperty.DbReservedName} FROM {modelDef.DbTableReservedName} WHERE {primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{newSuffix}_{number} AND {deletedProperty.DbReservedName}=0 ";
             }

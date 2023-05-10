@@ -80,7 +80,7 @@ namespace System
         /// <param name="timeNow"></param>
         /// <param name="storeAsBinary">true as binary stored in database;otherwise, as string stored in database</param>
         /// <returns></returns>
-        public static Guid CreateSequentialGuid(DateTimeOffset timeNow, GuidStoredFormat guidStoredFormat)
+        public static Guid CreateSequentialGuid(GuidStoredFormat guidStoredFormat = GuidStoredFormat.AsBinary)
         {
             // According to RFC 4122:
             // dddddddd-dddd-Mddd-Ndrr-rrrrrrrrrrrr
@@ -88,6 +88,8 @@ namespace System
             // - N = RFC variant (plus other bits), in this case 0b1000 for variant 1
             // - d = nibbles based on UTC date/time in ticks
             // - r = nibbles based on random bytes
+
+            DateTimeOffset timeNow = DateTimeOffset.UtcNow;
 
             var randomBytes = new byte[7];
             _randomNumberGenerator.GetBytes(randomBytes);
