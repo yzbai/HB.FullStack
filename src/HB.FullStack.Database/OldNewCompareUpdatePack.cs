@@ -8,7 +8,7 @@ using HB.FullStack.Database.DbModels;
 namespace HB.FullStack.Database
 {
     /// <summary>
-    /// 使用新旧值比较来解决冲突，不使用Timestamp来解决冲突
+    /// 使用新旧值比较来解决冲突
     /// </summary>
     public class OldNewCompareUpdatePack
     {

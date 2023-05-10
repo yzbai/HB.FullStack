@@ -9,6 +9,13 @@ using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database.DbModels
 {
+    public enum DbModelIdType
+    {
+        LongId = 0,
+        AutoIncrementLongId = 1,
+        GuidId = 2
+    }
+
     /// <summary>
     /// 实体定义
     /// </summary>
@@ -28,40 +35,20 @@ namespace HB.FullStack.Database.DbModels
 
         #endregion
 
-        public string DbSchemaName { get; set; } = null!;
-
-        /// <summary>
-        /// 属于那种数据库
-        /// </summary>
         public DbEngineType EngineType { get; set; }
 
-        /// <summary>
-        /// 数据库表名
-        /// 在IsTableDomain为false时没有意义
-        /// </summary>
+        public string DbSchemaName { get; set; } = null!;
+
         public string TableName { get; set; } = null!;
 
-        public bool IsTimestampDBModel { get; set; }
+        public bool HasTimestamp { get; set; }
 
-        /// <summary>
-        /// 是否是GuidModel
-        /// </summary>
-        public bool IsIdGuid { get; set; }
-
-        /// <summary>
-        /// 是否是IdLongModel
-        /// </summary>
-        public bool IsIdLong { get; set; }
-
-        /// <summary>
-        /// 是否是AutoincrementIdModel
-        /// </summary>
-        public bool IsIdAutoIncrement { get; set; }
+        public DbModelIdType IdType { get; set; }
 
         /// <summary>
         /// 数据库是否可写
         /// </summary>
-        public bool DbWriteable { get; set; }
+        public bool IsWriteable { get; set; }
 
         public int FieldCount { get; set; }
 
@@ -100,7 +87,7 @@ namespace HB.FullStack.Database.DbModels
     {
         public static DbModelDef ThrowIfNotWriteable(this DbModelDef modelDef)
         {
-            if (!modelDef.DbWriteable)
+            if (!modelDef.IsWriteable)
             {
                 throw DbExceptions.NotWriteable(type: modelDef.ModelFullName, database: modelDef.DbSchemaName);
             }

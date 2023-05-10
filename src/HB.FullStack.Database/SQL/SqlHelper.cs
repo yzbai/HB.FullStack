@@ -81,7 +81,7 @@ namespace HB.FullStack.Database.SQL
 
             if (returnModel)
             {
-                if (modelDef.IsIdAutoIncrement)
+                if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
                     sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {GetLastInsertIdStatement(modelDef.EngineType)};";
                 }
@@ -114,7 +114,7 @@ namespace HB.FullStack.Database.SQL
             args.RemoveLast();
             values.RemoveLast();
 
-            string returnIdStatement = returnId && modelDef.IsIdAutoIncrement ? $"select {GetLastInsertIdStatement(modelDef.EngineType)};" : string.Empty;
+            string returnIdStatement = returnId && modelDef.IdType == DbModelIdType.AutoIncrementLongId ? $"select {GetLastInsertIdStatement(modelDef.EngineType)};" : string.Empty;
 
             return $"insert into {modelDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
         }
@@ -146,7 +146,7 @@ namespace HB.FullStack.Database.SQL
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
 
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 //TODO: 提高效率。简化所有的Version、LastTime、LastUser、Deleted、Id字段的 Property读取和DbReservedName使用
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
@@ -191,7 +191,7 @@ namespace HB.FullStack.Database.SQL
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
 
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
                 
@@ -214,7 +214,7 @@ namespace HB.FullStack.Database.SQL
             args.Append(Invariant($"{lastUserProperty.DbReservedName}={DbParameterName_LastUser}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
 
             //如果是TimestampDBModel，强迫加上Timestamp字段
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
 
@@ -247,7 +247,7 @@ namespace HB.FullStack.Database.SQL
             //TODO: 还是要查验一下found_rows的并发？
             string sql = $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
 
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 //" SELECT {FoundUpdateMatchedRows_Statement(engineType)}, {timestampProperty.DbReservedName} FROM {modelDef.DbTableReservedName} WHERE {primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{newSuffix}_{number} AND {deletedProperty.DbReservedName}=0 ";
             }

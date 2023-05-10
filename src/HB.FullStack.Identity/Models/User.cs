@@ -13,6 +13,7 @@ namespace HB.FullStack.Server.Identity.Models
     {
         public string? UserLevel { get; set; }
 
+        //TODO: Remove this, becuase of Timestamp already done the job
         [Required]
         [DbGuid32StringField(NotNull = true)]
         public string SecurityStamp { get; set; } = default!;

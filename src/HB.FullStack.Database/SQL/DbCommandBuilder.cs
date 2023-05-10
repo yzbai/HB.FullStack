@@ -205,7 +205,7 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            bool isIdAutoIncrement = modelDef.IsIdAutoIncrement;
+            bool isIdAutoIncrement = modelDef.IdType == DbModelIdType.AutoIncrementLongId;
 
             DbEngineType engineType = modelDef.EngineType;
 
@@ -262,7 +262,7 @@ namespace HB.FullStack.Database
         {
             var paramters = model.ToDbParameters(modelDef, _modelDefFactory);
 
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
                 paramters.Add(new KeyValuePair<string, object>($"{timestampProperty.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
@@ -277,7 +277,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.Empty(models, nameof(models));
 
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 ThrowIf.NotEqual(models.Count(), oldTimestamps.Count, nameof(models), nameof(oldTimestamps));
             }
@@ -289,7 +289,7 @@ namespace HB.FullStack.Database
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            DbModelPropertyDef? timestampProperty = modelDef.IsTimestampDBModel ? modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))! : null;
+            DbModelPropertyDef? timestampProperty = modelDef.HasTimestamp ? modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))! : null;
 
             foreach (T model in models)
             {
@@ -298,7 +298,7 @@ namespace HB.FullStack.Database
                 parameters.AddRange(model.ToDbParameters(modelDef, _modelDefFactory, number));
 
                 //这里要添加 一些参数值，参考update
-                if (modelDef.IsTimestampDBModel)
+                if (modelDef.HasTimestamp)
                 {
                     parameters.Add(new KeyValuePair<string, object>($"{timestampProperty!.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}", oldTimestamps[number]));
                 }
@@ -332,7 +332,7 @@ namespace HB.FullStack.Database
 
         public DbEngineCommand CreateUpdatePropertiesTimestampCommand(DbModelDef modelDef, TimestampUpdatePack updatePack, string lastUser)
         {
-            if (!modelDef.IsTimestampDBModel)
+            if (!modelDef.HasTimestamp)
             {
                 throw DbExceptions.UpdatePropertiesMethodWrong("TimelessDbModel 应该使用值比较法", updatePack.PropertyNames, modelDef);
             }
@@ -370,7 +370,7 @@ namespace HB.FullStack.Database
 
         public DbEngineCommand CreateBatchUpdatePropertiesTimestampCommand(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser, bool needTrans)
         {
-            if (!modelDef.IsTimestampDBModel)
+            if (!modelDef.HasTimestamp)
             {
                 throw DbExceptions.UpdatePropertiesMethodWrong("Batch TimelessDbModel 应该使用值比较法", updatePacks[0].PropertyNames, modelDef);
             }
@@ -448,7 +448,7 @@ namespace HB.FullStack.Database
 
         public DbEngineCommand CreateUpdatePropertiesTimelessCommand(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser)
         {
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 throw DbExceptions.UpdatePropertiesMethodWrong("TimestampDBModel 应该使用 Timestamp解决冲突", updatePack.PropertyNames, modelDef);
             }
@@ -486,7 +486,7 @@ namespace HB.FullStack.Database
 
         public DbEngineCommand CreateBatchUpdatePropertiesTimelessCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, bool needTrans)
         {
-            if (modelDef.IsTimestampDBModel)
+            if (modelDef.HasTimestamp)
             {
                 throw DbExceptions.UpdatePropertiesMethodWrong("TimestampDBModel 应该使用 Timestamp解决冲突", updatePacks[0].PropertyNames, modelDef);
             }
@@ -649,7 +649,7 @@ namespace HB.FullStack.Database
             List<string> propertyNames = new List<string> { nameof(TimestampLongIdDbModel.Id) };
             List<object?> propertyValues = new List<object?> { id };
 
-            if (modelDef.IsTimestampDBModel && !oldTimestamp.HasValue)
+            if (modelDef.HasTimestamp && !oldTimestamp.HasValue)
             {
                 throw DbExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
             }
@@ -740,7 +740,7 @@ namespace HB.FullStack.Database
                 List<string> propertyNames = new List<string> { nameof(TimestampLongIdDbModel.Id) };
                 List<object?> propertyValues = new List<object?> { ids[i] };
 
-                if (modelDef.IsTimestampDBModel && !oldTimestamps[i].HasValue)
+                if (modelDef.HasTimestamp && !oldTimestamps[i].HasValue)
                 {
                     throw DbExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
                 }

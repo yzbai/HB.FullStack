@@ -229,7 +229,7 @@ namespace HB.FullStack.Database
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            //if (modelDef.IsTimestampDBModel)
+            //if (modelDef.HasTimestamp)
             //{
             //    TimestampUpdatePack updatePack = changedPack.ToTimestampUpdatePack(modelDef);
 
@@ -257,7 +257,7 @@ namespace HB.FullStack.Database
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            //if (modelDef.IsTimestampDBModel)
+            //if (modelDef.HasTimestamp)
             //{
             //    return UpdatePropertiesUsingTimestampAsync(modelDef, changedPacks.Select(cp => cp.ToTimestampUpdatePack(modelDef)).ToList(), lastUser, transContext);
 

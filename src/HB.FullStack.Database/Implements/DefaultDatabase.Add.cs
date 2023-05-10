@@ -52,7 +52,7 @@ namespace HB.FullStack.Database
                     ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandScalarAsync(connectionString, command).ConfigureAwait(false);
 
-                if (modelDef.IsIdAutoIncrement)
+                if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
                     ((ILongId)item).Id = System.Convert.ToInt64(rt, CultureInfo.InvariantCulture);
                 }
@@ -122,32 +122,43 @@ namespace HB.FullStack.Database
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(connectionString, command);
 
-                if (modelDef.IsIdAutoIncrement)
+                switch (modelDef.IdType)
                 {
-                    while (reader.Read())
+                    case DbModelIdType.AutoIncrementLongId:
                     {
-                        newIds.Add(reader.GetValue(0));
+                        while (reader.Read())
+                        {
+                            newIds.Add(reader.GetValue(0));
+                        }
+
+                        int num = 0;
+
+                        foreach (var item in items)
+                        {
+                            ((ILongId)item).Id = System.Convert.ToInt64(newIds[num++], Globals.Culture);
+                        }
+
+                        break;
                     }
 
-                    int num = 0;
+                    case DbModelIdType.GuidId:
+                    {
+                        foreach (var item in items)
+                        {
+                            newIds.Add(((IGuidId)item).Id);
+                        }
 
-                    foreach (var item in items)
-                    {
-                        ((ILongId)item).Id = System.Convert.ToInt64(newIds[num++], Globals.Culture);
+                        break;
                     }
-                }
-                else if (modelDef.IsIdGuid)
-                {
-                    foreach (var item in items)
+
+                    case DbModelIdType.LongId:
                     {
-                        newIds.Add(((IGuidId)item).Id);
-                    }
-                }
-                else if (modelDef.IsIdLong)
-                {
-                    foreach (var item in items)
-                    {
-                        newIds.Add(((ILongId)item).Id);
+                        foreach (var item in items)
+                        {
+                            newIds.Add(((ILongId)item).Id);
+                        }
+
+                        break;
                     }
                 }
 
@@ -184,7 +195,7 @@ namespace HB.FullStack.Database
 
         private static void PrepareBatchItems<T>(IEnumerable<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
         {
-            if (!modelDef.IsTimestampDBModel)
+            if (!modelDef.HasTimestamp)
             {
                 return;
             }
@@ -206,7 +217,7 @@ namespace HB.FullStack.Database
 
         private static void RestoreBatchItems<T>(IEnumerable<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
         {
-            if (!modelDef.IsTimestampDBModel)
+            if (!modelDef.HasTimestamp)
             {
                 return;
             }

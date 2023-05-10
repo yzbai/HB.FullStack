@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
@@ -142,13 +143,10 @@ namespace HB.FullStack.Database.DbModels
                     EngineType = dbSchemaFromOptions.EngineType,
 
                     TableName = tableSchemaFromOptons.TableName,
+                    IdType = GetIdType(modelType),
+                    HasTimestamp = typeof(TimestampDbModel).IsAssignableFrom(modelType),
 
-                    IsTimestampDBModel = typeof(TimestampDbModel).IsAssignableFrom(modelType),
-                    IsIdAutoIncrement = typeof(IAutoIncrementId).IsAssignableFrom(modelType),
-                    IsIdGuid = typeof(IGuidId).IsAssignableFrom(modelType),
-                    IsIdLong = typeof(ILongId).IsAssignableFrom(modelType),
-
-                    DbWriteable = !(tableSchemaFromOptons.ReadOnly!.Value)
+                    IsWriteable = !(tableSchemaFromOptons.ReadOnly!.Value)
                 };
 
                 //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
@@ -190,6 +188,24 @@ namespace HB.FullStack.Database.DbModels
                 }
 
                 return modelDef;
+
+                static DbModelIdType GetIdType(Type modelType)
+                {
+                    if(typeof(IAutoIncrementId).IsAssignableFrom(modelType))
+                    {
+                        return DbModelIdType.AutoIncrementLongId;
+                    }
+                    if(typeof(IGuidId).IsAssignableFrom(modelType))
+                    {
+                        return DbModelIdType.GuidId;
+                    }
+                    if(typeof(ILongId).IsAssignableFrom(modelType))
+                    {
+                        return DbModelIdType.LongId;
+                    }
+
+                    throw new ErrorCodeException(ErrorCodes.ModelDefError, $"{modelType.FullName} has unkown DbModelIdType.");
+                }
             }
 
             static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
