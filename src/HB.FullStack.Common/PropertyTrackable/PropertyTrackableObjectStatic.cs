@@ -12,10 +12,10 @@ namespace HB.FullStack.Common.PropertyTrackable
         {
             //TODO: 需要考虑锁吗?
 
-            if (trackableObject is ITimestampModel timestampModel)
-            {
-                timestampModel.Timestamp = TimeUtil.Timestamp;
-            }
+            //if (trackableObject is ITimestampModel timestampModel)
+            //{
+            //    timestampModel.Timestamp = TimeUtil.Timestamp;
+            //}
 
             PropertyValue[] addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(trackableObject);
             IList<PropertyChange>? propertyChanges = GetPropertyChangeList(trackableObject, mergeMultipleChanged);

@@ -23,7 +23,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 如果不指定，则使用TimeUtil.Timestamp
         /// </summary>
-        public long? NewTimestamp { get; set; }
+        //public long? NewTimestamp { get; set; }
 
         public IList<string> PropertyNames { get; set; } = new List<string>();
 
@@ -35,15 +35,15 @@ namespace HB.FullStack.Database
     {
         public static TimestampUpdatePack ThrowIfNotValid(this TimestampUpdatePack updatePack)
         {
-            if (!updatePack.OldTimestamp.HasValue || updatePack.OldTimestamp.Value <= 638000651894004864)
+            if (updatePack.OldTimestamp == null || updatePack.OldTimestamp <= 638000651894004864)
             {
                 throw DbExceptions.TimestampShouldBePositive(updatePack.OldTimestamp ?? 0);
             }
 
-            if (updatePack.NewTimestamp.HasValue && updatePack.NewTimestamp.Value <= 638000651894004864)
-            {
-                throw DbExceptions.TimestampShouldBePositive(updatePack.NewTimestamp.Value);
-            }
+            //if (updatePack.NewTimestamp.HasValue && updatePack.NewTimestamp.Value <= 638000651894004864)
+            //{
+            //    throw DbExceptions.TimestampShouldBePositive(updatePack.NewTimestamp.Value);
+            //}
 
             if (updatePack.Id is long longId && longId <= 0)
             {
@@ -70,30 +70,24 @@ namespace HB.FullStack.Database
 
         public static TimestampUpdatePack ToTimestampUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)
         {
-            if (changePack == null || changePack.PropertyChanges.IsNullOrEmpty())
+            if (!changePack.AddtionalProperties.TryGetValue(nameof(DbModel2<long>.Id), out JsonElement idElement))
             {
-                throw DbExceptions.ChangedPropertyPackError("ChangePack为空或者Id为null", changePack, modelDef.ModelFullName);
+                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Id", changePack, modelDef.ModelFullName);
             }
 
-            if (!changePack.AddtionalProperties.TryGetValue(modelDef.PrimaryKeyPropertyDef.Name, out JsonElement idElement))
+            if (!changePack.AddtionalProperties.TryGetValue(nameof(ITimestamp.Timestamp), out JsonElement timestampElement))
             {
-                throw DbExceptions.ChangedPropertyPackError("ChangePack的AddtionalProperties中缺少Id", changePack, modelDef.ModelFullName);
+                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Timestamp", changePack, modelDef.ModelFullName);
             }
 
             TimestampUpdatePack dbPack = new TimestampUpdatePack
             {
-                Id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, idElement)
+                Id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, idElement),
+                OldTimestamp = (long)(SerializeUtil.FromJsonElement(typeof(long), timestampElement)!)
             };
 
             foreach (PropertyChange cp in changePack.PropertyChanges)
             {
-                if (cp.PropertyName == nameof(ITimestampModel.Timestamp))
-                {
-                    dbPack.OldTimestamp = cp.OldValue.To<long>();
-                    dbPack.NewTimestamp = cp.NewValue.To<long>();
-                    continue;
-                }
-
                 DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(cp.PropertyName)
                     ?? throw DbExceptions.ChangedPropertyPackError($"ChangePack包含未知的property:{cp.PropertyName}", changePack, modelDef.ModelFullName);
 

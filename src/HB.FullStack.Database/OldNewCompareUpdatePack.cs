@@ -50,10 +50,6 @@ namespace HB.FullStack.Database
 
         public static OldNewCompareUpdatePack ToOldNewCompareUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)
         {
-            if (changePack == null || changePack.PropertyChanges.IsNullOrEmpty())
-            {
-                throw DbExceptions.ChangedPropertyPackError("ChangePack为空或者Id为null", changePack, modelDef.ModelFullName);
-            }
 
             if (!changePack.AddtionalProperties.TryGetValue(modelDef.PrimaryKeyPropertyDef.Name, out JsonElement idElement))
             {

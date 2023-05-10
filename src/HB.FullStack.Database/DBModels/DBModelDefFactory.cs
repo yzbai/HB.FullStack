@@ -42,19 +42,17 @@ namespace HB.FullStack.Database.DbModels
                 ? ReflectionUtil.GetAllTypeByCondition(typeCondition)
                 : ReflectionUtil.GetAllTypeByCondition(_options.DbModelAssemblies, typeCondition);
 
-            //从Options中获取
-            ConstructDbTableSchemaFromOptions(allModelTypes, out Dictionary<Type, DbTableSchemaEx> typeSchemaDictFromOptions);
-            
-            //从程序中获取
-            ConstructDbModelDefFromProgramming(allModelTypes, typeSchemaDictFromOptions);
+            Dictionary<Type, DbTableSchemaEx> typeDbTableSchemaDict = ConstructDbTableSchema(allModelTypes);
 
-            CheckDbModelDefs();
+            ConstructDbModelDefs(allModelTypes, typeDbTableSchemaDict);
 
-            void ConstructDbTableSchemaFromOptions(IEnumerable<Type> allModelTypes, out Dictionary<Type, DbTableSchemaEx> typeSchemaDictFromOptions)
+            CheckDuplicateTableNames();
+
+            Dictionary<Type, DbTableSchemaEx> ConstructDbTableSchema(IEnumerable<Type> allModelTypes)
             {
-                typeSchemaDictFromOptions = new Dictionary<Type, DbTableSchemaEx>();
+                Dictionary<Type, DbTableSchemaEx> resultTypeDbTableSchemaDict = new Dictionary<Type, DbTableSchemaEx>();
 
-                IDictionary<string, DbTableSchemaEx> typeTableFromOptionsDict = new Dictionary<string, DbTableSchemaEx>();
+                IDictionary<string, DbTableSchemaEx> typeDbTableSchemaFromOptions = new Dictionary<string, DbTableSchemaEx>();
 
                 foreach (DbSchema schema in _options.DbSchemas)
                 {
@@ -62,7 +60,7 @@ namespace HB.FullStack.Database.DbModels
                     {
                         DbTableSchemaEx dbTableSchemaEx = new DbTableSchemaEx { DbSchema = schema, TableSchema = tableSchema };
 
-                        if (!typeTableFromOptionsDict.TryAdd(tableSchema.DbModelFullName, dbTableSchemaEx))
+                        if (!typeDbTableSchemaFromOptions.TryAdd(tableSchema.DbModelFullName, dbTableSchemaEx))
                         {
                             throw DbExceptions.DbSchemaError(schema.Name, $"Same DbModel FullName :{tableSchema.DbModelFullName} Exists Already.");
                         }
@@ -92,7 +90,7 @@ namespace HB.FullStack.Database.DbModels
                     }
 
                     //来自Options, 覆盖Attribute
-                    if (typeTableFromOptionsDict.TryGetValue(type.FullName!, out DbTableSchemaEx? optionTableSchemaEx))
+                    if (typeDbTableSchemaFromOptions.TryGetValue(type.FullName!, out DbTableSchemaEx? optionTableSchemaEx))
                     {
                         resultDbSchemaName = optionTableSchemaEx.DbSchema.Name ?? resultDbSchemaName;
                         resultTableSchema.TableName = optionTableSchemaEx.TableSchema.TableName ?? resultTableSchema.TableName;
@@ -114,17 +112,17 @@ namespace HB.FullStack.Database.DbModels
                         resultTableSchema.TableName = resultTableSchema.TableName.RemoveSuffix(resultDbSchema.TableNameSuffixToRemove);
                     }
 
-                    typeSchemaDictFromOptions.Add(type, new DbTableSchemaEx { DbSchema = resultDbSchema, TableSchema = resultTableSchema });
+                    resultTypeDbTableSchemaDict.Add(type, new DbTableSchemaEx { DbSchema = resultDbSchema, TableSchema = resultTableSchema });
                 }
 
-                //return resultTypeTableDict;
+                return resultTypeDbTableSchemaDict;
             }
 
-            void ConstructDbModelDefFromProgramming(IEnumerable<Type> types, IDictionary<Type, DbTableSchemaEx> typeTableSchemaDictFromOptions)
+            void ConstructDbModelDefs(IEnumerable<Type> types, IDictionary<Type, DbTableSchemaEx> typeDbTableSchemaDict)
             {
                 foreach (Type type in types)
                 {
-                    if (!typeTableSchemaDictFromOptions!.TryGetValue(type, out DbTableSchemaEx? dbTableSchemaExFromOptions))
+                    if (!typeDbTableSchemaDict!.TryGetValue(type, out DbTableSchemaEx? dbTableSchemaExFromOptions))
                     {
                         throw DbExceptions.ModelError(type: type.FullName, "", cause: "不是Model，或者没有DatabaseModelAttribute.");
                     }
@@ -152,7 +150,13 @@ namespace HB.FullStack.Database.DbModels
                     IsWriteable = !(tableSchema.ReadOnly!.Value),
                 };
 
-                if(!modelDef.IsTimestamp && tableSchema)
+                //ConflictCheckMethods
+                modelDef.ConflictCheckMethods = tableSchema.ConflictCheckMethods!.Value;
+
+                if (!modelDef.IsTimestamp && tableSchema.ConflictCheckMethods!.Value.HasFlag(DbConflictCheckMethods.Timestamp))
+                {
+                    modelDef.ConflictCheckMethods = modelDef.ConflictCheckMethods ^ DbConflictCheckMethods.Timestamp;
+                }
 
                 //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
                 var orderedProperties = modelType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
@@ -192,27 +196,26 @@ namespace HB.FullStack.Database.DbModels
                     modelDef.PropertyDict.Add(propertyDef.Name, propertyDef);
                 }
 
-                return modelDef;
+                //IdType
+                var primaryKeyPropertyDef = modelDef.PrimaryKeyPropertyDef;
 
-                static DbModelIdType GetIdType(Type modelType)
+                if (primaryKeyPropertyDef != null)
                 {
-
-
-                    if(typeof(IAutoIncrementId).IsAssignableFrom(modelType))
+                    if (primaryKeyPropertyDef.IsAutoIncrementPrimaryKey)
                     {
-                        return DbModelIdType.AutoIncrementLongId;
+                        modelDef.IdType = DbModelIdType.AutoIncrementLongId;
                     }
-                    if(typeof(IGuidId).IsAssignableFrom(modelType))
+                    else if (primaryKeyPropertyDef.Type == typeof(long))
                     {
-                        return DbModelIdType.GuidId;
+                        modelDef.IdType = DbModelIdType.LongId;
                     }
-                    if(typeof(ILongId).IsAssignableFrom(modelType))
+                    else if(primaryKeyPropertyDef.Type == typeof(Guid))
                     {
-                        return DbModelIdType.LongId;
+                        modelDef.IdType = DbModelIdType.GuidId;
                     }
-
-                    throw new ErrorCodeException(ErrorCodes.ModelDefError, $"{modelType.FullName} has unkown DbModelIdType.");
                 }
+
+                return modelDef;
             }
 
             static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
@@ -252,7 +255,7 @@ namespace HB.FullStack.Database.DbModels
                 {
                     modelDef.PrimaryKeyPropertyDef = propertyDef;
                     propertyDef.IsPrimaryKey = true;
-                    propertyDef.IsAutoIncrementPrimaryKey = primaryAttribute is DbAutoIncrementPrimaryKeyAttribute;
+                    propertyDef.IsAutoIncrementPrimaryKey = propertyInfo.GetCustomAttribute<DbAutoIncrementPrimaryKeyAttribute>(true) != null;
                     propertyDef.IsNullable = false;
                     propertyDef.IsForeignKey = false;
                     propertyDef.IsUnique = true;
@@ -274,7 +277,7 @@ namespace HB.FullStack.Database.DbModels
                 return propertyDef;
             }
 
-            void CheckDbModelDefs()
+            void CheckDuplicateTableNames()
             {
                 //Same table name under same dbschema
                 HashSet<string> hashSet = new HashSet<string>();
@@ -291,7 +294,7 @@ namespace HB.FullStack.Database.DbModels
             }
         }
 
-        public DbModelDef? GetDef<T>() where T : DbModel
+        public DbModelDef? GetDef<T>() where T : BaseDbModel
         {
             return GetDef(typeof(T));
         }

@@ -2,8 +2,9 @@
 {
     public enum DbModelIdType
     {
-        LongId = 0,
-        AutoIncrementLongId = 1,
-        GuidId = 2
+        Unkown = 0,
+        LongId = 1,
+        AutoIncrementLongId = 2,
+        GuidId = 3
     }
 }

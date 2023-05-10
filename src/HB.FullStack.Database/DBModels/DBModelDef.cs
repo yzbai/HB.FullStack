@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.DbModels
 
         public string TableName { get; set; } = null!;
 
-        public DbModelIdType IdType { get; set; }
+        public DbModelIdType IdType { get; set; } = DbModelIdType.Unkown;
 
         public bool IsTimestamp { get; set; }
 
@@ -55,7 +55,7 @@ namespace HB.FullStack.Database.DbModels
 
         public string DbTableReservedName => _dbTableReservedName ??= SqlHelper.GetReserved(TableName, EngineType);
 
-        public string DeletedPropertyReservedName => _deletedPropertyReservedName ??= SqlHelper.GetReserved(nameof(DbModel<long>.Deleted), EngineType);
+        public string DeletedPropertyReservedName => _deletedPropertyReservedName ??= SqlHelper.GetReserved(nameof(DbModel2<long>.Deleted), EngineType);
 
         public IList<DbModelPropertyDef> ForeignKeyProperties => _foreignKeyProperties ??= PropertyDict.Values.Where(p => p.IsForeignKey).ToList();
 

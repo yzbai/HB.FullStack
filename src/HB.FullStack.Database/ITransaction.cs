@@ -14,7 +14,7 @@ namespace HB.FullStack.Database
     {
         Task<TransactionContext> BeginTransactionAsync(string dbSchemaName, IsolationLevel? isolationLevel = null);
 
-        Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DbModel;
+        Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : BaseDbModel;
 
         Task RollbackAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
 

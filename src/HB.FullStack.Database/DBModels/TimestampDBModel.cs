@@ -2,13 +2,14 @@
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Database.DbModels
 {
     /// <summary>
     /// 使用timestamp 或者新旧值比较 实现版本冲突检测
     /// </summary>
-    public abstract class TimestampDbModel<T> : DbModel<T>, ITimestamp
+    public abstract class TimestampDbModel<T> : DbModel2<T>, ITimestamp
     {
         /// <summary>
         /// 取代Version，实现行粒度。
@@ -33,6 +34,7 @@ namespace HB.FullStack.Database.DbModels
         //}
 
         [DbField(3)]
+        [AddtionalProperty]
         [Range(638000651894004864, long.MaxValue)]
         public abstract long Timestamp { get; internal set; }    
     }
