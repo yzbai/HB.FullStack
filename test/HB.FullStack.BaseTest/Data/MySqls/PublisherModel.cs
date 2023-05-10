@@ -6,7 +6,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class PublisherModel3 : TimestampFlackIdDbModel
     {
         [DbField]
@@ -24,7 +24,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_PublisherModel3 : TimestampGuidDbModel
     {
         [DbField]
@@ -42,7 +42,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class PublisherModel2 : TimestampFlackIdDbModel
     {
         [DbField]
@@ -81,7 +81,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_PublisherModel2 : TimestampGuidDbModel
     {
         [DbField]
@@ -120,7 +120,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class PublisherModel : TimestampFlackIdDbModel
     {
         [DbField]
@@ -162,7 +162,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_PublisherModel : TimestampGuidDbModel
     {
         [DbField]
@@ -218,7 +218,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         public string Mobile { get; set; } = default!;
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class PublisherModel3_Client : TimestampFlackIdDbModel
     {
         [DbField]
@@ -236,7 +236,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class PublisherModel2_Client : TimestampFlackIdDbModel
     {
         [DbField]
@@ -275,7 +275,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class PublisherModel_Client : TimestampFlackIdDbModel
     {
         [DbField]
@@ -317,7 +317,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_PublisherModel_Client : TimestampGuidDbModel
     {
         [DbField]

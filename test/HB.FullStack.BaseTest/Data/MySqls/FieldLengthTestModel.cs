@@ -8,7 +8,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class FieldLengthTestModel : TimestampAutoIncrementIdDbModel
     {
         [DbField(MaxLength = 10)]

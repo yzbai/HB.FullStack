@@ -44,6 +44,7 @@ namespace HB.FullStack.Database.DbModels
 
             //从Options中获取
             ConstructDbTableSchemaFromOptions(allModelTypes, out Dictionary<Type, DbTableSchemaEx> typeSchemaDictFromOptions);
+            
             //从程序中获取
             ConstructDbModelDefFromProgramming(allModelTypes, typeSchemaDictFromOptions);
 
@@ -79,7 +80,7 @@ namespace HB.FullStack.Database.DbModels
 
                     string resultDbSchemaName = null!;
 
-                    DbTableAttribute? tableAttribute = type.GetCustomAttribute<DbTableAttribute>(true);
+                    DbModelAttribute? tableAttribute = type.GetCustomAttribute<DbModelAttribute>(true);
 
                     //来自Attribute
                     if (tableAttribute != null)
@@ -87,6 +88,7 @@ namespace HB.FullStack.Database.DbModels
                         resultDbSchemaName = tableAttribute.DbSchemaName;
                         resultTableSchema.TableName = tableAttribute.TableName ?? resultTableSchema.TableName;
                         resultTableSchema.ReadOnly = tableAttribute.ReadOnly ?? resultTableSchema.ReadOnly;
+                        resultTableSchema.ConflictCheckMethod = tableAttribute.ConflictCheckMethod;
                     }
 
                     //来自Options, 覆盖Attribute
@@ -96,6 +98,7 @@ namespace HB.FullStack.Database.DbModels
                         resultTableSchema.TableName = optionTableSchemaEx.TableSchema.TableName ?? resultTableSchema.TableName;
                         resultTableSchema.ReadOnly = optionTableSchemaEx.TableSchema.ReadOnly ?? resultTableSchema.ReadOnly;
                         resultTableSchema.Fields = optionTableSchemaEx.TableSchema.Fields ?? resultTableSchema.Fields;
+                        resultTableSchema.ConflictCheckMethod = optionTableSchemaEx.TableSchema.ConflictCheckMethod ?? resultTableSchema.ConflictCheckMethod;
                     }
 
                     //做最后的检查，有可能两者都没有定义, 默认使用第一个
@@ -146,7 +149,9 @@ namespace HB.FullStack.Database.DbModels
                     IdType = GetIdType(modelType),
                     HasTimestamp = typeof(TimestampDbModel).IsAssignableFrom(modelType),
 
-                    IsWriteable = !(tableSchemaFromOptons.ReadOnly!.Value)
+                    IsWriteable = !(tableSchemaFromOptons.ReadOnly!.Value),
+
+                    ConflictCheckMethod = tableSchemaFromOptons.ConflictCheckMethod ?? DbConflictCheckMethod.Both
                 };
 
                 //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null

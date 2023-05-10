@@ -10,13 +10,13 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class User_Test : TimestampGuidDbModel
     {
         public string Name { get; set; } = null!;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class UserProfile_Test : TimestampGuidDbModel
     {
         [DbForeignKey(typeof(User_Test), true)]

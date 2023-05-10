@@ -7,7 +7,7 @@ using HB.FullStack.Database.Config;
 
 namespace HB.FullStack.BaseTest.Data.Sqlites
 {
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class PublisherModel3 : TimestampFlackIdDbModel
     {
         [DbField]
@@ -25,7 +25,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class Guid_PublisherModel3 : TimestampGuidDbModel
     {
         [DbField]
@@ -43,7 +43,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class PublisherModel2 : TimestampFlackIdDbModel
     {
         [DbField]
@@ -82,7 +82,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class Guid_PublisherModel2 : TimestampGuidDbModel
     {
         [DbField]
@@ -121,7 +121,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class PublisherModel : TimestampFlackIdDbModel
     {
         [DbField]
@@ -163,7 +163,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class Guid_PublisherModel : TimestampGuidDbModel
     {
         [DbField]
@@ -206,7 +206,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class PublisherModel3_Client : TimestampFlackIdDbModel
     {
         [DbField]
@@ -224,7 +224,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public string Name3 { get; set; } = "xxxx";
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class PublisherModel2_Client : TimestampFlackIdDbModel
     {
         [DbField]
@@ -263,7 +263,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class PublisherModel_Client : TimestampFlackIdDbModel
     {
         [DbField]
@@ -305,7 +305,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
     }
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public class Guid_PublisherModel_Client : TimestampGuidDbModel
     {
         [DbField]

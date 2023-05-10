@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Book2Model : TimestampFlackIdDbModel
     {
 
@@ -13,7 +13,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public double Price { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_BookModel : TimestampGuidDbModel
     {
 
@@ -24,7 +24,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public double Price { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_BookModel_Timeless : TimelessGuidDbModel
     {
 
@@ -35,7 +35,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public double Price { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Book : TimestampFlackIdDbModel
     {
         [DbField]
@@ -53,7 +53,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public double Price { get; set; }
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class BookModel_Client : TimestampFlackIdDbModel
     {
 
@@ -64,7 +64,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public double Price { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Book_Client : TimestampFlackIdDbModel
     {
 

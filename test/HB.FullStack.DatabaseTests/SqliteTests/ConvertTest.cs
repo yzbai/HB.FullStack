@@ -24,7 +24,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
         Fun
     }
 
-    [DbTable(BaseTestClass.DbSchema_Sqlite)]
+    [DbModel(BaseTestClass.DbSchema_Sqlite)]
     public class ConvertTestModel_Sqlite : TimelessGuidDbModel
     {
         public DateOnly DateOnly { get; set; }

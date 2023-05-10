@@ -16,7 +16,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         public string Mobile { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     [CacheModel]
     public class Book2Model : TimestampFlackIdDbModel
     {
@@ -28,7 +28,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         public double Price { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     [CacheModel]
     public class Guid_BookModel : TimestampGuidDbModel
     {
@@ -40,7 +40,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         public double Price { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     [CacheModel]
     public class Book : TimestampFlackIdDbModel
     {
@@ -59,7 +59,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         public double Price { get; set; }
     }
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     [CacheModel]
     public class BookModel_Client : TimestampFlackIdDbModel
     {
@@ -71,7 +71,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
         public double Price { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     [CacheModel]
     public class Book_Client : TimestampFlackIdDbModel
     {

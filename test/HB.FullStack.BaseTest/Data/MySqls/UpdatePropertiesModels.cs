@@ -21,7 +21,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public string? _innerName;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     [PropertyTrackableObject]
     public partial class UPTimestampModel : TimestampGuidDbModel
     {
@@ -41,7 +41,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     [PropertyTrackableObject]
     public partial class UPTimelessModel : TimelessGuidDbModel
     {

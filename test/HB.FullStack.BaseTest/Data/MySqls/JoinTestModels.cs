@@ -5,7 +5,7 @@ using HB.FullStack.Database.DbModels;
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class A : TimestampFlackIdDbModel
     {
 
@@ -13,14 +13,14 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public string Name { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class B : TimestampFlackIdDbModel
     {
 
         [DbField]
         public string Name { get; set; } = default!;
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class AB : TimestampFlackIdDbModel
     {
 
@@ -30,7 +30,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField]
         public long BId { get; set; } = default!;
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class C : TimestampFlackIdDbModel
     {
         [DbField]
@@ -40,21 +40,21 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         public long AId { get; set; } = default!;
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_A : TimestampGuidDbModel
     {
 
         [DbField]
         public string Name { get; set; } = default!;
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_B : TimestampGuidDbModel
     {
 
         [DbField]
         public string Name { get; set; } = default!;
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_AB : TimestampGuidDbModel
     {
 
@@ -62,7 +62,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         public Guid Guid_BId { get; set; }
     }
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class Guid_C : TimestampGuidDbModel
     {
         [DbField]

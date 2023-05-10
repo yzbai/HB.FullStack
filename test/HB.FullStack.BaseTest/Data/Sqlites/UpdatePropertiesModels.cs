@@ -12,10 +12,10 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.Sqlites
 {
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     public record InnerModel(string? InnerName);
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     [PropertyTrackableObject]
     public partial class UPTimestampModel : TimestampGuidDbModel
     {
@@ -31,7 +31,7 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
     }
 
-    [DbTable(DbSchema_Sqlite)]
+    [DbModel(DbSchema_Sqlite)]
     [PropertyTrackableObject]
     public partial class UPTimelessModel : TimelessGuidDbModel
     {

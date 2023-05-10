@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 using HB.FullStack.Common.Models;
 using HB.FullStack.Database.Engine;
@@ -9,13 +7,6 @@ using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database.DbModels
 {
-    public enum DbModelIdType
-    {
-        LongId = 0,
-        AutoIncrementLongId = 1,
-        GuidId = 2
-    }
-
     /// <summary>
     /// 实体定义
     /// </summary>
@@ -42,6 +33,8 @@ namespace HB.FullStack.Database.DbModels
         public string TableName { get; set; } = null!;
 
         public bool HasTimestamp { get; set; }
+
+        public DbConflictCheckMethod ConflictCheckMethod { get; set; } = DbConflictCheckMethod.Both;
 
         public DbModelIdType IdType { get; set; }
 

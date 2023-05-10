@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
+using HB.FullStack.Database.DbModels;
+
 namespace HB.FullStack.Database.Config
 {
     
@@ -14,6 +16,8 @@ namespace HB.FullStack.Database.Config
         public string DbModelFullName { get; set; } = null!;
 
         public bool? ReadOnly { get; set; }
+
+        public DbConflictCheckMethod? ConflictCheckMethod { get; set; }
 
         public IList<DbFieldSchema> Fields { get; set; } = new List<DbFieldSchema>();
     }

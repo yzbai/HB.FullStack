@@ -8,13 +8,13 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class DeleteTimestampModel : TimestampGuidDbModel
     {
         public string? Name { get; set; }
     }
 
-    [DbTable(DbSchema_Mysql)]
+    [DbModel(DbSchema_Mysql)]
     public class DeleteTimelessModel : TimelessGuidDbModel
     {
         public string? Name { get; set; }
