@@ -243,7 +243,7 @@ namespace HB.FullStack.Database.SQL
 
                 DbModelDef modelDef = _modelDefFactory.GetDef(modelType)!;
                 DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(m.Member.Name)
-                    ?? throw DbExceptions.ModelError(modelDef.ModelFullName, m.Member.Name, "Lack property definition");
+                    ?? throw DbExceptions.ModelError(modelDef.FullName, m.Member.Name, "Lack property definition");
 
                 string prefix = "";
 

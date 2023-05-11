@@ -244,7 +244,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             model.InnerModel2 ??= new InnerModel2();
             model.InnerModel2.InnerName = "Changed_InnerModel2_Name";
 
-            PropertyChangePack cp = model.GetPropertyChangePack();
+            PropertyChangeJsonPack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimelessModel>(cp, "", null);
 
@@ -276,7 +276,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             model.InnerModel2.InnerName = "Changed_InnerModel2_Name";
 
             //自动更新Timestamp
-            PropertyChangePack cp = model.GetPropertyChangePack(true);
+            PropertyChangeJsonPack cp = model.GetPropertyChangePack(true);
 
             long timestamp3 = model.Timestamp;
 
@@ -298,7 +298,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             IEnumerable<UPTimelessModel> models = Mocker.MockTimelessList(3);
             await Db.AddAsync(models, "", null);
 
-            var cps = new List<PropertyChangePack>();
+            var cps = new List<PropertyChangeJsonPack>();
 
             foreach (var model in models)
             {
@@ -324,7 +324,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var models = Mocker.MockTimestampList(3);
             await Db.AddAsync(models, "", null);
 
-            var cps = new List<PropertyChangePack>();
+            var cps = new List<PropertyChangeJsonPack>();
 
             foreach (var model in models)
             {

@@ -37,44 +37,50 @@ namespace HB.FullStack.Database.SQL
             return $"insert into {modelDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
         }
 
+        private static Dictionary<DbModelDef, string> _insertTemplateCache = new Dictionary<DbModelDef, string>();
+
         public static string CreateBatchInsertSql(DbModelDef modelDef, int modelCount)
         {
             DbEngineType engineType = modelDef.EngineType;
 
-            string insertTemplate = CreateInsertSql(modelDef, "{0}", false);
+            if (!_insertTemplateCache.TryGetValue(modelDef, out string? insertTemplate))
+            {
+                insertTemplate = CreateInsertSql(modelDef, "{0}", false);
+                _insertTemplateCache[modelDef] = insertTemplate;
+            }
 
-            StringBuilder commandTextBuilder = new StringBuilder();
-            
-            commandTextBuilder.Append(Transaction_Begin(engineType));
+            StringBuilder sqlBuilder = new StringBuilder();
+
+            sqlBuilder.Append(Transaction_Begin(engineType));
 
             if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
             {
                 string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
 
-                commandTextBuilder.Append(TempTable_Drop(tempTableName, engineType));
-                commandTextBuilder.Append(TempTable_Create_Id(tempTableName, engineType));
+                sqlBuilder.Append(TempTable_Drop(tempTableName, engineType));
+                sqlBuilder.Append(TempTable_Create_Id(tempTableName, engineType));
 
                 for (int i = 0; i < modelCount; ++i)
                 {
-                    commandTextBuilder.AppendFormat(insertTemplate, i);
-                    commandTextBuilder.Append($"{TempTable_Insert_Id(tempTableName, GetLastInsertIdStatement(engineType), engineType)}");
+                    sqlBuilder.AppendFormat(insertTemplate, i);
+                    sqlBuilder.Append($"{TempTable_Insert_Id(tempTableName, GetLastInsertIdStatement(engineType), engineType)}");
                 }
 
-                commandTextBuilder.Append(TempTable_Select_Id(tempTableName, engineType));
+                sqlBuilder.Append(TempTable_Select_Id(tempTableName, engineType));
 
-                commandTextBuilder.Append(TempTable_Drop(tempTableName, engineType));
+                sqlBuilder.Append(TempTable_Drop(tempTableName, engineType));
             }
             else
             {
                 for (int i = 0; i < modelCount; ++i)
                 {
-                    commandTextBuilder.AppendFormat(insertTemplate, i);
+                    sqlBuilder.AppendFormat(insertTemplate, i);
                 }
             }
 
-            commandTextBuilder.Append(Transaction_Commit(engineType));
+            sqlBuilder.Append(Transaction_Commit(engineType));
 
-            return commandTextBuilder.ToString();
+            return sqlBuilder.ToString();
         }
     }
 }

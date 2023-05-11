@@ -28,17 +28,17 @@ namespace HB.FullStack.Database
             return exception;
         }
 
-        internal static Exception TimestampNotExists(DbEngineType engineType, DbModelDef modelDef, IList<string> propertyNames, [CallerMemberName] string? caller = null)
-        {
-            DbException ex = new DbException(ErrorCodes.TimestampError, nameof(TimestampNotExists), null, null);
+        //internal static Exception TimestampNotExists(DbEngineType engineType, DbModelDef modelDef, IList<string> propertyNames, [CallerMemberName] string? caller = null)
+        //{
+        //    DbException ex = new DbException(ErrorCodes.TimestampError, nameof(TimestampNotExists), null, null);
 
-            ex.Data["EngineType"] = engineType.ToString();
-            ex.Data["Model"] = modelDef.ModelFullName;
-            ex.Data["PropertyNames"] = propertyNames.ToJoinedString(",");
-            ex.Data["Caller"] = caller;
+        //    ex.Data["EngineType"] = engineType.ToString();
+        //    ex.Data["Model"] = modelDef.FullName;
+        //    ex.Data["PropertyNames"] = propertyNames.ToJoinedString(",");
+        //    ex.Data["Caller"] = caller;
 
-            return ex;
-        }
+        //    return ex;
+        //}
 
         internal static Exception MySQLExecuterError(string? commandText, string? engineInnerCode, string? sqlState, Exception? innerException = null)
         {
@@ -376,7 +376,7 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception ChangedPropertyPackError(string cause, PropertyChangePack? changePack, string? modelFullName)
+        internal static Exception ChangedPropertyPackError(string cause, PropertyChangeJsonPack? changePack, string? modelFullName)
         {
             DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 
@@ -436,13 +436,13 @@ namespace HB.FullStack.Database
             DbException ex = new DbException(ErrorCodes.DbUpdatePropertiesError, cause, null, null);
 
             ex.Data["DbSchemaName"] = modelDef.DbSchemaName;
-            ex.Data["DbModelName"] = modelDef.ModelFullName;
+            ex.Data["DbModelName"] = modelDef.FullName;
             ex.Data["PropertyNames"] = propertyNames.ToJoinedString(",");
 
             return ex;
         }
 
-        internal static Exception ConflictCheckMethodError(string message)
+        internal static Exception ConflictCheckError(string message)
         {
             DbException ex = new DbException(ErrorCodes.DbConflictMethodError, message, null, null);
             return ex;

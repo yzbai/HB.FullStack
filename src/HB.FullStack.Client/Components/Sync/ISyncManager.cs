@@ -36,7 +36,7 @@ namespace HB.FullStack.Client.Components.Sync
 
         Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 
-        Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new();
+        Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangeJsonPack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 
         Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
 

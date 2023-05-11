@@ -98,44 +98,7 @@ namespace HB.FullStack.Database.SQL
 
         
 
-        /// <summary>
-        /// 使用Timestamp乐观锁的Update-Fields。行粒度。
-        /// </summary>
-        public static string CreateUpdatePropertiesSql(DbModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
-        {
-            StringBuilder args = new StringBuilder();
-
-            foreach (string propertyName in propertyNames)
-            {
-                if (/*propertyName == nameof(Model.CreateTime) || */propertyName == nameof(DbModel2<long>.Id))
-                {
-                    continue;
-                }
-
-                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
-
-                args.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
-            }
-
-            args.RemoveLast();
-
-            StringBuilder where = new StringBuilder();
-
-            DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.Deleted))!;
-
-            where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
-            where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
-
-            if (modelDef.IsTimestamp)
-            {
-                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp))!;
-                
-                where.Append(Invariant($" AND {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
-            }
-
-            return $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
-        }
+        
 
         /// <summary>
         /// 使用新旧值比较乐观锁的update-fields.field粒度
@@ -164,7 +127,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
+                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.FullName, propertyName);
 
                 //这里就不加了
                 if (propertyName != nameof(ITimestamp.Timestamp))
@@ -215,7 +178,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
+                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.FullName, propertyName);
                 
                 where.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number} ");
                 where.Append("AND");
@@ -512,7 +475,7 @@ namespace HB.FullStack.Database.SQL
 
                 if (length >= maxMediumTextFieldLength)
                 {
-                    throw DbExceptions.ModelError(propertyDef.ModelDef.ModelFullName, propertyDef.Name, "字段长度太长");
+                    throw DbExceptions.ModelError(propertyDef.ModelDef.FullName, propertyDef.Name, "字段长度太长");
                 }
 
                 //if (propertyDef.IsLengthFixed )
@@ -536,7 +499,7 @@ namespace HB.FullStack.Database.SQL
 
             if (primaryKeyPropertyDef == null)
             {
-                throw DbExceptions.ModelError(modelDef.ModelFullName, "", "no primary key");
+                throw DbExceptions.ModelError(modelDef.FullName, "", "no primary key");
             }
 
             string dropStatement = addDropStatement ? $"Drop table if exists {modelDef.DbTableReservedName};" : string.Empty;

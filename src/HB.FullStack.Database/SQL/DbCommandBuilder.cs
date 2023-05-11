@@ -29,7 +29,7 @@ namespace HB.FullStack.Database.SQL
             _expressionVisitor = expressionVisitor;
         }
 
-        private string GetCachedSql(SqlType sqlType, DbModelDef[] modelDefs, IEnumerable<string>? propertyNames = null, bool addOrUpdateReturnModel = false)
+        private string GetCachedSql(SqlType sqlType, DbModelDef[] modelDefs, IList<string>? propertyNames = null, bool addOrUpdateReturnModel = false)
         {
             string cacheKey = GetCommandTextCacheKey(sqlType, modelDefs, propertyNames, addOrUpdateReturnModel);
 
@@ -40,9 +40,11 @@ namespace HB.FullStack.Database.SQL
                     SqlType.Select => SqlHelper.CreateSelectSql(modelDefs),
                     SqlType.Insert => SqlHelper.CreateInsertSql(modelDefs[0]),
 
-                    SqlType.UpdateIgnoreConflictCheck => SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDefs[0]) ,
+                    SqlType.UpdateIgnoreConflictCheck => SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDefs[0]),
+                    SqlType.UpdateUsingTimestamp => SqlHelper.CreateUpdateUsingTimestampSql(modelDefs[0]),
+
                     SqlType.Update => SqlHelper.CreateUpdateModelSql(modelDefs[0]),
-                    SqlType.UpdatePropertiesTimestamp => SqlHelper.CreateUpdatePropertiesSql(modelDefs[0], propertyNames!),
+                    SqlType.UpdatePropertiesUsingTimestamp => SqlHelper.CreateUpdatePropertiesUsingTimestampSql(modelDefs[0], propertyNames!),
                     //SqlType.UpdatePropertiesUsingTimestampCompare => SqlHelper.CreateUpdatePropertiesUsingTimestampCompareSql(modelDefs[0], propertyNames!),
                     SqlType.UpdatePropertiesTimeless => SqlHelper.CreateUpdatePropertiesUsingCompareSql(modelDefs[0], propertyNames!),
 
@@ -115,241 +117,13 @@ namespace HB.FullStack.Database.SQL
 
         #endregion
 
-        
+
+
+
+
+
 
         
-
-        
-
-        #region 更改 - UpdateProperties
-
-        public DbEngineCommand CreateUpdatePropertiesTimestampCommand(DbModelDef modelDef, TimestampUpdatePack updatePack, string lastUser)
-        {
-            if (!modelDef.IsTimestamp)
-            {
-                throw DbExceptions.UpdatePropertiesMethodWrong("TimelessDbModel 应该使用值比较法", updatePack.PropertyNames, modelDef);
-            }
-
-            DbEngineType engineType = modelDef.EngineType;
-
-            if (!updatePack.OldTimestamp.HasValue)
-            {
-                throw DbExceptions.TimestampNotExists(engineType: engineType, modelDef: modelDef, propertyNames: updatePack.PropertyNames);
-            }
-
-            updatePack.NewTimestamp ??= TimeUtil.Timestamp;
-
-            IList<string> curPropertyNames = new List<string>(updatePack.PropertyNames)
-            {
-                nameof(DbModel2<long>.Id),
-                nameof(BaseDbModel.LastUser),
-                nameof(ITimestamp.Timestamp)
-            };
-            IList<object?> curPropertyValues = new List<object?>(updatePack.NewPropertyValues)
-            {
-                updatePack.Id,
-                lastUser,
-                updatePack.NewTimestamp.Value
-            };
-
-            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, curPropertyNames, curPropertyValues);
-
-            parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", updatePack.OldTimestamp.Value));
-
-            return new DbEngineCommand(
-                GetCachedSql(SqlType.UpdatePropertiesTimestamp, new DbModelDef[] { modelDef }, curPropertyNames),
-                parameters);
-        }
-
-        public DbEngineCommand CreateBatchUpdatePropertiesTimestampCommand(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser, bool needTrans)
-        {
-            if (!modelDef.IsTimestamp)
-            {
-                throw DbExceptions.UpdatePropertiesMethodWrong("Batch TimelessDbModel 应该使用值比较法", updatePacks[0].PropertyNames, modelDef);
-            }
-
-            DbEngineType engineType = modelDef.EngineType;
-
-            StringBuilder innerBuilder = new StringBuilder();
-            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
-            int number = 0;
-
-            DbModelPropertyDef? timestampProperty = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp))!;
-
-            foreach (TimestampUpdatePack updatePack in updatePacks)
-            {
-
-                if (!updatePack.OldTimestamp.HasValue)
-                {
-                    throw DbExceptions.TimestampNotExists(engineType: engineType, modelDef: modelDef, propertyNames: updatePack.PropertyNames);
-                }
-
-                updatePack.NewTimestamp ??= TimeUtil.Timestamp;
-
-                #region Parameters
-
-                IList<string> curPropertyNames = new List<string>(updatePack.PropertyNames)
-                {
-                    nameof(TimestampLongIdDbModel.Id),
-                    nameof(TimestampDbModel.LastUser),
-                    nameof(TimestampDbModel.Timestamp)
-                };
-                IList<object?> curPropertyValues = new List<object?>(updatePack.NewPropertyValues)
-                {
-                    updatePack.Id,
-                    lastUser,
-                    updatePack.NewTimestamp.Value
-                };
-
-                IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
-                    modelDef,
-                    _modelDefFactory,
-                    curPropertyNames,
-                    curPropertyValues,
-                    number.ToString());
-
-                parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}", updatePack.OldTimestamp.Value));
-
-                totalParameters.AddRange(parameters);
-
-                #endregion
-
-                string updatePropertiesSql = SqlHelper.CreateUpdatePropertiesSql(modelDef, curPropertyNames, number);
-
-#if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{updatePropertiesSql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#elif NETSTANDARD2_1
-                innerBuilder.Append($"{updatePropertiesSql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#endif
-                number++;
-            }
-
-            string may_trans_begin = needTrans ? SqlHelper.Transaction_Begin(engineType) : "";
-            string may_trans_commit = needTrans ? SqlHelper.Transaction_Commit(engineType) : "";
-
-            string commandText = $@"{may_trans_begin}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
-                                    {innerBuilder}
-                                    {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {may_trans_commit}";
-
-            return new DbEngineCommand(commandText, totalParameters);
-        }
-
-        public DbEngineCommand CreateUpdatePropertiesTimelessCommand(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser)
-        {
-            if (modelDef.IsTimestamp)
-            {
-                throw DbExceptions.UpdatePropertiesMethodWrong("TimestampDBModel 应该使用 Timestamp解决冲突", updatePack.PropertyNames, modelDef);
-            }
-
-            List<string> curPropertyNames = new List<string>(updatePack.PropertyNames);
-            List<object?> curNewPropertyValues = new List<object?>(updatePack.NewPropertyValues);
-
-            var oldParameters = DbModelConvert.PropertyValuesToParameters(
-                modelDef,
-                _modelDefFactory,
-                curPropertyNames,
-                updatePack.OldPropertyValues,
-                $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
-
-            curPropertyNames.Add(nameof(TimelessLongIdDbModel.Id));
-            curPropertyNames.Add(nameof(TimelessLongIdDbModel.LastUser));
-            curNewPropertyValues.Add(updatePack.Id);
-            curNewPropertyValues.Add(lastUser);
-
-            var newParameters = DbModelConvert.PropertyValuesToParameters(
-                modelDef,
-                _modelDefFactory,
-                curPropertyNames,
-                curNewPropertyValues,
-                $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
-
-            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(oldParameters);
-            parameters.AddRange(newParameters);
-
-            //使用propertyNames而不是curPropertyNames
-            string sql = GetCachedSql(SqlType.UpdatePropertiesTimeless, new DbModelDef[] { modelDef }, updatePack.PropertyNames);
-
-            return new DbEngineCommand(sql, parameters);
-        }
-
-        public DbEngineCommand CreateBatchUpdatePropertiesTimelessCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, bool needTrans)
-        {
-            if (modelDef.IsTimestamp)
-            {
-                throw DbExceptions.UpdatePropertiesMethodWrong("TimestampDBModel 应该使用 Timestamp解决冲突", updatePacks[0].PropertyNames, modelDef);
-            }
-
-            ThrowIf.Empty(updatePacks, nameof(updatePacks));
-
-            DbEngineType engineType = modelDef.EngineType;
-
-            StringBuilder innerBuilder = new StringBuilder();
-            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
-            int number = 0;
-
-            foreach (OldNewCompareUpdatePack updatePack in updatePacks)
-            {
-                List<string> curPropertyNames = new List<string>(updatePack.PropertyNames);
-                List<object?> curNewPropertyValues = new List<object?>(updatePack.NewPropertyValues);
-
-                #region Parameters
-
-                var oldParameters = DbModelConvert.PropertyValuesToParameters(
-                    modelDef,
-                    _modelDefFactory,
-                    curPropertyNames,
-                    updatePack.OldPropertyValues,
-                    $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}");
-
-                curPropertyNames.Add(nameof(TimestampLongIdDbModel.Id));
-                curPropertyNames.Add(nameof(DbModel.LastUser));
-                curNewPropertyValues.Add(updatePack.Id);
-                curNewPropertyValues.Add(lastUser);
-
-                var newParameters = DbModelConvert.PropertyValuesToParameters(
-                    modelDef,
-                    _modelDefFactory,
-                    curPropertyNames,
-                    curNewPropertyValues,
-                    $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_{number}");
-
-                totalParameters.AddRange(oldParameters);
-                totalParameters.AddRange(newParameters);
-
-                #endregion
-
-                string sql = SqlHelper.CreateUpdatePropertiesUsingCompareSql(modelDef, updatePack.PropertyNames, number);
-
-#if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#elif NETSTANDARD2_1
-                innerBuilder.Append($"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#endif
-
-                number++;
-            }
-
-            string may_trans_begin = needTrans ? SqlHelper.Transaction_Begin(engineType) : "";
-            string may_trans_commit = needTrans ? SqlHelper.Transaction_Commit(engineType) : "";
-
-            string commandText = $@"{may_trans_begin}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
-                                    {innerBuilder}
-                                    {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {may_trans_commit}";
-
-            return new DbEngineCommand(commandText, totalParameters);
-        }
-
-        #endregion
 
         #region 更改 - AddOrUpdate
 

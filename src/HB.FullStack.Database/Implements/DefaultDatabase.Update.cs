@@ -26,7 +26,21 @@ namespace HB.FullStack.Database
 
             ThrowIf.NotValid(item, nameof(item));
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+            DbConflictCheckMethods conflictCheckMethods = modelDef.BestConflictCheckMethodWhenUpdateEntire;
 
+            if (conflictCheckMethods == DbConflictCheckMethods.OldNewValueCompare)
+            {
+                IPropertyTrackableObject trackableModel = item as IPropertyTrackableObject
+                    ?? throw DbExceptions.ConflictCheckError($"{modelDef.FullName} using old new value compare method update whole, but not a IPropertyTrackable Object.");
+
+                PropertyChangePack changePack = trackableModel.GetPropertyChangePack();
+
+                await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
+                
+                //trackableModel.Clear();
+
+                return;
+            }
 
             long? oldTimestamp = null;
             string oldLastUser = "";
@@ -37,7 +51,6 @@ namespace HB.FullStack.Database
 
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
                 ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-                DbConflictCheckMethods conflictCheckMethods = modelDef.ConflictCheckMethodWhenUpdate;
                 DbEngineCommand command = DbCommandBuilder.CreateUpdateCommand(modelDef, item, oldTimestamp, conflictCheckMethods);
 
                 long rows = transContext != null
@@ -61,10 +74,10 @@ namespace HB.FullStack.Database
 
                     //不存在和Version冲突，统称为冲突，所以不用改，反正后续业务为了解决冲突也会重新select什么的，到时候可以判定是已经删掉了还是version冲突
 
-                    throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(item), "");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(item), "");
                 }
 
-                throw DbExceptions.FoundTooMuch(modelDef.ModelFullName, SerializeUtil.ToJson(item));
+                throw DbExceptions.FoundTooMuch(modelDef.FullName, SerializeUtil.ToJson(item));
             }
             catch (DbException ex)
             {
@@ -82,7 +95,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
-                throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(item), ex);
             }
         }
 
@@ -141,7 +154,7 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "BatchUpdate");
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate");
                     }
 
                     count++;
@@ -149,7 +162,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "BatchUpdate");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate");
                 }
             }
             catch (DbException ex)
@@ -168,7 +181,7 @@ namespace HB.FullStack.Database
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }
 
-                throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(items), ex);
             }
         }
     }

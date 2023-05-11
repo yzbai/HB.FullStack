@@ -60,7 +60,7 @@ namespace HB.FullStack.Database
                     RestoreItem(item, oldTimestamp, oldLastUser);
                 }
 
-                throw DbExceptions.UnKown(type: modelDef.ModelFullName, item: SerializeUtil.ToJson(item), ex);
+                throw DbExceptions.UnKown(type: modelDef.FullName, item: SerializeUtil.ToJson(item), ex);
             }
         }
 
@@ -120,7 +120,7 @@ namespace HB.FullStack.Database
                     RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
                 }
 
-                throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(items), ex);
             }
         }
         

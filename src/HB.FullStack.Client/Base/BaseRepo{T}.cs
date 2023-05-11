@@ -63,7 +63,7 @@ namespace HB.FullStack.Client.Base
 
         protected abstract Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
-        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> changedPacks);
+        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangeJsonPack> changedPacks);
 
         protected abstract Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
@@ -280,7 +280,7 @@ namespace HB.FullStack.Client.Base
             ThrowIf.NotValid(models, nameof(models));
             _syncManager.WaitUntilNotSyncing();
 
-            IList<PropertyChangePack> changedPacks = models.Select(m => m.GetPropertyChangePack()).ToList();
+            IList<PropertyChangeJsonPack> changedPacks = models.Select(m => m.GetPropertyChangePack()).ToList();
 
             try
             {

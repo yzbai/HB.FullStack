@@ -125,19 +125,19 @@ namespace HB.FullStack.Repository
             remove => AsyncEventManager.Remove(value);
         }
 
-        protected virtual Task OnModelUpdatingPropertiesAsync(IEnumerable<PropertyChangePack> cpps)
+        protected virtual Task OnModelUpdatingPropertiesAsync(IEnumerable<PropertyChangeJsonPack> cpps)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdating), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
-        protected virtual Task OnModelUpdatedPropertiesAsync(IEnumerable<PropertyChangePack> cpps)
+        protected virtual Task OnModelUpdatedPropertiesAsync(IEnumerable<PropertyChangeJsonPack> cpps)
         {
             //Events
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdated), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
 
-        protected virtual Task OnModelUpdatePropertiesFailedAsync(IEnumerable<PropertyChangePack> cpps)
+        protected virtual Task OnModelUpdatePropertiesFailedAsync(IEnumerable<PropertyChangeJsonPack> cpps)
         {
             return AsyncEventManager.RaiseEventAsync(nameof(ModelUpdateFailed), cpps, new DBChangeEventArgs { ChangeType = DBChangeType.UpdateProperties });
         }
@@ -281,16 +281,16 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedAsync(models).ConfigureAwait(false);
         }
 
-        public async Task UpdateProperties<T>(PropertyChangePack cp, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
+        public async Task UpdateProperties<T>(PropertyChangeJsonPack cp, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
         {
             //检查必要的AddtionalProperties
             //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
 
             DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
 
-            ThrowIfAddtionalPropertiesLack(new PropertyChangePack[] { cp }, modelDef);
+            ThrowIfAddtionalPropertiesLack(new PropertyChangeJsonPack[] { cp }, modelDef);
 
-            await OnModelUpdatingPropertiesAsync(new PropertyChangePack[] { cp }).ConfigureAwait(false);
+            await OnModelUpdatingPropertiesAsync(new PropertyChangeJsonPack[] { cp }).ConfigureAwait(false);
 
             try
             {
@@ -298,16 +298,16 @@ namespace HB.FullStack.Repository
             }
             catch
             {
-                await OnModelUpdatePropertiesFailedAsync(new PropertyChangePack[] { cp }).ConfigureAwait(false);
+                await OnModelUpdatePropertiesFailedAsync(new PropertyChangeJsonPack[] { cp }).ConfigureAwait(false);
                 throw;
             }
 
-            ModelCacheStrategy.InvalidateCache<T>(new PropertyChangePack[] { cp }, modelDef, Cache);
+            ModelCacheStrategy.InvalidateCache<T>(new PropertyChangeJsonPack[] { cp }, modelDef, Cache);
 
-            await OnModelUpdatedPropertiesAsync(new PropertyChangePack[] { cp }).ConfigureAwait(false);
+            await OnModelUpdatedPropertiesAsync(new PropertyChangeJsonPack[] { cp }).ConfigureAwait(false);
         }
 
-        public async Task UpdateProperties<T>(IEnumerable<PropertyChangePack> cps, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
+        public async Task UpdateProperties<T>(IEnumerable<PropertyChangeJsonPack> cps, string lastUser, TransactionContext? transactionContext) where T : DbModel, new()
         {
             DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
 
@@ -330,13 +330,13 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedPropertiesAsync(cps).ConfigureAwait(false);
         }
 
-        private static void ThrowIfAddtionalPropertiesLack(IEnumerable<PropertyChangePack> cps, DbModelDef modelDef)
+        private static void ThrowIfAddtionalPropertiesLack(IEnumerable<PropertyChangeJsonPack> cps, DbModelDef modelDef)
         {
             foreach (var cp in cps)
             {
                 if (!cp.AddtionalProperties.ContainsAllKey(modelDef.ForeignKeyProperties.Select(p => p.Name).ToList()))
                 {
-                    throw RepositoryExceptions.AddtionalPropertyNeeded(modelDef.ModelFullName);
+                    throw RepositoryExceptions.AddtionalPropertyNeeded(modelDef.FullName);
                 }
             }
         }

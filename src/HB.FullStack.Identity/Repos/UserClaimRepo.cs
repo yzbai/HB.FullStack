@@ -32,7 +32,7 @@ namespace HB.FullStack.Server.Identity
                     InvalidateCache(new CachedUserClaimsByUserId(userClaim.UserId)); 
                 }
             }
-            else if (sender is IEnumerable<PropertyChangePack> cpps)
+            else if (sender is IEnumerable<PropertyChangeJsonPack> cpps)
             {
                 foreach (var cpp in cpps)
                 {

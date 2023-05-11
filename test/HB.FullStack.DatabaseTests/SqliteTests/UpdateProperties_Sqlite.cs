@@ -170,7 +170,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             model.Age = 999;
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
 
-            PropertyChangePack cp = model.GetPropertyChangePack();
+            PropertyChangeJsonPack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimelessModel>(cp, "", null);
 
@@ -192,7 +192,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             model.InnerModel = model.InnerModel == null ? new InnerModel("ChangedName_InnerName") : model.InnerModel with { InnerName = "ChangedName_InnerName" };
             model.Timestamp = TimeUtil.Timestamp;
 
-            PropertyChangePack cp = model.GetPropertyChangePack();
+            PropertyChangeJsonPack cp = model.GetPropertyChangePack();
 
             await Db.UpdatePropertiesAsync<UPTimestampModel>(cp, "", null);
 
@@ -211,7 +211,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 var models = Mocker.MockTimelessList(3);
                 await Db.AddAsync(models, "", trans);
 
-                var cps = new List<PropertyChangePack>();
+                var cps = new List<PropertyChangeJsonPack>();
 
                 foreach (var model in models)
                 {
@@ -247,7 +247,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
                 var models = Mocker.MockTimestampList(3);
                 await Db.AddAsync(models, "", trans);
 
-                var cps = new List<PropertyChangePack>();
+                var cps = new List<PropertyChangeJsonPack>();
 
                 foreach (var model in models)
                 {

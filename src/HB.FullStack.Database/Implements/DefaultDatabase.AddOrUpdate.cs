@@ -36,7 +36,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(item), ex);
             }
         }
 
@@ -73,7 +73,7 @@ namespace HB.FullStack.Database
             catch (Exception ex) when (ex is not DbException)
             {
                 string detail = $"Items:{SerializeUtil.ToJson(items)}";
-                throw DbExceptions.UnKown(modelDef.ModelFullName, detail, ex);
+                throw DbExceptions.UnKown(modelDef.FullName, detail, ex);
             }
         }
     }

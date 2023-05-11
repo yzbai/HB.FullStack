@@ -15,8 +15,6 @@ namespace HB.FullStack.Common.PropertyTrackable
 
         void Clear();
 
-        PropertyChangePack GetPropertyChangePack(bool mergeMultipleChanges = true);
-
         void Track<T>(string propertyName, T oldValue, T newValue);
 
         void TrackOldValue<T>(string propertyName, T oldValue);

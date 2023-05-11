@@ -155,7 +155,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             cache.RemoveModelAsync(model).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache<T>(IEnumerable<PropertyChangePack> cps, DbModelDef modelDef, ICache cache)
+        public static void InvalidateCache<T>(IEnumerable<PropertyChangeJsonPack> cps, DbModelDef modelDef, ICache cache)
         {
             List<object> ids = new List<object>();
 

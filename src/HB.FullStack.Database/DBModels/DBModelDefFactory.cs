@@ -153,7 +153,7 @@ namespace HB.FullStack.Database.DbModels
             DbModelDef modelDef = new DbModelDef
             {
                 Kind = ModelKind.Db,
-                ModelFullName = modelType.FullName!,
+                FullName = modelType.FullName!,
                 ModelType = modelType,
                 IsPropertyTrackable = modelType.IsAssignableTo(typeof(IPropertyTrackableObject)),
 
@@ -173,7 +173,7 @@ namespace HB.FullStack.Database.DbModels
                 modelDef.AllowedConflictCheckMethods ^= DbConflictCheckMethods.Timestamp;
             }
 
-            modelDef.ConflictCheckMethodWhenUpdate = GetConflictCheckMethodWhenUpdateWhole(modelDef);
+            modelDef.BestConflictCheckMethodWhenUpdateEntire = GetBestConflictCheckMethodWhenUpdateEntire(modelDef);
 
             //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
             var orderedProperties = modelType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
@@ -216,7 +216,7 @@ namespace HB.FullStack.Database.DbModels
             //TimestampPropertyDef
             if(modelDef.IsTimestamp)
             {
-                modelDef.TimestampPropertyDef = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp)).ThrowIfNull($"{modelDef.ModelFullName} should has a Timestamp Property!");
+                modelDef.TimestampPropertyDef = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp)).ThrowIfNull($"{modelDef.FullName} should has a Timestamp Property!");
             }
 
             //IdType
@@ -241,7 +241,7 @@ namespace HB.FullStack.Database.DbModels
             return modelDef;
         }
 
-        private static DbConflictCheckMethods GetConflictCheckMethodWhenUpdateWhole(DbModelDef modelDef)
+        private static DbConflictCheckMethods GetBestConflictCheckMethodWhenUpdateEntire(DbModelDef modelDef)
         {
             if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
             {
@@ -258,7 +258,7 @@ namespace HB.FullStack.Database.DbModels
                 return DbConflictCheckMethods.Ignore;
             }
 
-            throw DbExceptions.ConflictCheckMethodError($"{modelDef.ModelFullName} can not get proper conflict check method. allowed methods:{modelDef.AllowedConflictCheckMethods}");
+            throw DbExceptions.ConflictCheckError($"{modelDef.FullName} can not get proper conflict check method. allowed methods:{modelDef.AllowedConflictCheckMethods}");
         }
 
         private static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
@@ -272,10 +272,10 @@ namespace HB.FullStack.Database.DbModels
             propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
 
             propertyDef.SetMethod = propertyInfo.GetSetterMethod(modelDef.ModelType)
-                ?? throw DbExceptions.ModelError(type: modelDef.ModelFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Set方法. ");
+                ?? throw DbExceptions.ModelError(type: modelDef.FullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Set方法. ");
 
             propertyDef.GetMethod = propertyInfo.GetGetterMethod(modelDef.ModelType)
-                ?? throw DbExceptions.ModelError(type: modelDef.ModelFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
+                ?? throw DbExceptions.ModelError(type: modelDef.FullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
 
             propertyDef.IsIndexNeeded = fieldSchemaFromOptions?.NeedIndex ?? fieldAttribute.NeedIndex;
             propertyDef.IsNullable = !(fieldSchemaFromOptions?.NotNull ?? fieldAttribute.NotNull);

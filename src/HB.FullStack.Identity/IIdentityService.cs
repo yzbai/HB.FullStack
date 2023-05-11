@@ -34,7 +34,7 @@ namespace HB.FullStack.Server.Identity
 
         Task<UserProfile> GetUserProfileByUserIdAsync(Guid userId, string lastUser);
 
-        Task UpdateUserProfileAsync(PropertyChangePack cp, string lastUser);
+        Task UpdateUserProfileAsync(PropertyChangeJsonPack cp, string lastUser);
 
         #endregion
 

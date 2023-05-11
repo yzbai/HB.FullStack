@@ -113,7 +113,7 @@ namespace HB.FullStack.Database.Convert
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
-                throw DbExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DbExceptions.ModelTimestampError(type: modelDef.FullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(modelDef.FieldCount);
@@ -151,7 +151,7 @@ namespace HB.FullStack.Database.Convert
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
-                throw DbExceptions.ModelTimestampError(type: modelDef.ModelFullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
+                throw DbExceptions.ModelTimestampError(type: modelDef.FullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
             Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef);
@@ -190,7 +190,7 @@ namespace HB.FullStack.Database.Convert
 
                 if (propertyDef == null)
                 {
-                    throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, kv.Key);
+                    throw DbExceptions.PropertyNotFound(modelDef.FullName, kv.Key);
                 }
 
                 parameters.Add(new KeyValuePair<string, object>(

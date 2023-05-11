@@ -37,7 +37,7 @@ namespace HB.FullStack.Database
         {
             if (updatePack.OldTimestamp == null || updatePack.OldTimestamp <= 638000651894004864)
             {
-                throw DbExceptions.TimestampShouldBePositive(updatePack.OldTimestamp ?? 0);
+                throw DbExceptions.ConflictCheckError($"");
             }
 
             //if (updatePack.NewTimestamp.HasValue && updatePack.NewTimestamp.Value <= 638000651894004864)
@@ -68,16 +68,26 @@ namespace HB.FullStack.Database
             return updatePack;
         }
 
-        public static TimestampUpdatePack ToTimestampUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)
+        public static IList<TimestampUpdatePack> ThrowIfNotValid(this IList<TimestampUpdatePack> updatePacks)
+        {
+            foreach (var updatePack in updatePacks)
+            {
+                updatePack.ThrowIfNotValid();
+            }
+
+            return updatePacks;
+        }
+
+        public static TimestampUpdatePack ToTimestampUpdatePack(this PropertyChangeJsonPack changePack, DbModelDef modelDef)
         {
             if (!changePack.AddtionalProperties.TryGetValue(nameof(DbModel2<long>.Id), out JsonElement idElement))
             {
-                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Id", changePack, modelDef.ModelFullName);
+                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Id", changePack, modelDef.FullName);
             }
 
             if (!changePack.AddtionalProperties.TryGetValue(nameof(ITimestamp.Timestamp), out JsonElement timestampElement))
             {
-                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Timestamp", changePack, modelDef.ModelFullName);
+                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Timestamp", changePack, modelDef.FullName);
             }
 
             TimestampUpdatePack dbPack = new TimestampUpdatePack
@@ -86,10 +96,10 @@ namespace HB.FullStack.Database
                 OldTimestamp = (long)(SerializeUtil.FromJsonElement(typeof(long), timestampElement)!)
             };
 
-            foreach (PropertyChange cp in changePack.PropertyChanges)
+            foreach (PropertyChangeJson cp in changePack.PropertyChanges)
             {
                 DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(cp.PropertyName)
-                    ?? throw DbExceptions.ChangedPropertyPackError($"ChangePack包含未知的property:{cp.PropertyName}", changePack, modelDef.ModelFullName);
+                    ?? throw DbExceptions.ChangedPropertyPackError($"ChangePack包含未知的property:{cp.PropertyName}", changePack, modelDef.FullName);
 
                 dbPack.PropertyNames.Add(cp.PropertyName);
                 dbPack.NewPropertyValues.Add(SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue));

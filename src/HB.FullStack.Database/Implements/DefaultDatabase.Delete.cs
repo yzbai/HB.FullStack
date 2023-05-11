@@ -48,16 +48,16 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DbExceptions.ConcurrencyConflict(type: modelDef.ModelFullName, id.ToString(), "");
+                    throw DbExceptions.ConcurrencyConflict(type: modelDef.FullName, id.ToString(), "");
                 }
                 else
                 {
-                    throw DbExceptions.FoundTooMuch(modelDef.ModelFullName, item: id.ToString());
+                    throw DbExceptions.FoundTooMuch(modelDef.FullName, item: id.ToString());
                 }
             }
             catch (Exception ex)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, id.ToString(), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, id.ToString(), ex);
             }
         }
 
@@ -130,7 +130,7 @@ namespace HB.FullStack.Database
 
                     if (affected != 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(ids), $"not found the {count}th data item");
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(ids), $"not found the {count}th data item");
                     }
 
                     count++;
@@ -138,12 +138,12 @@ namespace HB.FullStack.Database
 
                 if (count != ids.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(ids), "");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(ids), "");
                 }
             }
             catch (Exception ex)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(ids), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(ids), ex);
             }
         }
         public Task DeleteAsync<T>(IList<object> ids, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : TimelessDbModel, new()
@@ -210,7 +210,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, whereExpr.ToString(), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, whereExpr.ToString(), ex);
             }
         }
     }

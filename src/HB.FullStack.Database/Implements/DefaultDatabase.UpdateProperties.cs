@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
@@ -15,14 +16,14 @@ namespace HB.FullStack.Database
     {
         #region Timestamp
 
-        public Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new()
+        public Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, ITimestamp, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             return UpdatePropertiesUsingTimestampAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new()
+        public Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : BaseDbModel, ITimestamp, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
@@ -32,14 +33,13 @@ namespace HB.FullStack.Database
         private async Task UpdatePropertiesUsingTimestampAsync(DbModelDef modelDef, TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext)
         {
             updatePack.ThrowIfNotValid();
-            modelDef.ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-            //TruncateLastUser(ref lastUser);
+            modelDef.ThrowIfNotWriteable().ThrowIfNotTimestamp();
 
             try
             {
-                DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesTimestampCommand(modelDef, updatePack, lastUser);
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesTimestampCommand(modelDef, updatePack, lastUser);
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
@@ -51,20 +51,20 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用Timestamp版本的乐观锁，出现冲突。UpdatePack:{SerializeUtil.ToJson(updatePack)}, lastUser:{lastUser}", "");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"使用Timestamp版本的乐观锁，出现冲突。UpdatePack:{SerializeUtil.ToJson(updatePack)}, lastUser:{lastUser}", "");
                 }
                 else
                 {
-                    throw DbExceptions.FoundTooMuch(modelDef.ModelFullName, $"UpdatePackUsingTimestamp:{updatePack}, lastUser:{lastUser}");
+                    throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePackUsingTimestamp:{updatePack}, lastUser:{lastUser}");
                 }
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, $"UpdatePackUsingTimestamp: {updatePack} , lastUser: {lastUser}", ex);
+                throw DbExceptions.UnKown(modelDef.FullName, $"UpdatePackUsingTimestamp: {updatePack} , lastUser: {lastUser}", ex);
             }
         }
 
-        private async Task UpdatePropertiesUsingTimestampAsync(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext)
+        private async Task UpdatePropertiesUsingTimestampAsync(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext)
         {
             if (updatePacks.IsNullOrEmpty())
             {
@@ -77,15 +77,15 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            modelDef.ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-            //TruncateLastUser(ref lastUser);
+            transactionContext.ThrowIfNull(nameof(transactionContext));
+            updatePacks.ThrowIfNotValid();
+            modelDef.ThrowIfNotWriteable().ThrowIfNotTimestamp();
 
             try
             {
-                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser, transactionContext == null);
-
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser, transactionContext == null);
 
                 using IDataReader reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
@@ -99,7 +99,7 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
                     }
 
                     count++;
@@ -107,12 +107,12 @@ namespace HB.FullStack.Database
 
                 if (count != updatePacks.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
                 }
             }
             catch (Exception ex)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(updatePacks), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(updatePacks), ex);
             }
         }
 
@@ -156,16 +156,16 @@ namespace HB.FullStack.Database
                 }
                 else if (matchedRows == 0)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, $"使用新旧值对比的乐观锁出现冲突。UpdatePack:{updatePack}, lastUser:{lastUser}", "");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"使用新旧值对比的乐观锁出现冲突。UpdatePack:{updatePack}, lastUser:{lastUser}", "");
                 }
                 else
                 {
-                    throw DbExceptions.FoundTooMuch(modelDef.ModelFullName, $"UpdatePack:{updatePack}, lastUser:{lastUser}");
+                    throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePack:{updatePack}, lastUser:{lastUser}");
                 }
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, $"UpdatePack:{updatePack}, lastUser:{lastUser}", ex);
+                throw DbExceptions.UnKown(modelDef.FullName, $"UpdatePack:{updatePack}, lastUser:{lastUser}", ex);
             }
         }
 
@@ -204,7 +204,7 @@ namespace HB.FullStack.Database
 
                     if (matched != 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
                     }
 
                     count++;
@@ -212,12 +212,12 @@ namespace HB.FullStack.Database
 
                 if (count != updatePacks.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
                 }
             }
             catch (Exception ex)
             {
-                throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(updatePacks), ex);
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(updatePacks), ex);
             }
         }
 
@@ -225,9 +225,11 @@ namespace HB.FullStack.Database
 
         #region PropertyChangePack - Timeless
 
-        public async Task UpdatePropertiesAsync<T>(PropertyChangePack changedPack, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task UpdatePropertiesAsync<T>(PropertyChangePack changedPack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
+
 
             //if (modelDef.IsTimestamp)
             //{
@@ -243,7 +245,7 @@ namespace HB.FullStack.Database
             //}
         }
 
-        public Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangeJsonPack> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
         {
             if (changedPacks.IsNullOrEmpty())
             {

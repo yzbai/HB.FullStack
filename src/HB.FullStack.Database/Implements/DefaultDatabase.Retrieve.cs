@@ -67,7 +67,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(type: selectDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
+                throw DbExceptions.UnKown(type: selectDef.FullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
@@ -93,7 +93,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
+                throw DbExceptions.UnKown(type: modelDef.FullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
@@ -118,7 +118,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(type: modelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
+                throw DbExceptions.UnKown(type: modelDef.FullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
@@ -288,7 +288,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
+                throw DbExceptions.UnKown(type: sourceModelDef.FullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 
@@ -366,7 +366,7 @@ namespace HB.FullStack.Database
             }
             catch (Exception ex) when (ex is not DbException)
             {
-                throw DbExceptions.UnKown(type: sourceModelDef.ModelFullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
+                throw DbExceptions.UnKown(type: sourceModelDef.FullName, from: fromCondition?.ToStatement(), where: whereCondition.ToStatement(), innerException: ex);
             }
         }
 

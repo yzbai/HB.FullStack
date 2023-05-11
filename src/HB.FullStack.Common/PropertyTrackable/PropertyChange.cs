@@ -6,6 +6,8 @@ namespace HB.FullStack.Common.PropertyTrackable
 {
     /// <summary>
     /// One change of Property
+    /// 使用序列化固定值
+    /// 选择Json的原因是是为了在两端传输方便。但的确只在一端操作时，Json序列有性能考虑之忧
     /// </summary>
     public class PropertyChange
     {

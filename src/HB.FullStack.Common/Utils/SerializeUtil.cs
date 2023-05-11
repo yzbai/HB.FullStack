@@ -26,6 +26,7 @@ namespace System
         static SerializeUtil()
         {
             Configure(_jsonSerializerOptions);
+            //MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options;
         }
 
         public static void Configure(JsonSerializerOptions jsonSerializerOptions)
@@ -238,6 +239,16 @@ namespace System
             return MessagePackSerializer.Serialize<T>(t!, ContractlessStandardResolver.Options);
         }
 
+        public static byte[] Serialize(object? obj)
+        {
+            return MessagePackSerializer.Typeless.Serialize(obj);
+        }
+
+        public static object? Deserialize(byte[] bytes)
+        {
+            return MessagePackSerializer.Typeless.Deserialize(bytes);
+        }
+
         public static IEnumerable<byte[]> Serialize<T>(IEnumerable<T?> ts)
         {
             foreach (T? t in ts)
@@ -264,7 +275,13 @@ namespace System
             }
         }
 
-        #endregion MsgPack Serialize
+        #endregion
+
+        #region MemoryPack Serialize
+
+        //https://github.com/Cysharp/MemoryPack
+
+        #endregion
 
     }
 }

@@ -25,7 +25,7 @@ namespace System
             return new WebException(ErrorCodes.UploadError, cause, innerEx, context);
         }
 
-        public static Exception ChangedPropertyPackError(string cause, PropertyChangePack? changePack, string? modelFullName)
+        public static Exception ChangedPropertyPackError(string cause, PropertyChangeJsonPack? changePack, string? modelFullName)
         {
             DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 

@@ -57,7 +57,7 @@ namespace HB.FullStack.Database.Convert
                 for (int i = startIndex; i < startIndex + length; ++i)
                 {
                     propertyDefs.Add(def.GetDbPropertyDef(reader.GetName(i))
-                        ?? throw DbExceptions.ModelError(def.ModelFullName, reader.GetName(i), "Lack PropertyDef"));
+                        ?? throw DbExceptions.ModelError(def.FullName, reader.GetName(i), "Lack PropertyDef"));
                 }
 
                 LocalBuilder returnValueLocal = il.DeclareLocal(def.ModelType);
@@ -68,7 +68,7 @@ namespace HB.FullStack.Database.Convert
                 System.Reflection.Emit.Label allFinished = il.DefineLabel();
 
                 ConstructorInfo ctor = def.ModelType.GetDefaultConstructor()
-                    ?? throw DbExceptions.ModelError(def.ModelFullName, "", "实体没有默认构造函数");
+                    ?? throw DbExceptions.ModelError(def.FullName, "", "实体没有默认构造函数");
 
                 il.Emit(OpCodes.Ldtoken, def.ModelType);
                 il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);
@@ -505,7 +505,7 @@ namespace HB.FullStack.Database.Convert
 
                 if (propertyDef == null)
                 {
-                    throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
+                    throw DbExceptions.PropertyNotFound(modelDef.FullName, propertyName);
                 }
 
                 Label nullLabel = il.DefineLabel();

@@ -284,7 +284,7 @@ namespace HB.FullStack.Database.Convert
                 return DbType.String;
             }
 
-            throw DbExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DbExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.FullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         public static string PropertyTypeToDbTypeStatement(DbModelPropertyDef propertyDef, DbEngineType engineType)
@@ -310,7 +310,7 @@ namespace HB.FullStack.Database.Convert
             {
                 return GetGlobalDbPropertyMapping(typeof(string), engineType)!.DbTypeStatement;
             }
-            throw DbExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.ModelFullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
+            throw DbExceptions.ModelHasNotSupportedPropertyType(type: propertyDef.ModelDef.FullName, propertyTypeName: (propertyDef.NullableUnderlyingType ?? propertyDef.Type).FullName, propertyName: propertyDef.Name);
         }
 
         public static IDbPropertyConverter? GetGlobalDbPropertyConverter(Type trueType, DbEngineType engineType)

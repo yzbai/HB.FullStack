@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 
@@ -28,7 +29,7 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// Update.
-        /// If item is IPropertyTrackableObject, will use <see cref="UpdatePropertiesAsync{T}(PropertyChangePack, string, TransactionContext?)"/> Underneath.
+        /// If item is IPropertyTrackableObject, will use <see cref="UpdatePropertiesAsync{T}(PropertyChangeJsonPack, string, TransactionContext?)"/> Underneath.
         /// If item is TimestampDBModel, will use Timestamp to solve conflict.
         /// If item is TimelessDBModel, will just update, ignore conflict.
         /// </summary>
@@ -36,7 +37,7 @@ namespace HB.FullStack.Database
 
         /// <summary>
         /// Update.
-        /// If item is IPropertyTrackableObject, will use <see cref="UpdatePropertiesAsync{T}(IEnumerable{PropertyChangePack}, string, TransactionContext?)"/> Underneath.
+        /// If item is IPropertyTrackableObject, will use <see cref="UpdatePropertiesAsync{T}(IEnumerable{PropertyChangeJsonPack}, string, TransactionContext?)"/> Underneath.
         /// If item is TimestampDBModel, will use Timestamp to solve conflict.
         /// If item is TimelessDBModel, will just update, ignore conflict.
         /// </summary>
@@ -49,12 +50,12 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Update TimestampDbModel while using Timestamp method to solve conflict.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimestampDbModel, new();
+        Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, ITimestamp, new();
 
         /// <summary>
         /// Update TimestampDbModels while using Timestamp method to solve conflict.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimestampDbModel, new();
+        Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : BaseDbModel, ITimestamp, new();
 
         /// <summary>
         /// Update TimelessDbModel while using old new value compare method to solve conflict.
@@ -69,12 +70,12 @@ namespace HB.FullStack.Database
         /// <summary>
         /// Update DbModel using PropertyChangePack, auto decide conflict solve method.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(PropertyChangePack changePack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task UpdatePropertiesAsync<T>(PropertyChangeJsonPack changePack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         /// <summary>
         /// Update DbModels using PropertyChangePack, auto decide conflict solve method.
         /// </summary>
-        Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changePacks, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangeJsonPack> changePacks, string lastUser, TransactionContext? transContext) where T : DbModel, new();
 
         #endregion
 

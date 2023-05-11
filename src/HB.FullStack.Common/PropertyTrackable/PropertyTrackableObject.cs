@@ -89,10 +89,5 @@ namespace HB.FullStack.Common.PropertyTrackable
 
             field = newValue;
         }
-
-        public global::HB.FullStack.Common.PropertyTrackable.PropertyChangePack GetPropertyChangePack(bool mergeMultipleChanged = true)
-        {
-            return global::HB.FullStack.Common.PropertyTrackable.PropertyTrackableObjectStatic.GetPropertyChanges(this, mergeMultipleChanged);
-        }
     }
 }

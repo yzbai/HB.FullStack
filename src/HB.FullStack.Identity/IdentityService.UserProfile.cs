@@ -47,7 +47,7 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task UpdateUserProfileAsync(PropertyChangePack cp, string lastUser)
+        public async Task UpdateUserProfileAsync(PropertyChangeJsonPack cp, string lastUser)
         {
             TransactionContext trans = await _transaction.BeginTransactionAsync<UserProfile>().ConfigureAwait(false);
 

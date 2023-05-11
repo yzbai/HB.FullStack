@@ -21,7 +21,7 @@ namespace HB.FullStack.Client.Components.Sync
         //public string? BusinessCatalog { get; set; }
 
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
-        public PropertyChangePack? ChangePack { get; set; }
+        public PropertyChangeJsonPack? ChangePack { get; set; }
 
         //public string? DeletedObjectJson { get; set; }
 

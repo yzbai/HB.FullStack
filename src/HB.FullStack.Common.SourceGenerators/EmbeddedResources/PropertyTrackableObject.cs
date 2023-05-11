@@ -1,8 +1,4 @@
 ﻿
-/*
- * Copy of HB.FullStack.Common.PropertyTrackable.PropertyTrackableObject
- * Without namespace
- */
 /// <summary>
 /// Use [PropertyTrackableObjectAttribute] to put these memebers into your class
 /// Keep full namespace before every type, because of source generation has exactly copy of this.
@@ -90,10 +86,5 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
         Track(propertyName!, field, newValue);
 
         field = newValue;
-    }
-
-    public global::HB.FullStack.Common.PropertyTrackable.PropertyChangePack GetPropertyChangePack(bool mergeMultipleChanged = true)
-    {
-        return global::HB.FullStack.Common.PropertyTrackable.PropertyTrackableObjectStatic.GetPropertyChanges(this, mergeMultipleChanged);
     }
 }

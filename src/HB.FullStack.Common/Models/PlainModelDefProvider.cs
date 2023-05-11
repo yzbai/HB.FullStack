@@ -25,7 +25,7 @@ namespace HB.FullStack.Common.Models
             PlainModelDef modelDef = new PlainModelDef
             {
                 Kind = ModelKind.Plain,
-                ModelFullName = type.FullName!,
+                FullName = type.FullName!,
                 ModelType = type,
                 IsPropertyTrackable = type.IsAssignableTo(typeof(IPropertyTrackableObject))
             };

@@ -76,7 +76,7 @@ namespace HB.FullStack.Client.Files
             throw new NotImplementedException();
         }
 
-        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> changedPacks)
+        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangeJsonPack> changedPacks)
         {
             throw new NotImplementedException();
         }

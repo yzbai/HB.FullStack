@@ -131,7 +131,7 @@ namespace HB.FullStack.Client.Components.Sync
                     Type = offlineChangeType,
                     Status = OfflineChangeStatus.Waiting,
                     ModelId = model.Id,
-                    ModelFullName = modelDef.ModelFullName
+                    ModelFullName = modelDef.FullName
                 };
 
                 offlineHistories.Add(offlineChange);
@@ -140,7 +140,7 @@ namespace HB.FullStack.Client.Components.Sync
             await _database.AddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
         }
 
-        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangeJsonPack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
         {
             DbModelDef? modelDef = _modelDefFactory.GetDef<TModel>(ModelKind.Db) as DbModelDef;
 
@@ -155,7 +155,7 @@ namespace HB.FullStack.Client.Components.Sync
                     Type = OfflineChangeType.UpdateProperties,
                     Status = OfflineChangeStatus.Waiting,
                     ModelId = changedPack.AddtionalProperties["Id"].To<Guid>()!,
-                    ModelFullName = modelDef.ModelFullName,
+                    ModelFullName = modelDef.FullName,
                     ChangePack = changedPack
                 };
 

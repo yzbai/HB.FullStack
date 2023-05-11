@@ -29,8 +29,8 @@ namespace HB.FullStack.Database.SQL
                     
                     return new DbEngineCommand(sql, paramters);
                 }
-                case DbConflictCheckMethods.OldNewValueCompare:
-                    break;
+                //case DbConflictCheckMethods.OldNewValueCompare:
+                //    break;
                 case DbConflictCheckMethods.Timestamp:
                 {
                     IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
@@ -39,10 +39,13 @@ namespace HB.FullStack.Database.SQL
                     {
                         paramters.Add(new KeyValuePair<string, object>($"{SqlHelper.GetParameterized(nameof(ITimestamp.Timestamp))}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp.Value));
                     }
-                    break;
+
+                    string sql = GetCachedSql(SqlType.UpdateUsingTimestamp, new DbModelDef[] { modelDef });
+
+                    return new DbEngineCommand(sql, paramters);
                 }
                 default:
-                    throw DbExceptions.ConflictCheckMethodError($"{modelDef.ModelFullName} has incorrent ConflictCheckMethod:{conflictCheckMethods}");
+                    throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has incorrent ConflictCheckMethod:{conflictCheckMethods}");
             }
         }
 

@@ -53,7 +53,7 @@ namespace HB.FullStack.Database
 
         DbEngineCommand CreateUpdatePropertiesTimestampCommand(DbModelDef modelDef, TimestampUpdatePack updatePack, string lastUser);
 
-        DbEngineCommand CreateBatchUpdatePropertiesTimestampCommand(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser, bool needTrans);
+        DbEngineCommand CreateBatchUpdatePropertiesTimestampCommand(DbModelDef modelDef, IList<TimestampUpdatePack> updatePacks, string lastUser);
 
         DbEngineCommand CreateUpdatePropertiesTimelessCommand(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser);
 

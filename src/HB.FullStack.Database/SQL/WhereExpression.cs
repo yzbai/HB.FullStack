@@ -554,7 +554,7 @@ namespace HB.FullStack.Database.SQL
                 {
                     if (!_tModelDef.ContainsProperty(orderName))
                     {
-                        throw DbExceptions.NoSuchProperty(_tModelDef.ModelFullName, orderName);
+                        throw DbExceptions.NoSuchProperty(_tModelDef.FullName, orderName);
                     }
 
                     orderBuilder.Append(SqlHelper.GetQuoted(orderName));

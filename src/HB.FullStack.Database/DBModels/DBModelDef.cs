@@ -39,7 +39,8 @@ namespace HB.FullStack.Database.DbModels
 
         public DbConflictCheckMethods AllowedConflictCheckMethods { get; set; } = DbConflictCheckMethods.OldNewValueCompare | DbConflictCheckMethods.Timestamp;
 
-        public DbConflictCheckMethods ConflictCheckMethodWhenUpdate { get; set; }
+        public DbConflictCheckMethods BestConflictCheckMethodWhenUpdateEntire { get; set; }
+
 
         /// <summary>
         /// 数据库是否可写
@@ -89,10 +90,19 @@ namespace HB.FullStack.Database.DbModels
         {
             if (!modelDef.IsWriteable)
             {
-                throw DbExceptions.NotWriteable(type: modelDef.ModelFullName, database: modelDef.DbSchemaName);
+                throw DbExceptions.NotWriteable(type: modelDef.FullName, database: modelDef.DbSchemaName);
             }
 
             return modelDef;
         }
+
+        public static DbModelDef ThrowIfNotTimestamp(this DbModelDef modelDef)
+        {
+            if (!modelDef.IsTimestamp)
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} is not ITimestamp, but update properties using timestamp check.");
+            }
+
+            return modelDef;
     }
 }

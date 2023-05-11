@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.Models
         /// <summary>
         /// 实体名
         /// </summary>
-        public string ModelFullName { get; set; } = null!;
+        public string FullName { get; set; } = null!;
 
         /// <summary>
         /// 实体类型

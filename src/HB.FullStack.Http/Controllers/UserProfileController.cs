@@ -32,7 +32,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
         }
 
         [HttpPatch]
-        public async Task<IActionResult> UpdateUserProfile([FromBody][Required]PropertyChangePack cp)
+        public async Task<IActionResult> UpdateUserProfile([FromBody][Required]PropertyChangeJsonPack cp)
         {
             await _identityService.UpdateUserProfileAsync(cp, User.GetLastUser()).ConfigureAwait(false);
 
