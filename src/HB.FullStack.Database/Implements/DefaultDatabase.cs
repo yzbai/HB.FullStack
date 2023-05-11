@@ -133,13 +133,13 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : DbModel, new() => DbCommandBuilder.From<T>();
+        public FromExpression<T> From<T>() where T : BaseDbModel, new() => DbCommandBuilder.From<T>();
 
-        public WhereExpression<T> Where<T>() where T : DbModel, new() => DbCommandBuilder.Where<T>();
+        public WhereExpression<T> Where<T>() where T : BaseDbModel, new() => DbCommandBuilder.Where<T>();
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : DbModel, new() => DbCommandBuilder.Where<T>(sqlFilter, filterParams);
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : BaseDbModel, new() => DbCommandBuilder.Where<T>(sqlFilter, filterParams);
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : DbModel, new() => DbCommandBuilder.Where(predicate);
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : BaseDbModel, new() => DbCommandBuilder.Where(predicate);
 
         #endregion
     }

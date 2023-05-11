@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.Implements
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, engine);
         }
 
-        public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : DbModel
+        public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : BaseDbModel
         {
             DbModelDef? modelDef = _modelDefFactory.GetDef<T>();
 

@@ -129,6 +129,21 @@ namespace HB.FullStack.Database.Convert
             return parameters;
         }
 
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory) where T : BaseDbModel, new()
+        {
+            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
+            int number = 0;
+
+            foreach (T model in models)
+            {
+                parameters.AddRange(model.ToDbParameters(modelDef, modelDefFactory, number));
+
+                ++number;
+            }
+
+            return parameters;
+        }
+
         /// <summary>
         /// ToDbParameters. number为属性名的后缀数字
         /// </summary>
@@ -173,7 +188,7 @@ namespace HB.FullStack.Database.Convert
             {
                 DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(kv.Key);
 
-                    if (propertyDef == null)
+                if (propertyDef == null)
                 {
                     throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, kv.Key);
                 }

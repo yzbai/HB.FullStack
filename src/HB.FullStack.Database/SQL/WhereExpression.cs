@@ -13,7 +13,7 @@ using static System.FormattableString;
 
 namespace HB.FullStack.Database.SQL
 {
-    public class WhereExpression<T> where T : DbModel, new()
+    public class WhereExpression<T> where T : BaseDbModel, new()
     {
         private readonly SQLExpressionVisitorContenxt _expressionContext;
         private Expression<Func<T, bool>>? _whereExpression;

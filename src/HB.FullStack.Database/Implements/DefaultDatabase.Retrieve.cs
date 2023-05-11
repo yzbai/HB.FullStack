@@ -20,7 +20,7 @@ namespace HB.FullStack.Database
         #region 单表查询 From, Where
 
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             IEnumerable<T> lst = await RetrieveAsync(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -41,24 +41,22 @@ namespace HB.FullStack.Database
             FromExpression<TFrom>? fromCondition,
             WhereExpression<TWhere>? whereCondition,
             TransactionContext? transContext = null)
-            where TSelect : DbModel, new()
-            where TFrom : DbModel, new()
-            where TWhere : DbModel, new()
+            where TSelect : BaseDbModel, new()
+            where TFrom : BaseDbModel, new()
+            where TWhere : BaseDbModel, new()
         {
 
             DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>().ThrowIfNull(typeof(TSelect).FullName);
             DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>().ThrowIfNull(typeof(TFrom).FullName);
             DbModelDef whereDef = ModelDefFactory.GetDef<TWhere>().ThrowIfNull(typeof(TWhere).FullName);
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(fromDef.DbSchemaName, false);
 
             whereCondition ??= Where<TWhere>();
             whereCondition.And($"{whereDef.DbTableReservedName}.{whereDef.DeletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{selectDef.DeletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{fromDef.DeletedPropertyReservedName}=0");
 
-            IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(selectDef.EngineType);
-
             try
             {
-
+                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(selectDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(fromDef.DbSchemaName, false);
                 DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(fromCondition, whereCondition, selectDef);
 
                 using IDataReader reader = transContext != null
@@ -74,10 +72,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, false);
 
             whereCondition ??= Where<T>();
             whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
@@ -85,6 +82,7 @@ namespace HB.FullStack.Database
             try
             {
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, false);
                 DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand(modelDef, fromCondition, whereCondition);
 
                 using var reader = transContext != null
@@ -100,10 +98,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, false);
 
             whereCondition ??= Where<T>();
             whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
@@ -111,6 +108,7 @@ namespace HB.FullStack.Database
             try
             {
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, false);
                 DbEngineCommand command = DbCommandBuilder.CreateCountCommand(fromCondition, whereCondition);
 
                 object? countObj = transContext != null
@@ -129,7 +127,7 @@ namespace HB.FullStack.Database
         #region 单表查询, Where
 
         public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             WhereExpression<T> where = Where<T>().AddOrderAndLimits(page, perPage, orderBy);
 
@@ -137,25 +135,25 @@ namespace HB.FullStack.Database
         }
 
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             return ScalarAsync(null, whereCondition, transContext);
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
         public Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             return CountAsync(null, condition, transContext);
         }
 
         public Task<long> CountAsync<T>(TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             return CountAsync<T>(null, null, transContext);
         }
@@ -165,17 +163,17 @@ namespace HB.FullStack.Database
         #region 单表查询, Expression Where
 
         public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : DbModel, ILongId, new()
+            where T : DbModel2<long>, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(ILongId.Id), modelDef.EngineType)}={{0}}", id);
+            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(DbModel2<long>.Id), modelDef.EngineType)}={{0}}", id);
 
             return ScalarAsync(where, transContext);
         }
 
         public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
-            where T : DbModel, IGuidId, new()
+            where T : DbModel2<Guid>, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
@@ -184,7 +182,7 @@ namespace HB.FullStack.Database
             return ScalarAsync(where, transContext);
         }
 
-        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : DbModel, new()
+        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : BaseDbModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -192,7 +190,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr).AddOrderAndLimits(page, perPage, orderBy);
 
@@ -200,7 +198,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : DbModel, new()
+            where T : BaseDbModel, new()
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -211,46 +209,44 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 根据给出的外键值获取 page从0开始
         /// </summary>
-        public async Task<IEnumerable<T>> RetrieveByForeignKeyAsync<T>(Expression<Func<T, object>> foreignKeyExp, object foreignKeyValue, TransactionContext? transactionContext, int? page, int? perPage, string? orderBy)
-            where T : DbModel, new()
-        {
-            string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
+        //public async Task<IEnumerable<T>> RetrieveByForeignKeyAsync<T>(Expression<Func<T, object>> foreignKeyExp, object foreignKeyValue, TransactionContext? transactionContext, int? page, int? perPage, string? orderBy)
+        //    where T : BaseDbModel, new()
+        //{
+        //    string foreignKeyName = ((MemberExpression)foreignKeyExp.Body).Member.Name;
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+        //    DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            DbModelPropertyDef? foreignKeyProperty = modelDef.GetDbPropertyDef(foreignKeyName);
+        //    DbModelPropertyDef? foreignKeyProperty = modelDef.GetDbPropertyDef(foreignKeyName);
 
-            if (foreignKeyProperty == null || !foreignKeyProperty.IsForeignKey)
-            {
-                throw DbExceptions.NoSuchForeignKey(modelDef.ModelFullName, foreignKeyName);
-            }
+        //    if (foreignKeyProperty == null || !foreignKeyProperty.IsForeignKey)
+        //    {
+        //        throw DbExceptions.NoSuchForeignKey(modelDef.ModelFullName, foreignKeyName);
+        //    }
 
-            Type foreignKeyValueType = foreignKeyValue.GetType();
+        //    Type foreignKeyValueType = foreignKeyValue.GetType();
 
-            if (foreignKeyValueType != typeof(long) && foreignKeyValueType != typeof(Guid))
-            {
-                throw DbExceptions.KeyValueNotLongOrGuid(modelDef.ModelFullName, foreignKeyName, foreignKeyValue, foreignKeyValueType.FullName);
-            }
+        //    if (foreignKeyValueType != typeof(long) && foreignKeyValueType != typeof(Guid))
+        //    {
+        //        throw DbExceptions.KeyValueNotLongOrGuid(modelDef.ModelFullName, foreignKeyName, foreignKeyValue, foreignKeyValueType.FullName);
+        //    }
 
-            WhereExpression<T> where = Where<T>($"{foreignKeyName}={{0}}", foreignKeyValue)
-                .AddOrderAndLimits(page, perPage, orderBy);
+        //    WhereExpression<T> where = Where<T>($"{foreignKeyName}={{0}}", foreignKeyValue)
+        //        .AddOrderAndLimits(page, perPage, orderBy);
 
-            return await RetrieveAsync(where, transactionContext).ConfigureAwait(false);
-        }
+        //    return await RetrieveAsync(where, transactionContext).ConfigureAwait(false);
+        //}
 
         #endregion
 
         #region 双表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DbModel, new()
-            where TTarget : DbModel, new()
+            where TSource : BaseDbModel, new()
+            where TTarget : BaseDbModel, new()
         {
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
             DbModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>().ThrowIfNull(typeof(TTarget).FullName);
             whereCondition ??= Where<TSource>();
-
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(sourceModelDef.DbSchemaName, false);
 
             switch (fromCondition.JoinType)
             {
@@ -281,9 +277,10 @@ namespace HB.FullStack.Database
             try
             {
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(sourceModelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(sourceModelDef.DbSchemaName, false);
+                DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition, sourceModelDef, targetModelDef);
 
-                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition, sourceModelDef, targetModelDef);
-                using var reader = transContext != null
+                using IDataReader reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
 
@@ -296,8 +293,8 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DbModel, new()
-            where TTarget : DbModel, new()
+            where TSource : BaseDbModel, new()
+            where TTarget : BaseDbModel, new()
         {
             IEnumerable<Tuple<TSource, TTarget?>> lst = await RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -319,14 +316,13 @@ namespace HB.FullStack.Database
         #region 三表查询
 
         public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DbModel, new()
-            where TTarget1 : DbModel, new()
-            where TTarget2 : DbModel, new()
+            where TSource : BaseDbModel, new()
+            where TTarget1 : BaseDbModel, new()
+            where TTarget2 : BaseDbModel, new()
         {
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
             DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>().ThrowIfNull(typeof(TTarget1).FullName);
             DbModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>().ThrowIfNull(typeof(TTarget2).FullName);
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(sourceModelDef.DbSchemaName, false);
 
             whereCondition ??= Where<TSource>();
 
@@ -358,9 +354,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                var engine = _dbSchemaManager.GetDatabaseEngine(sourceModelDef.EngineType);
-                var command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
-                using var reader = transContext != null
+                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(sourceModelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(sourceModelDef.DbSchemaName, false);
+                DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
+
+                using IDataReader reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
 
@@ -373,9 +371,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : DbModel, new()
-            where TTarget1 : DbModel, new()
-            where TTarget2 : DbModel, new()
+            where TSource : BaseDbModel, new()
+            where TTarget1 : BaseDbModel, new()
+            where TTarget2 : BaseDbModel, new()
         {
             IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> lst = await RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 

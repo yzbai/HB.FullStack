@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -14,39 +15,25 @@ namespace HB.FullStack.Database
 {
     partial class DefaultDatabase
     {
-        /// <summary>
-        /// 增加,并且item被重新赋值，如有Timestamp，那么会被重新赋值当前最新的。
-        /// </summary>
-        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
-            
+
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()
                 .ThrowIfNull(typeof(T).FullName)
                 .ThrowIfNotWriteable();
 
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-
-            //TruncateLastUser(ref lastUser);
 
             long oldTimestamp = -1;
             string oldLastUser = "";
 
             try
             {
-                //Prepare
-                if (item is TimestampDbModel serverModel)
-                {
-                    oldTimestamp = serverModel.Timestamp;
-                    oldLastUser = serverModel.LastUser;
-
-                    serverModel.Timestamp = TimeUtil.Timestamp;
-                    serverModel.LastUser = lastUser;
-                }
+                PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-
-                var command = DbCommandBuilder.CreateAddCommand(modelDef, item);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateAddCommand(modelDef, item);
 
                 object? rt = transContext != null
                     ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
@@ -54,7 +41,7 @@ namespace HB.FullStack.Database
 
                 if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
-                    ((ILongId)item).Id = System.Convert.ToInt64(rt, CultureInfo.InvariantCulture);
+                    modelDef.PrimaryKeyPropertyDef.SetValueTo(item, System.Convert.ToInt64(rt, CultureInfo.InvariantCulture));
                 }
             }
             catch (DbException ex)
@@ -75,94 +62,48 @@ namespace HB.FullStack.Database
 
                 throw DbExceptions.UnKown(type: modelDef.ModelFullName, item: SerializeUtil.ToJson(item), ex);
             }
-
-            static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
-            {
-                if (item is TimestampDbModel serverModel)
-                {
-                    serverModel.Timestamp = oldTimestamp;
-                    serverModel.LastUser = oldLastUser;
-                }
-            }
         }
 
-        /// <summary>
-        /// AddAsync，反应Version变化
-        /// </summary>
-        public async Task<IEnumerable<object>> AddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task AddAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel, new()
         {
             if (items.IsNullOrEmpty())
             {
-                return new List<object>();
+                return;
             }
 
+            ThrowIf.Null(transContext, nameof(transContext));
             ThrowIf.NotValid(items, nameof(items));
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
-            //TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();
             List<string?> oldLastUsers = new List<string?>();
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-
                 //Prepare
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
-                IList<object> newIds = new List<object>();
+                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateBatchAddCommand(modelDef, items);
 
-                var command = DbCommandBuilder.CreateBatchAddCommand(modelDef, items, transContext == null);
-
-                using var reader = transContext != null
+                using IDataReader reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(connectionString, command);
 
-                switch (modelDef.IdType)
+                if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
-                    case DbModelIdType.AutoIncrementLongId:
+                    int num = 0;
+
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            newIds.Add(reader.GetValue(0));
-                        }
-
-                        int num = 0;
-
-                        foreach (var item in items)
-                        {
-                            ((ILongId)item).Id = System.Convert.ToInt64(newIds[num++], Globals.Culture);
-                        }
-
-                        break;
-                    }
-
-                    case DbModelIdType.GuidId:
-                    {
-                        foreach (var item in items)
-                        {
-                            newIds.Add(((IGuidId)item).Id);
-                        }
-
-                        break;
-                    }
-
-                    case DbModelIdType.LongId:
-                    {
-                        foreach (var item in items)
-                        {
-                            newIds.Add(((ILongId)item).Id);
-                        }
-
-                        break;
+                        modelDef.PrimaryKeyPropertyDef.SetValueTo(items[num], reader.GetInt64(0));
+                        ++num;
                     }
                 }
-
-                return newIds;
             }
             catch (DbException ex)
             {
@@ -182,52 +123,67 @@ namespace HB.FullStack.Database
 
                 throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(items), ex);
             }
-
         }
-
-        private void ThrowIfExceedMaxBatchNumber<TObj>(IEnumerable<TObj> items, string lastUser, DbModelDef modelDef)
+        
+        private void ThrowIfExceedMaxBatchNumber<TObj>(IList<TObj> items, string lastUser, DbModelDef modelDef)
         {
-            if (_dbSchemaManager.GetDbSchema(modelDef.DbSchemaName).MaxBatchNumber < items.Count())
+            if (_dbSchemaManager.GetDbSchema(modelDef.DbSchemaName).MaxBatchNumber < items.Count)
             {
-                throw DbExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count(), lastUser);
+                throw DbExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count, lastUser);
             }
         }
 
-        private static void PrepareBatchItems<T>(IEnumerable<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
+        private static void PrepareItem<T>(T item, string lastUser, ref string oldLastUser, ref long oldTimestamp) where T : BaseDbModel, new()
         {
-            if (!modelDef.IsTimestamp)
+            if (item is ITimestamp timestampModel)
             {
-                return;
+                oldTimestamp = timestampModel.Timestamp;
+                timestampModel.Timestamp = TimeUtil.Timestamp;
             }
 
+            oldLastUser = item.LastUser;
+            item.LastUser = lastUser;
+        }
+
+        private static void RestoreItem<T>(T item, long oldTimestamp, string oldLastUser) where T : BaseDbModel, new()
+        {
+            if (item is ITimestamp timestampModel)
+            {
+                timestampModel.Timestamp = oldTimestamp;
+            }
+
+            item.LastUser = oldLastUser;
+        }
+
+        private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel, new()
+        {
             long timestamp = TimeUtil.Timestamp;
 
-            foreach (var item in items)
+            foreach (T item in items)
             {
-                if (item is TimestampDbModel tsItem)
-                {
-                    oldTimestamps.Add(tsItem.Timestamp);
-                    oldLastUsers.Add(tsItem.LastUser);
+                oldLastUsers.Add(item.LastUser);
+                item.LastUser = lastUser;
 
-                    tsItem.Timestamp = timestamp;
-                    tsItem.LastUser = lastUser;
+                if (item is ITimestamp timestampModel)
+                {
+                    oldTimestamps.Add(timestampModel.Timestamp);
+
+                    timestampModel.Timestamp = timestamp;
                 }
             }
         }
 
-        private static void RestoreBatchItems<T>(IEnumerable<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : DbModel, new()
+        private static void RestoreBatchItems<T>(IList<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel, new()
         {
-            if (!modelDef.IsTimestamp)
+            for (int i = 0; i < items.Count; ++i)
             {
-                return;
-            }
+                T item = items[i];
 
-            for (int i = 0; i < items.Count(); ++i)
-            {
-                if (items.ElementAt(i) is TimestampDbModel tsItem)
+                item.LastUser = oldLastUsers[i] ?? "";
+
+                if (item is ITimestamp timestampModel)
                 {
-                    tsItem.Timestamp = oldTimestamps[i];
-                    tsItem.LastUser = oldLastUsers[i] ?? "";
+                    timestampModel.Timestamp = oldTimestamps[i];
                 }
             }
         }

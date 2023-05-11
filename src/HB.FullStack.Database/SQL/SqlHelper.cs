@@ -20,18 +20,18 @@ using static System.FormattableString;
 
 namespace HB.FullStack.Database.SQL
 {
-    internal static class SqlHelper
+    internal static partial class SqlHelper
     {
         public const string OLD_PROPERTY_VALUE_SUFFIX = "old";
         public const string NEW_PROPERTY_VALUES_SUFFIX = "new";
 
-        public static readonly string DbParameterName_OldTimestamp = GetParameterized($"{nameof(TimestampDbModel.Timestamp)}_{OLD_PROPERTY_VALUE_SUFFIX}");
-        public static readonly string DbParameterName_NewTimestamp = GetParameterized($"{nameof(TimestampDbModel.Timestamp)}_{NEW_PROPERTY_VALUES_SUFFIX}");
-        public static readonly string DbParameterName_Timestamp = GetParameterized(nameof(TimestampDbModel.Timestamp));
+        public static readonly string DbParameterName_OldTimestamp = GetParameterized($"{nameof(ITimestamp.Timestamp)}_{OLD_PROPERTY_VALUE_SUFFIX}");
+        public static readonly string DbParameterName_NewTimestamp = GetParameterized($"{nameof(ITimestamp.Timestamp)}_{NEW_PROPERTY_VALUES_SUFFIX}");
+        public static readonly string DbParameterName_Timestamp = GetParameterized(nameof(ITimestamp.Timestamp));
 
-        public static readonly string DbParameterName_LastUser = GetParameterized(nameof(DbModel.LastUser));
-        public static readonly string DbParameterName_Deleted = GetParameterized(nameof(DbModel.Deleted));
-        public static readonly string DbParameterName_Id = GetParameterized(nameof(ILongId.Id));
+        public static readonly string DbParameterName_LastUser = GetParameterized(nameof(BaseDbModel.LastUser));
+        public static readonly string DbParameterName_Deleted = GetParameterized(nameof(BaseDbModel.Deleted));
+        public static readonly string DbParameterName_Id = GetParameterized(nameof(DbModel2<long>.Id));
 
         /// <summary>
         /// 只用于客户端，没有做Timestamp检查
@@ -94,30 +94,7 @@ namespace HB.FullStack.Database.SQL
             return sql;
         }
 
-        public static string CreateAddModelSql(DbModelDef modelDef, bool returnId, int number = 0)
-        {
-            StringBuilder args = new StringBuilder();
-            StringBuilder values = new StringBuilder();
-
-            foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
-            {
-                if (propertyDef.IsAutoIncrementPrimaryKey)
-                {
-                    continue;
-                }
-
-                args.Append(Invariant($"{propertyDef.DbReservedName},"));
-
-                values.Append(Invariant($"{propertyDef.DbParameterizedName}_{number},"));
-            }
-
-            args.RemoveLast();
-            values.RemoveLast();
-
-            string returnIdStatement = returnId && modelDef.IdType == DbModelIdType.AutoIncrementLongId ? $"select {GetLastInsertIdStatement(modelDef.EngineType)};" : string.Empty;
-
-            return $"insert into {modelDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
-        }
+        
 
         /// <summary>
         /// 需要随后在Parameters中特别添加Timestamp_old_number的值
@@ -141,7 +118,7 @@ namespace HB.FullStack.Database.SQL
             StringBuilder where = new StringBuilder();
 
             DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(DbModel.Deleted))!;
+            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.Deleted))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
@@ -149,7 +126,7 @@ namespace HB.FullStack.Database.SQL
             if (modelDef.IsTimestamp)
             {
                 //TODO: 提高效率。简化所有的Version、LastTime、LastUser、Deleted、Id字段的 Property读取和DbReservedName使用
-                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
+                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp))!;
                 //where.Append(Invariant($" AND {timestampProperty.DbReservedName}={timestampProperty.DbParameterizedName}_{number} - 1 "));
                 where.Append(Invariant($" AND {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
             }
@@ -166,17 +143,12 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                if (/*propertyName == nameof(Model.CreateTime) || */propertyName == nameof(TimestampLongIdDbModel.Id))
+                if (/*propertyName == nameof(Model.CreateTime) || */propertyName == nameof(DbModel2<long>.Id))
                 {
                     continue;
                 }
 
-                DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(propertyName);
-
-                if (propertyDef == null)
-                {
-                    throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
-                }
+                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
 
                 args.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
             }
@@ -186,14 +158,14 @@ namespace HB.FullStack.Database.SQL
             StringBuilder where = new StringBuilder();
 
             DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(DbModel.Deleted))!;
+            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.Deleted))!;
 
             where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
             where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
 
             if (modelDef.IsTimestamp)
             {
-                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
+                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp))!;
                 
                 where.Append(Invariant($" AND {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
             }
@@ -207,8 +179,8 @@ namespace HB.FullStack.Database.SQL
         public static string CreateUpdatePropertiesUsingCompareSql(DbModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
         {
             DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(DbModel.Deleted))!;
-            DbModelPropertyDef lastUserProperty = modelDef.GetDbPropertyDef(nameof(DbModel.LastUser))!;
+            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.Deleted))!;
+            DbModelPropertyDef lastUserProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.LastUser))!;
 
             StringBuilder args = new StringBuilder();
             args.Append(Invariant($"{lastUserProperty.DbReservedName}={DbParameterName_LastUser}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
@@ -216,7 +188,7 @@ namespace HB.FullStack.Database.SQL
             //如果是TimestampDBModel，强迫加上Timestamp字段
             if (modelDef.IsTimestamp)
             {
-                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(TimestampDbModel.Timestamp))!;
+                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp))!;
 
                 args.Append(Invariant($", {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
             }
@@ -228,15 +200,10 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(propertyName);
-
-                if (propertyDef == null)
-                {
-                    throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
-                }
+                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
 
                 //这里就不加了
-                if (propertyName != nameof(TimestampDbModel.Timestamp))
+                if (propertyName != nameof(ITimestamp.Timestamp))
                 {
                     args.Append(Invariant($",{propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{NEW_PROPERTY_VALUES_SUFFIX}_{number}"));
                 }
@@ -260,32 +227,15 @@ namespace HB.FullStack.Database.SQL
         //    return CreateUpdateModelSql(modelDef, number);
         //}
 
-        public static string CreateSelectModelSql(params DbModelDef[] modelDefs)
-        {
-            StringBuilder builder = new StringBuilder("SELECT ");
 
-            foreach (DbModelDef modelDef in modelDefs)
-            {
-                string DbTableReservedName = modelDef.DbTableReservedName;
-
-                foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
-                {
-                    builder.Append(Invariant($"{DbTableReservedName}.{propertyDef.DbReservedName},"));
-                }
-            }
-
-            builder.RemoveLast();
-
-            return builder.ToString();
-        }
 
         /// <summary>
         /// 针对Client
         /// </summary>
         public static string CreateUpdateDeletedSql(DbModelDef modelDef, int number = 0)
         {
-            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(DbModel.Deleted))!;
-            DbModelPropertyDef lastNameProperty = modelDef.GetDbPropertyDef(nameof(DbModel.LastUser))!;
+            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.Deleted))!;
+            DbModelPropertyDef lastNameProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.LastUser))!;
 
             return $"update {modelDef.DbTableReservedName} set  {deletedProperty.DbReservedName}={deletedProperty.DbParameterizedName}_{number},{lastNameProperty.DbReservedName}={lastNameProperty.DbParameterizedName}_{number}";
         }
@@ -301,13 +251,8 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(propertyName);
-
-                if (propertyDef == null)
-                {
-                    throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
-                }
-
+                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.ModelFullName, propertyName);
+                
                 where.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number} ");
                 where.Append("AND");
             }

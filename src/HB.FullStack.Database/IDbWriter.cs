@@ -18,9 +18,9 @@ namespace HB.FullStack.Database
     {
         #region Add
 
-        Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
 
-        Task<IEnumerable<object>> AddAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task AddAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel, new();
 
         #endregion
 

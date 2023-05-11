@@ -36,7 +36,7 @@ namespace HB.FullStack.Database.DbModels
         [DbField(3)]
         [AddtionalProperty]
         [Range(638000651894004864, long.MaxValue)]
-        public abstract long Timestamp { get; internal set; }    
+        public abstract long Timestamp { get; set; }    
     }
 
 }
