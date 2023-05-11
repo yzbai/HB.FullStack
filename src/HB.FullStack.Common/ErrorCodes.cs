@@ -169,7 +169,7 @@
         #endregion
         #region Db
 
-
+        public static ErrorCode DbConflictMethodError { get; set; } = new ErrorCode(nameof(DbConflictMethodError), "");
         public static ErrorCode DbUpdatePropertiesError { get; set; } = new ErrorCode(nameof(DbUpdatePropertiesError), "");
 
         public static ErrorCode DbUpdateUsingTimestampError = new ErrorCode(nameof(DbUpdateUsingTimestampError), "");

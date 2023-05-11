@@ -32,7 +32,7 @@ namespace HB.FullStack.Database
         /// If item is TimestampDBModel, will use Timestamp to solve conflict.
         /// If item is TimelessDBModel, will just update, ignore conflict.
         /// </summary>
-        Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
 
         /// <summary>
         /// Update.

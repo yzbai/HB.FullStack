@@ -441,5 +441,11 @@ namespace HB.FullStack.Database
 
             return ex;
         }
+
+        internal static Exception ConflictCheckMethodError(string message)
+        {
+            DbException ex = new DbException(ErrorCodes.DbConflictMethodError, message, null, null);
+            return ex;
+        }
     }
 }

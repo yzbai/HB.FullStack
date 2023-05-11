@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 using HB.FullStack.Common.Models;
@@ -36,7 +37,9 @@ namespace HB.FullStack.Database.DbModels
 
         public bool IsTimestamp { get; set; }
 
-        public DbConflictCheckMethods ConflictCheckMethods { get; set; } = DbConflictCheckMethods.OldNewValueCompare | DbConflictCheckMethods.Timestamp;
+        public DbConflictCheckMethods AllowedConflictCheckMethods { get; set; } = DbConflictCheckMethods.OldNewValueCompare | DbConflictCheckMethods.Timestamp;
+
+        public DbConflictCheckMethods ConflictCheckMethodWhenUpdate { get; set; }
 
         /// <summary>
         /// 数据库是否可写
@@ -48,6 +51,10 @@ namespace HB.FullStack.Database.DbModels
         public int UniqueFieldCount { get; set; }
 
         public DbModelPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
+        public DbModelPropertyDef DeletedPropertyDef { get; internal set; } = null!;
+
+        [NotNullIfNotNull(nameof(IsTimestamp))]
+        public DbModelPropertyDef? TimestampPropertyDef { get; internal set; } = null!;
 
         private string? _dbTableReservedName;
         private string? _deletedPropertyReservedName;

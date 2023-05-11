@@ -24,7 +24,7 @@ namespace HB.FullStack.Database
                 .ThrowIfNotWriteable();
 
 
-            long oldTimestamp = -1;
+            long? oldTimestamp = null;
             string oldLastUser = "";
 
             try
@@ -83,7 +83,6 @@ namespace HB.FullStack.Database
 
             try
             {
-                //Prepare
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
@@ -133,7 +132,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void PrepareItem<T>(T item, string lastUser, ref string oldLastUser, ref long oldTimestamp) where T : BaseDbModel, new()
+        private static void PrepareItem<T>(T item, string lastUser, ref string oldLastUser, ref long? oldTimestamp) where T : BaseDbModel, new()
         {
             if (item is ITimestamp timestampModel)
             {
@@ -145,11 +144,11 @@ namespace HB.FullStack.Database
             item.LastUser = lastUser;
         }
 
-        private static void RestoreItem<T>(T item, long oldTimestamp, string oldLastUser) where T : BaseDbModel, new()
+        private static void RestoreItem<T>(T item, long? oldTimestamp, string oldLastUser) where T : BaseDbModel, new()
         {
             if (item is ITimestamp timestampModel)
             {
-                timestampModel.Timestamp = oldTimestamp;
+                timestampModel.Timestamp = oldTimestamp!.Value;
             }
 
             item.LastUser = oldLastUser;

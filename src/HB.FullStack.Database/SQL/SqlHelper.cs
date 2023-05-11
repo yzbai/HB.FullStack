@@ -96,43 +96,7 @@ namespace HB.FullStack.Database.SQL
 
         
 
-        /// <summary>
-        /// 需要随后在Parameters中特别添加Timestamp_old_number的值
-        /// </summary>
-        public static string CreateUpdateModelSql(DbModelDef modelDef, int number = 0)
-        {
-            StringBuilder args = new StringBuilder();
-
-            foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
-            {
-                if (propertyDef.IsPrimaryKey /*|| propertyDef.SiteName == nameof(Model.CreateTime)*/)
-                {
-                    continue;
-                }
-
-                args.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
-            }
-
-            args.RemoveLast();
-
-            StringBuilder where = new StringBuilder();
-
-            DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.Deleted))!;
-
-            where.Append(Invariant($"{primaryKeyProperty.DbReservedName}={primaryKeyProperty.DbParameterizedName}_{number} AND "));
-            where.Append(Invariant($"{deletedProperty.DbReservedName}=0 "));
-
-            if (modelDef.IsTimestamp)
-            {
-                //TODO: 提高效率。简化所有的Version、LastTime、LastUser、Deleted、Id字段的 Property读取和DbReservedName使用
-                DbModelPropertyDef timestampProperty = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp))!;
-                //where.Append(Invariant($" AND {timestampProperty.DbReservedName}={timestampProperty.DbParameterizedName}_{number} - 1 "));
-                where.Append(Invariant($" AND {timestampProperty.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} "));
-            }
-
-            return $"UPDATE {modelDef.DbTableReservedName} SET {args} WHERE {where};";
-        }
+        
 
         /// <summary>
         /// 使用Timestamp乐观锁的Update-Fields。行粒度。

@@ -7,9 +7,9 @@ namespace HB.FullStack.Database.SQL
 
         Insert,
 
+        UpdateIgnoreConflictCheck,
         UpdateUsingOldNewCompare,
         UpdateUsingTimestamp,
-        UpdateWithoutConflictCheck,
 
         //Update,
         //UpdatePropertiesTimestamp,

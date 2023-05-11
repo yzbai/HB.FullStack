@@ -1,51 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
+using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
     partial class DefaultDatabase
     {
-        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
-            if (item is IPropertyTrackableObject trackableObject)
-            {
-                PropertyChangePack changePack = trackableObject.GetPropertyChangePack();
+            //if (item is IPropertyTrackableObject trackableObject)
+            //{
+            //    PropertyChangePack changePack = trackableObject.GetPropertyChangePack();
 
-                await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
+            //    await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
 
-                return;
-            }
+            //    return;
+            //}
 
             ThrowIf.NotValid(item, nameof(item));
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
-            //TruncateLastUser(ref lastUser);
 
-            long oldTimestamp = -1;
+            long? oldTimestamp = null;
             string oldLastUser = "";
 
             try
             {
-                //Prepare
-                if (item is TimestampDbModel timestampDBModel)
-                {
-                    oldTimestamp = timestampDBModel.Timestamp;
-                    oldLastUser = timestampDBModel.LastUser;
+                PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
-                    timestampDBModel.Timestamp = TimeUtil.Timestamp;
-                    timestampDBModel.LastUser = lastUser;
-                }
-
-                DbEngineCommand command = DbCommandBuilder.CreateUpdateCommand(modelDef, item, oldTimestamp);
-
-                var engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbConflictCheckMethods conflictCheckMethods = modelDef.ConflictCheckMethodWhenUpdate;
+                DbEngineCommand command = DbCommandBuilder.CreateUpdateCommand(modelDef, item, oldTimestamp, conflictCheckMethods);
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
@@ -91,25 +84,19 @@ namespace HB.FullStack.Database
 
                 throw DbExceptions.UnKown(modelDef.ModelFullName, SerializeUtil.ToJson(item), ex);
             }
-
-            static void RestoreItem(T item, long oldTimestamp, string oldLastUser)
-            {
-                if (item is TimestampDbModel timestampDBModel)
-                {
-                    timestampDBModel.Timestamp = oldTimestamp;
-                    timestampDBModel.LastUser = oldLastUser;
-                }
-            }
         }
 
-        public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public async Task UpdateAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel, new()
         {
             if (items.IsNullOrEmpty())
             {
                 return;
             }
 
-            if (items.Count() == 1)
+            ThrowIf.Null(transContext, nameof(transContext));
+            ThrowIf.NotValid(items, nameof(items));
+
+            if (items.Count == 1)
             {
                 await UpdateAsync(items.First(), lastUser, transContext).ConfigureAwait(false);
                 return;
@@ -117,22 +104,19 @@ namespace HB.FullStack.Database
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
 
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
 
-            if (modelDef.IsPropertyTrackable)
-            {
-                await UpdatePropertiesAsync<T>(
-                    items.Select(t => ((IPropertyTrackableObject)t).GetPropertyChangePack()).ToList(), 
-                    lastUser, 
-                    transContext).ConfigureAwait(false);
+            //if (modelDef.IsPropertyTrackable)
+            //{
+            //    await UpdatePropertiesAsync<T>(
+            //        items.Select(t => ((IPropertyTrackableObject)t).GetPropertyChangePack()).ToList(),
+            //        lastUser,
+            //        transContext).ConfigureAwait(false);
 
-                return;
-            }
+            //    return;
+            //}
 
-            ThrowIf.NotValid(items, nameof(items));
 
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
-            //TruncateLastUser(ref lastUser);
 
             List<long> oldTimestamps = new List<long>();
             List<string?> oldLastUsers = new List<string?>();
@@ -141,11 +125,11 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
-                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdateCommand(modelDef, items, oldTimestamps, transContext == null);
+                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdateCommand(modelDef, items, oldTimestamps);
 
-                Engine.IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-
-                using var reader = transContext != null
+                using IDataReader reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
 
@@ -163,7 +147,7 @@ namespace HB.FullStack.Database
                     count++;
                 }
 
-                if (count != items.Count())
+                if (count != items.Count)
                 {
                     throw DbExceptions.ConcurrencyConflict(modelDef.ModelFullName, SerializeUtil.ToJson(items), "BatchUpdate");
                 }

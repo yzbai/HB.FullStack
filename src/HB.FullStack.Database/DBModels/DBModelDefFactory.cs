@@ -165,13 +165,15 @@ namespace HB.FullStack.Database.DbModels
                 IsWriteable = !(tableSchema.ReadOnly!.Value),
             };
 
-            //ConflictCheckMethods
-            modelDef.ConflictCheckMethods = tableSchema.ConflictCheckMethods!.Value;
+            //AllowedConflictCheckMethods
+            modelDef.AllowedConflictCheckMethods = tableSchema.ConflictCheckMethods!.Value;
 
             if (!modelDef.IsTimestamp && tableSchema.ConflictCheckMethods!.Value.HasFlag(DbConflictCheckMethods.Timestamp))
             {
-                modelDef.ConflictCheckMethods = modelDef.ConflictCheckMethods ^ DbConflictCheckMethods.Timestamp;
+                modelDef.AllowedConflictCheckMethods ^= DbConflictCheckMethods.Timestamp;
             }
+
+            modelDef.ConflictCheckMethodWhenUpdate = GetConflictCheckMethodWhenUpdateWhole(modelDef);
 
             //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
             var orderedProperties = modelType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
@@ -210,9 +212,15 @@ namespace HB.FullStack.Database.DbModels
                 modelDef.PropertyDefs.Add(propertyDef);
                 modelDef.PropertyDict.Add(propertyDef.Name, propertyDef);
             }
+            
+            //TimestampPropertyDef
+            if(modelDef.IsTimestamp)
+            {
+                modelDef.TimestampPropertyDef = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp)).ThrowIfNull($"{modelDef.ModelFullName} should has a Timestamp Property!");
+            }
 
             //IdType
-            var primaryKeyPropertyDef = modelDef.PrimaryKeyPropertyDef;
+            DbModelPropertyDef primaryKeyPropertyDef = modelDef.PrimaryKeyPropertyDef;
 
             if (primaryKeyPropertyDef != null)
             {
@@ -231,6 +239,26 @@ namespace HB.FullStack.Database.DbModels
             }
 
             return modelDef;
+        }
+
+        private static DbConflictCheckMethods GetConflictCheckMethodWhenUpdateWhole(DbModelDef modelDef)
+        {
+            if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            {
+                return DbConflictCheckMethods.Timestamp;
+            }
+
+            if (modelDef.IsPropertyTrackable && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.OldNewValueCompare))
+            {
+                return DbConflictCheckMethods.OldNewValueCompare;
+            }
+
+            if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            {
+                return DbConflictCheckMethods.Ignore;
+            }
+
+            throw DbExceptions.ConflictCheckMethodError($"{modelDef.ModelFullName} can not get proper conflict check method. allowed methods:{modelDef.AllowedConflictCheckMethods}");
         }
 
         private static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
@@ -287,6 +315,11 @@ namespace HB.FullStack.Database.DbModels
                     propertyDef.IsNullable = true;
                     propertyDef.IsUnique = atts2.IsUnique;
                 }
+            }
+
+            if (propertyInfo.Name == nameof(BaseDbModel.Deleted))
+            {
+                modelDef.DeletedPropertyDef = propertyDef;
             }
 
             return propertyDef;
