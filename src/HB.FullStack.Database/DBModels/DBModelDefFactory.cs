@@ -118,165 +118,6 @@ namespace HB.FullStack.Database.DbModels
                 return resultTypeDbTableSchemaDict;
             }
 
-            void ConstructDbModelDefs(IEnumerable<Type> types, IDictionary<Type, DbTableSchemaEx> typeDbTableSchemaDict)
-            {
-                foreach (Type type in types)
-                {
-                    if (!typeDbTableSchemaDict!.TryGetValue(type, out DbTableSchemaEx? dbTableSchemaExFromOptions))
-                    {
-                        throw DbExceptions.ModelError(type: type.FullName, "", cause: "不是Model，或者没有DatabaseModelAttribute.");
-                    }
-
-                    _dbModelDefs[type] = CreateModelDef(type, dbTableSchemaExFromOptions.TableSchema, dbTableSchemaExFromOptions.DbSchema);
-                }
-            }
-
-            static DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchema, DbSchema dbSchema)
-            {
-                DbModelDef modelDef = new DbModelDef
-                {
-                    Kind = ModelKind.Db,
-                    ModelFullName = modelType.FullName!,
-                    ModelType = modelType,
-                    IsPropertyTrackable = modelType.IsAssignableTo(typeof(IPropertyTrackableObject)),
-
-                    DbSchemaName = dbSchema.Name,
-                    EngineType = dbSchema.EngineType,
-
-                    TableName = tableSchema.TableName,
-                    //IdType = GetIdType(modelType),
-                    IsTimestamp = typeof(ITimestamp).IsAssignableFrom(modelType),
-
-                    IsWriteable = !(tableSchema.ReadOnly!.Value),
-                };
-
-                //ConflictCheckMethods
-                modelDef.ConflictCheckMethods = tableSchema.ConflictCheckMethods!.Value;
-
-                if (!modelDef.IsTimestamp && tableSchema.ConflictCheckMethods!.Value.HasFlag(DbConflictCheckMethods.Timestamp))
-                {
-                    modelDef.ConflictCheckMethods = modelDef.ConflictCheckMethods ^ DbConflictCheckMethods.Timestamp;
-                }
-
-                //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
-                var orderedProperties = modelType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
-
-                foreach (PropertyInfo propertyInfo in orderedProperties)
-                {
-                    DbFieldAttribute? fieldAttribute = propertyInfo.GetCustomAttribute<DbFieldAttribute>(true);
-
-                    if (fieldAttribute == null)
-                    {
-                        DbIgnoreFieldPropertyAttribute? ignoreAttribute = propertyInfo.GetCustomAttribute<DbIgnoreFieldPropertyAttribute>(true);
-
-                        if (ignoreAttribute != null)
-                        {
-                            continue;
-                        }
-
-                        fieldAttribute = new DbFieldAttribute();
-
-                        if (propertyInfo.Name == nameof(DbModel2<long>.LastUser))
-                        {
-                            fieldAttribute.MaxLength = dbSchema.MaxLastUserFieldLength;
-                        }
-                    }
-
-                    DbFieldSchema? fieldSchemaFromOptions = tableSchema.Fields.FirstOrDefault(f => f.FieldName == propertyInfo.Name);
-                    DbModelPropertyDef propertyDef = CreatePropertyDef(modelDef, propertyInfo, fieldAttribute, fieldSchemaFromOptions, dbSchema);
-
-                    modelDef.FieldCount++;
-
-                    if (propertyDef.IsUnique)
-                    {
-                        modelDef.UniqueFieldCount++;
-                    }
-
-                    modelDef.PropertyDefs.Add(propertyDef);
-                    modelDef.PropertyDict.Add(propertyDef.Name, propertyDef);
-                }
-
-                //IdType
-                var primaryKeyPropertyDef = modelDef.PrimaryKeyPropertyDef;
-
-                if (primaryKeyPropertyDef != null)
-                {
-                    if (primaryKeyPropertyDef.IsAutoIncrementPrimaryKey)
-                    {
-                        modelDef.IdType = DbModelIdType.AutoIncrementLongId;
-                    }
-                    else if (primaryKeyPropertyDef.Type == typeof(long))
-                    {
-                        modelDef.IdType = DbModelIdType.LongId;
-                    }
-                    else if(primaryKeyPropertyDef.Type == typeof(Guid))
-                    {
-                        modelDef.IdType = DbModelIdType.GuidId;
-                    }
-                }
-
-                return modelDef;
-            }
-
-            static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
-            {
-                DbModelPropertyDef propertyDef = new DbModelPropertyDef
-                {
-                    ModelDef = modelDef,
-                    Name = propertyInfo.Name,
-                    Type = propertyInfo.PropertyType
-                };
-                propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
-
-                propertyDef.SetMethod = propertyInfo.GetSetterMethod(modelDef.ModelType)
-                    ?? throw DbExceptions.ModelError(type: modelDef.ModelFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Set方法. ");
-
-                propertyDef.GetMethod = propertyInfo.GetGetterMethod(modelDef.ModelType)
-                    ?? throw DbExceptions.ModelError(type: modelDef.ModelFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
-
-                propertyDef.IsIndexNeeded = fieldSchemaFromOptions?.NeedIndex ?? fieldAttribute.NeedIndex;
-                propertyDef.IsNullable = !(fieldSchemaFromOptions?.NotNull ?? fieldAttribute.NotNull);
-                propertyDef.IsUnique = fieldSchemaFromOptions?.Unique ?? fieldAttribute.Unique;
-                propertyDef.DbMaxLength = fieldSchemaFromOptions?.MaxLength ?? (fieldAttribute.MaxLength > 0 ? (int?)fieldAttribute.MaxLength : null);
-                propertyDef.IsLengthFixed = fieldSchemaFromOptions?.FixedLength ?? fieldAttribute.FixedLength;
-
-                propertyDef.DbReservedName = SqlHelper.GetReserved(propertyDef.Name, dbSchema.EngineType);
-                propertyDef.DbParameterizedName = SqlHelper.GetParameterized(propertyDef.Name);
-
-                if (fieldAttribute.Converter != null)
-                {
-                    propertyDef.TypeConverter = (IDbPropertyConverter)Activator.CreateInstance(fieldAttribute.Converter)!;
-                }
-
-                //判断是否是主键
-                DbPrimaryKeyAttribute? primaryAttribute = propertyInfo.GetCustomAttribute<DbPrimaryKeyAttribute>(true);
-
-                if (primaryAttribute != null)
-                {
-                    modelDef.PrimaryKeyPropertyDef = propertyDef;
-                    propertyDef.IsPrimaryKey = true;
-                    propertyDef.IsAutoIncrementPrimaryKey = propertyInfo.GetCustomAttribute<DbAutoIncrementPrimaryKeyAttribute>(true) != null;
-                    propertyDef.IsNullable = false;
-                    propertyDef.IsForeignKey = false;
-                    propertyDef.IsUnique = true;
-                }
-                else
-                {
-                    //判断是否外键
-                    DbForeignKeyAttribute? atts2 = propertyInfo.GetCustomAttribute<DbForeignKeyAttribute>(true);
-
-                    if (atts2 != null)
-                    {
-                        propertyDef.IsAutoIncrementPrimaryKey = false;
-                        propertyDef.IsForeignKey = true;
-                        propertyDef.IsNullable = true;
-                        propertyDef.IsUnique = atts2.IsUnique;
-                    }
-                }
-
-                return propertyDef;
-            }
-
             void CheckDuplicateTableNames()
             {
                 //Same table name under same dbschema
@@ -292,6 +133,163 @@ namespace HB.FullStack.Database.DbModels
                     }
                 }
             }
+        }
+
+        private void ConstructDbModelDefs(IEnumerable<Type> types, IDictionary<Type, DbTableSchemaEx> typeDbTableSchemaDict)
+        {
+            foreach (Type type in types)
+            {
+                if (!typeDbTableSchemaDict!.TryGetValue(type, out DbTableSchemaEx? dbTableSchemaExFromOptions))
+                {
+                    throw DbExceptions.ModelError(type: type.FullName, "", cause: "不是Model，或者没有DatabaseModelAttribute.");
+                }
+
+                _dbModelDefs[type] = CreateModelDef(type, dbTableSchemaExFromOptions.TableSchema, dbTableSchemaExFromOptions.DbSchema);
+            }
+        }
+
+        private static DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchema, DbSchema dbSchema)
+        {
+            DbModelDef modelDef = new DbModelDef
+            {
+                Kind = ModelKind.Db,
+                ModelFullName = modelType.FullName!,
+                ModelType = modelType,
+                IsPropertyTrackable = modelType.IsAssignableTo(typeof(IPropertyTrackableObject)),
+
+                DbSchemaName = dbSchema.Name,
+                EngineType = dbSchema.EngineType,
+
+                TableName = tableSchema.TableName,
+                IsTimestamp = typeof(ITimestamp).IsAssignableFrom(modelType),
+                IsWriteable = !(tableSchema.ReadOnly!.Value),
+            };
+
+            //ConflictCheckMethods
+            modelDef.ConflictCheckMethods = tableSchema.ConflictCheckMethods!.Value;
+
+            if (!modelDef.IsTimestamp && tableSchema.ConflictCheckMethods!.Value.HasFlag(DbConflictCheckMethods.Timestamp))
+            {
+                modelDef.ConflictCheckMethods = modelDef.ConflictCheckMethods ^ DbConflictCheckMethods.Timestamp;
+            }
+
+            //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
+            var orderedProperties = modelType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
+
+            foreach (PropertyInfo propertyInfo in orderedProperties)
+            {
+                DbFieldAttribute? fieldAttribute = propertyInfo.GetCustomAttribute<DbFieldAttribute>(true);
+
+                if (fieldAttribute == null)
+                {
+                    DbIgnoreFieldPropertyAttribute? ignoreAttribute = propertyInfo.GetCustomAttribute<DbIgnoreFieldPropertyAttribute>(true);
+
+                    if (ignoreAttribute != null)
+                    {
+                        continue;
+                    }
+
+                    fieldAttribute = new DbFieldAttribute();
+
+                    if (propertyInfo.Name == nameof(DbModel2<long>.LastUser))
+                    {
+                        fieldAttribute.MaxLength = dbSchema.MaxLastUserFieldLength;
+                    }
+                }
+
+                DbFieldSchema? fieldSchemaFromOptions = tableSchema.Fields.FirstOrDefault(f => f.FieldName == propertyInfo.Name);
+                DbModelPropertyDef propertyDef = CreatePropertyDef(modelDef, propertyInfo, fieldAttribute, fieldSchemaFromOptions, dbSchema);
+
+                modelDef.FieldCount++;
+
+                if (propertyDef.IsUnique)
+                {
+                    modelDef.UniqueFieldCount++;
+                }
+
+                modelDef.PropertyDefs.Add(propertyDef);
+                modelDef.PropertyDict.Add(propertyDef.Name, propertyDef);
+            }
+
+            //IdType
+            var primaryKeyPropertyDef = modelDef.PrimaryKeyPropertyDef;
+
+            if (primaryKeyPropertyDef != null)
+            {
+                if (primaryKeyPropertyDef.IsAutoIncrementPrimaryKey)
+                {
+                    modelDef.IdType = DbModelIdType.AutoIncrementLongId;
+                }
+                else if (primaryKeyPropertyDef.Type == typeof(long))
+                {
+                    modelDef.IdType = DbModelIdType.LongId;
+                }
+                else if (primaryKeyPropertyDef.Type == typeof(Guid))
+                {
+                    modelDef.IdType = DbModelIdType.GuidId;
+                }
+            }
+
+            return modelDef;
+        }
+
+        private static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
+        {
+            DbModelPropertyDef propertyDef = new DbModelPropertyDef
+            {
+                ModelDef = modelDef,
+                Name = propertyInfo.Name,
+                Type = propertyInfo.PropertyType
+            };
+            propertyDef.NullableUnderlyingType = Nullable.GetUnderlyingType(propertyDef.Type);
+
+            propertyDef.SetMethod = propertyInfo.GetSetterMethod(modelDef.ModelType)
+                ?? throw DbExceptions.ModelError(type: modelDef.ModelFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Set方法. ");
+
+            propertyDef.GetMethod = propertyInfo.GetGetterMethod(modelDef.ModelType)
+                ?? throw DbExceptions.ModelError(type: modelDef.ModelFullName, propertyName: propertyInfo.Name, cause: "实体属性缺少Get方法. ");
+
+            propertyDef.IsIndexNeeded = fieldSchemaFromOptions?.NeedIndex ?? fieldAttribute.NeedIndex;
+            propertyDef.IsNullable = !(fieldSchemaFromOptions?.NotNull ?? fieldAttribute.NotNull);
+            propertyDef.IsUnique = fieldSchemaFromOptions?.Unique ?? fieldAttribute.Unique;
+            propertyDef.DbMaxLength = fieldSchemaFromOptions?.MaxLength ?? (fieldAttribute.MaxLength > 0 ? (int?)fieldAttribute.MaxLength : null);
+            propertyDef.IsLengthFixed = fieldSchemaFromOptions?.FixedLength ?? fieldAttribute.FixedLength;
+
+            propertyDef.DbReservedName = SqlHelper.GetReserved(propertyDef.Name, dbSchema.EngineType);
+            propertyDef.DbParameterizedName = SqlHelper.GetParameterized(propertyDef.Name);
+
+            if (fieldAttribute.Converter != null)
+            {
+                propertyDef.TypeConverter = (IDbPropertyConverter)Activator.CreateInstance(fieldAttribute.Converter)!;
+            }
+
+            //判断是否是主键
+            DbPrimaryKeyAttribute? primaryAttribute = propertyInfo.GetCustomAttribute<DbPrimaryKeyAttribute>(true);
+
+            if (primaryAttribute != null)
+            {
+                modelDef.PrimaryKeyPropertyDef = propertyDef;
+                propertyDef.IsPrimaryKey = true;
+                propertyDef.IsAutoIncrementPrimaryKey = propertyInfo.GetCustomAttribute<DbAutoIncrementPrimaryKeyAttribute>(true) != null;
+                propertyDef.IsNullable = false;
+                propertyDef.IsForeignKey = false;
+                propertyDef.IsUnique = true;
+            }
+            else
+            {
+                //判断是否外键
+                DbForeignKeyAttribute? atts2 = propertyInfo.GetCustomAttribute<DbForeignKeyAttribute>(true);
+
+                if (atts2 != null)
+                {
+                    propertyDef.IsAutoIncrementPrimaryKey = false;
+                    propertyDef.IsForeignKey = true;
+                    propertyDef.IsNullable = true;
+                    propertyDef.IsUnique = atts2.IsUnique;
+                }
+            }
+
+            return propertyDef;
         }
 
         public DbModelDef? GetDef<T>() where T : BaseDbModel

@@ -1,11 +1,15 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yzbai@brlite.com
+ * Github: github.com/yzbai
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
 
-/*
- * 
- */
 namespace HB.FullStack.Database.DbModels
 {
     public abstract class BaseDbModel : ValidatableObject, IModel
@@ -28,6 +32,5 @@ namespace HB.FullStack.Database.DbModels
 
         [DbField(2)]
         public abstract string? LastUser { get; set; }
-
     }
 }
