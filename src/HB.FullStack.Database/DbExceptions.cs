@@ -157,6 +157,13 @@ namespace HB.FullStack.Database
             return exception; ;
         }
 
+        internal static Exception NotFound(string cause)
+        {
+            DbException exception = new DbException(ErrorCodes.NotFound, cause, null, null);
+
+            return exception; ;
+        }
+
         internal static Exception PropertyNotFound(string? type, string property)
         {
             DbException exception = new DbException(ErrorCodes.PropertyNotFound, nameof(PropertyNotFound), null, null);

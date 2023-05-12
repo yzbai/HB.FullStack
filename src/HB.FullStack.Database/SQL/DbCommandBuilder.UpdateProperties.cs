@@ -155,7 +155,7 @@ namespace HB.FullStack.Database.SQL
             return new DbEngineCommand(sql, parameters);
         }
 
-        public DbEngineCommand CreateBatchUpdatePropertiesTimelessCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, bool needTrans)
+        public DbEngineCommand CreateBatchUpd atePropertiesTimelessCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, bool needTrans)
         {
             if (modelDef.IsTimestamp)
             {

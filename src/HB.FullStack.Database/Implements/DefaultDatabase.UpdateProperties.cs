@@ -36,6 +36,11 @@ namespace HB.FullStack.Database
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable().ThrowIfNotTimestamp();
 
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Timestamp Conflict Check.");
+            }
+
             try
             {
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
@@ -52,7 +57,8 @@ namespace HB.FullStack.Database
                 }
                 else if (rows == 0)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"使用Timestamp版本的乐观锁，出现冲突。UpdatePack:{SerializeUtil.ToJson(updatePack)}, lastUser:{lastUser}", "");
+                    //没有这样的ID，或者版本冲突
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"没有这样的ID，或者使用Timestamp版本的乐观锁，出现冲突。UpdatePack:{SerializeUtil.ToJson(updatePack)}, lastUser:{lastUser}", "");
                 }
                 else
                 {
@@ -81,6 +87,11 @@ namespace HB.FullStack.Database
             transactionContext.ThrowIfNull(nameof(transactionContext));
             updatePacks.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable().ThrowIfNotTimestamp();
+
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Timestamp Conflict Check.");
+            }
 
             try
             {
@@ -226,14 +237,114 @@ namespace HB.FullStack.Database
 
         #region IgnoreConflictCheck
 
-        public Task UpdatePropertiesAsync<T>()
+        public Task UpdatePropertiesAsync<T>(IgnoreConflictCheckUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
+            return UpdatePropertiesIgnoreConflictCheckAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        private Task UpdatePropertiesIgnoreConflictCheckAsync(DbModelDef modelDef, IgnoreConflictCheckUpdatePack ignorePack, string lastUser, TransactionContext? transContext)
+        public Task UpdatePropertiesAsync<T>(IList<IgnoreConflictCheckUpdatePack> updatePacks, string lastUser, TransactionContext transContext) where T : BaseDbModel, new()
         {
-            throw new NotImplementedException();
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
+            return UpdatePropertiesIgnoreConflictCheckAsync(modelDef, updatePacks, lastUser, transContext);
+        }
+
+        private async Task UpdatePropertiesIgnoreConflictCheckAsync(DbModelDef modelDef, IgnoreConflictCheckUpdatePack updatePack, string lastUser, TransactionContext? transContext)
+        {
+            updatePack.ThrowIfNotValid();
+            modelDef.ThrowIfNotWriteable();
+
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Ignore Conflict Check.");
+            }
+
+            try
+            {
+                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesIgnoreConflictCheckCommand(modelDef, updatePack, lastUser);
+
+                long rows = transContext != null
+                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
+
+                if (rows == 1)
+                {
+                    return;
+                }
+                else if (rows == 0)
+                {
+                    throw DbExceptions.NotFound($"没有找到这样的ID。UpdatePack:{SerializeUtil.ToJson(updatePack)}, lastUser:{lastUser}, model:{modelDef.FullName}");
+                }
+                else
+                {
+                    throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePackUsingTimestamp:{updatePack}, lastUser:{lastUser}");
+                }
+            }
+            catch (Exception ex) when (ex is not DbException)
+            {
+                throw DbExceptions.UnKown(modelDef.FullName, $"UpdatePackUsingTimestamp: {updatePack} , lastUser: {lastUser}", ex);
+            }
+        }
+
+        private async Task UpdatePropertiesIgnoreConflictCheckAsync(DbModelDef modelDef, IList<IgnoreConflictCheckUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext)
+        {
+            if (updatePacks.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            if (updatePacks.Count == 1)
+            {
+                await UpdatePropertiesIgnoreConflictCheckAsync(modelDef, updatePacks[0], lastUser, transactionContext).ConfigureAwait(false);
+                return;
+            }
+
+            transactionContext.ThrowIfNull(nameof(transactionContext));
+            updatePacks.ThrowIfNotValid();
+            modelDef.ThrowIfNotWriteable()
+
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Ignore Conflict Check.");
+            }
+
+            try
+            {
+                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateB.CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser);
+
+                using IDataReader reader = transactionContext != null
+                    ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
+                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+
+                int count = 0;
+
+                while (reader.Read())
+                {
+                    int matched = reader.GetInt32(0);
+
+                    if (matched != 1)
+                    {
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    }
+
+                    count++;
+                }
+
+                if (count != updatePacks.Count)
+                {
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(updatePacks), ex);
+            }
         }
 
         #endregion
@@ -286,32 +397,49 @@ namespace HB.FullStack.Database
             }
         }
 
-        public Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changedPacks, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
+        public async Task UpdatePropertiesAsync<T>(IList<PropertyChangePack> changedPacks, string lastUser, TransactionContext transContext) where T : BaseDbModel, new()
         {
             if (changedPacks.IsNullOrEmpty())
             {
-                return Task.CompletedTask;
+                return;
             }
 
-            if (changedPacks.Count() == 1)
+            if (changedPacks.Count == 1)
             {
-                return UpdatePropertiesAsync<T>(changedPacks.First(), lastUser, transContext);
+                await UpdatePropertiesAsync<T>(changedPacks.First(), lastUser, transContext).ConfigureAwait(false);
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
-            //TODO: 是否允许不同
+            //TODO: 是否允许不同的ConflictCheckMethod混杂?
             DbConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPacks[0]);
 
-            //if (modelDef.IsTimestamp)
-            //{
-            //    return UpdatePropertiesUsingTimestampAsync(modelDef, changedPacks.Select(cp => cp.ToTimestampUpdatePack(modelDef)).ToList(), lastUser, transContext);
-
-            //}
-            //else
-            //{
-            return UpdatePropertiesUsingOldNewCompareAsync(modelDef, changedPacks.Select(cp => cp.ToOldNewCompareUpdatePack(modelDef)).ToList(), lastUser, transContext);
-            //}
+            switch (conflictCheckMethod)
+            {
+                case DbConflictCheckMethods.Ignore:
+                    await UpdatePropertiesIgnoreConflictCheckAsync(
+                        modelDef,
+                        changedPacks.Select(cp => cp.ToIgnoreConflictCheckUpdatePack(modelDef)).ToList(),
+                        lastUser,
+                        transContext).ConfigureAwait(false);
+                    break;
+                case DbConflictCheckMethods.OldNewValueCompare:
+                    await UpdatePropertiesUsingOldNewCompareAsync(
+                        modelDef,
+                        changedPacks.Select(cp => cp.ToOldNewCompareUpdatePack(modelDef)).ToList(),
+                        lastUser,
+                        transContext).ConfigureAwait(false);
+                    break;
+                case DbConflictCheckMethods.Timestamp:
+                    await UpdatePropertiesUsingTimestampAsync(
+                        modelDef,
+                        changedPacks.Select(cp => cp.ToTimestampUpdatePack(modelDef)).ToList(),
+                        lastUser,
+                        transContext).ConfigureAwait(false);
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         #endregion
