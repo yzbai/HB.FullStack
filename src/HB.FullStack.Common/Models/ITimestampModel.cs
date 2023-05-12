@@ -10,6 +10,6 @@ namespace HB.FullStack.Common
     public interface ITimestamp
     {
         //int Version { get; set; }
-        long Timestamp { get; internal set; }
+        long Timestamp { get; set; }
     }
 }

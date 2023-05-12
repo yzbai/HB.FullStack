@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
@@ -85,7 +86,7 @@ namespace HB.FullStack.Database
             {
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
                 ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser, transactionContext == null);
+                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser);
 
                 using IDataReader reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
@@ -223,29 +224,69 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        #region PropertyChangePack - Timeless
+        #region IgnoreConflictCheck
+
+        public Task UpdatePropertiesAsync<T>()
+        {
+
+        }
+
+        private Task UpdatePropertiesIgnoreConflictCheckAsync(DbModelDef modelDef, IgnoreConflictCheckUpdatePack ignorePack, string lastUser, TransactionContext? transContext)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region PropertyChangePack
+
+        private static DbConflictCheckMethods GetPropertyChangePackConflictCheckMethod(DbModelDef modelDef, PropertyChangePack changePack)
+        {
+            if (modelDef.BestConflictCheckMethodWhenUpdateEntire == DbConflictCheckMethods.Timestamp && !changePack.ContainsProperty(nameof(ITimestamp.Timestamp)))
+            {
+                if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.OldNewValueCompare))
+                {
+                    return DbConflictCheckMethods.OldNewValueCompare;
+                }
+                else if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+                {
+                    return DbConflictCheckMethods.Ignore;
+                }
+                else
+                {
+                    throw DbExceptions.ConflictCheckError($"Can not find proper conflict check method. For {modelDef.FullName}, changePack :{SerializeUtil.ToJson(changePack)}");
+                }
+            }
+
+            return modelDef.BestConflictCheckMethodWhenUpdateEntire;
+        }
 
         public async Task UpdatePropertiesAsync<T>(PropertyChangePack changedPack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
+            DbConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPack);
 
-
-            //if (modelDef.IsTimestamp)
-            //{
-            //    TimestampUpdatePack updatePack = changedPack.ToTimestampUpdatePack(modelDef);
-
-            //    await UpdatePropertiesUsingTimestampAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
-            //}
-            //else
-            //{
-            OldNewCompareUpdatePack updatePack = changedPack.ToOldNewCompareUpdatePack(modelDef);
-
-            await UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePack, lastUser, transContext).ConfigureAwait(false);
-            //}
+            switch (conflictCheckMethod)
+            {
+                case DbConflictCheckMethods.Ignore:
+                    IgnoreConflictCheckUpdatePack ignorePack = changedPack.ToIgnoreConflictCheckUpdatePack(modelDef);
+                    await UpdatePropertiesIgnoreConflictCheckAsync(modelDef, ignorePack, lastUser, transContext).ConfigureAwait(false);
+                    break;
+                case DbConflictCheckMethods.OldNewValueCompare:
+                    OldNewCompareUpdatePack pack = changedPack.ToOldNewCompareUpdatePack(modelDef);
+                    await UpdatePropertiesUsingOldNewCompareAsync(modelDef, pack, lastUser, transContext).ConfigureAwait(false);
+                    break;
+                case DbConflictCheckMethods.Timestamp:
+                    TimestampUpdatePack timestamPack = changedPack.ToTimestampUpdatePack(modelDef);
+                    await UpdatePropertiesUsingTimestampAsync(modelDef, timestamPack, lastUser, transContext).ConfigureAwait(false);
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
-        public Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangeJsonPack> changedPacks, string lastUser, TransactionContext? transContext) where T : DbModel, new()
+        public Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangePack> changedPacks, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
             if (changedPacks.IsNullOrEmpty())
             {
@@ -259,6 +300,9 @@ namespace HB.FullStack.Database
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
+            //TODO: 是否允许不同
+            DbConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPacks[0]);
+
             //if (modelDef.IsTimestamp)
             //{
             //    return UpdatePropertiesUsingTimestampAsync(modelDef, changedPacks.Select(cp => cp.ToTimestampUpdatePack(modelDef)).ToList(), lastUser, transContext);
@@ -269,12 +313,6 @@ namespace HB.FullStack.Database
             return UpdatePropertiesUsingOldNewCompareAsync(modelDef, changedPacks.Select(cp => cp.ToOldNewCompareUpdatePack(modelDef)).ToList(), lastUser, transContext);
             //}
         }
-
-        #endregion
-
-        #region Update Properties without any conflict check
-
-        //TODO: Update Properties without any conflict check
 
         #endregion
     }

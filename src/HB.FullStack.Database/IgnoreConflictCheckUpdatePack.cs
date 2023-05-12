@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using HB.FullStack.Common.PropertyTrackable;
 
@@ -7,23 +8,19 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
-    /// <summary>
-    /// 使用新旧值比较来解决冲突
-    /// </summary>
-    public class OldNewCompareUpdatePack
+    public class IgnoreConflictCheckUpdatePack
     {
+        [Required]
         public object? Id { get; set; }
 
         public IList<string> PropertyNames { get; set; } = new List<string>();
 
         public IList<object?> NewPropertyValues { get; set; } = new List<object?>();
-
-        public IList<object?> OldPropertyValues { get; set; } = new List<object?>();
     }
 
-    public static class OldNewCompareUpdatePackExtensions
+    public static class IgnoreConflictCheckUpdatePackExtensions
     {
-        public static OldNewCompareUpdatePack ThrowIfNotValid(this OldNewCompareUpdatePack updatePack)
+        public static IgnoreConflictCheckUpdatePack ThrowIfNotValid(this IgnoreConflictCheckUpdatePack updatePack)
         {
             if (updatePack.Id is long longId && longId <= 0)
             {
@@ -35,7 +32,7 @@ namespace HB.FullStack.Database
                 throw DbExceptions.GuidShouldNotEmpty();
             }
 
-            if (updatePack.PropertyNames.Count != updatePack.NewPropertyValues.Count || updatePack.OldPropertyValues.Count != updatePack.PropertyNames.Count)
+            if (updatePack.PropertyNames.Count != updatePack.NewPropertyValues.Count)
             {
                 throw DbExceptions.UpdatePackCountNotEqual();
             }
@@ -48,14 +45,14 @@ namespace HB.FullStack.Database
             return updatePack;
         }
 
-        public static OldNewCompareUpdatePack ToOldNewCompareUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)
+        public static IgnoreConflictCheckUpdatePack ToIgnoreConflictCheckUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)
         {
             if (!changePack.AddtionalProperties.TryGetValue(modelDef.PrimaryKeyPropertyDef.Name, out JsonElement idElement))
             {
                 throw DbExceptions.ChangedPropertyPackError("ChangePack的AddtionalProperties中缺少Id", changePack, modelDef.FullName);
             }
 
-            OldNewCompareUpdatePack dbPack = new OldNewCompareUpdatePack
+            IgnoreConflictCheckUpdatePack dbPack = new IgnoreConflictCheckUpdatePack
             {
                 Id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, idElement)
             };
@@ -69,7 +66,6 @@ namespace HB.FullStack.Database
 
                 dbPack.PropertyNames.Add(cp.PropertyName);
                 dbPack.NewPropertyValues.Add(SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue));
-                dbPack.OldPropertyValues.Add(SerializeUtil.FromJsonElement(propertyDef.Type, cp.OldValue));
             }
 
             return dbPack;

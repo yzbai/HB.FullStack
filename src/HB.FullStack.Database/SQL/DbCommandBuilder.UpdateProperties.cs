@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.Meta;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
@@ -15,8 +16,6 @@ namespace HB.FullStack.Database.SQL
 {
     internal partial class DbCommandBuilder
     {
-        #region 更改 - UpdateProperties
-
         public DbEngineCommand CreateUpdatePropertiesTimestampCommand(DbModelDef modelDef, TimestampUpdatePack updatePack, string lastUser)
         {
             modelDef.ThrowIfNotTimestamp();
@@ -38,13 +37,13 @@ namespace HB.FullStack.Database.SQL
             {
                 updatePack.Id,
                 lastUser,
-               TimeUtil.Timestamp
+                updatePack.NewTimestamp ?? TimeUtil.Timestamp
             };
 
             IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
-                modelDef, 
-                _modelDefFactory, 
-                updatedPropertyNames, 
+                modelDef,
+                _modelDefFactory,
+                updatedPropertyNames,
                 updatedPropertyValues);
 
             parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", updatePack.OldTimestamp.Value));
@@ -60,13 +59,13 @@ namespace HB.FullStack.Database.SQL
 
             DbEngineType engineType = modelDef.EngineType;
 
-            
+
             List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
             int number = 0;
             StringBuilder innerSqlBuilder = new StringBuilder();
             string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
 
-            long newTimestamp = TimeUtil.Timestamp;
+            long curTimestamp = TimeUtil.Timestamp;
 
             foreach (TimestampUpdatePack updatePack in updatePacks)
             {
@@ -85,7 +84,7 @@ namespace HB.FullStack.Database.SQL
                 {
                     updatePack.Id,
                     lastUser,
-                    newTimestamp
+                    updatePack.NewTimestamp ?? curTimestamp
                 };
 
                 IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
@@ -228,6 +227,26 @@ namespace HB.FullStack.Database.SQL
             return new DbEngineCommand(commandText, totalParameters);
         }
 
-        #endregion
+        public DbEngineCommand CreateUpdatePropertiesIgnoreConflictCheckCommand(DbModelDef modelDef, IgnoreConflictCheckUpdatePack updatePack, string lastUser)
+        {
+            IList<string> updatedPropertyNames = new List<string>(updatePack.PropertyNames)
+            {
+                nameof(DbModel2<long>.Id),
+                nameof(BaseDbModel.LastUser)
+            };
+
+            IList<object?> updatedPropertyValues = new List<object?>(updatePack.NewPropertyValues)
+            {
+                updatePack.Id,
+                lastUser
+            };
+
+            IList<KeyValuePair<string, object>> paramters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues);
+
+            return new DbEngineCommand(
+                GetCachedSql(SqlType.UpdatePropertiesIgnoreConflictCheck, new DbModelDef[] { modelDef }, updatedPropertyNames),
+                paramters);
+        }
+
     }
 }

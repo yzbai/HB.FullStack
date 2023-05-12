@@ -44,6 +44,8 @@ namespace HB.FullStack.Database.SQL
                     SqlType.UpdateUsingTimestamp => SqlHelper.CreateUpdateUsingTimestampSql(modelDefs[0]),
 
                     SqlType.Update => SqlHelper.CreateUpdateModelSql(modelDefs[0]),
+
+                    SqlType.UpdatePropertiesIgnoreConflictCheck => SqlHelper.CreateUpdatePropertiesIgnoreConflictCheck(modelDefs[0], propertyNames!),
                     SqlType.UpdatePropertiesUsingTimestamp => SqlHelper.CreateUpdatePropertiesUsingTimestampSql(modelDefs[0], propertyNames!),
                     //SqlType.UpdatePropertiesUsingTimestampCompare => SqlHelper.CreateUpdatePropertiesUsingTimestampCompareSql(modelDefs[0], propertyNames!),
                     SqlType.UpdatePropertiesTimeless => SqlHelper.CreateUpdatePropertiesUsingCompareSql(modelDefs[0], propertyNames!),

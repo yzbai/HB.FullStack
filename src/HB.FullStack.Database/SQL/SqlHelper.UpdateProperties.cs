@@ -1,26 +1,58 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yzbai@brlite.com
+ * Github: github.com/yzbai
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
-using HB.FullStack.Common;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HB.FullStack.Database.SQL
 {
     internal static partial class SqlHelper
     {
+        public static string CreateUpdatePropertiesIgnoreConflictCheck(DbModelDef modelDef, IList<string> propertyNames, int number = 0)
+        {
+            //assignments
+            StringBuilder assignments = GetUpdatePropertiesAssignments(modelDef.EngineType, modelDef.PrimaryKeyPropertyDef.Name, propertyNames, number);
+
+            //where
+            string where = $"""
+                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{number}
+                AND
+                {modelDef.DeletedPropertyDef.DbReservedName}=0
+                AND
+                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number}
+                """;
+
+            return $"UPDATE {modelDef.DbTableReservedName} SET {assignments} WHERE {where};";
+        }
+
         public static string CreateUpdatePropertiesUsingTimestampSql(DbModelDef modelDef, IList<string> propertyNames, int number = 0)
         {
             //assignments
-            StringBuilder assignments = new StringBuilder();
+            StringBuilder assignments = GetUpdatePropertiesAssignments(modelDef.EngineType, modelDef.PrimaryKeyPropertyDef.Name, propertyNames, number);
 
-            string primaryKeyName = modelDef.PrimaryKeyPropertyDef.Name;
+            //where
+            string where = $"""
+                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{number}
+                AND
+                {modelDef.DeletedPropertyDef.DbReservedName}=0
+                AND
+                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number}
+                """;
+
+            return $"UPDATE {modelDef.DbTableReservedName} SET {assignments} WHERE {where};";
+        }
+
+        private static StringBuilder GetUpdatePropertiesAssignments(DbEngineType engineType, string primaryKeyName, IList<string> propertyNames, int number)
+        {
+            StringBuilder assignments = new StringBuilder();
 
             foreach (string propertyName in propertyNames)
             {
@@ -29,36 +61,11 @@ namespace HB.FullStack.Database.SQL
                     continue;
                 }
 
-                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.FullName, propertyName);
-
-                assignments.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},");
+                assignments.Append($" {GetReserved(propertyName, engineType)}={GetParameterized(propertyName)}_{number},");
             }
 
             assignments.RemoveLast();
-
-            
-            //where
-            string where = $"""
-                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{number} 
-                AND 
-                {modelDef.DeletedPropertyDef.DbReservedName}=0 
-                AND 
-                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} 
-                """;
-
-            return $"UPDATE {modelDef.DbTableReservedName} SET {assignments} WHERE {where};";
+            return assignments;
         }
-
-        //因为UpdatePacks有可能各有各的PropertyNames，所以不能同一生成模板
-        //public static string CreateBatchUpdatePropertiesUsingTimestampSql(DbModelDef modelDef, int modelCount )
-        //{
-            
-        //    for(int i = 0; i < modelCount; i++)
-        //    {
-                
-        //    }
-
-            
-        //}
     }
 }

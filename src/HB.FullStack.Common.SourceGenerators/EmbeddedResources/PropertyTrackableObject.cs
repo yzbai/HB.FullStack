@@ -1,5 +1,4 @@
-﻿
-/// <summary>
+﻿/// <summary>
 /// Use [PropertyTrackableObjectAttribute] to put these memebers into your class
 /// Keep full namespace before every type, because of source generation has exactly copy of this.
 /// When modify this class, update source generation embeded source.

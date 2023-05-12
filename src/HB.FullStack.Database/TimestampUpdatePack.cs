@@ -9,6 +9,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
+
     /// <summary>
     /// 使用Timestamp来解决冲突的更新包
     /// </summary>
@@ -23,12 +24,12 @@ namespace HB.FullStack.Database
         /// <summary>
         /// 如果不指定，则使用TimeUtil.Timestamp
         /// </summary>
-        //public long? NewTimestamp { get; set; }
+        public long? NewTimestamp { get; set; }
 
         public IList<string> PropertyNames { get; set; } = new List<string>();
 
         public IList<object?> NewPropertyValues { get; set; } = new List<object?>();
-        
+
     }
 
     public static class TimestampUpdatePackExtensions
@@ -57,12 +58,12 @@ namespace HB.FullStack.Database
 
             if (updatePack.PropertyNames.Count != updatePack.NewPropertyValues.Count)
             {
-                throw DbExceptions.UpdateUsingTimestampListCountNotEqual();
+                throw DbExceptions.UpdatePackCountNotEqual();
             }
 
             if (updatePack.PropertyNames.Count <= 0)
             {
-                throw DbExceptions.UpdateUsingTimestampListEmpty();
+                throw DbExceptions.UpdatePackEmpty();
             }
 
             return updatePack;
@@ -78,31 +79,50 @@ namespace HB.FullStack.Database
             return updatePacks;
         }
 
-        public static TimestampUpdatePack ToTimestampUpdatePack(this PropertyChangeJsonPack changePack, DbModelDef modelDef)
+        public static TimestampUpdatePack ToTimestampUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)
         {
-            if (!changePack.AddtionalProperties.TryGetValue(nameof(DbModel2<long>.Id), out JsonElement idElement))
+            if (!modelDef.IsTimestamp)
             {
-                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Id", changePack, modelDef.FullName);
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} is not ITimestamp, but convert PropertyChangePack to TimestampUpdatePack.");
             }
 
-            if (!changePack.AddtionalProperties.TryGetValue(nameof(ITimestamp.Timestamp), out JsonElement timestampElement))
+            if (!changePack.AddtionalProperties.TryGetValue(modelDef.PrimaryKeyPropertyDef.Name, out JsonElement primaryKeyElement))
             {
-                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Timestamp", changePack, modelDef.FullName);
+                throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少PrimaryKey", changePack, modelDef.FullName);
             }
+
+            //if (!changePack.AddtionalProperties.TryGetValue(nameof(ITimestamp.Timestamp), out JsonElement timestampElement))
+            //{
+            //    throw DbExceptions.ChangedPropertyPackError("PropertyChangePack的AddtionalProperties中缺少Timestamp", changePack, modelDef.FullName);
+            //}
 
             TimestampUpdatePack dbPack = new TimestampUpdatePack
             {
-                Id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, idElement),
-                OldTimestamp = (long)(SerializeUtil.FromJsonElement(typeof(long), timestampElement)!)
+                Id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, primaryKeyElement)
             };
 
-            foreach (PropertyChangeJson cp in changePack.PropertyChanges)
+            string timestampPropertyName = modelDef.TimestampPropertyDef!.Name;
+
+            foreach (PropertyChange cp in changePack.PropertyChanges)
             {
                 DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(cp.PropertyName)
                     ?? throw DbExceptions.ChangedPropertyPackError($"ChangePack包含未知的property:{cp.PropertyName}", changePack, modelDef.FullName);
 
+                if (propertyDef.Name == timestampPropertyName)
+                {
+                    dbPack.OldTimestamp = cp.OldValue.To<long>();
+                    dbPack.NewTimestamp = cp.NewValue.To<long>();
+
+                    continue;
+                }
+
                 dbPack.PropertyNames.Add(cp.PropertyName);
                 dbPack.NewPropertyValues.Add(SerializeUtil.FromJsonElement(propertyDef.Type, cp.NewValue));
+            }
+
+            if (dbPack.OldTimestamp == null || dbPack.NewTimestamp == null)
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} convert PropertyChangePack to TimestampUpdatepack, but no Timestamp old new values.");
             }
 
             return dbPack;

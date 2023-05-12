@@ -13,40 +13,29 @@ using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.SQL
 {
+    /// <summary>
+    /// DbCommandBuilder.Update
+    /// </summary>
     internal partial class DbCommandBuilder
     {
-        #region 更改 - Update
-
-        public DbEngineCommand CreateUpdateCommand<T>(DbModelDef modelDef, T model, long? oldTimestamp, DbConflictCheckMethods conflictCheckMethods) where T : BaseDbModel, new()
+        public DbEngineCommand CreateUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, T model) where T : BaseDbModel, new()
         {
-            switch (conflictCheckMethods)
-            {
-                case DbConflictCheckMethods.Ignore:
-                {
-                    IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
+            IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
 
-                    string sql = GetCachedSql(SqlType.UpdateIgnoreConflictCheck, new DbModelDef[] { modelDef });
-                    
-                    return new DbEngineCommand(sql, paramters);
-                }
-                //case DbConflictCheckMethods.OldNewValueCompare:
-                //    break;
-                case DbConflictCheckMethods.Timestamp:
-                {
-                    IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
+            string sql = GetCachedSql(SqlType.UpdateIgnoreConflictCheck, new DbModelDef[] { modelDef });
 
-                    if (oldTimestamp != null)
-                    {
-                        paramters.Add(new KeyValuePair<string, object>($"{SqlHelper.GetParameterized(nameof(ITimestamp.Timestamp))}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp.Value));
-                    }
+            return new DbEngineCommand(sql, paramters);
+        }
 
-                    string sql = GetCachedSql(SqlType.UpdateUsingTimestamp, new DbModelDef[] { modelDef });
+        public DbEngineCommand CreateUpdateUsingTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel, new()
+        {
+            IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
 
-                    return new DbEngineCommand(sql, paramters);
-                }
-                default:
-                    throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has incorrent ConflictCheckMethod:{conflictCheckMethods}");
-            }
+            paramters.Add(new KeyValuePair<string, object>($"{modelDef.TimestampPropertyDef!.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
+
+            string sql = GetCachedSql(SqlType.UpdateUsingTimestamp, new DbModelDef[] { modelDef });
+
+            return new DbEngineCommand(sql, paramters);
         }
 
         public DbEngineCommand CreateBatchUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : BaseDbModel, new()
@@ -101,7 +90,5 @@ namespace HB.FullStack.Database.SQL
 
             return new DbEngineCommand(commandText, parameters);
         }
-
-        #endregion
     }
 }

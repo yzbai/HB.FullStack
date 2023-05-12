@@ -6,7 +6,7 @@ using HB.FullStack.Common.Meta;
 
 namespace HB.FullStack.Common.PropertyTrackable
 {
-    public static class PropertyTrackableObjectStatic
+    public static class IPropertyTrackableObjectExtensions
     {
         public static PropertyChangePack GetPropertyChangePack(this IPropertyTrackableObject trackableObject, bool mergeMultipleChanged = true)
         {

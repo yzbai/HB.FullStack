@@ -13,6 +13,7 @@ namespace HB.FullStack.Database.SQL
 
         //Update,
         UpdatePropertiesUsingTimestamp,
+        UpdatePropertiesIgnoreConflictCheck,
         //UpdatePropertiesTimeless,
         //UpdateDeletedFields,
 

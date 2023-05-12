@@ -376,7 +376,7 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception ChangedPropertyPackError(string cause, PropertyChangeJsonPack? changePack, string? modelFullName)
+        internal static Exception ChangedPropertyPackError(string cause, PropertyChangePack? changePack, string? modelFullName)
         {
             DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 
@@ -419,15 +419,15 @@ namespace HB.FullStack.Database
             return ex;
         }
 
-        internal static Exception UpdateUsingTimestampListCountNotEqual()
+        internal static Exception UpdatePackCountNotEqual()
         {
-            DbException ex = new DbException(ErrorCodes.DbUpdateUsingTimestampError, nameof(UpdateUsingTimestampListCountNotEqual), null, null);
+            DbException ex = new DbException(ErrorCodes.DbUpdateUsingTimestampError, nameof(UpdatePackCountNotEqual), null, null);
             return ex;
         }
 
-        internal static Exception UpdateUsingTimestampListEmpty()
+        internal static Exception UpdatePackEmpty()
         {
-            DbException ex = new DbException(ErrorCodes.DbUpdateUsingTimestampError, nameof(UpdateUsingTimestampListEmpty), null, null);
+            DbException ex = new DbException(ErrorCodes.DbUpdateUsingTimestampError, nameof(UpdatePackEmpty), null, null);
             return ex;
         }
 

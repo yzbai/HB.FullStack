@@ -15,20 +15,12 @@ namespace HB.FullStack.Database
     {
         public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
-            //if (item is IPropertyTrackableObject trackableObject)
-            //{
-            //    PropertyChangePack changePack = trackableObject.GetPropertyChangePack();
-
-            //    await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
-
-            //    return;
-            //}
-
             ThrowIf.NotValid(item, nameof(item));
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-            DbConflictCheckMethods conflictCheckMethods = modelDef.BestConflictCheckMethodWhenUpdateEntire;
+            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdateEntire;
 
-            if (conflictCheckMethods == DbConflictCheckMethods.OldNewValueCompare)
+
+            if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)
             {
                 IPropertyTrackableObject trackableModel = item as IPropertyTrackableObject
                     ?? throw DbExceptions.ConflictCheckError($"{modelDef.FullName} using old new value compare method update whole, but not a IPropertyTrackable Object.");
@@ -36,10 +28,15 @@ namespace HB.FullStack.Database
                 PropertyChangePack changePack = trackableModel.GetPropertyChangePack();
 
                 await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
-                
+
                 //trackableModel.Clear();
 
                 return;
+            }
+
+            if (bestConflictCheckMethod != DbConflictCheckMethods.Ignore && bestConflictCheckMethod != DbConflictCheckMethods.Timestamp)
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has wrong Best Conflict Check Method When update entire model: {bestConflictCheckMethod}.");
             }
 
             long? oldTimestamp = null;
@@ -51,7 +48,9 @@ namespace HB.FullStack.Database
 
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
                 ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-                DbEngineCommand command = DbCommandBuilder.CreateUpdateCommand(modelDef, item, oldTimestamp, conflictCheckMethods);
+                DbEngineCommand command = bestConflictCheckMethod == DbConflictCheckMethods.Timestamp
+                    ? DbCommandBuilder.CreateUpdateUsingTimestampCommand(modelDef, item, oldTimestamp!.Value)
+                    : DbCommandBuilder.CreateUpdateIgnoreConflictCheckCommand(modelDef, item);
 
                 long rows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
