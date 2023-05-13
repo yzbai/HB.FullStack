@@ -52,7 +52,10 @@ namespace HB.FullStack.Database.DbModels
         public int UniqueFieldCount { get; set; }
 
         public DbModelPropertyDef PrimaryKeyPropertyDef { get; internal set; } = null!;
+        
         public DbModelPropertyDef DeletedPropertyDef { get; internal set; } = null!;
+
+        public DbModelPropertyDef LastUserPropertyDef { get; internal set; } = null!;
 
         [NotNullIfNotNull(nameof(IsTimestamp))]
         public DbModelPropertyDef? TimestampPropertyDef { get; internal set; } = null!;
@@ -104,5 +107,6 @@ namespace HB.FullStack.Database.DbModels
             }
 
             return modelDef;
+        }
     }
 }

@@ -45,10 +45,10 @@ namespace HB.FullStack.Database.SQL
 
                     SqlType.Update => SqlHelper.CreateUpdateModelSql(modelDefs[0]),
 
-                    SqlType.UpdatePropertiesIgnoreConflictCheck => SqlHelper.CreateUpdatePropertiesIgnoreConflictCheck(modelDefs[0], propertyNames!),
+                    SqlType.UpdatePropertiesIgnoreConflictCheck => SqlHelper.CreateUpdatePropertiesIgnoreConflictCheckSql(modelDefs[0], propertyNames!),
                     SqlType.UpdatePropertiesUsingTimestamp => SqlHelper.CreateUpdatePropertiesUsingTimestampSql(modelDefs[0], propertyNames!),
                     //SqlType.UpdatePropertiesUsingTimestampCompare => SqlHelper.CreateUpdatePropertiesUsingTimestampCompareSql(modelDefs[0], propertyNames!),
-                    SqlType.UpdatePropertiesTimeless => SqlHelper.CreateUpdatePropertiesUsingCompareSql(modelDefs[0], propertyNames!),
+                    SqlType.UpdatePropertiesUsingOldNewCompare => SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDefs[0], propertyNames!),
 
                     //SqlType.DeleteModel => SqlHelper.CreateDeleteModelSql(modelDefs[0]),
                     SqlType.UpdateDeletedFields => SqlHelper.CreateUpdateDeletedSql(modelDefs[0]),

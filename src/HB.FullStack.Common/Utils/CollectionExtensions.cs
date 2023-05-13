@@ -26,20 +26,22 @@ namespace System
         //    }
         //}
 
-        public static void AddRange<T>(this IList<T> ts, IEnumerable<T> items)
+        public static IList<T> AddRange<T>(this IList<T> ts, IEnumerable<T> items)
         {
             if (ts == null) throw new ArgumentNullException(nameof(ts));
 
             if (ts is List<T> lst)
             {
                 lst.AddRange(items);
-                return;
+                return ts;
             }
 
             foreach (var t in items)
             {
                 ts.Add(t);
             }
+
+            return ts;
         }
 
         public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T>? ts)
@@ -107,7 +109,7 @@ namespace System
                 else if (nullReplacement != null)
                 {
                     stringBuilder.Append(nullReplacement);
-                    
+
                     if (seprator != null)
                     {
                         stringBuilder.Append(seprator);

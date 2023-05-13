@@ -25,16 +25,6 @@ namespace HB.FullStack.Database
     {
         public static OldNewCompareUpdatePack ThrowIfNotValid(this OldNewCompareUpdatePack updatePack)
         {
-            if (updatePack.Id is long longId && longId <= 0)
-            {
-                throw DbExceptions.LongIdShouldBePositive(longId);
-            }
-
-            if (updatePack.Id is Guid guid && guid.IsEmpty())
-            {
-                throw DbExceptions.GuidShouldNotEmpty();
-            }
-
             if (updatePack.PropertyNames.Count != updatePack.NewPropertyValues.Count || updatePack.OldPropertyValues.Count != updatePack.PropertyNames.Count)
             {
                 throw DbExceptions.UpdatePackCountNotEqual();
@@ -46,6 +36,16 @@ namespace HB.FullStack.Database
             }
 
             return updatePack;
+        }
+
+        public static IList<OldNewCompareUpdatePack> ThrowIfNotldValid(this IList<OldNewCompareUpdatePack> updatePacks)
+        {
+            foreach (var updatePack in updatePacks)
+            {
+                updatePack.ThrowIfNotValid();
+            }
+
+            return updatePacks;
         }
 
         public static OldNewCompareUpdatePack ToOldNewCompareUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)

@@ -212,9 +212,9 @@ namespace HB.FullStack.Database.DbModels
                 modelDef.PropertyDefs.Add(propertyDef);
                 modelDef.PropertyDict.Add(propertyDef.Name, propertyDef);
             }
-            
+
             //TimestampPropertyDef
-            if(modelDef.IsTimestamp)
+            if (modelDef.IsTimestamp)
             {
                 modelDef.TimestampPropertyDef = modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp)).ThrowIfNull($"{modelDef.FullName} should has a Timestamp Property!");
             }
@@ -296,6 +296,11 @@ namespace HB.FullStack.Database.DbModels
 
             if (primaryAttribute != null)
             {
+                if(propertyInfo.Name != nameof(DbModel2<long>.Id))
+                {
+                    throw DbExceptions.ModelError($"the name of PrimaryKey of {modelDef.FullName} should always be 'Id', but '{propertyInfo.Name}' ");
+                }
+
                 modelDef.PrimaryKeyPropertyDef = propertyDef;
                 propertyDef.IsPrimaryKey = true;
                 propertyDef.IsAutoIncrementPrimaryKey = propertyInfo.GetCustomAttribute<DbAutoIncrementPrimaryKeyAttribute>(true) != null;
@@ -320,6 +325,10 @@ namespace HB.FullStack.Database.DbModels
             if (propertyInfo.Name == nameof(BaseDbModel.Deleted))
             {
                 modelDef.DeletedPropertyDef = propertyDef;
+            }
+            else if (propertyInfo.Name == nameof(BaseDbModel.LastUser))
+            {
+                modelDef.LastUserPropertyDef = propertyDef;
             }
 
             return propertyDef;

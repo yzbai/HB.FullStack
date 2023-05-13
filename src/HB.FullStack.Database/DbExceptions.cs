@@ -253,6 +253,13 @@ namespace HB.FullStack.Database
             return exception;
         }
 
+        internal static Exception ModelError(string cause)
+        {
+            DbException exception = new DbException(ErrorCodes.ModelError, cause, null, null);
+
+            return exception;
+        }
+
         internal static Exception ModelTimestampError(string type, long timestamp, string cause)
         {
             DbException exception = new DbException(ErrorCodes.TimestampError, cause, null, null);

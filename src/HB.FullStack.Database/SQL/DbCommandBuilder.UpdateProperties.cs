@@ -59,7 +59,6 @@ namespace HB.FullStack.Database.SQL
 
             DbEngineType engineType = modelDef.EngineType;
 
-
             List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
             int number = 0;
             StringBuilder innerSqlBuilder = new StringBuilder();
@@ -99,6 +98,7 @@ namespace HB.FullStack.Database.SQL
                 totalParameters.AddRange(parameters);
 
                 //sql
+                //Remark: 由于packs中的pack可能是各种各样的，所以这里不能用模板，像Update那样
                 string updatePropertiesSql = SqlHelper.CreateUpdatePropertiesUsingTimestampSql(modelDef, updatedPropertyNames, number);
                 innerSqlBuilder.Append($"{updatePropertiesSql} {SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
 
@@ -117,42 +117,26 @@ namespace HB.FullStack.Database.SQL
             return new DbEngineCommand(commandText, totalParameters);
         }
 
-        public DbEngineCommand CreateUpdatePropertie sTimelessCommand(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser)
+        public DbEngineCommand CreateUpdatePropertiesOldNewCompareCommand(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser)
         {
-            if (modelDef.IsTimestamp)
-            {
-                throw DbExceptions.UpdatePropertiesMethodWrong("TimestampDBModel 应该使用 Timestamp解决冲突", updatePack.PropertyNames, modelDef);
-            }
-
-            List<string> curPropertyNames = new List<string>(updatePack.PropertyNames);
-            List<object?> curNewPropertyValues = new List<object?>(updatePack.NewPropertyValues);
-
             var oldParameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 _modelDefFactory,
-                curPropertyNames,
-                updatePack.OldPropertyValues,
+                new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
+                new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
                 $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
-
-            curPropertyNames.Add(nameof(TimelessLongIdDbModel.Id));
-            curPropertyNames.Add(nameof(TimelessLongIdDbModel.LastUser));
-            curNewPropertyValues.Add(updatePack.Id);
-            curNewPropertyValues.Add(lastUser);
 
             var newParameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 _modelDefFactory,
-                curPropertyNames,
-                curNewPropertyValues,
-                $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
-
-            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(oldParameters);
-            parameters.AddRange(newParameters);
+                new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
+                new List<object?>(updatePack.NewPropertyValues) { lastUser },
+                $"{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_0");
 
             //使用propertyNames而不是curPropertyNames
-            string sql = GetCachedSql(SqlType.UpdatePropertiesTimeless, new DbModelDef[] { modelDef }, updatePack.PropertyNames);
+            string sql = GetCachedSql(SqlType.UpdatePropertiesUsingOldNewCompare, new DbModelDef[] { modelDef }, updatePack.PropertyNames);
 
-            return new DbEngineCommand(sql, parameters);
+            return new DbEngineCommand(sql, oldParameters.AddRange(newParameters));
         }
 
         public DbEngineCommand CreateBatchUpd atePropertiesTimelessCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, bool needTrans)
@@ -195,14 +179,14 @@ namespace HB.FullStack.Database.SQL
                     _modelDefFactory,
                     curPropertyNames,
                     curNewPropertyValues,
-                    $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_{number}");
+                    $"{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_{number}");
 
                 totalParameters.AddRange(oldParameters);
                 totalParameters.AddRange(newParameters);
 
                 #endregion
 
-                string sql = SqlHelper.CreateUpdatePropertiesUsingCompareSql(modelDef, updatePack.PropertyNames, number);
+                string sql = SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDef, updatePack.PropertyNames, number);
 
 #if NET6_0_OR_GREATER
                 innerBuilder.Append(CultureInfo.InvariantCulture, $"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
@@ -241,12 +225,67 @@ namespace HB.FullStack.Database.SQL
                 lastUser
             };
 
-            IList<KeyValuePair<string, object>> paramters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues);
+            IList<KeyValuePair<string, object>> paramters = DbModelConvert.PropertyValuesToParameters(
+                modelDef,
+                _modelDefFactory,
+                updatedPropertyNames,
+                updatedPropertyValues);
 
             return new DbEngineCommand(
                 GetCachedSql(SqlType.UpdatePropertiesIgnoreConflictCheck, new DbModelDef[] { modelDef }, updatedPropertyNames),
                 paramters);
         }
 
+        public DbEngineCommand CreateBatchUpdatePropertiesIgnoreConflictCheckCommand(DbModelDef modelDef, IList<IgnoreConflictCheckUpdatePack> updatePacks, string lastUser)
+        {
+            DbEngineType engineType = modelDef.EngineType;
+
+            int number = 0;
+            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
+            long curTimestamp = TimeUtil.Timestamp;
+
+            List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
+            StringBuilder innerSqlBuilder = new StringBuilder();
+
+            foreach (IgnoreConflictCheckUpdatePack updatePack in updatePacks)
+            {
+                IList<string> updatedPropertyNames = new List<string>(updatePack.PropertyNames)
+                {
+                    nameof(DbModel2<long>.Id),
+                    nameof(BaseDbModel.LastUser),
+                };
+                IList<object?> updatedPropertyValues = new List<object?>(updatePack.NewPropertyValues)
+                {
+                    updatePack.Id,
+                    lastUser,
+                };
+
+                IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
+                    modelDef,
+                    _modelDefFactory,
+                    updatedPropertyNames,
+                    updatedPropertyValues,
+                    number.ToString());
+
+                totalParameters.AddRange(parameters);
+
+                //sql
+                //Remark: 由于packs中的pack可能是各种各样的，所以这里不能用模板，像Update那样
+                string updatePropertiesSql = SqlHelper.CreateUpdatePropertiesIgnoreConflictCheckSql(modelDef, updatedPropertyNames, number);
+                innerSqlBuilder.Append($"{updatePropertiesSql} {SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
+
+                number++;
+            }
+
+            string commandText = $@"{SqlHelper.Transaction_Begin(engineType)}
+                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
+                                    {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
+                                    {innerSqlBuilder}
+                                    {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
+                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
+                                    {SqlHelper.Transaction_Commit(engineType)}";
+
+            return new DbEngineCommand(commandText, totalParameters);
+        }
     }
 }

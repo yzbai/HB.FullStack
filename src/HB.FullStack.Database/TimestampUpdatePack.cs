@@ -41,21 +41,6 @@ namespace HB.FullStack.Database
                 throw DbExceptions.ConflictCheckError($"");
             }
 
-            //if (updatePack.NewTimestamp.HasValue && updatePack.NewTimestamp.Value <= 638000651894004864)
-            //{
-            //    throw DbExceptions.TimestampShouldBePositive(updatePack.NewTimestamp.Value);
-            //}
-
-            if (updatePack.Id is long longId && longId <= 0)
-            {
-                throw DbExceptions.LongIdShouldBePositive(longId);
-            }
-
-            if (updatePack.Id is Guid guid && guid.IsEmpty())
-            {
-                throw DbExceptions.GuidShouldNotEmpty();
-            }
-
             if (updatePack.PropertyNames.Count != updatePack.NewPropertyValues.Count)
             {
                 throw DbExceptions.UpdatePackCountNotEqual();

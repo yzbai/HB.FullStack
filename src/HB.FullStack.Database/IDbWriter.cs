@@ -47,35 +47,21 @@ namespace HB.FullStack.Database
 
         #region Update Properties
 
-        /// <summary>
-        /// Update TimestampDbModel while using Timestamp method to solve conflict.
-        /// </summary>
         Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, ITimestamp, new();
 
-        /// <summary>
-        /// Update TimestampDbModels while using Timestamp method to solve conflict.
-        /// </summary>
         Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : BaseDbModel, ITimestamp, new();
 
-        /// <summary>
-        /// Update TimelessDbModel while using old new value compare method to solve conflict.
-        /// </summary>
-        Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new();
+        Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
 
-        /// <summary>
-        /// Update TimelessDbModel while using old new value compare method to solve conflict.
-        /// </summary>
-        Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext) where T : TimelessDbModel, new();
+        Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : BaseDbModel, new();
 
-        /// <summary>
-        /// Update DbModel using PropertyChangePack, auto decide conflict solve method.
-        /// </summary>
-        Task UpdatePropertiesAsync<T>(PropertyChangeJsonPack changePack, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task UpdatePropertiesAsync<T>(IgnoreConflictCheckUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T: BaseDbModel, new();
 
-        /// <summary>
-        /// Update DbModels using PropertyChangePack, auto decide conflict solve method.
-        /// </summary>
-        Task UpdatePropertiesAsync<T>(IEnumerable<PropertyChangeJsonPack> changePacks, string lastUser, TransactionContext? transContext) where T : DbModel, new();
+        Task UpdatePropertiesAsync<T>(IList<IgnoreConflictCheckUpdatePack> updatePack, string lastUser, TransactionContext transContext) where T:BaseDbModel, new();
+
+        Task UpdatePropertiesAsync<T>(PropertyChangePack changePack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
+
+        Task UpdatePropertiesAsync<T>(IList<PropertyChangePack> changePacks, string lastUser, TransactionContext transContext) where T : BaseDbModel, new();
 
         #endregion
 

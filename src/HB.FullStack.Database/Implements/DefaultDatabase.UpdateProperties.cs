@@ -130,16 +130,16 @@ namespace HB.FullStack.Database
 
         #endregion
 
-        #region Timeless - using old new value compare
+        #region OldNewCompare
 
-        public Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new()
+        public Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             return UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext = null) where T : TimelessDbModel, new()
+        public Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext = null) where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
@@ -305,7 +305,7 @@ namespace HB.FullStack.Database
 
             transactionContext.ThrowIfNull(nameof(transactionContext));
             updatePacks.ThrowIfNotValid();
-            modelDef.ThrowIfNotWriteable()
+            modelDef.ThrowIfNotWriteable();
 
             if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
             {
@@ -316,7 +316,7 @@ namespace HB.FullStack.Database
             {
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
                 ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-                DbEngineCommand command = DbCommandBuilder.CreateB.CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser);
+                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesIgnoreConflictCheckCommand(modelDef, updatePacks, lastUser);
 
                 using IDataReader reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
@@ -328,9 +328,17 @@ namespace HB.FullStack.Database
                 {
                     int matched = reader.GetInt32(0);
 
-                    if (matched != 1)
+                    if (matched == 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                        
+                    }
+                    else if (matched == 0)
+                    {
+                        throw DbExceptions.NotFound($"没有找到这样的ID。lastUser:{lastUser}, model:{modelDef.FullName}");
+                    }
+                    else
+                    {
+                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $" lastUser:{lastUser}, model:{modelDef.FullName}");
                     }
 
                     count++;

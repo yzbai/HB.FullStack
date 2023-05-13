@@ -22,16 +22,6 @@ namespace HB.FullStack.Database
     {
         public static IgnoreConflictCheckUpdatePack ThrowIfNotValid(this IgnoreConflictCheckUpdatePack updatePack)
         {
-            if (updatePack.Id is long longId && longId <= 0)
-            {
-                throw DbExceptions.LongIdShouldBePositive(longId);
-            }
-
-            if (updatePack.Id is Guid guid && guid.IsEmpty())
-            {
-                throw DbExceptions.GuidShouldNotEmpty();
-            }
-
             if (updatePack.PropertyNames.Count != updatePack.NewPropertyValues.Count)
             {
                 throw DbExceptions.UpdatePackCountNotEqual();
@@ -43,6 +33,16 @@ namespace HB.FullStack.Database
             }
 
             return updatePack;
+        }
+
+        public static IList<IgnoreConflictCheckUpdatePack> ThrowIfNotValid(this IList<IgnoreConflictCheckUpdatePack> updatePacks)
+        {
+            foreach (var updatePack in updatePacks)
+            {
+                updatePack.ThrowIfNotValid();
+            }
+
+            return updatePacks;
         }
 
         public static IgnoreConflictCheckUpdatePack ToIgnoreConflictCheckUpdatePack(this PropertyChangePack changePack, DbModelDef modelDef)
