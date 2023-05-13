@@ -54,7 +54,10 @@ namespace HB.FullStack.Database.SQL
         {
             DbEngineType engineType = modelDef.EngineType;
 
-            StringBuilder assignments = GetUpdatePropertiesAssignments(engineType, new List<string>(propertyNames) { nameof(BaseDbModel.LastUser) }, $"{NEW_PROPERTY_VALUE_SUFFIX}_{number}");
+            StringBuilder assignments = GetUpdatePropertiesAssignments(
+                engineType, 
+                new List<string>(propertyNames) { nameof(BaseDbModel.LastUser) }, 
+                $"{NEW_PROPERTY_VALUE_SUFFIX}_{number}");
 
             StringBuilder where = new StringBuilder($"""
                 {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{OLD_PROPERTY_VALUE_SUFFIX}_{number} 

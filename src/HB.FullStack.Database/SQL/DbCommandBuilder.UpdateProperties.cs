@@ -139,46 +139,35 @@ namespace HB.FullStack.Database.SQL
             return new DbEngineCommand(sql, oldParameters.AddRange(newParameters));
         }
 
-        public DbEngineCommand CreateBatchUpd atePropertiesTimelessCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, bool needTrans)
+        public DbEngineCommand CreateBatchUpdatePropertiesOldNewCompareCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser)
         {
-            if (modelDef.IsTimestamp)
-            {
-                throw DbExceptions.UpdatePropertiesMethodWrong("TimestampDBModel 应该使用 Timestamp解决冲突", updatePacks[0].PropertyNames, modelDef);
-            }
-
+            //TODO:如果packs中的PropertyNames都相同，可以进一步提升性能
             ThrowIf.Empty(updatePacks, nameof(updatePacks));
 
             DbEngineType engineType = modelDef.EngineType;
 
-            StringBuilder innerBuilder = new StringBuilder();
-            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
             int number = 0;
+            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
+            StringBuilder innerBuilder = new StringBuilder();
+
+            List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
 
             foreach (OldNewCompareUpdatePack updatePack in updatePacks)
             {
-                List<string> curPropertyNames = new List<string>(updatePack.PropertyNames);
-                List<object?> curNewPropertyValues = new List<object?>(updatePack.NewPropertyValues);
-
                 #region Parameters
 
                 var oldParameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
                     _modelDefFactory,
-                    curPropertyNames,
-                    updatePack.OldPropertyValues,
+                    new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
+                    new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
                     $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}");
-
-                curPropertyNames.Add(nameof(TimestampLongIdDbModel.Id));
-                curPropertyNames.Add(nameof(DbModel.LastUser));
-                curNewPropertyValues.Add(updatePack.Id);
-                curNewPropertyValues.Add(lastUser);
 
                 var newParameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
                     _modelDefFactory,
-                    curPropertyNames,
-                    curNewPropertyValues,
+                    new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
+                    new List<object?>(updatePack.NewPropertyValues) { lastUser },
                     $"{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_{number}");
 
                 totalParameters.AddRange(oldParameters);
@@ -188,25 +177,18 @@ namespace HB.FullStack.Database.SQL
 
                 string sql = SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDef, updatePack.PropertyNames, number);
 
-#if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#elif NETSTANDARD2_1
-                innerBuilder.Append($"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#endif
+                innerBuilder.Append($"{sql} {SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
 
                 number++;
             }
 
-            string may_trans_begin = needTrans ? SqlHelper.Transaction_Begin(engineType) : "";
-            string may_trans_commit = needTrans ? SqlHelper.Transaction_Commit(engineType) : "";
-
-            string commandText = $@"{may_trans_begin}
+            string commandText = $@"{SqlHelper.Transaction_Begin(engineType)}
                                     {SqlHelper.TempTable_Drop(tempTableName, engineType)}
                                     {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
                                     {innerBuilder}
                                     {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
                                     {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {may_trans_commit}";
+                                    {SqlHelper.Transaction_Commit(engineType)}";
 
             return new DbEngineCommand(commandText, totalParameters);
         }

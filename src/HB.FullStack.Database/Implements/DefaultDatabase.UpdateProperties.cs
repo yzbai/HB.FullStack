@@ -1,8 +1,14 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yzbai@brlite.com
+ * Github: github.com/yzbai
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
@@ -13,7 +19,7 @@ using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
-    partial class DefaultDatabase
+    internal partial class DefaultDatabase
     {
         #region Timestamp
 
@@ -109,9 +115,16 @@ namespace HB.FullStack.Database
                 {
                     int matched = reader.GetInt32(0);
 
-                    if (matched != 1)
+                    if (matched == 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    }
+                    else if (matched == 0)
+                    {
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingTimestamp. 没有这样的ID，或者产生冲突！");
+                    }
+                    else
+                    {
+                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePropertiesUsingTimestamp. Packs:{SerializeUtil.ToJson(updatePacks)}, ModelDef:{modelDef.FullName}, lastUser:{lastUser}");
                     }
 
                     count++;
@@ -119,7 +132,7 @@ namespace HB.FullStack.Database
 
                 if (count != updatePacks.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingTimestamp. 数量不对.");
                 }
             }
             catch (Exception ex)
@@ -139,7 +152,7 @@ namespace HB.FullStack.Database
             return UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext = null) where T : BaseDbModel, new()
+        public Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
@@ -150,13 +163,12 @@ namespace HB.FullStack.Database
         {
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-            //TruncateLastUser(ref lastUser);
 
             try
             {
-                DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesTimelessCommand(modelDef, updatePack, lastUser);
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesOldNewCompareCommand(modelDef, updatePack, lastUser);
 
                 int matchedRows = transContext != null
                     ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
@@ -168,7 +180,7 @@ namespace HB.FullStack.Database
                 }
                 else if (matchedRows == 0)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"使用新旧值对比的乐观锁出现冲突。UpdatePack:{updatePack}, lastUser:{lastUser}", "");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"没有这样的ID，或者使用新旧值对比的乐观锁出现冲突。UpdatePack:{updatePack}, lastUser:{lastUser}", "");
                 }
                 else
                 {
@@ -181,7 +193,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task UpdatePropertiesUsingOldNewCompareAsync(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext? transactionContext = null)
+        private async Task UpdatePropertiesUsingOldNewCompareAsync(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext)
         {
             if (updatePacks.IsNullOrEmpty())
             {
@@ -194,15 +206,14 @@ namespace HB.FullStack.Database
                 return;
             }
 
+            transactionContext.ThrowIfNull(nameof(transactionContext));
             modelDef.ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-            //TruncateLastUser(ref lastUser);
 
             try
             {
-                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesTimelessCommand(modelDef, updatePacks, lastUser, transactionContext == null);
-
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
+                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesOldNewCompareCommand(modelDef, updatePacks, lastUser);
 
                 using IDataReader reader = transactionContext != null
                     ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
@@ -214,9 +225,16 @@ namespace HB.FullStack.Database
                 {
                     int matched = reader.GetInt32(0);
 
-                    if (matched != 1)
+                    if (matched == 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    }
+                    else if (matched == 0)
+                    {
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingOldNewCompareAsync. 没有这样的ID，或者产生冲突！");
+                    }
+                    else
+                    {
+                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePropertiesUsingOldNewCompareAsync. Packs:{SerializeUtil.ToJson(updatePacks)}, ModelDef:{modelDef.FullName}, lastUser:{lastUser}");
                     }
 
                     count++;
@@ -224,7 +242,7 @@ namespace HB.FullStack.Database
 
                 if (count != updatePacks.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingOldNewCompareAsync, 数量不对");
                 }
             }
             catch (Exception ex)
@@ -330,7 +348,6 @@ namespace HB.FullStack.Database
 
                     if (matched == 1)
                     {
-                        
                     }
                     else if (matched == 0)
                     {
@@ -346,7 +363,7 @@ namespace HB.FullStack.Database
 
                 if (count != updatePacks.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "BatchUpdatePropertiesAsync");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesIgnoreConflictCheckAsync. 数量不对.");
                 }
             }
             catch (Exception ex)
@@ -392,14 +409,17 @@ namespace HB.FullStack.Database
                     IgnoreConflictCheckUpdatePack ignorePack = changedPack.ToIgnoreConflictCheckUpdatePack(modelDef);
                     await UpdatePropertiesIgnoreConflictCheckAsync(modelDef, ignorePack, lastUser, transContext).ConfigureAwait(false);
                     break;
+
                 case DbConflictCheckMethods.OldNewValueCompare:
                     OldNewCompareUpdatePack pack = changedPack.ToOldNewCompareUpdatePack(modelDef);
                     await UpdatePropertiesUsingOldNewCompareAsync(modelDef, pack, lastUser, transContext).ConfigureAwait(false);
                     break;
+
                 case DbConflictCheckMethods.Timestamp:
                     TimestampUpdatePack timestamPack = changedPack.ToTimestampUpdatePack(modelDef);
                     await UpdatePropertiesUsingTimestampAsync(modelDef, timestamPack, lastUser, transContext).ConfigureAwait(false);
                     break;
+
                 default:
                     throw new InvalidOperationException();
             }
@@ -431,6 +451,7 @@ namespace HB.FullStack.Database
                         lastUser,
                         transContext).ConfigureAwait(false);
                     break;
+
                 case DbConflictCheckMethods.OldNewValueCompare:
                     await UpdatePropertiesUsingOldNewCompareAsync(
                         modelDef,
@@ -438,6 +459,7 @@ namespace HB.FullStack.Database
                         lastUser,
                         transContext).ConfigureAwait(false);
                     break;
+
                 case DbConflictCheckMethods.Timestamp:
                     await UpdatePropertiesUsingTimestampAsync(
                         modelDef,
@@ -445,6 +467,7 @@ namespace HB.FullStack.Database
                         lastUser,
                         transContext).ConfigureAwait(false);
                     break;
+
                 default:
                     throw new InvalidOperationException();
             }

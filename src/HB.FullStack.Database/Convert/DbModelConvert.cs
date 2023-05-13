@@ -131,8 +131,8 @@ namespace HB.FullStack.Database.Convert
 
         public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory) where T : BaseDbModel, new()
         {
-            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
+            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
 
             foreach (T model in models)
             {

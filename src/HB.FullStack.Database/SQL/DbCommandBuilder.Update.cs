@@ -27,68 +27,44 @@ namespace HB.FullStack.Database.SQL
             return new DbEngineCommand(sql, paramters);
         }
 
-        public DbEngineCommand CreateUpdateUsingTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel, new()
+        public DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel, new()
         {
             IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
 
-            paramters.Add(new KeyValuePair<string, object>($"{modelDef.TimestampPropertyDef!.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
+            paramters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
 
             string sql = GetCachedSql(SqlType.UpdateUsingTimestamp, new DbModelDef[] { modelDef });
 
             return new DbEngineCommand(sql, paramters);
         }
 
-        public DbEngineCommand CreateBatchUpdateCommand<T>(DbModelDef modelDef, IEnumerable<T> models, IList<long> oldTimestamps, bool needTrans) where T : BaseDbModel, new()
+        public DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel, new()
         {
             ThrowIf.Empty(models, nameof(models));
 
-            if (modelDef.IsTimestamp)
-            {
-                ThrowIf.NotEqual(models.Count(), oldTimestamps.Count, nameof(models), nameof(oldTimestamps));
-            }
-
-            DbEngineType engineType = modelDef.EngineType;
-
-            StringBuilder innerBuilder = new StringBuilder();
-            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
             int number = 0;
-
-            DbModelPropertyDef? timestampProperty = modelDef.IsTimestamp ? modelDef.GetDbPropertyDef(nameof(ITimestamp.Timestamp))! : null;
+            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
 
             foreach (T model in models)
             {
-                string updateCommandText = SqlHelper.CreateUpdateModelSql(modelDef, number);
-
                 parameters.AddRange(model.ToDbParameters(modelDef, _modelDefFactory, number));
-
-                //这里要添加 一些参数值，参考update
-                if (modelDef.IsTimestamp)
-                {
-                    parameters.Add(new KeyValuePair<string, object>($"{timestampProperty!.DbParameterizedName}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}", oldTimestamps[number]));
-                }
-
-#if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#elif NETSTANDARD2_1
-                innerBuilder.Append($"{updateCommandText}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-#endif
+                parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}", oldTimestamps[number]));
 
                 number++;
             }
 
-            string may_trans_begin = needTrans ? SqlHelper.Transaction_Begin(engineType) : "";
-            string may_trans_commit = needTrans ? SqlHelper.Transaction_Commit(engineType) : "";
+            return new DbEngineCommand(
+                SqlHelper.CreateBatchUpdateUsingTimestampSql(modelDef, models.Count),
+                parameters);
+        }
 
-            string commandText = $@"{may_trans_begin}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
-                                    {innerBuilder}
-                                    {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {may_trans_commit}";
+        public DbEngineCommand CreateBatchUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel, new()
+        {
+            ThrowIf.Empty(models, nameof(models));
 
-            return new DbEngineCommand(commandText, parameters);
+            return new DbEngineCommand(
+                SqlHelper.CreateBatchUpdateIgnoreConflictCheckSql(modelDef, models.Count),
+                models.ToDbParameters(modelDef, _modelDefFactory));
         }
     }
 }

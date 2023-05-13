@@ -19,7 +19,6 @@ namespace HB.FullStack.Database
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
             DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdateEntire;
 
-
             if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)
             {
                 IPropertyTrackableObject trackableModel = item as IPropertyTrackableObject
@@ -34,10 +33,10 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            if (bestConflictCheckMethod != DbConflictCheckMethods.Ignore && bestConflictCheckMethod != DbConflictCheckMethods.Timestamp)
-            {
-                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has wrong Best Conflict Check Method When update entire model: {bestConflictCheckMethod}.");
-            }
+            //if (bestConflictCheckMethod != DbConflictCheckMethods.Ignore && bestConflictCheckMethod != DbConflictCheckMethods.Timestamp)
+            //{
+            //    throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has wrong Best Conflict Check Method When update entire model: {bestConflictCheckMethod}.");
+            //}
 
             long? oldTimestamp = null;
             string oldLastUser = "";
@@ -49,7 +48,7 @@ namespace HB.FullStack.Database
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
                 ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = bestConflictCheckMethod == DbConflictCheckMethods.Timestamp
-                    ? DbCommandBuilder.CreateUpdateUsingTimestampCommand(modelDef, item, oldTimestamp!.Value)
+                    ? DbCommandBuilder.CreateUpdateTimestampCommand(modelDef, item, oldTimestamp!.Value)
                     : DbCommandBuilder.CreateUpdateIgnoreConflictCheckCommand(modelDef, item);
 
                 long rows = transContext != null
@@ -115,18 +114,21 @@ namespace HB.FullStack.Database
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdateEntire;
 
+            if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)
+            {
+                if (!modelDef.IsPropertyTrackable)
+                {
+                    throw DbExceptions.ConflictCheckError($"{modelDef.FullName} using old new value compare method update whole, but not a IPropertyTrackable Object.");
+                }
 
-            //if (modelDef.IsPropertyTrackable)
-            //{
-            //    await UpdatePropertiesAsync<T>(
-            //        items.Select(t => ((IPropertyTrackableObject)t).GetPropertyChangePack()).ToList(),
-            //        lastUser,
-            //        transContext).ConfigureAwait(false);
+                var propertyChangePacks = items.Select(m => (m as IPropertyTrackableObject)!.GetPropertyChangePack()).ToList();
 
-            //    return;
-            //}
+                await UpdatePropertiesAsync<T>(propertyChangePacks, lastUser, transContext).ConfigureAwait(false);
 
+                return;
+            }
 
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
 
@@ -139,7 +141,9 @@ namespace HB.FullStack.Database
 
                 IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
                 ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-                DbEngineCommand command = DbCommandBuilder.CreateBatchUpdateCommand(modelDef, items, oldTimestamps);
+                DbEngineCommand command = bestConflictCheckMethod == DbConflictCheckMethods.Timestamp
+                    ? DbCommandBuilder.CreateBatchUpdateTimestampCommand(modelDef, items, oldTimestamps)
+                    : DbCommandBuilder.CreateBatchUpdateIgnoreConflictCheckCommand(modelDef, items, oldTimestamps);
 
                 using IDataReader reader = transContext != null
                     ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
@@ -151,9 +155,16 @@ namespace HB.FullStack.Database
                 {
                     int matched = reader.GetInt32(0);
 
-                    if (matched != 1)
+                    if (matched == 1)
                     {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate");
+                    }
+                    else if (matched == 0)
+                    {
+                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate. 没有这样的ID，或者产生冲突！");
+                    }
+                    else
+                    {
+                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $"BatchUpadate. {SerializeUtil.ToJson(items)}, ModelDef:{modelDef.FullName}, lastUser:{lastUser}");
                     }
 
                     count++;
@@ -161,7 +172,7 @@ namespace HB.FullStack.Database
 
                 if (count != items.Count)
                 {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate");
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate. 数量不同.");
                 }
             }
             catch (DbException ex)

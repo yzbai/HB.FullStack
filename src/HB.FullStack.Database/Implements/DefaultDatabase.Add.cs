@@ -134,10 +134,12 @@ namespace HB.FullStack.Database
 
         private static void PrepareItem<T>(T item, string lastUser, ref string oldLastUser, ref long? oldTimestamp) where T : BaseDbModel, new()
         {
+            long curTimestamp = TimeUtil.Timestamp;
+
             if (item is ITimestamp timestampModel)
             {
                 oldTimestamp = timestampModel.Timestamp;
-                timestampModel.Timestamp = TimeUtil.Timestamp;
+                timestampModel.Timestamp = curTimestamp;
             }
 
             oldLastUser = item.LastUser;
@@ -156,7 +158,7 @@ namespace HB.FullStack.Database
 
         private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel, new()
         {
-            long timestamp = TimeUtil.Timestamp;
+            long curTimestamp = TimeUtil.Timestamp;
 
             foreach (T item in items)
             {
@@ -167,7 +169,7 @@ namespace HB.FullStack.Database
                 {
                     oldTimestamps.Add(timestampModel.Timestamp);
 
-                    timestampModel.Timestamp = timestamp;
+                    timestampModel.Timestamp = curTimestamp;
                 }
             }
         }
