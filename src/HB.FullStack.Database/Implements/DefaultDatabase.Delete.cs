@@ -20,7 +20,7 @@ namespace HB.FullStack.Database
             long? newTimestamp,
             string lastUser,
             TransactionContext? transContext,
-            bool? trulyDelete = null) where T : DbModel, new()
+            bool? trulyDelete = null) where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
             ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
@@ -71,19 +71,9 @@ namespace HB.FullStack.Database
             return DeleteCoreAsync<T>(id, null, null, lastUser, transContext, trulyDelete);
         }
 
-        public Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : DbModel, new()
+        public Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : BaseDbModel, new()
         {
-            object id = item is ILongId longIdItem ? longIdItem.Id : ((IGuidId)item).Id;
-
-            if (item is TimestampDbModel tModel)
-            {
-                return DeleteCoreAsync<T>(id, tModel.Timestamp, TimeUtil.Timestamp, lastUser, transContext, trulyDelete);
-
-            }
-            else
-            {
-                return DeleteCoreAsync<T>(id, null, null, lastUser, transContext, trulyDelete);
-            }
+            
         }
 
         private async Task BatchDeleteCoreAsync<T>(

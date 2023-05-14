@@ -109,38 +109,7 @@ namespace HB.FullStack.Database.SQL
 
 
 
-        /// <summary>
-        /// 针对Client
-        /// </summary>
-        public static string CreateUpdateDeletedSql(DbModelDef modelDef, int number = 0)
-        {
-            DbModelPropertyDef deletedProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.Deleted))!;
-            DbModelPropertyDef lastNameProperty = modelDef.GetDbPropertyDef(nameof(BaseDbModel.LastUser))!;
-
-            return $"update {modelDef.DbTableReservedName} set  {deletedProperty.DbReservedName}={deletedProperty.DbParameterizedName}_{number},{lastNameProperty.DbReservedName}={lastNameProperty.DbParameterizedName}_{number}";
-        }
-
-        public static string CreateDeleteSql(DbModelDef modelDef, int number = 0)
-        {
-            return $"delete from {modelDef.DbTableReservedName} ";
-        }
-
-        public static string CreateDeleteByPropertiesSql(DbModelDef modelDef, IEnumerable<string> propertyNames, int number = 0)
-        {
-            StringBuilder where = new StringBuilder();
-
-            foreach (string propertyName in propertyNames)
-            {
-                DbModelPropertyDef propertyDef = modelDef.GetDbPropertyDef(propertyName) ?? throw DbExceptions.PropertyNotFound(modelDef.FullName, propertyName);
-                
-                where.Append($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number} ");
-                where.Append("AND");
-            }
-
-            where.RemoveLast(3);// "AND".Length
-
-            return $"delete from {modelDef.DbTableReservedName} where {where};";
-        }
+        
 
         /// <summary>
         /// 用于专有化的字符（`）

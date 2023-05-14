@@ -61,15 +61,11 @@ namespace HB.FullStack.Database.DbModels
         public DbModelPropertyDef? TimestampPropertyDef { get; internal set; } = null!;
 
         private string? _dbTableReservedName;
-        private string? _deletedPropertyReservedName;
         private IList<DbModelPropertyDef>? _foreignKeyProperties;
 
         public string DbTableReservedName => _dbTableReservedName ??= SqlHelper.GetReserved(TableName, EngineType);
 
-        public string DeletedPropertyReservedName => _deletedPropertyReservedName ??= SqlHelper.GetReserved(nameof(DbModel2<long>.Deleted), EngineType);
-
         public IList<DbModelPropertyDef> ForeignKeyProperties => _foreignKeyProperties ??= PropertyDict.Values.Where(p => p.IsForeignKey).ToList();
-
 
         public DbModelPropertyDef? GetDbPropertyDef(string propertyName)
         {

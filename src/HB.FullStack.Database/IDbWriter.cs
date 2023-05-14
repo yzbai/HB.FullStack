@@ -29,7 +29,7 @@ namespace HB.FullStack.Database
 
         Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
 
-        Task UpdateAsync<T>(IList<T> items, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
+        Task UpdateAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel, new();
 
         #endregion
 
