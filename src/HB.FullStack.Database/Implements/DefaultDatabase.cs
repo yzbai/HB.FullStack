@@ -54,40 +54,9 @@ namespace HB.FullStack.Database
             Transaction = transaction;
         }
 
-        private Random _slaveConnectionRandom = new Random();
+        
 
-        public ConnectionString? GetSlaveConnectionString(DbSchema dbSchema)
-        {
-            if (dbSchema.SlaveConnectionStrings.IsNullOrEmpty())
-            {
-                return dbSchema.ConnectionString;
-            }
-            else
-            {
-                return dbSchema.SlaveConnectionStrings[_slaveConnectionRandom.Next() % dbSchema.SlaveConnectionStrings.Count];
-            }
-
-
-            //if (useMaster)
-            //{
-            //    return dbSchema.ConnectionString;
-            //}
-
-            //DbSchemaEx unit = _dbSchemaExDict[dbSchema.Name];
-
-            //return GetSlaveConnectionString(unit);
-
-            //static ConnectionString? GetSlaveConnectionString(DbSchemaEx dbUnit)
-            //{
-            //    //这里采取平均轮训的方法
-            //    if (dbUnit.SlaveCount == 0)
-            //    {
-            //        return dbUnit.Schema.ConnectionString;
-            //    }
-
-            //    return dbUnit.Schema.SlaveConnectionStrings![dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];
-            //}
-        }
+       
 
         #region SystemInfo 管理
 

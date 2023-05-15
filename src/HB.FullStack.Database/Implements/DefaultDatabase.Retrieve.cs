@@ -50,18 +50,23 @@ namespace HB.FullStack.Database
             DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>().ThrowIfNull(typeof(TFrom).FullName);
             DbModelDef whereDef = ModelDefFactory.GetDef<TWhere>().ThrowIfNull(typeof(TWhere).FullName);
 
+            string deleteDbReservedName = fromDef.DeletedPropertyDef.DbReservedName;
+
             whereCondition ??= Where<TWhere>();
-            whereCondition.And($"{whereDef.DbTableReservedName}.{whereDef.DeletedPropertyReservedName}=0 and {selectDef.DbTableReservedName}.{selectDef.DeletedPropertyReservedName}=0 and {fromDef.DbTableReservedName}.{fromDef.DeletedPropertyReservedName}=0");
+            whereCondition.And($"""
+                {whereDef.DbTableReservedName}.{deleteDbReservedName}=0 
+                AND 
+                {selectDef.DbTableReservedName}.{deleteDbReservedName}=0 
+                AND {fromDef.DbTableReservedName}.{deleteDbReservedName}=0 
+                """);
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(selectDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(fromDef.DbSchemaName, false);
                 DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSelect, TFrom, TWhere>(fromCondition, whereCondition, selectDef);
 
                 using IDataReader reader = transContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+                    ? await fromDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await fromDef.Engine.ExecuteCommandReaderAsync(fromDef.SlaverConnectionString, command).ConfigureAwait(false);
 
                 return reader.ToDbModels<TSelect>(ModelDefFactory, selectDef);
             }
@@ -77,17 +82,15 @@ namespace HB.FullStack.Database
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             whereCondition ??= Where<T>();
-            whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
+            whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyDef.DbReservedName}=0");
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, false);
                 DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand(modelDef, fromCondition, whereCondition);
 
                 using var reader = transContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
                 return reader.ToDbModels<T>(ModelDefFactory, modelDef);
             }
@@ -103,17 +106,15 @@ namespace HB.FullStack.Database
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             whereCondition ??= Where<T>();
-            whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyReservedName}=0");
+            whereCondition.And($"{modelDef.DbTableReservedName}.{modelDef.DeletedPropertyDef.DbReservedName}=0");
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, false);
                 DbEngineCommand command = DbCommandBuilder.CreateCountCommand(fromCondition, whereCondition);
 
                 object? countObj = transContext != null
-                    ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandScalarAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandScalarAsync(modelDef.SlaverConnectionString, command).ConfigureAwait(false);
                 return System.Convert.ToInt32(countObj, Globals.Culture);
             }
             catch (Exception ex) when (ex is not DbException)
@@ -246,22 +247,25 @@ namespace HB.FullStack.Database
         {
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
             DbModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>().ThrowIfNull(typeof(TTarget).FullName);
+
+            string deleteDbReservedName = sourceModelDef.DeletedPropertyDef.DbReservedName;
+
             whereCondition ??= Where<TSource>();
 
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetModelDef.DbTableReservedName}.{targetModelDef.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"{targetModelDef.DbTableReservedName}.{deleteDbReservedName}=0");
                     //whereCondition.And<TTarget>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{targetModelDef.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0 and {targetModelDef.DbTableReservedName}.{deleteDbReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
 
@@ -269,20 +273,18 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef.DbTableReservedName}.{targetModelDef.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0 and {targetModelDef.DbTableReservedName}.{deleteDbReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false).And<TTarget>(t => t.Deleted == false);
                     break;
             }
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(sourceModelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(sourceModelDef.DbSchemaName, false);
                 DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget>(fromCondition, whereCondition, sourceModelDef, targetModelDef);
 
                 using IDataReader reader = transContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+                    ? await sourceModelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await sourceModelDef.Engine.ExecuteCommandReaderAsync(sourceModelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
                 return reader.ToDbModels<TSource, TTarget>(ModelDefFactory, sourceModelDef, targetModelDef);
             }
@@ -323,23 +325,29 @@ namespace HB.FullStack.Database
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
             DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>().ThrowIfNull(typeof(TTarget1).FullName);
             DbModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>().ThrowIfNull(typeof(TTarget2).FullName);
+            
+            string deleteDbReservedName = sourceModelDef.DeletedPropertyDef.DbReservedName;
 
             whereCondition ??= Where<TSource>();
 
             switch (fromCondition.JoinType)
             {
                 case SqlJoinType.LEFT:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0");
                     //whereCondition.And(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.RIGHT:
-                    whereCondition.And($"{targetModelDef2.DbTableReservedName}.{targetModelDef2.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"{targetModelDef2.DbTableReservedName}.{deleteDbReservedName}=0");
                     //whereCondition.And<TTarget2>(t => t.Deleted == false);
                     break;
 
                 case SqlJoinType.INNER:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{targetModelDef1.DeletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{targetModelDef2.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"""
+                        {sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0 
+                        AND {targetModelDef1.DbTableReservedName}.{deleteDbReservedName}=0 
+                        AND {targetModelDef2.DbTableReservedName}.{deleteDbReservedName}=0 
+                        """);
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
 
@@ -347,20 +355,23 @@ namespace HB.FullStack.Database
                     break;
 
                 case SqlJoinType.CROSS:
-                    whereCondition.And($"{sourceModelDef.DbTableReservedName}.{sourceModelDef.DeletedPropertyReservedName}=0 and {targetModelDef1.DbTableReservedName}.{targetModelDef1.DeletedPropertyReservedName}=0 and {targetModelDef2.DbTableReservedName}.{targetModelDef2.DeletedPropertyReservedName}=0");
+                    whereCondition.And($"""
+                        {sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0 
+                        AND {targetModelDef1.DbTableReservedName}.{deleteDbReservedName}=0 
+                        AND {targetModelDef2.DbTableReservedName}.{deleteDbReservedName}=0 
+                        """);
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
             }
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(sourceModelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(sourceModelDef.DbSchemaName, false);
-                DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
+                DbEngineCommand command = DbCommandBuilder.CreateRetrieveCommand<TSource, TTarget1, TTarget2>(
+                    fromCondition, whereCondition, sourceModelDef, targetModelDef1, targetModelDef2);
 
                 using IDataReader reader = transContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+                    ? await sourceModelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await sourceModelDef.Engine.ExecuteCommandReaderAsync(sourceModelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
                 return reader.ToDbModels<TSource, TTarget1, TTarget2>(ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
             }

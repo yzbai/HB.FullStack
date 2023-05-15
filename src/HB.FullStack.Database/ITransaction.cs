@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
@@ -12,7 +13,7 @@ namespace HB.FullStack.Database
     //TODO: 实现 多数据库事务： TransactionScope
     public interface ITransaction
     {
-        Task<TransactionContext> BeginTransactionAsync(string dbSchemaName, IsolationLevel? isolationLevel = null);
+        Task<TransactionContext> BeginTransactionAsync(DbSchema dbSchema, IsolationLevel? isolationLevel = null);
 
         Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : BaseDbModel;
 
@@ -20,50 +21,4 @@ namespace HB.FullStack.Database
 
         Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0);
     }
-
-#if NETSTANDARD2_0
-    public static class NetStandard2_0_Database_Extensions
-    {
-        public static ValueTask DisposeAsync(this DbConnection connection)
-        {
-            connection.Dispose();
-            return default;
-        }
-
-        public static Task CommitAsync(this DbTransaction dbTransaction, CancellationToken cancellationToken = default)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return Task.FromCanceled(cancellationToken);
-            }
-
-            try
-            {
-                dbTransaction.Commit();
-                return Task.CompletedTask;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception e)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return Task.FromException(e);
-            }
-        }
-
-        public static Task RollbackAsync(this DbTransaction dbTransaction)
-        {
-            try
-            {
-                dbTransaction.Rollback();
-                return Task.CompletedTask;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception e)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return Task.FromException(e);
-            }
-        }
-    }
-#endif
 }

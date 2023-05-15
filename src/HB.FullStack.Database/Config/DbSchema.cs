@@ -80,5 +80,13 @@ namespace HB.FullStack.Database.Config
         public const int MAX_MEDIUM_TEXT_LENGTH = 4194303;
 
         #endregion
+
+        #region Internal
+
+        internal IDbEngine DbEngine { get; set; } = null!;
+
+
+
+        #endregion
     }
 }

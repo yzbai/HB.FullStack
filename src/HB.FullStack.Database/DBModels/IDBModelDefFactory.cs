@@ -14,5 +14,7 @@ namespace HB.FullStack.Database.DbModels
         IEnumerable<DbModelDef> GetAllDefsByDbSchema(string dbSchema);
 
         IDbPropertyConverter? GetPropertyTypeConverter(Type modelType, string propertyName);
+
+
     }
 }

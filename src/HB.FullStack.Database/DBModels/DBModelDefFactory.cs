@@ -9,6 +9,7 @@ using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Convert;
+using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -54,7 +55,7 @@ namespace HB.FullStack.Database.DbModels
 
                 IDictionary<string, DbTableSchemaEx> typeDbTableSchemaFromOptions = new Dictionary<string, DbTableSchemaEx>();
 
-                foreach (DbSchema schema in _configManager.GetAllDbSchemas())
+                foreach (DbSchema schema in _configManager.AllDbSchemas)
                 {
                     foreach (DbTableSchema tableSchema in schema.Tables)
                     {
@@ -160,7 +161,7 @@ namespace HB.FullStack.Database.DbModels
 
                 DbSchema = dbSchema,
                 EngineType = dbSchema.EngineType,
-                Engine = _configManager.GetDatabaseEngine(dbSchema.EngineType),
+                Engine = dbSchema.DbEngine,
                 TableName = tableSchema.TableName,
                 IsTimestamp = typeof(ITimestamp).IsAssignableFrom(modelType),
                 IsWriteable = !(tableSchema.ReadOnly!.Value),
@@ -318,7 +319,7 @@ namespace HB.FullStack.Database.DbModels
 
             if (primaryAttribute != null)
             {
-                if(propertyInfo.Name != nameof(DbModel2<long>.Id))
+                if (propertyInfo.Name != nameof(DbModel2<long>.Id))
                 {
                     throw DbExceptions.ModelError($"the name of PrimaryKey of {modelDef.FullName} should always be 'Id', but '{propertyInfo.Name}' ");
                 }

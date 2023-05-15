@@ -22,14 +22,11 @@ namespace HB.FullStack.Database.Implements
 
         #region 事务
 
-        public async Task<TransactionContext> BeginTransactionAsync(string dbSchemaName, IsolationLevel? isolationLevel = null)
+        public async Task<TransactionContext> BeginTransactionAsync(DbSchema dbSchema, IsolationLevel? isolationLevel = null)
         {
-            ConnectionString connectionString = _dbManager.GetRequiredConnectionString(dbSchemaName, true);
-            IDbEngine engine = _dbManager.GetDatabaseEngine(dbSchemaName);
+            IDbTransaction dbTransaction = await dbSchema.DbEngine.BeginTransactionAsync(dbSchema.ConnectionString!, isolationLevel).ConfigureAwait(false);
 
-            IDbTransaction dbTransaction = await engine.BeginTransactionAsync(connectionString, isolationLevel).ConfigureAwait(false);
-
-            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, engine);
+            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, dbSchema.DbEngine);
         }
 
         public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : BaseDbModel
@@ -38,13 +35,9 @@ namespace HB.FullStack.Database.Implements
 
             ThrowIf.Null(modelDef, $"{typeof(T).FullName} 没有 DbModelDef");
 
-            ConnectionString connectionString = _dbManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-            IDbEngine engine = _dbManager.GetDatabaseEngine(modelDef.EngineType);
+            IDbTransaction dbTransaction = await modelDef.Engine.BeginTransactionAsync(modelDef.DbSchema.ConnectionString!, isolationLevel).ConfigureAwait(false);
 
-
-            IDbTransaction dbTransaction = await engine.BeginTransactionAsync(connectionString, isolationLevel).ConfigureAwait(false);
-
-            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, engine);
+            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, modelDef.Engine);
         }
 
         public async Task CommitAsync(TransactionContext context, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = 0)

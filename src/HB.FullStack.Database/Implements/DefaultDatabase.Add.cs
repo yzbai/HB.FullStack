@@ -23,7 +23,6 @@ namespace HB.FullStack.Database
                 .ThrowIfNull(typeof(T).FullName)
                 .ThrowIfNotWriteable();
 
-
             long? oldTimestamp = null;
             string oldLastUser = "";
 
@@ -31,13 +30,11 @@ namespace HB.FullStack.Database
             {
                 PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateAddCommand(modelDef, item);
 
                 object? rt = transContext != null
-                    ? await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandScalarAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandScalarAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
@@ -85,13 +82,11 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateBatchAddCommand(modelDef, items);
 
                 using IDataReader reader = transContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command);
+                    ? await modelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command);
 
                 if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
@@ -126,7 +121,7 @@ namespace HB.FullStack.Database
         
         private void ThrowIfExceedMaxBatchNumber<TObj>(IList<TObj> items, string lastUser, DbModelDef modelDef)
         {
-            if (_dbSchemaManager.GetDbSchema(modelDef.DbSchemaName).MaxBatchNumber < items.Count)
+            if (modelDef.DbSchema.MaxBatchNumber < items.Count)
             {
                 throw DbExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count, lastUser);
             }

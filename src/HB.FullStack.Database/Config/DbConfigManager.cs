@@ -7,6 +7,7 @@ using System.Linq;
 using HB.FullStack.Database.Engine;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.CompilerServices;
 
 namespace HB.FullStack.Database.Config
 {
@@ -17,31 +18,28 @@ namespace HB.FullStack.Database.Config
     //TODO: 确保mysql中useAffectedRows=false
     internal class DbConfigManager : IDbConfigManager
     {
-        /// <summary>
-        ///  Including some statistics info
-        /// </summary>
-        class DbSchemaEx
-        {
-            public ushort SlaveAccessCount = 0;
-            public int SlaveCount;
-
-            public DbSchema Schema;
-
-            public DbSchemaEx(DbSchema schema)
-            {
-                Schema = schema;
-                SlaveCount = schema.SlaveConnectionStrings == null ? 0 : schema.SlaveConnectionStrings.Count;
-            }
-        }
-
         private DbOptions _options;
-        private readonly IDbEngine? _mysqlEngine;
-        private readonly IDbEngine? _sqliteEngine;
-        private readonly Dictionary<DbSchemaName, DbSchemaEx> _dbSchemaExDict = new Dictionary<DbSchemaName, DbSchemaEx>();
+        private readonly Dictionary<DbSchemaName, DbSchema> _dbSchemaDict = new Dictionary<DbSchemaName, DbSchema>();
 
-        public DbConfigManager(IOptions<DbOptions> options, IEnumerable<IDbEngine> databaseEngines)
+        private IDbEngine? _sqliteEngine;
+        private IDbEngine? _mysqlEngine;
+
+        public DbConfigManager(IOptions<DbOptions> options, IEnumerable<IDbEngine> dbEngines)
         {
             _options = options.Value;
+
+            //Range DbEngines
+            foreach (IDbEngine engine in dbEngines)
+            {
+                if (engine.EngineType == DbEngineType.SQLite)
+                {
+                    _sqliteEngine = engine;
+                }
+                else if (engine.EngineType == DbEngineType.MySQL)
+                {
+                    _mysqlEngine = engine;
+                }
+            }
 
             //Range DbSchema
             foreach (DbSchema schema in _options.DbSchemas)
@@ -61,55 +59,15 @@ namespace HB.FullStack.Database.Config
                     DefaultDbSchema = schema;
                 }
 
-                _dbSchemaExDict[schema.Name] = new DbSchemaEx(schema);
+                schema.DbEngine = GetDbEngine(schema.EngineType);
+
+                _dbSchemaDict[schema.Name] = schema;
             }
 
             DefaultDbSchema ??= _options.DbSchemas[0];
-
-            //Range DatabaseEngines
-            foreach (IDbEngine engine in databaseEngines)
-            {
-                if (engine.EngineType == DbEngineType.SQLite)
-                {
-                    _sqliteEngine = engine;
-                }
-                else if (engine.EngineType == DbEngineType.MySQL)
-                {
-                    _mysqlEngine = engine;
-                }
-            }
         }
 
-        public IList<DbSchema> GetAllDbSchemas()
-        {
-            return _dbSchemaExDict.Values.Select(v => v.Schema).ToList();
-        }
-
-        public DbSchema GetDbSchema(string dbSchemaName)
-        {
-            return _dbSchemaExDict[dbSchemaName].Schema;
-        }
-
-        public void SetConnectionString(string dbSchemaName, string? connectionString, IList<string>? slaveConnectionStrings)
-        {
-            DbSchemaEx unit = _dbSchemaExDict[dbSchemaName];
-
-            if (connectionString.IsNotNullOrEmpty())
-            {
-                unit.Schema.ConnectionString = new ConnectionString(connectionString.ThrowIfNullOrEmpty($"在初始化时，应该为 {dbSchemaName} 提供连接字符串"));
-            }
-
-            if (slaveConnectionStrings != null)
-            {
-                unit.Schema.SlaveConnectionStrings = slaveConnectionStrings.Select(c => new ConnectionString(c)).ToList();
-                unit.SlaveCount = slaveConnectionStrings.Count;
-            }
-        }
-
-
-        public IDbEngine GetDatabaseEngine(DbSchema dbSchema) => GetDatabaseEngine(dbSchema.EngineType);
-
-        public IDbEngine GetDatabaseEngine(DbEngineType engineType)
+        public IDbEngine GetDbEngine(DbEngineType engineType)
         {
             return engineType switch
             {
@@ -119,9 +77,72 @@ namespace HB.FullStack.Database.Config
             };
         }
 
+        public DbSchema GetDbSchema(string dbSchemaName)
+        {
+            return _dbSchemaDict[dbSchemaName];
+        }
+
         public IList<string> DbModelAssemblies => _options.DbModelAssemblies;
 
-
         public DbSchema DefaultDbSchema { get; private set; }
+
+        public IList<DbSchema> AllDbSchemas => _options.DbSchemas;
+
+        public void SetConnectionString(string dbSchemaName, string? connectionString, IList<string>? slaveConnectionStrings)
+        {
+            DbSchema schema = _dbSchemaDict[dbSchemaName];
+
+            if (connectionString.IsNotNullOrEmpty())
+            {
+                schema.ConnectionString = new ConnectionString(connectionString.ThrowIfNullOrEmpty($"在初始化时，应该为 {dbSchemaName} 提供连接字符串"));
+            }
+
+            if (slaveConnectionStrings != null)
+            {
+                schema.SlaveConnectionStrings = slaveConnectionStrings.Select(c => new ConnectionString(c)).ToList();
+            }
+        }
+    }
+
+    public static class DbSchemaExtensions
+    {
+        private static Random _slaveConnectionRandom = new Random();
+
+        public static ConnectionString GetSlaveConnectionString(this DbSchema dbSchema)
+        {
+            if (dbSchema.SlaveConnectionStrings.IsNullOrEmpty())
+            {
+                return dbSchema.ConnectionString.ThrowIfNull($"{dbSchema.Name} do not has master connection string.");
+            }
+            else
+            {
+                return dbSchema.SlaveConnectionStrings[_slaveConnectionRandom.Next() % dbSchema.SlaveConnectionStrings.Count];
+            }
+
+            //if (useMaster)
+            //{
+            //    return dbSchema.ConnectionString;
+            //}
+
+            //DbSchemaEx unit = _dbSchemaExDict[dbSchema.Name];
+
+            //return GetSlaveConnectionString(unit);
+
+            //static ConnectionString? GetSlaveConnectionString(DbSchemaEx dbUnit)
+            //{
+            //    //这里采取平均轮训的方法
+            //    if (dbUnit.SlaveCount == 0)
+            //    {
+            //        return dbUnit.Schema.ConnectionString;
+            //    }
+
+            //    return dbUnit.Schema.SlaveConnectionStrings![dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];
+            //}
+        }
+
+        public static ConnectionString GetMasterConnectionString(this DbSchema dbSchema)
+        {
+            return dbSchema.ConnectionString.ThrowIfNull($"{dbSchema.Name} do not has master connection string.");
+        }
     }
 }

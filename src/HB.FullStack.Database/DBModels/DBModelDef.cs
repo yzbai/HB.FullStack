@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -87,6 +88,9 @@ namespace HB.FullStack.Database.DbModels
 
         public bool ContainsProperty(string propertyName) => PropertyDict.ContainsKey(propertyName);
 
+        public ConnectionString MasterConnectionString => DbSchema.GetMasterConnectionString();
+
+        public ConnectionString SlaverConnectionString => DbSchema.GetSlaveConnectionString();
 
         public override ModelPropertyDef? GetPropertyDef(string propertyName) => GetDbPropertyDef(propertyName);
     }
