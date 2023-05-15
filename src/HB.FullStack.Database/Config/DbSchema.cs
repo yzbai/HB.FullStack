@@ -8,6 +8,8 @@ namespace HB.FullStack.Database.Config
 {
     public class DbSchema
     {
+        public bool IsDefault { get; set; }
+
         public string Name { get; set; } = null!;
 
         public DbEngineType EngineType { get; set; }

@@ -10,35 +10,35 @@ namespace HB.FullStack.Common.Meta
     public static partial class MetaAccess
     {
 
-        private static readonly Dictionary<string, Func<object, PropertyValue[]>> _getPropertyValuesFuncDict = new Dictionary<string, Func<object, PropertyValue[]>>();
+        private static readonly Dictionary<string, Func<object, PropertyNameValue[]>> _getPropertyValuesFuncDict = new Dictionary<string, Func<object, PropertyNameValue[]>>();
 
         //TODO: do we need a lock?
-        private static Func<object, PropertyValue[]> GetCachedGetPropertyValuesFunc<TAttr>(Type objType) where TAttr : Attribute
+        private static Func<object, PropertyNameValue[]> GetCachedGetPropertyValuesFunc<TAttr>(Type objType) where TAttr : Attribute
         {
             string key = $"{objType.FullName}.{typeof(TAttr).Name}";
 
-            if (_getPropertyValuesFuncDict.TryGetValue(key, out Func<object, PropertyValue[]>? cachedFunc))
+            if (_getPropertyValuesFuncDict.TryGetValue(key, out Func<object, PropertyNameValue[]>? cachedFunc))
             {
                 return cachedFunc;
             }
 
             IList<PropertyInfo> propertyInfos = ReflectionUtil.GetPropertyInfosByAttribute<TAttr>(objType);
 
-            Func<object, PropertyValue[]> func = CreateGetPropertyValuesDelegate2(objType, propertyInfos);
+            Func<object, PropertyNameValue[]> func = CreateGetPropertyValuesDelegate2(objType, propertyInfos);
 
             _getPropertyValuesFuncDict.TryAdd(key, func);
 
             return func;
         }
 
-        public static PropertyValue[] GetPropertyValuesByAttribute<TAttr>(object obj) where TAttr : Attribute
+        public static PropertyNameValue[] GetPropertyValuesByAttribute<TAttr>(object obj) where TAttr : Attribute
         {
             if (obj == null)
             {
-                return Array.Empty<PropertyValue>();
+                return Array.Empty<PropertyNameValue>();
             }
 
-            Func<object, PropertyValue[]> func = GetCachedGetPropertyValuesFunc<TAttr>(obj.GetType());
+            Func<object, PropertyNameValue[]> func = GetCachedGetPropertyValuesFunc<TAttr>(obj.GetType());
 
             return func(obj);
         }

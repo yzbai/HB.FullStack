@@ -71,9 +71,31 @@ namespace HB.FullStack.Database
             return DeleteCoreAsync<T>(id, null, null, lastUser, transContext, trulyDelete);
         }
 
-        public Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : BaseDbModel, new()
+        public Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
-            
+            ThrowIf.NotValid(item, nameof(item));
+
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
+            DbConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
+
+
+            bool trulyDelete = modelDef.DbSchema.TrulyDelete;
+            object idValue = modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!;
+            long curTimestamp = TimeUtil.Timestamp;
+
+            DbEngineCommand command = bestConflictMethod switch
+            {
+                DbConflictCheckMethods.Ignore => DbCommandBuilder.CreateDeleteIgnoreConflictCheckCommand(modelDef, idValue, lastUser, trulyDelete, curTimestamp),
+                DbConflictCheckMethods.OldNewValueCompare => DbCommandBuilder.CreateDeleteOldNewCompareCommand(modelDef, item, lastUser, trulyDelete, curTimestamp),
+                DbConflictCheckMethods.Timestamp => DbCommandBuilder.CreateDeleteTimestampCommand(modelDef, idValue, (item as ITimestamp)!.Timestamp, lastUser, trulyDelete, curTimestamp),
+                _ => throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has wrong Best Conflict Check Method. {bestConflictMethod}")
+            };
+
+            ConnectionString connectionString = modelDef.DbSchema.ConnectionString!;
+
+            long matched = transContext != null
+                ? engine
+
         }
 
         private async Task BatchDeleteCoreAsync<T>(

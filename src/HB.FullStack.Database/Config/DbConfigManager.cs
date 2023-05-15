@@ -15,7 +15,7 @@ namespace HB.FullStack.Database.Config
     //TODO: 记录Settings到tb_sys_info表中，自动加载
     //TODO: 处理slave库的brandNewCreate，以及Migration
     //TODO: 确保mysql中useAffectedRows=false
-    internal class DbSchemaManager : IDbSchemaManager
+    internal class DbConfigManager : IDbConfigManager
     {
         /// <summary>
         ///  Including some statistics info
@@ -34,13 +34,14 @@ namespace HB.FullStack.Database.Config
             }
         }
 
+        private DbOptions _options;
         private readonly IDbEngine? _mysqlEngine;
         private readonly IDbEngine? _sqliteEngine;
         private readonly Dictionary<DbSchemaName, DbSchemaEx> _dbSchemaExDict = new Dictionary<DbSchemaName, DbSchemaEx>();
 
-        public DbSchemaManager(IOptions<DbOptions> options, IEnumerable<IDbEngine> databaseEngines)
+        public DbConfigManager(IOptions<DbOptions> options, IEnumerable<IDbEngine> databaseEngines)
         {
-            DbOptions _options = options.Value;
+            _options = options.Value;
 
             //Range DbSchema
             foreach (DbSchema schema in _options.DbSchemas)
@@ -55,8 +56,15 @@ namespace HB.FullStack.Database.Config
                     throw DbExceptions.DbSchemaError(schema.Version, schema.Name, "DbSchema Name Can not be null or empty");
                 }
 
+                if (schema.IsDefault && DefaultDbSchema == null)
+                {
+                    DefaultDbSchema = schema;
+                }
+
                 _dbSchemaExDict[schema.Name] = new DbSchemaEx(schema);
             }
+
+            DefaultDbSchema ??= _options.DbSchemas[0];
 
             //Range DatabaseEngines
             foreach (IDbEngine engine in databaseEngines)
@@ -98,25 +106,8 @@ namespace HB.FullStack.Database.Config
             }
         }
 
-        public ConnectionString? GetConnectionString(string dbSchemaName, bool useMaster)
-        {
-            DbSchemaEx unit = _dbSchemaExDict[dbSchemaName];
 
-            return useMaster ? unit.Schema.ConnectionString : GetSlaveConnectionString(unit);
-
-            static ConnectionString? GetSlaveConnectionString(DbSchemaEx dbUnit)
-            {
-                //这里采取平均轮训的方法
-                if (dbUnit.SlaveCount == 0)
-                {
-                    return dbUnit.Schema.ConnectionString;
-                }
-
-                return dbUnit.Schema.SlaveConnectionStrings![dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];
-            }
-        }
-
-        public IDbEngine GetDatabaseEngine(string dbSchemaName) => GetDatabaseEngine(_dbSchemaExDict[dbSchemaName].Schema.EngineType);
+        public IDbEngine GetDatabaseEngine(DbSchema dbSchema) => GetDatabaseEngine(dbSchema.EngineType);
 
         public IDbEngine GetDatabaseEngine(DbEngineType engineType)
         {
@@ -127,5 +118,10 @@ namespace HB.FullStack.Database.Config
                 _ => throw new NotImplementedException(),
             };
         }
+
+        public IList<string> DbModelAssemblies => _options.DbModelAssemblies;
+
+
+        public DbSchema DefaultDbSchema { get; private set; }
     }
 }

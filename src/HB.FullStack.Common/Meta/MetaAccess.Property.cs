@@ -173,9 +173,9 @@ namespace HB.FullStack.Common.Meta
             return (Func<object, object?[]>)dm.CreateDelegate(funType);
         }
 
-        public static Func<object, PropertyValue[]> CreateGetPropertyValuesDelegate2(Type type, IEnumerable<PropertyInfo> propertyInfos)
+        public static Func<object, PropertyNameValue[]> CreateGetPropertyValuesDelegate2(Type type, IEnumerable<PropertyInfo> propertyInfos)
         {
-            DynamicMethod dm = new DynamicMethod($"{type.Name}_GetSomePropertyValues2_{Guid.NewGuid()}", typeof(PropertyValue[]), new[] { typeof(object) }, true);
+            DynamicMethod dm = new DynamicMethod($"{type.Name}_GetSomePropertyValues2_{Guid.NewGuid()}", typeof(PropertyNameValue[]), new[] { typeof(object) }, true);
             ILGenerator il = dm.GetILGenerator();
 
             LocalBuilder rtArray = il.DeclareLocal(typeof(object?[]));
@@ -188,7 +188,7 @@ namespace HB.FullStack.Common.Meta
 
             //rtArray = new object[]
             EmitUtil.EmitInt32(il, propertyInfos.Count());
-            il.Emit(OpCodes.Newarr, typeof(PropertyValue));
+            il.Emit(OpCodes.Newarr, typeof(PropertyNameValue));
             il.Emit(OpCodes.Stloc, rtArray);
 
             int index = 0;
@@ -215,9 +215,9 @@ namespace HB.FullStack.Common.Meta
 
             il.Emit(OpCodes.Ret);
 
-            Type funType = Expression.GetFuncType(typeof(object), typeof(PropertyValue[]));
+            Type funType = Expression.GetFuncType(typeof(object), typeof(PropertyNameValue[]));
 
-            return (Func<object, PropertyValue[]>)dm.CreateDelegate(funType);
+            return (Func<object, PropertyNameValue[]>)dm.CreateDelegate(funType);
         }
 
         /// <summary>

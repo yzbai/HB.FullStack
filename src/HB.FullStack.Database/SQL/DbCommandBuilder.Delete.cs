@@ -17,20 +17,29 @@ namespace HB.FullStack.Database.SQL
 {
     internal partial class DbCommandBuilder
     {
-        public DbEngineCommand CreateDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, object id, string lastUser, bool trulyDelete)
+        public DbEngineCommand CreateDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, object id, string lastUser, bool trulyDelete, long? newTimestamp = null)
         {
+            List<string> propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(BaseDbModel.LastUser) };
+            List<object?> propertyValues = new List<object?> { id, lastUser };
+
+            if (modelDef.IsTimestamp)
+            {
+                propertyNames.Add(nameof(ITimestamp.Timestamp));
+                propertyValues.Add(newTimestamp ?? TimeUtil.Timestamp);
+            }
+
             var parameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 _modelDefFactory,
-                new List<string> { nameof(DbModel2<long>.Id), nameof(BaseDbModel.LastUser) },
-                new List<object?> { id, lastUser });
+                propertyNames,
+                propertyValues);
 
             return new DbEngineCommand(
                 SqlHelper.CreateDeleteIgnoreConflictCheckSql(modelDef, trulyDelete),
                 parameters);
         }
 
-        public DbEngineCommand CreateDeleteTimestampCommand(DbModelDef modelDef, object id, long timestamp, string lastUser, bool trulyDelete)
+        public DbEngineCommand CreateDeleteTimestampCommand(DbModelDef modelDef, object id, long timestamp, string lastUser, bool trulyDelete, long? newTimestamp = null)
         {
             var parameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
@@ -38,20 +47,24 @@ namespace HB.FullStack.Database.SQL
                 new List<string> { nameof(DbModel2<long>.Id), nameof(BaseDbModel.LastUser), nameof(ITimestamp.Timestamp) },
                 new List<object?> { id, lastUser, timestamp });
 
+            parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_0", newTimestamp ?? TimeUtil.Timestamp));
+
             return new DbEngineCommand(
                 SqlHelper.CreateDeleteUsingTimestampSql(modelDef, trulyDelete),
                 parameters);
         }
 
-        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete) where T : BaseDbModel, new()
+        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel, new()
         {
             var parameters = model.ToDbParameters(modelDef, _modelDefFactory);
 
             var newParameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 _modelDefFactory,
-                new List<string> {nameof(BaseDbModel.LastUser)},
-                new List<object?> {lastUser});
+                new List<string> { nameof(BaseDbModel.LastUser) },
+                new List<object?> { lastUser });
+
+            parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_0", newTimestamp ?? TimeUtil.Timestamp));
 
             return new DbEngineCommand(
                 SqlHelper.CreateDeleteUsingOldNewCompareSql(modelDef, trulyDelete),

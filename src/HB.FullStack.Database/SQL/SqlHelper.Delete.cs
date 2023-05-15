@@ -44,8 +44,8 @@ namespace HB.FullStack.Database.SQL
         public static string CreateDeleteIgnoreConflictCheckSql(DbModelDef modelDef, bool trulyDeleted, int number = 0)
         {
             string where = $"""
-                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{number}
-                AND
+                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{number} 
+                AND 
                 {modelDef.DeletedPropertyDef.DbReservedName}=0 
                 """;
 
@@ -54,12 +54,17 @@ namespace HB.FullStack.Database.SQL
                 return $"delete from {modelDef.DbTableReservedName} where {where};";
             }
 
-            return $"""
-                update {modelDef.DbTableReservedName} set 
+            StringBuilder assignments = new StringBuilder($"""
                 {modelDef.DeletedPropertyDef.DbReservedName}=1,
                 {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{number} 
-                where {where};
-                """;
+                """);
+
+            if (modelDef.IsTimestamp)
+            {
+                assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{number} ");
+            }
+
+            return $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
         }
 
         public static string CreateDeleteUsingTimestampSql(DbModelDef modelDef, bool trulyDeleted, int number = 0)
@@ -80,7 +85,8 @@ namespace HB.FullStack.Database.SQL
             return $"""
                 update {modelDef.DbTableReservedName} set 
                 {modelDef.DeletedPropertyDef.DbReservedName}=1,
-                {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{number} 
+                {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{number},
+                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{number} 
                 where {where};
                 """;
         }
@@ -107,12 +113,17 @@ namespace HB.FullStack.Database.SQL
                 return $"delete from {modelDef.DbTableReservedName} where {where};";
             }
 
-            return $"""
-                update {modelDef.DbTableReservedName} set 
+            StringBuilder assignments = new StringBuilder($"""
                 {modelDef.DeletedPropertyDef.DbReservedName}=1,
                 {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{NEW_PROPERTY_VALUE_SUFFIX}_{number} 
-                where {where};
-                """;
+                """);
+
+            if(modelDef.IsTimestamp)
+            {
+                assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{number} ");
+            }
+
+            return $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 using HB.FullStack.Common.Models;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
@@ -27,11 +28,17 @@ namespace HB.FullStack.Database.DbModels
 
         #endregion
 
+        #region Environment
+        
         public DbEngineType EngineType { get; set; }
 
-        public string DbSchemaName { get; set; } = null!;
+        public IDbEngine Engine { get; set; } = null!;
+
+        public DbSchema DbSchema { get; set; } = null!;
 
         public string TableName { get; set; } = null!;
+
+        #endregion
 
         public DbModelIdType IdType { get; set; } = DbModelIdType.Unkown;
 
@@ -39,8 +46,9 @@ namespace HB.FullStack.Database.DbModels
 
         public DbConflictCheckMethods AllowedConflictCheckMethods { get; set; } = DbConflictCheckMethods.OldNewValueCompare | DbConflictCheckMethods.Timestamp;
 
-        public DbConflictCheckMethods BestConflictCheckMethodWhenUpdateEntire { get; set; }
+        public DbConflictCheckMethods BestConflictCheckMethodWhenUpdate { get; set; }
 
+        public DbConflictCheckMethods BestConflictCheckMethodWhenDelete { get; set; }
 
         /// <summary>
         /// 数据库是否可写
@@ -60,9 +68,9 @@ namespace HB.FullStack.Database.DbModels
         [NotNullIfNotNull(nameof(IsTimestamp))]
         public DbModelPropertyDef? TimestampPropertyDef { get; internal set; } = null!;
 
-        private string? _dbTableReservedName;
         private IList<DbModelPropertyDef>? _foreignKeyProperties;
-
+        private string? _dbTableReservedName;
+        
         public string DbTableReservedName => _dbTableReservedName ??= SqlHelper.GetReserved(TableName, EngineType);
 
         public IList<DbModelPropertyDef> ForeignKeyProperties => _foreignKeyProperties ??= PropertyDict.Values.Where(p => p.IsForeignKey).ToList();
@@ -89,7 +97,7 @@ namespace HB.FullStack.Database.DbModels
         {
             if (!modelDef.IsWriteable)
             {
-                throw DbExceptions.NotWriteable(type: modelDef.FullName, database: modelDef.DbSchemaName);
+                throw DbExceptions.NotWriteable(type: modelDef.FullName, database: modelDef.DbSchema.Name);
             }
 
             return modelDef;

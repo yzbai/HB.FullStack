@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-
-using HB.FullStack.Database;
 using HB.FullStack.Database.Config;
 
 using Microsoft.Extensions.Options;

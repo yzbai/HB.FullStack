@@ -46,11 +46,11 @@ namespace HB.FullStack.Common.Meta.Tests
         {
             MetaAccessObj obj = new MetaAccessObj();
 
-            PropertyValue[] values = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(obj);
+            PropertyNameValue[] values = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(obj);
 
-            Assert.IsTrue(values[0].PropertyName == nameof(MetaAccessObj.Name) && values[0].Value!.ToString() == "TestName");
+            Assert.IsTrue(values[0].Name == nameof(MetaAccessObj.Name) && values[0].Value!.ToString() == "TestName");
 
-            Assert.IsTrue(values[1].PropertyName == nameof(MetaAccessObj.Keys) && values[1].Value is IList<string> list && list.Count == 2 && list[0] == "1" && list[1] == "2");
+            Assert.IsTrue(values[1].Name == nameof(MetaAccessObj.Keys) && values[1].Value is IList<string> list && list.Count == 2 && list[0] == "1" && list[1] == "2");
         }
 
         [TestMethod()]
@@ -58,15 +58,15 @@ namespace HB.FullStack.Common.Meta.Tests
         {
             IList<PropertyInfo> properties = typeof(MetaAccessObj).GetPropertyInfosByAttribute<AddtionalPropertyAttribute>();
 
-            Func<object, PropertyValue[]> func = MetaAccess.CreateGetPropertyValuesDelegate2(typeof(MetaAccessObj), properties);
+            Func<object, PropertyNameValue[]> func = MetaAccess.CreateGetPropertyValuesDelegate2(typeof(MetaAccessObj), properties);
 
             MetaAccessObj obj = new MetaAccessObj();
 
-            PropertyValue[] values = func(obj);
+            PropertyNameValue[] values = func(obj);
 
-            Assert.IsTrue(values[0].PropertyName == nameof(MetaAccessObj.Name) && values[0].Value!.ToString() == "TestName");
+            Assert.IsTrue(values[0].Name == nameof(MetaAccessObj.Name) && values[0].Value!.ToString() == "TestName");
 
-            Assert.IsTrue(values[1].PropertyName == nameof(MetaAccessObj.Keys) && values[1].Value is IList<string> list && list.Count == 2 && list[0] == "1" && list[1] == "2");
+            Assert.IsTrue(values[1].Name == nameof(MetaAccessObj.Keys) && values[1].Value is IList<string> list && list.Count == 2 && list[0] == "1" && list[1] == "2");
         }
     }
 }

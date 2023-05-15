@@ -99,7 +99,7 @@ namespace HB.FullStack.Database.Convert
                     {
                         il.Emit(OpCodes.Ldarg_0);//stack is now [target][target][IDbModelDefFactory]
                         il.Emit(OpCodes.Ldloc, modelTypeLocal);//stack is now [target][target][IDbModelDefFactory][ModelType]
-                        il.Emit(OpCodes.Ldstr, propertyDef.Name);//stack is now [target][target][IDbModelDefFactory][ModelType][PropertyName]
+                        il.Emit(OpCodes.Ldstr, propertyDef.Name);//stack is now [target][target][IDbModelDefFactory][ModelType][Name]
 
                         //TODO: 不能直接把propertyDef.TypeConverter变量加进来吗?
                         il.EmitCall(OpCodes.Callvirt, _getPropertyTypeConverterMethod2, null);// stack is now [target][target][DbPropertyConverter]

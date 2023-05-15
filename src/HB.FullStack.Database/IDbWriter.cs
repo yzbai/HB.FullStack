@@ -55,19 +55,19 @@ namespace HB.FullStack.Database
 
         #region Delete
 
-        Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : BaseDbModel, new();
+        Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
 
-        Task DeleteAsync<T>(IList<T> items, string lastUser, TransactionContext transContext, bool? trulyDelete = null) where T : BaseDbModel, new();
+        Task DeleteAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel, new();
 
-        Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext, bool? trulyDelete = null) where T : BaseDbModel, ITimestamp, new();
+        Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext) where T : BaseDbModel, ITimestamp, new();
 
-        Task DeleteAsync<T>(IList<object> ids, IList<long> timestamps, string lastUser, TransactionContext transContext, bool? trulyDelete = null) where T : BaseDbModel, ITimestamp, new();
+        Task DeleteAsync<T>(IList<object> ids, IList<long> timestamps, string lastUser, TransactionContext transContext) where T : BaseDbModel, ITimestamp, new();
         
-        Task DeleteIgnoreConflictCheckAsync<T>(object id, TransactionContext? transContext, string lastUser, bool? trulyDelete = null) where T : BaseDbModel, new();
+        Task DeleteIgnoreConflictCheckAsync<T>(object id, TransactionContext? transContext, string lastUser) where T : BaseDbModel, new();
 
-        Task DeleteIgnoreConflictCheckAsync<T>(IList<object> ids, TransactionContext transContext, string lastUser, bool? trulyDelete = null) where T : BaseDbModel, new();
+        Task DeleteIgnoreConflictCheckAsync<T>(IList<object> ids, TransactionContext transContext, string lastUser) where T : BaseDbModel, new();
         
-        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext? transactionContext = null, bool? trulyDelete = null) where T : BaseDbModel, new();
+        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext? transactionContext = null) where T : BaseDbModel, new();
 
         #endregion
 

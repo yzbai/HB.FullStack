@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             //public
             services.AddSingleton<IDbModelDefFactory, DbModelDefFactory>();
-            services.AddSingleton<IDbSchemaManager, DbSchemaManager>();
+            services.AddSingleton<IDbConfigManager, DbConfigManager>();
             services.AddSingleton<ISQLExpressionVisitor, SQLExpressionVisitor>();
             services.AddSingleton<IDbCommandBuilder, DbCommandBuilder>();
             services.AddSingleton<ITransaction, DefaultTransaction>();

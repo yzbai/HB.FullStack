@@ -101,7 +101,7 @@ namespace HB.FullStack.Database.Convert
 
             static string GetKey(DbModelDef modelDef, int startIndex, int length, bool returnNullIfFirstNull)
             {
-                return $"{modelDef.DbSchemaName}_{modelDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
+                return $"{modelDef.DbSchema.Name}_{modelDef.TableName}_{startIndex}_{length}_{returnNullIfFirstNull}";
             }
         }
 
@@ -169,7 +169,7 @@ namespace HB.FullStack.Database.Convert
 
             static string GetKey(DbModelDef modelDef)
             {
-                return $"{modelDef.DbSchemaName}_{modelDef.TableName}_ModelToParameters";
+                return $"{modelDef.DbSchema.Name}_{modelDef.TableName}_ModelToParameters";
             }
         }
 
@@ -213,7 +213,7 @@ namespace HB.FullStack.Database.Convert
 
             static string GetKey(DbModelDef modelDef, IList<string> names)
             {
-                return $"{modelDef.DbSchemaName}_{modelDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
+                return $"{modelDef.DbSchema.Name}_{modelDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
             }
         }
 

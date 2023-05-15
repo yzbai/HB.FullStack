@@ -20,8 +20,6 @@ namespace HB.FullStack.Database.SQL
         {
             modelDef.ThrowIfNotTimestamp();
 
-            DbEngineType engineType = modelDef.EngineType;
-
             if (!updatePack.OldTimestamp.HasValue)
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} propertyNames: {updatePack.PropertyNames.ToJoinedString(",")}. Lack of OldTimestamp.");
@@ -131,7 +129,7 @@ namespace HB.FullStack.Database.SQL
                 _modelDefFactory,
                 new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
                 new List<object?>(updatePack.NewPropertyValues) { lastUser },
-                $"{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_0");
+                $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_0");
 
             //使用propertyNames而不是curPropertyNames
             string sql = GetCachedSql(SqlType.UpdatePropertiesUsingOldNewCompare, new DbModelDef[] { modelDef }, updatePack.PropertyNames);
@@ -168,7 +166,7 @@ namespace HB.FullStack.Database.SQL
                     _modelDefFactory,
                     new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
                     new List<object?>(updatePack.NewPropertyValues) { lastUser },
-                    $"{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_{number}");
+                    $"{SqlHelper.NEW_PROPERTY_VALUES_SUFFIX}_{number}");
 
                 totalParameters.AddRange(oldParameters);
                 totalParameters.AddRange(newParameters);

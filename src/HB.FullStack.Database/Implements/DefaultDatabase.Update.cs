@@ -17,7 +17,7 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdateEntire;
+            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdate;
 
             if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)
             {
@@ -114,7 +114,7 @@ namespace HB.FullStack.Database
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdateEntire;
+            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdate;
 
             if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)
             {

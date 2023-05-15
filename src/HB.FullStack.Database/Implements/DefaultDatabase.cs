@@ -29,7 +29,7 @@ namespace HB.FullStack.Database
         private readonly ILogger _logger;
         private readonly DbOptions _options;
 
-        private IDbSchemaManager _dbSchemaManager { get; }
+        private IDbConfigManager _dbConfigManager { get; }
 
         public IDbModelDefFactory ModelDefFactory { get; }
 
@@ -40,7 +40,7 @@ namespace HB.FullStack.Database
         public DefaultDatabase(
             ILogger<DefaultDatabase> logger,
             IOptions<DbOptions> options,
-            IDbSchemaManager dbSchemaManager,
+            IDbConfigManager dbSchemaManager,
             IDbModelDefFactory modelDefFactory,
             IDbCommandBuilder commandBuilder,
             ITransaction transaction)
@@ -52,6 +52,41 @@ namespace HB.FullStack.Database
             ModelDefFactory = modelDefFactory;
             DbCommandBuilder = commandBuilder;
             Transaction = transaction;
+        }
+
+        private Random _slaveConnectionRandom = new Random();
+
+        public ConnectionString? GetSlaveConnectionString(DbSchema dbSchema)
+        {
+            if (dbSchema.SlaveConnectionStrings.IsNullOrEmpty())
+            {
+                return dbSchema.ConnectionString;
+            }
+            else
+            {
+                return dbSchema.SlaveConnectionStrings[_slaveConnectionRandom.Next() % dbSchema.SlaveConnectionStrings.Count];
+            }
+
+
+            //if (useMaster)
+            //{
+            //    return dbSchema.ConnectionString;
+            //}
+
+            //DbSchemaEx unit = _dbSchemaExDict[dbSchema.Name];
+
+            //return GetSlaveConnectionString(unit);
+
+            //static ConnectionString? GetSlaveConnectionString(DbSchemaEx dbUnit)
+            //{
+            //    //这里采取平均轮训的方法
+            //    if (dbUnit.SlaveCount == 0)
+            //    {
+            //        return dbUnit.Schema.ConnectionString;
+            //    }
+
+            //    return dbUnit.Schema.SlaveConnectionStrings![dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];
+            //}
         }
 
         #region SystemInfo 管理

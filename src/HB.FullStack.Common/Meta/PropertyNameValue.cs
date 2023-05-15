@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Common.Meta
 {
-    public class PropertyValue
+    public class PropertyNameValue
     {
-        public string PropertyName { get; set; } = null!;
+        public string Name { get; set; } = null!;
 
         public object? Value { get; set; }
 
-        public PropertyValue(string propertyName, object? value)
+        public PropertyNameValue(string propertyName, object? value)
         {
-            PropertyName = propertyName;
+            Name = propertyName;
             Value = value;
         }
     }

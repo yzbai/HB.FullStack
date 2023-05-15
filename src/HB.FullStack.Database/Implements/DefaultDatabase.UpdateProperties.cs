@@ -378,7 +378,7 @@ namespace HB.FullStack.Database
 
         private static DbConflictCheckMethods GetPropertyChangePackConflictCheckMethod(DbModelDef modelDef, PropertyChangePack changePack)
         {
-            if (modelDef.BestConflictCheckMethodWhenUpdateEntire == DbConflictCheckMethods.Timestamp && !changePack.ContainsProperty(nameof(ITimestamp.Timestamp)))
+            if (modelDef.BestConflictCheckMethodWhenUpdate == DbConflictCheckMethods.Timestamp && !changePack.ContainsProperty(nameof(ITimestamp.Timestamp)))
             {
                 if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.OldNewValueCompare))
                 {
@@ -394,7 +394,7 @@ namespace HB.FullStack.Database
                 }
             }
 
-            return modelDef.BestConflictCheckMethodWhenUpdateEntire;
+            return modelDef.BestConflictCheckMethodWhenUpdate;
         }
 
         public async Task UpdatePropertiesAsync<T>(PropertyChangePack changedPack, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()

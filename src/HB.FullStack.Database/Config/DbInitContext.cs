@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HB.FullStack.Database
+namespace HB.FullStack.Database.Config
 {
     public class DbInitContext
     {
@@ -12,6 +12,6 @@ namespace HB.FullStack.Database
 
         public IList<Migration>? Migrations { get; set; }
 
-       
+
     }
 }

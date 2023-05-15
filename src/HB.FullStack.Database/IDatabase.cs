@@ -7,6 +7,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 
 [assembly: InternalsVisibleTo("HB.FullStack.Client")]

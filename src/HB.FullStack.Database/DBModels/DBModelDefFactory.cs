@@ -25,22 +25,22 @@ namespace HB.FullStack.Database.DbModels
             public DbTableSchema TableSchema { get; set; } = null!;
         }
 
-        private readonly DbOptions _options;
+        private readonly IDbConfigManager _configManager;
 
         /// <summary>
         /// 这里不用ConcurrentDictionary。是因为在初始化时，就已经ConstructModelDefs，后续只有read，没有write
         /// </summary>
         private readonly IDictionary<Type, DbModelDef> _dbModelDefs = new Dictionary<Type, DbModelDef>();
 
-        public DbModelDefFactory(IOptions<DbOptions> options)
+        public DbModelDefFactory(IDbConfigManager configManager)
         {
-            _options = options.Value;
+            _configManager = configManager;
 
             static bool typeCondition(Type t) => t.IsSubclassOf(typeof(BaseDbModel)) && !t.IsAbstract;
 
-            IEnumerable<Type> allModelTypes = _options.DbModelAssemblies.IsNullOrEmpty()
+            IEnumerable<Type> allModelTypes = _configManager.DbModelAssemblies.IsNullOrEmpty()
                 ? ReflectionUtil.GetAllTypeByCondition(typeCondition)
-                : ReflectionUtil.GetAllTypeByCondition(_options.DbModelAssemblies, typeCondition);
+                : ReflectionUtil.GetAllTypeByCondition(_configManager.DbModelAssemblies, typeCondition);
 
             Dictionary<Type, DbTableSchemaEx> typeDbTableSchemaDict = ConstructDbTableSchema(allModelTypes);
 
@@ -54,7 +54,7 @@ namespace HB.FullStack.Database.DbModels
 
                 IDictionary<string, DbTableSchemaEx> typeDbTableSchemaFromOptions = new Dictionary<string, DbTableSchemaEx>();
 
-                foreach (DbSchema schema in _options.DbSchemas)
+                foreach (DbSchema schema in _configManager.GetAllDbSchemas())
                 {
                     foreach (DbTableSchema tableSchema in schema.Tables)
                     {
@@ -102,10 +102,10 @@ namespace HB.FullStack.Database.DbModels
                     //做最后的检查，有可能两者都没有定义, 默认使用第一个
                     if (resultDbSchemaName.IsNullOrEmpty())
                     {
-                        resultDbSchemaName = _options.DbSchemas[0].Name;
+                        resultDbSchemaName = _configManager.DefaultDbSchema.Name;
                     }
 
-                    DbSchema resultDbSchema = _options.DbSchemas.First(s => s.Name == resultDbSchemaName);
+                    DbSchema resultDbSchema = _configManager.GetDbSchema(resultDbSchemaName);
 
                     if (resultDbSchema.TableNameSuffixToRemove.IsNotNullOrEmpty())
                     {
@@ -125,14 +125,15 @@ namespace HB.FullStack.Database.DbModels
 
                 foreach (var modelDef in _dbModelDefs.Values)
                 {
-                    string key = $"{modelDef.DbSchemaName} + {modelDef.TableName}";
+                    string key = $"{modelDef.DbSchema.Name} + {modelDef.TableName}";
 
                     if (!hashSet.Add(key))
                     {
-                        throw DbExceptions.SameTableNameInSameDbSchema(modelDef.DbSchemaName, modelDef.TableName);
+                        throw DbExceptions.SameTableNameInSameDbSchema(modelDef.DbSchema.Name, modelDef.TableName);
                     }
                 }
             }
+            _configManager = configManager;
         }
 
         private void ConstructDbModelDefs(IEnumerable<Type> types, IDictionary<Type, DbTableSchemaEx> typeDbTableSchemaDict)
@@ -148,7 +149,7 @@ namespace HB.FullStack.Database.DbModels
             }
         }
 
-        private static DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchema, DbSchema dbSchema)
+        private DbModelDef CreateModelDef(Type modelType, DbTableSchema tableSchema, DbSchema dbSchema)
         {
             DbModelDef modelDef = new DbModelDef
             {
@@ -157,9 +158,9 @@ namespace HB.FullStack.Database.DbModels
                 ModelType = modelType,
                 IsPropertyTrackable = modelType.IsAssignableTo(typeof(IPropertyTrackableObject)),
 
-                DbSchemaName = dbSchema.Name,
+                DbSchema = dbSchema,
                 EngineType = dbSchema.EngineType,
-
+                Engine = _configManager.GetDatabaseEngine(dbSchema.EngineType),
                 TableName = tableSchema.TableName,
                 IsTimestamp = typeof(ITimestamp).IsAssignableFrom(modelType),
                 IsWriteable = !(tableSchema.ReadOnly!.Value),
@@ -173,7 +174,8 @@ namespace HB.FullStack.Database.DbModels
                 modelDef.AllowedConflictCheckMethods ^= DbConflictCheckMethods.Timestamp;
             }
 
-            modelDef.BestConflictCheckMethodWhenUpdateEntire = GetBestConflictCheckMethodWhenUpdateEntire(modelDef);
+            modelDef.BestConflictCheckMethodWhenUpdate = GetBestConflictCheckMethodWhenUpdate(modelDef);
+            modelDef.BestConflictCheckMethodWhenDelete = GetBestConflictCheckMethodWhenDelete(modelDef);
 
             //确保Id排在第一位，在ModelMapper中，判断reader.GetValue(0)为DBNull,则为Null
             var orderedProperties = modelType.GetProperties().OrderBy(p => p, new PropertyOrderComparer());
@@ -241,7 +243,7 @@ namespace HB.FullStack.Database.DbModels
             return modelDef;
         }
 
-        private static DbConflictCheckMethods GetBestConflictCheckMethodWhenUpdateEntire(DbModelDef modelDef)
+        private static DbConflictCheckMethods GetBestConflictCheckMethodWhenUpdate(DbModelDef modelDef)
         {
             if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
             {
@@ -258,7 +260,27 @@ namespace HB.FullStack.Database.DbModels
                 return DbConflictCheckMethods.Ignore;
             }
 
-            throw DbExceptions.ConflictCheckError($"{modelDef.FullName} can not get proper conflict check method. allowed methods:{modelDef.AllowedConflictCheckMethods}");
+            throw DbExceptions.ConflictCheckError($"{modelDef.FullName} can not get best conflict check method for update. allowed methods:{modelDef.AllowedConflictCheckMethods}");
+        }
+
+        private static DbConflictCheckMethods GetBestConflictCheckMethodWhenDelete(DbModelDef modelDef)
+        {
+            if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            {
+                return DbConflictCheckMethods.Timestamp;
+            }
+
+            if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.OldNewValueCompare))
+            {
+                return DbConflictCheckMethods.OldNewValueCompare;
+            }
+
+            if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            {
+                return DbConflictCheckMethods.Ignore;
+            }
+
+            throw DbExceptions.ConflictCheckError($"{modelDef.FullName} can not get best conflict check method for delete. allowed methods:{modelDef.AllowedConflictCheckMethods}");
         }
 
         private static DbModelPropertyDef CreatePropertyDef(DbModelDef modelDef, PropertyInfo propertyInfo, DbFieldAttribute fieldAttribute, DbFieldSchema? fieldSchemaFromOptions, DbSchema dbSchema)
@@ -356,7 +378,7 @@ namespace HB.FullStack.Database.DbModels
 
         public IEnumerable<DbModelDef> GetAllDefsByDbSchema(string dbSchemaName)
         {
-            return _dbModelDefs.Values.Where(def => dbSchemaName.Equals(def.DbSchemaName, Globals.ComparisonIgnoreCase));
+            return _dbModelDefs.Values.Where(def => dbSchemaName.Equals(def.DbSchema.Name, Globals.ComparisonIgnoreCase));
         }
 
         public IDbPropertyConverter? GetPropertyTypeConverter(Type modelType, string propertyName)

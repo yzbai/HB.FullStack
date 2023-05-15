@@ -8,7 +8,7 @@ namespace HB.FullStack.Common.PropertyTrackable
 {
     public class PropertyChangePack : ValidatableObject
     {
-        public IList<PropertyChange> PropertyChanges { get; set; } = new List<PropertyChange>();
+        public IDictionary<PropertyName, PropertyChange> PropertyChanges { get; set; } = new Dictionary<PropertyName, PropertyChange>();
 
         public IDictionary<PropertyName, JsonElement> AddtionalProperties { get; set; } = new Dictionary<PropertyName, JsonElement>();
 
@@ -20,9 +20,9 @@ namespace HB.FullStack.Common.PropertyTrackable
 
     public static class PropertyChangePackExtensions
     {
-        public static bool ContainsProperty(this PropertyChangePack cp, string propertyName)
+        public static bool ContainsProperty(this PropertyChangePack cp, PropertyName propertyName)
         {
-            return cp.PropertyChanges.FirstOrDefault(change => change.PropertyName == propertyName) != null;
+            return cp.PropertyChanges.ContainsKey(propertyName);
         }
 
         public static bool ContainsAddtionalProperty(this PropertyChangePack cp, string propertyName)

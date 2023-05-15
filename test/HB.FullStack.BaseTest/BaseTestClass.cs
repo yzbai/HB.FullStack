@@ -24,9 +24,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using HB.FullStack.Database.Implements;
-using HB.FullStack.Database.Config;
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Database.Config;
 
 [assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
 
@@ -46,7 +46,7 @@ namespace HB.FullStack.BaseTest
 
         public static IDatabase Db { get; set; } = null!;
 
-        public static IDbSchemaManager DbSettingManager { get; set; } = null!;
+        public static IDbConfigManager DbSettingManager { get; set; } = null!;
 
         public static ITransaction Trans { get; set; } = null!;
 
@@ -104,7 +104,7 @@ namespace HB.FullStack.BaseTest
             #region Db
 
             Db = ServiceProvider.GetRequiredService<IDatabase>();
-            DbSettingManager = ServiceProvider.GetRequiredService<IDbSchemaManager>();
+            DbSettingManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
             await DropSysInfoTableFirstForTest();

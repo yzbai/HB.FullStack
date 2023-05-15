@@ -8,7 +8,12 @@ namespace HB.FullStack.Common.PropertyTrackable
 {
     public static class IPropertyTrackableObjectExtensions
     {
-        public static PropertyChangePack GetPropertyChangePack(this IPropertyTrackableObject trackableObject, bool mergeMultipleChanged = true)
+        /// <summary>
+        /// This will change the Timestamp if the trackableObject is ITimestamp
+        /// </summary>
+        /// <param name="trackableObject"></param>
+        /// <returns></returns>
+        public static PropertyChangePack GetPropertyChangePack(this IPropertyTrackableObject trackableObject)
         {
             //TODO: 需要考虑锁吗?
 
@@ -17,52 +22,34 @@ namespace HB.FullStack.Common.PropertyTrackable
                 timestampModel.Timestamp = TimeUtil.Timestamp;
             }
 
-            PropertyValue[] addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(trackableObject);
-            IList<PropertyChange>? propertyChanges = GetPropertyChangeList(trackableObject, mergeMultipleChanged);
+            var addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(trackableObject);
+            var propertyChanges = GetPropertyChangeDict(trackableObject);
 
-            PropertyChangePack changePack = new PropertyChangePack
+            var changePack = new PropertyChangePack
             {
                 PropertyChanges = propertyChanges,
-                AddtionalProperties = addtionalProperties.ToDictionary(pv => pv.PropertyName, pv => SerializeUtil.ToJsonElement(pv.Value))
+                AddtionalProperties = addtionalProperties.ToDictionary(pv => pv.Name, pv => SerializeUtil.ToJsonElement(pv.Value))
             };
 
             return changePack;
 
-            static IList<PropertyChange> GetPropertyChangeList(IPropertyTrackableObject trackableObject, bool mergeMultipleChanged)
+            static IDictionary<PropertyName, PropertyChange> GetPropertyChangeDict(IPropertyTrackableObject trackableObject)
             {
-                IList<PropertyChange>? propertyChanges = null;
+                Dictionary<PropertyName, PropertyChange>? propertyChangsDict = new Dictionary<string, PropertyChange>();
 
-                if (mergeMultipleChanged)
+                foreach (PropertyChange curProperty in trackableObject.GetChanges())
                 {
-                    Dictionary<string, PropertyChange> dict = new Dictionary<string, PropertyChange>();
-
-                    foreach (PropertyChange curProperty in trackableObject.GetChanges())
+                    if (propertyChangsDict.TryGetValue(curProperty.PropertyName, out PropertyChange? storedProperty))
                     {
-                        if (dict.TryGetValue(curProperty.PropertyName, out PropertyChange? storedProperty))
-                        {
-                            storedProperty.NewValue = curProperty.NewValue;
-                        }
-                        else
-                        {
-                            dict.Add(curProperty.PropertyName, new PropertyChange(curProperty));
-                        }
+                        storedProperty.NewValue = curProperty.NewValue;
                     }
-
-                    propertyChanges = Enumerable.ToList(dict.Values);
-                }
-                else
-                {
-                    propertyChanges = new List<PropertyChange>();
-
-                    foreach (PropertyChange curProperty in trackableObject.GetChanges())
+                    else
                     {
-                        propertyChanges.Add(new PropertyChange(curProperty));
+                        propertyChangsDict.Add(curProperty.PropertyName, new PropertyChange(curProperty));
                     }
                 }
 
-                //propertyChanges.OrderBy(pc => pc.PropertyName);
-
-                return propertyChanges;
+                return propertyChangsDict;
             }
         }
     }
