@@ -5,9 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common.PropertyTrackable;
-using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
@@ -45,15 +43,13 @@ namespace HB.FullStack.Database
             {
                 PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = bestConflictCheckMethod == DbConflictCheckMethods.Timestamp
                     ? DbCommandBuilder.CreateUpdateTimestampCommand(modelDef, item, oldTimestamp!.Value)
                     : DbCommandBuilder.CreateUpdateIgnoreConflictCheckCommand(modelDef, item);
 
                 long rows = transContext != null
-                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -139,15 +135,13 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = bestConflictCheckMethod == DbConflictCheckMethods.Timestamp
                     ? DbCommandBuilder.CreateBatchUpdateTimestampCommand(modelDef, items, oldTimestamps)
                     : DbCommandBuilder.CreateBatchUpdateIgnoreConflictCheckCommand(modelDef, items, oldTimestamps);
 
                 using IDataReader reader = transContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 int count = 0;
 

@@ -12,6 +12,13 @@ namespace HB.FullStack.Database.SQL
     {
         public static string CreateSelectSql(params DbModelDef[] modelDefs)
         {
+            string cacheKey = GetCachedSqlKey(modelDefs, null, null);
+
+            if (SqlCache.TryGetValue(cacheKey, out string? sql))
+            {
+                return sql;
+            }
+
             StringBuilder builder = new StringBuilder("SELECT ");
 
             foreach (DbModelDef modelDef in modelDefs)
@@ -26,7 +33,11 @@ namespace HB.FullStack.Database.SQL
 
             builder.RemoveLast();
 
-            return builder.ToString();
+            sql = builder.ToString();
+
+            SqlCache[cacheKey] = sql;
+
+            return sql;
         }
     }
 }

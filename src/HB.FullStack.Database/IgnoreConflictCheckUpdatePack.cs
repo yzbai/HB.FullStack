@@ -57,7 +57,7 @@ namespace HB.FullStack.Database
                 Id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, idElement)
             };
 
-            foreach (PropertyChange cp in changePack.PropertyChanges)
+            foreach (PropertyChange cp in changePack.PropertyChanges.Values)
             {
                 //TODO: 性能改进，使用Emit，可以省去查询这一步, Input: changePack.PropertyNames(需要提前order), modelDef
 

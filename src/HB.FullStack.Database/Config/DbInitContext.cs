@@ -11,7 +11,5 @@ namespace HB.FullStack.Database.Config
         public IList<string>? SlaveConnectionStrings { get; set; }
 
         public IList<Migration>? Migrations { get; set; }
-
-
     }
 }

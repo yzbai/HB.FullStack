@@ -49,13 +49,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesTimestampCommand(modelDef, updatePack, lastUser);
 
                 long rows = transContext != null
-                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -101,13 +99,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser);
 
                 using IDataReader reader = transactionContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -166,13 +162,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesOldNewCompareCommand(modelDef, updatePack, lastUser);
 
                 int matchedRows = transContext != null
-                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false); ;
+                    ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false); ;
 
                 if (matchedRows == 1)
                 {
@@ -211,13 +205,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesOldNewCompareCommand(modelDef, updatePacks, lastUser);
 
                 using IDataReader reader = transactionContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false); ;
+                    ? await modelDef.Engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false) 
+                    : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 int count = 0;
 
@@ -281,13 +273,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateUpdatePropertiesIgnoreConflictCheckCommand(modelDef, updatePack, lastUser);
 
                 long rows = transContext != null
-                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false) 
+                    : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 if (rows == 1)
                 {
@@ -332,13 +322,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-                ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
                 DbEngineCommand command = DbCommandBuilder.CreateBatchUpdatePropertiesIgnoreConflictCheckCommand(modelDef, updatePacks, lastUser);
 
                 using IDataReader reader = transactionContext != null
-                    ? await engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandReaderAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false) 
+                    : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 int count = 0;
 

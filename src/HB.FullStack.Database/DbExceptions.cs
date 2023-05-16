@@ -395,7 +395,7 @@ namespace HB.FullStack.Database
             DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 
             ex.Data["ModelFullName"] = modelFullName;
-            ex.Data["PropertyNames"] = changePack?.PropertyChanges.Select(c => c.PropertyName).ToJoinedString(",");
+            ex.Data["PropertyNames"] = changePack?.PropertyChanges.Select(c => c.Key).ToJoinedString(",");
 
             return ex;
         }
@@ -449,7 +449,7 @@ namespace HB.FullStack.Database
         {
             DbException ex = new DbException(ErrorCodes.DbUpdatePropertiesError, cause, null, null);
 
-            ex.Data["DbSchemaName"] = modelDef.DbSchemaName;
+            ex.Data["DbSchemaName"] = modelDef.DbSchema.Name;
             ex.Data["DbModelName"] = modelDef.FullName;
             ex.Data["PropertyNames"] = propertyNames.ToJoinedString(",");
 

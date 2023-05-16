@@ -161,7 +161,7 @@ namespace HB.FullStack.Database.DbModels
 
                 DbSchema = dbSchema,
                 EngineType = dbSchema.EngineType,
-                Engine = dbSchema.DbEngine,
+                Engine = dbSchema.Engine,
                 TableName = tableSchema.TableName,
                 IsTimestamp = typeof(ITimestamp).IsAssignableFrom(modelType),
                 IsWriteable = !(tableSchema.ReadOnly!.Value),

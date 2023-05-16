@@ -18,7 +18,7 @@ namespace HB.FullStack.Database.SQL
         public DbEngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : BaseDbModel, new()
         {
             return new DbEngineCommand(
-                GetCachedSql(SqlType.Insert, new DbModelDef[] { modelDef }),
+                SqlHelper.CreateInsertSql(modelDef),
                 model.ToDbParameters(modelDef, _modelDefFactory));
         }
 

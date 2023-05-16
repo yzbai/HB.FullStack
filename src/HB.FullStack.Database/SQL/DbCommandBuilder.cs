@@ -21,75 +21,11 @@ namespace HB.FullStack.Database.SQL
     {
         private readonly IDbModelDefFactory _modelDefFactory;
         private readonly ISQLExpressionVisitor _expressionVisitor;
-        private readonly ConcurrentDictionary<string, string> _commandTextCache = new ConcurrentDictionary<string, string>();
 
         public DbCommandBuilder(IDbModelDefFactory modelDefFactory, ISQLExpressionVisitor expressionVisitor)
         {
             _modelDefFactory = modelDefFactory;
             _expressionVisitor = expressionVisitor;
-        }
-
-        private string GetCachedSql(SqlType sqlType, DbModelDef[] modelDefs, IList<string>? propertyNames = null, bool addOrUpdateReturnModel = false)
-        {
-            string cacheKey = GetCommandTextCacheKey(sqlType, modelDefs, propertyNames, addOrUpdateReturnModel);
-
-            if (!_commandTextCache.TryGetValue(cacheKey, out string? commandText))
-            {
-                commandText = sqlType switch
-                {
-                    SqlType.Select => SqlHelper.CreateSelectSql(modelDefs),
-                    SqlType.Insert => SqlHelper.CreateInsertSql(modelDefs[0]),
-
-                    SqlType.UpdateIgnoreConflictCheck => SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDefs[0]),
-                    SqlType.UpdateUsingTimestamp => SqlHelper.CreateUpdateUsingTimestampSql(modelDefs[0]),
-
-                    SqlType.Update => SqlHelper.CreateUpdateModelSql(modelDefs[0]),
-
-                    SqlType.UpdatePropertiesIgnoreConflictCheck => SqlHelper.CreateUpdatePropertiesIgnoreConflictCheckSql(modelDefs[0], propertyNames!),
-                    SqlType.UpdatePropertiesUsingTimestamp => SqlHelper.CreateUpdatePropertiesUsingTimestampSql(modelDefs[0], propertyNames!),
-                    //SqlType.UpdatePropertiesUsingTimestampCompare => SqlHelper.CreateUpdatePropertiesUsingTimestampCompareSql(modelDefs[0], propertyNames!),
-                    SqlType.UpdatePropertiesUsingOldNewCompare => SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDefs[0], propertyNames!),
-
-                    //SqlType.DeleteModel => SqlHelper.CreateDeleteModelSql(modelDefs[0]),
-                    SqlType.UpdateDeletedFields => SqlHelper.CreateUpdateDeletedSql(modelDefs[0]),
-                    SqlType.AddOrUpdateModel => SqlHelper.CreateAddOrUpdateSql(modelDefs[0], addOrUpdateReturnModel),
-
-
-                    SqlType.Delete => SqlHelper.CreateDeleteSql(modelDefs[0]),
-                    SqlType.DeleteByProperties => SqlHelper.CreateDeleteByPropertiesSql(modelDefs[0], propertyNames!),
-
-                    _ => throw new NotSupportedException(),
-                };
-
-                _commandTextCache.TryAdd(cacheKey, commandText);
-            }
-
-            return commandText;
-
-            static string GetCommandTextCacheKey(SqlType textType, DbModelDef[] modelDefs, IEnumerable<string>? propertyNames, bool addOrUpdateReturnModel)
-            {
-                StringBuilder builder = new StringBuilder(modelDefs[0].DbSchemaName);
-
-                foreach (DbModelDef modelDef in modelDefs)
-                {
-                    builder.Append(modelDef.TableName);
-                    builder.Append('_');
-                }
-
-                if (propertyNames != null)
-                {
-                    foreach (string propertyName in propertyNames)
-                    {
-                        builder.Append(propertyName);
-                        builder.Append('_');
-                    }
-                }
-
-                builder.Append(textType.ToString());
-                builder.Append(addOrUpdateReturnModel);
-
-                return builder.ToString();
-            }
         }
 
         #region 条件构造
@@ -118,8 +54,6 @@ namespace HB.FullStack.Database.SQL
         }
 
         #endregion
-
-        
 
         #region 更改 - AddOrUpdate
 
@@ -181,7 +115,6 @@ namespace HB.FullStack.Database.SQL
         }
 
         #endregion
-
 
         #region Management
 

@@ -13,7 +13,10 @@ namespace HB.FullStack.Database.SQL
         public DbEngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
             where T : BaseDbModel, new()
         {
-            return AssembleRetrieveCommand(GetCachedSql(SqlType.Select, new DbModelDef[] { modelDef }), fromCondition, whereCondition);
+            return AssembleRetrieveCommand(
+                SqlHelper.CreateSelectSql(modelDef), 
+                fromCondition, 
+                whereCondition);
         }
 
         public DbEngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
@@ -27,7 +30,7 @@ namespace HB.FullStack.Database.SQL
             where T2 : BaseDbModel, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(SqlType.Select, returnModelDefs),
+                SqlHelper.CreateSelectSql(returnModelDefs),
                 fromCondition,
                 whereCondition);
         }
@@ -38,7 +41,7 @@ namespace HB.FullStack.Database.SQL
             where T3 : BaseDbModel, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(SqlType.Select, returnModelDefs),
+                SqlHelper.CreateSelectSql(returnModelDefs),
                 fromCondition,
                 whereCondition);
         }
@@ -49,7 +52,7 @@ namespace HB.FullStack.Database.SQL
             where TWhere : BaseDbModel, new()
         {
             return AssembleRetrieveCommand(
-                GetCachedSql(SqlType.Select, returnModelDefs),
+                SqlHelper.CreateSelectSql(returnModelDefs),
                 fromCondition,
                 whereCondition);
         }

@@ -71,13 +71,12 @@ namespace HB.FullStack.Database
             return DeleteCoreAsync<T>(id, null, null, lastUser, transContext, trulyDelete);
         }
 
-        public Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
+        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
             DbConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
-
 
             bool trulyDelete = modelDef.DbSchema.TrulyDelete;
             object idValue = modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!;
@@ -91,10 +90,44 @@ namespace HB.FullStack.Database
                 _ => throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has wrong Best Conflict Check Method. {bestConflictMethod}")
             };
 
-            ConnectionString connectionString = modelDef.DbSchema.ConnectionString!;
 
-            long matched = transContext != null
-                ? engine
+            long rows = transContext != null
+                    ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
+
+            if (rows == 1)
+            {
+                return;
+            }
+            else if (rows == 0)
+            {
+                throw DbExceptions.ConcurrencyConflict(type: modelDef.FullName, idValue.ToString(), "");
+            }
+            else
+            {
+                throw DbExceptions.FoundTooMuch(modelDef.FullName, item: idValue.ToString());
+            }
+        }
+
+        public async Task DeleteAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel, new()
+        {
+            ThrowIf.NotValid(items, nameof(items));
+
+            if (!items.Any())
+            {
+                return;
+            }
+
+            if(items.Count == 1)
+            {
+                await DeleteAsync(items[0], lastUser, transContext).ConfigureAwait(false);
+                return;
+            }
+
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
+            DbConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
+
+
 
         }
 

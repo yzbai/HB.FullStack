@@ -20,11 +20,9 @@ namespace HB.FullStack.Database.SQL
     {
         public DbEngineCommand CreateUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, T model) where T : BaseDbModel, new()
         {
-            IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
-
-            string sql = GetCachedSql(SqlType.UpdateIgnoreConflictCheck, new DbModelDef[] { modelDef });
-
-            return new DbEngineCommand(sql, paramters);
+            return new DbEngineCommand(
+                SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDef), 
+                model.ToDbParameters(modelDef, _modelDefFactory));
         }
 
         public DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel, new()
@@ -33,9 +31,9 @@ namespace HB.FullStack.Database.SQL
 
             paramters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
 
-            string sql = GetCachedSql(SqlType.UpdateUsingTimestamp, new DbModelDef[] { modelDef });
-
-            return new DbEngineCommand(sql, paramters);
+            return new DbEngineCommand(
+                SqlHelper.CreateUpdateUsingTimestampSql(modelDef), 
+                paramters);
         }
 
         public DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel, new()

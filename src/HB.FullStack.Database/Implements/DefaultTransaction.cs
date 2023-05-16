@@ -24,9 +24,9 @@ namespace HB.FullStack.Database.Implements
 
         public async Task<TransactionContext> BeginTransactionAsync(DbSchema dbSchema, IsolationLevel? isolationLevel = null)
         {
-            IDbTransaction dbTransaction = await dbSchema.DbEngine.BeginTransactionAsync(dbSchema.ConnectionString!, isolationLevel).ConfigureAwait(false);
+            IDbTransaction dbTransaction = await dbSchema.Engine.BeginTransactionAsync(dbSchema.ConnectionString!, isolationLevel).ConfigureAwait(false);
 
-            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, dbSchema.DbEngine);
+            return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, dbSchema.Engine);
         }
 
         public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : BaseDbModel

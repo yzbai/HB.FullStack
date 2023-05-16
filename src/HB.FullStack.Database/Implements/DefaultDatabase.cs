@@ -9,9 +9,7 @@ using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Implements;
 using HB.FullStack.Database.SQL;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Database
 {
@@ -27,7 +25,6 @@ namespace HB.FullStack.Database
     internal sealed partial class DefaultDatabase : IDatabase
     {
         private readonly ILogger _logger;
-        private readonly DbOptions _options;
 
         private IDbConfigManager _dbConfigManager { get; }
 
@@ -39,24 +36,18 @@ namespace HB.FullStack.Database
 
         public DefaultDatabase(
             ILogger<DefaultDatabase> logger,
-            IOptions<DbOptions> options,
-            IDbConfigManager dbSchemaManager,
+            IDbConfigManager dbConfigManager,
             IDbModelDefFactory modelDefFactory,
             IDbCommandBuilder commandBuilder,
             ITransaction transaction)
         {
             _logger = logger;
-            _options = options.Value;
-            _dbSchemaManager = dbSchemaManager;
+            _dbConfigManager = dbConfigManager;
 
             ModelDefFactory = modelDefFactory;
             DbCommandBuilder = commandBuilder;
             Transaction = transaction;
         }
-
-        
-
-       
 
         #region SystemInfo 管理
 
@@ -71,9 +62,7 @@ namespace HB.FullStack.Database
 
             var command = DbCommandBuilder.CreateSystemInfoRetrieveCommand(dbSchema.EngineType);
 
-            var engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
-
-            using IDataReader reader = await engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false);
+            using IDataReader reader = await dbSchema.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false);
 
             SystemInfo systemInfo = new SystemInfo(dbSchema.Name);
 
@@ -89,9 +78,8 @@ namespace HB.FullStack.Database
         {
             var command = DbCommandBuilder.CreateSystemVersionSetCommand(dbSchema.EngineType, dbSchema.Name, version);
 
-            var engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
 
-            await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
+            await dbSchema.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
         }
 
         #endregion
@@ -102,17 +90,13 @@ namespace HB.FullStack.Database
         {
             var command = DbCommandBuilder.CreateIsTableExistCommand(dbSchema.EngineType, tableName);
 
-            var engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
-
-            object? result = await engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false);
+            object? result = await dbSchema.Engine.ExecuteCommandScalarAsync(transContext.Transaction, command).ConfigureAwait(false);
 
             return System.Convert.ToBoolean(result, Globals.Culture);
         }
 
         private async Task<int> CreateTableAsync(DbModelDef def, TransactionContext transContext, DbSchema dbSchema)
         {
-            var engine = _dbSchemaManager.GetDatabaseEngine(def.EngineType);
-
             var command = DbCommandBuilder.CreateTableCreateCommand(
                 def,
                 dbSchema.AddDropStatementWhenCreateTable,
@@ -122,7 +106,7 @@ namespace HB.FullStack.Database
 
             _logger.LogInformation("Table创建：{CommandText}", command.CommandText);
 
-            return await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
+            return await dbSchema.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
         }
 
         private async Task CreateTablesByDbSchemaAsync(DbSchema dbSchema, TransactionContext trans)

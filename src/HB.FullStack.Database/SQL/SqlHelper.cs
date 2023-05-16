@@ -1,13 +1,14 @@
 ﻿/*
  * Author：Yuzhao Bai
- * Email: yuzhaobai@outlook.com
+ * Email: yzbai@brlite.com
+ * Github: github.com/yzbai
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
-
 
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using HB.FullStack.Common;
@@ -32,6 +33,145 @@ namespace HB.FullStack.Database.SQL
         public static readonly string DbParameterName_LastUser = GetParameterized(nameof(BaseDbModel.LastUser));
         public static readonly string DbParameterName_Deleted = GetParameterized(nameof(BaseDbModel.Deleted));
         public static readonly string DbParameterName_Id = GetParameterized(nameof(DbModel2<long>.Id));
+
+        #region Cache Sql
+
+        private static readonly Dictionary<string, string> SqlCache = new Dictionary<string, string>();
+
+        private static string GetCachedSqlKey(DbModelDef[] modelDefs, IList<string>? propertyNames, IList<object?>? otherParameters, [CallerMemberName] string caller = "")
+        {
+            ThrowIf.NullOrEmpty(caller, nameof(caller));
+
+            StringBuilder builder = new StringBuilder(modelDefs[0].DbSchema.Name);
+
+            foreach (DbModelDef modelDef in modelDefs)
+            {
+                builder.Append(modelDef.TableName);
+                builder.Append('_');
+            }
+
+            if (propertyNames.IsNotNullOrEmpty())
+            {
+                foreach (string propertyName in propertyNames)
+                {
+                    builder.Append(propertyName);
+                    builder.Append('_');
+                }
+            }
+
+            builder.Append(caller);
+            builder.Append('_');
+
+            if (otherParameters.IsNotNullOrEmpty())
+            {
+                foreach (object? other in otherParameters)
+                {
+                    builder.Append(other);
+                    builder.Append('_');
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        #endregion
+
+        #region Batch Sql
+
+        enum BatchSqlReturnType
+        {
+            None,
+            ReturnFoundUpdateMatchedRows,
+            ReturnLastInsertIds
+        }
+
+        private static string CreateBatchSql(BatchSqlReturnType returnType, DbModelDef modelDef, IList<object?> createSqlParameters, Func<int, object?, string> createSql)
+        {
+            //TODO: 将这一段反复重复的代码进行重构
+            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
+            StringBuilder innerBuilder = new StringBuilder();
+            DbEngineType engineType = modelDef.EngineType;
+
+            string returnSqlTemplate = returnType switch
+            {
+                BatchSqlReturnType.None => "",
+                BatchSqlReturnType.ReturnFoundUpdateMatchedRows => $" {TempTable_Insert_Id(tempTableName, FoundUpdateMatchedRows_Statement(engineType), engineType)}",
+                BatchSqlReturnType.ReturnLastInsertIds => $" {TempTable_Insert_Id(tempTableName, LastInsertIdStatement(engineType), engineType)}",
+                _ => throw new NotImplementedException($"Wrong Return SqlTemplate:{returnType}.")
+            };
+
+            for (int i = 0; i < createSqlParameters.Count; ++i)
+            {
+                innerBuilder.Append(createSql(i, createSqlParameters[i]));
+                innerBuilder.Append(returnSqlTemplate);
+            }
+
+            if (returnType == BatchSqlReturnType.None)
+            {
+                return $@"{Transaction_Begin(engineType)}
+                        {innerBuilder}
+                        {Transaction_Commit(engineType)}";
+            }
+            else
+            {
+                return $@"{Transaction_Begin(engineType)}
+                        {TempTable_Drop(tempTableName, engineType)}
+                        {TempTable_Create_Id(tempTableName, engineType)}
+                        {innerBuilder}
+                        {TempTable_Select_Id(tempTableName, engineType)}
+                        {TempTable_Drop(tempTableName, engineType)}
+                        {Transaction_Commit(engineType)}";
+            }
+        }
+
+        private static string CreateBatchSqlUsingTemplate(BatchSqlReturnType returnType, DbModelDef modelDef, int modelCount, Func<string> getTemplateSql, [CallerMemberName] string callerName = "")
+        {
+            string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { returnType }, callerName);
+
+            if (!SqlCache.TryGetValue(cacheKey, out string? templateSql))
+            {
+                templateSql = getTemplateSql();
+                SqlCache[cacheKey] = templateSql;
+            }
+
+            //TODO: 将这一段反复重复的代码进行重构
+            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
+            StringBuilder innerBuilder = new StringBuilder();
+            DbEngineType engineType = modelDef.EngineType;
+
+            string returnSqlTemplate = returnType switch
+            {
+                BatchSqlReturnType.None => "",
+                BatchSqlReturnType.ReturnFoundUpdateMatchedRows => $" {TempTable_Insert_Id(tempTableName, FoundUpdateMatchedRows_Statement(engineType), engineType)}",
+                BatchSqlReturnType.ReturnLastInsertIds => $" {TempTable_Insert_Id(tempTableName, LastInsertIdStatement(engineType), engineType)}",
+                _ => throw new NotImplementedException($"Wrong Return SqlTemplate:{returnType}.")
+            };
+
+            for (int i = 0; i < modelCount; ++i)
+            {
+                innerBuilder.AppendFormat(templateSql, i);
+                innerBuilder.Append(returnSqlTemplate);
+            }
+
+            if (returnType == BatchSqlReturnType.None)
+            {
+                return $@"{Transaction_Begin(engineType)}
+                        {innerBuilder}
+                        {Transaction_Commit(engineType)}";
+            }
+            else
+            {
+                return $@"{Transaction_Begin(engineType)}
+                        {TempTable_Drop(tempTableName, engineType)}
+                        {TempTable_Create_Id(tempTableName, engineType)}
+                        {innerBuilder}
+                        {TempTable_Select_Id(tempTableName, engineType)}
+                        {TempTable_Drop(tempTableName, engineType)}
+                        {Transaction_Commit(engineType)}";
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 只用于客户端，没有做Timestamp检查
@@ -83,7 +223,7 @@ namespace HB.FullStack.Database.SQL
             {
                 if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
-                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {GetLastInsertIdStatement(modelDef.EngineType)};";
+                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {LastInsertIdStatement(modelDef.EngineType)};";
                 }
                 else
                 {
@@ -94,22 +234,10 @@ namespace HB.FullStack.Database.SQL
             return sql;
         }
 
-        
-
-        
-
-        
-
-
-
         //public static string CreateDeleteModelSql(DbModelDef modelDef, int number = 0)
         //{
         //    return CreateUpdateModelSql(modelDef, number);
         //}
-
-
-
-        
 
         /// <summary>
         /// 用于专有化的字符（`）
@@ -277,7 +405,7 @@ namespace HB.FullStack.Database.SQL
             };
         }
 
-        public static string GetLastInsertIdStatement(DbEngineType databaseEngineType)
+        public static string LastInsertIdStatement(DbEngineType databaseEngineType)
         {
             return databaseEngineType switch
             {
@@ -351,10 +479,10 @@ namespace HB.FullStack.Database.SQL
         }
 
         public static string MySQL_Table_Create_Statement(
-            DbModelDef modelDef, 
-            bool addDropStatement, 
-            int varcharDefaultLength, 
-            int maxVarcharFieldLength, 
+            DbModelDef modelDef,
+            bool addDropStatement,
+            int varcharDefaultLength,
+            int maxVarcharFieldLength,
             int maxMediumTextFieldLength)
         {
             StringBuilder propertySqlBuilder = new StringBuilder();

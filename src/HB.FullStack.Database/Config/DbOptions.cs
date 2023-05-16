@@ -18,7 +18,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// 指定包含DbModel的Assemblies，不再去其他Assembly中查找
         /// </summary>
         public IList<string> DbModelAssemblies { get; set; } = new List<string>();
-
-        public IList<DbInitContext> InitContexts { get; set; } = new List<DbInitContext>();
+        
     }
 }

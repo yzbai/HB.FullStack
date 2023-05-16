@@ -83,7 +83,7 @@ namespace HB.FullStack.Database.Config
 
         #region Internal
 
-        internal IDbEngine DbEngine { get; set; } = null!;
+        internal IDbEngine Engine { get; set; } = null!;
 
 
 

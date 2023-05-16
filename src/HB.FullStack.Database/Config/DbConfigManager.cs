@@ -18,13 +18,14 @@ namespace HB.FullStack.Database.Config
     //TODO: 确保mysql中useAffectedRows=false
     internal class DbConfigManager : IDbConfigManager
     {
-        private DbOptions _options;
+        private readonly DbOptions _options;
         private readonly Dictionary<DbSchemaName, DbSchema> _dbSchemaDict = new Dictionary<DbSchemaName, DbSchema>();
 
-        private IDbEngine? _sqliteEngine;
-        private IDbEngine? _mysqlEngine;
+        private readonly IDbEngine? _sqliteEngine;
+        private readonly IDbEngine? _mysqlEngine;
+        private readonly IEnumerable<DbInitContext>? _initContexts;
 
-        public DbConfigManager(IOptions<DbOptions> options, IEnumerable<IDbEngine> dbEngines)
+        public DbConfigManager(IOptions<DbOptions> options, IEnumerable<IDbEngine> dbEngines, IEnumerable<DbInitContext>? initContexts)
         {
             _options = options.Value;
 
@@ -59,13 +60,16 @@ namespace HB.FullStack.Database.Config
                     DefaultDbSchema = schema;
                 }
 
-                schema.DbEngine = GetDbEngine(schema.EngineType);
+                schema.Engine = GetDbEngine(schema.EngineType);
 
                 _dbSchemaDict[schema.Name] = schema;
             }
 
             DefaultDbSchema ??= _options.DbSchemas[0];
+            _initContexts = initContexts;
         }
+
+        public IEnumerable<DbInitContext>? InitContexts => _initContexts;
 
         public IDbEngine GetDbEngine(DbEngineType engineType)
         {
@@ -88,61 +92,6 @@ namespace HB.FullStack.Database.Config
 
         public IList<DbSchema> AllDbSchemas => _options.DbSchemas;
 
-        public void SetConnectionString(string dbSchemaName, string? connectionString, IList<string>? slaveConnectionStrings)
-        {
-            DbSchema schema = _dbSchemaDict[dbSchemaName];
-
-            if (connectionString.IsNotNullOrEmpty())
-            {
-                schema.ConnectionString = new ConnectionString(connectionString.ThrowIfNullOrEmpty($"在初始化时，应该为 {dbSchemaName} 提供连接字符串"));
-            }
-
-            if (slaveConnectionStrings != null)
-            {
-                schema.SlaveConnectionStrings = slaveConnectionStrings.Select(c => new ConnectionString(c)).ToList();
-            }
-        }
-    }
-
-    public static class DbSchemaExtensions
-    {
-        private static Random _slaveConnectionRandom = new Random();
-
-        public static ConnectionString GetSlaveConnectionString(this DbSchema dbSchema)
-        {
-            if (dbSchema.SlaveConnectionStrings.IsNullOrEmpty())
-            {
-                return dbSchema.ConnectionString.ThrowIfNull($"{dbSchema.Name} do not has master connection string.");
-            }
-            else
-            {
-                return dbSchema.SlaveConnectionStrings[_slaveConnectionRandom.Next() % dbSchema.SlaveConnectionStrings.Count];
-            }
-
-            //if (useMaster)
-            //{
-            //    return dbSchema.ConnectionString;
-            //}
-
-            //DbSchemaEx unit = _dbSchemaExDict[dbSchema.Name];
-
-            //return GetSlaveConnectionString(unit);
-
-            //static ConnectionString? GetSlaveConnectionString(DbSchemaEx dbUnit)
-            //{
-            //    //这里采取平均轮训的方法
-            //    if (dbUnit.SlaveCount == 0)
-            //    {
-            //        return dbUnit.Schema.ConnectionString;
-            //    }
-
-            //    return dbUnit.Schema.SlaveConnectionStrings![dbUnit.SlaveAccessCount++ % dbUnit.SlaveCount];
-            //}
-        }
-
-        public static ConnectionString GetMasterConnectionString(this DbSchema dbSchema)
-        {
-            return dbSchema.ConnectionString.ThrowIfNull($"{dbSchema.Name} do not has master connection string.");
-        }
+        
     }
 }

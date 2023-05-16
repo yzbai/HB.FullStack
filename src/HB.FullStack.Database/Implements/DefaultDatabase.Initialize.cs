@@ -17,38 +17,22 @@ namespace HB.FullStack.Database
 
         //TODO: 思考要不要加一个waithandler，只能不在初始化中才能进行操作?
 
-        #region Initialize
-
         /// <summary>
         /// 有几个DbSchema，就初始化几次
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts = null)
+        public async Task InitializeAsync()
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
 
-            List<DbInitContext> allDbInitContexts = new List<DbInitContext>();
-
-            allDbInitContexts.AddRange(_options.InitContexts);
-
-            if (dbInitContexts != null)
+            foreach (DbSchema dbSchema in _dbConfigManager.AllDbSchemas)
             {
-                allDbInitContexts.AddRange(dbInitContexts);
-            }
+                DbInitContext? dbInitContext = _dbConfigManager.InitContexts?.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
 
-            IList<DbSchema> allDbSchemas = _dbSchemaManager.GetAllDbSchemas();
+                dbSchema.SetConnectionString(dbInitContext?.ConnectionString, dbInitContext?.SlaveConnectionStrings);
 
-            foreach (DbSchema dbSchema in allDbSchemas)
-            {
-                DbInitContext? dbInitContext = allDbInitContexts.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
-
-                //1. 设置connectionString, 如果需要
-                _dbSchemaManager.SetConnectionString(dbSchema.Name, dbInitContext?.ConnectionString, dbInitContext?.SlaveConnectionStrings);
-
-                ConnectionString? connectionString = _dbSchemaManager.GetConnectionString(dbSchema.Name, true);
-
-                if (connectionString == null)
+                if (dbSchema.ConnectionString == null)
                 {
                     continue;
                 }
@@ -56,25 +40,23 @@ namespace HB.FullStack.Database
                 IEnumerable<Migration>? curMigrations = dbInitContext?.Migrations?.Where(m => m.DbSchemaName == dbSchema.Name).ToList();
 
                 //2. 创建新数据, 如果需要
-                await CreateTablesIfNeed(curMigrations, dbSchema, connectionString).ConfigureAwait(false);
+                await CreateTablesIfNeed(curMigrations, dbSchema).ConfigureAwait(false);
 
                 //3. 迁移, 如果需要
-                await MigrateIfNeeded(curMigrations, dbSchema, connectionString).ConfigureAwait(false);
+                await MigrateIfNeeded(curMigrations, dbSchema).ConfigureAwait(false);
 
                 _logger.LogInformation("数据初{DbSchemaName}始化成功！, Version:{Version}", dbSchema.Name, dbSchema.Version);
             }
         }
 
-        private async Task CreateTablesIfNeed(IEnumerable<Migration>? migrations, DbSchema dbSchema, ConnectionString connectionString)
+        private async Task CreateTablesIfNeed(IEnumerable<Migration>? migrations, DbSchema dbSchema)
         {
             if (!dbSchema.AutomaticCreateTable)
             {
                 return;
             }
 
-            Engine.IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
-
-            var transContext = await Transaction.BeginTransactionAsync(dbSchema.Name).ConfigureAwait(false);
+            var transContext = await Transaction.BeginTransactionAsync(dbSchema).ConfigureAwait(false);
 
             try
             {
@@ -121,7 +103,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private async Task<bool> MigrateIfNeeded(IEnumerable<Migration>? migrations, DbSchema dbSchema, ConnectionString connectionString)
+        private async Task<bool> MigrateIfNeeded(IEnumerable<Migration>? migrations, DbSchema dbSchema)
         {
             if (migrations.IsNullOrEmpty())
             {
@@ -135,10 +117,8 @@ namespace HB.FullStack.Database
 
             bool haveExecutedMigration = false;
 
-            Engine.IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
-
             //TODO: 这里没有对slave库进行操作
-            var transContext = await Transaction.BeginTransactionAsync(dbSchema.Name, System.Data.IsolationLevel.Serializable);
+            var transContext = await Transaction.BeginTransactionAsync(dbSchema, System.Data.IsolationLevel.Serializable);
 
             try
             {
@@ -210,13 +190,11 @@ namespace HB.FullStack.Database
 
         private async Task ApplyMigration(DbSchema dbSchema, TransactionContext transContext, Migration migration)
         {
-            var engine = _dbSchemaManager.GetDatabaseEngine(dbSchema.EngineType);
-
             if (migration.SqlStatement.IsNotNullOrEmpty())
             {
                 DbEngineCommand command = new DbEngineCommand(migration.SqlStatement);
 
-                await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
+                await dbSchema.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
             }
 
             if (migration.ModifyFunc != null)
@@ -233,7 +211,5 @@ namespace HB.FullStack.Database
             _logger.LogInformation("数据库Migration, {DbSchemaName}, from {OldVersion}, to {NewVersion}, {Sql}",
                 dbSchema.Name, migration.OldVersion, migration.NewVersion, migration.SqlStatement);
         }
-
-        #endregion
     }
 }

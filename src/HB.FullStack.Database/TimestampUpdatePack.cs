@@ -88,7 +88,7 @@ namespace HB.FullStack.Database
 
             string timestampPropertyName = modelDef.TimestampPropertyDef!.Name;
 
-            foreach (PropertyChange cp in changePack.PropertyChanges)
+            foreach (PropertyChange cp in changePack.PropertyChanges.Values)
             {
                 DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(cp.PropertyName)
                     ?? throw DbExceptions.ChangedPropertyPackError($"ChangePack包含未知的property:{cp.PropertyName}", changePack, modelDef.FullName);
