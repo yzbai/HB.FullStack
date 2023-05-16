@@ -64,7 +64,7 @@ namespace HB.FullStack.Database.SQL
             StringBuilder sqlBuilder = new StringBuilder(selectSql);
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
 
-            fromCondition ??= new FromExpression<TFrom>(_modelDefFactory, _expressionVisitor);
+            fromCondition ??= From<TFrom>();
 
             sqlBuilder.Append(fromCondition.ToStatement());
             parameters.AddRange(fromCondition.GetParameters());

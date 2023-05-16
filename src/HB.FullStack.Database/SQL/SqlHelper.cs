@@ -174,7 +174,6 @@ namespace HB.FullStack.Database.SQL
         #endregion
 
         #region Sql Dialect
-        
 
         /// <summary>
         /// 用于参数化的字符（@）,用于参数化查询

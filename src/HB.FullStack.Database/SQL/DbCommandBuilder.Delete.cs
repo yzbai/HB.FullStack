@@ -71,52 +71,6 @@ namespace HB.FullStack.Database.SQL
                 parameters.AddRange(newParameters));
         }
 
-        public DbEngineCommand CreateDeleteCommand(
-            DbModelDef modelDef,
-            object id,
-            string lastUser,
-            bool trulyDeleted,
-            long? oldTimestamp,
-            long? newTimestamp)
-        {
-            DbEngineType engineType = modelDef.EngineType;
-
-            if (!trulyDeleted)
-            {
-                return CreateUpdatePropertiesTimestampCommand(
-                    modelDef,
-                    new TimestampUpdatePack
-                    {
-                        Id = id,
-                        OldTimestamp = oldTimestamp,
-                        NewTimestamp = newTimestamp,
-                        PropertyNames = new List<string> { nameof(DbModel.Deleted) },
-                        NewPropertyValues = new List<object?> { true }
-                    },
-                    lastUser);
-            }
-
-            List<string> propertyNames = new List<string> { nameof(TimestampLongIdDbModel.Id) };
-            List<object?> propertyValues = new List<object?> { id };
-
-            if (modelDef.IsTimestamp && !oldTimestamp.HasValue)
-            {
-                throw DbExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
-            }
-
-            if (oldTimestamp.HasValue)
-            {
-                propertyNames.Add(nameof(TimestampLongIdDbModel.Timestamp));
-                propertyValues.Add(oldTimestamp.Value);
-            }
-
-            string sql = GetCachedSql(SqlType.DeleteByProperties, new DbModelDef[] { modelDef }, propertyNames);
-
-            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues);
-
-            return new DbEngineCommand(sql, parameters);
-        }
-
         public DbEngineCommand CreateDeleteCommand<T>(
             DbModelDef modelDef,
             WhereExpression<T> whereExpression,
@@ -144,6 +98,54 @@ namespace HB.FullStack.Database.SQL
             string deleteSql = GetCachedSql(SqlType.Delete, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
 
             return new DbEngineCommand(deleteSql, parameters);
+        }
+
+
+        public DbEngineCommand CreateBatchDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, IList<object> ids, string lastUser, bool trulyDeleted, long? newTimestamp = null)
+        {
+            ThrowIf.NullOrEmpty(ids, nameof(ids));
+
+            IList<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
+
+            List<string> propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(BaseDbModel.LastUser) };
+
+            if (modelDef.IsTimestamp)
+            {
+                propertyNames.Add(nameof(ITimestamp.Timestamp));
+            }
+
+            long curTimestamp = TimeUtil.Timestamp;
+
+            foreach (var id in ids)
+            {
+                List<object?> propertyValues = new List<object?> { id, lastUser };
+
+                if (modelDef.IsTimestamp)
+                {
+                    propertyValues.Add(newTimestamp ?? curTimestamp);
+                }
+
+                var parameters = DbModelConvert.PropertyValuesToParameters(
+                    modelDef,
+                    _modelDefFactory,
+                    propertyNames,
+                    propertyValues);
+
+                totalParameters.AddRange(parameters);
+            }
+
+            return new DbEngineCommand(
+                SqlHelper.CreateBatchDeleteIgnoreConflictCheckSql(modelDef, trulyDeleted, ids.Count),
+                totalParameters);
+        }
+
+        public DbEngineCommand CreateBatchDeleteTimestampCommand(DbModelDef modelDef, IList<object> ids, IList<long> timestamps, string lastUser, bool trulyDelete, long? newTimestamp = null)
+        {
+            IList<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
+
+            return new DbEngineCommand(
+                SqlHelper.CreateBatchDeleteUsingTimestampSql(modelDef, trulyDelete, ids.Count), 
+                totalParameters);
         }
 
         public DbEngineCommand CreateBatchDeleteCommand(
