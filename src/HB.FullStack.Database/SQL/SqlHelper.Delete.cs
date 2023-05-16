@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 using HB.FullStack.Database.DbModels;
@@ -46,6 +47,13 @@ namespace HB.FullStack.Database.SQL
 
         public static string CreateDeleteIgnoreConflictCheckSql(DbModelDef modelDef, bool trulyDeleted, string placeHolder = "0")
         {
+            string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { trulyDeleted, placeHolder });
+
+            if (SqlCache.TryGetValue(cacheKey, out var sql))
+            {
+                return sql;
+            }
+
             string where = $"""
                 {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{placeHolder}
                 AND
@@ -54,25 +62,31 @@ namespace HB.FullStack.Database.SQL
 
             if (trulyDeleted)
             {
-                return $"delete from {modelDef.DbTableReservedName} where {where};";
+                sql = $"delete from {modelDef.DbTableReservedName} where {where};";
             }
-
-            StringBuilder assignments = new StringBuilder($"""
-                {modelDef.DeletedPropertyDef.DbReservedName}=1,
-                {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{placeHolder}
-                """);
-
-            if (modelDef.IsTimestamp)
+            else
             {
-                assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{placeHolder} ");
+                StringBuilder assignments = new StringBuilder($"""
+                    {modelDef.DeletedPropertyDef.DbReservedName}=1,
+                    {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{placeHolder}
+                    """);
+
+                if (modelDef.IsTimestamp)
+                {
+                    assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{placeHolder} ");
+                }
+
+                sql = $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
             }
 
-            return $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
+            SqlCache[cacheKey] = sql;
+
+            return sql;
         }
 
         public static string CreateBatchDeleteIgnoreConflictCheckSql2(DbModelDef modelDef, bool trulyDeleted, int modelCount)
         {
-            return CreateBatchSqlUsingTemplate(
+            return CreateBatchSql(
                 BatchSqlReturnType.ReturnFoundUpdateMatchedRows,
                 modelDef,
                 modelCount,
@@ -81,6 +95,13 @@ namespace HB.FullStack.Database.SQL
 
         public static string CreateDeleteUsingTimestampSql(DbModelDef modelDef, bool trulyDeleted, int number = 0)
         {
+            string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { trulyDeleted, number });
+
+            if (SqlCache.TryGetValue(cacheKey, out var sql))
+            {
+                return sql;
+            }
+
             string where = $"""
                 {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{number}
                 AND
@@ -91,16 +112,22 @@ namespace HB.FullStack.Database.SQL
 
             if (trulyDeleted)
             {
-                return $"delete from {modelDef.DbTableReservedName} where {where};";
+                sql = $"delete from {modelDef.DbTableReservedName} where {where};";
+            }
+            else
+            {
+                sql = $"""
+                    update {modelDef.DbTableReservedName} set
+                    {modelDef.DeletedPropertyDef.DbReservedName}=1,
+                    {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{number},
+                    {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{number}
+                    where {where};
+                    """;
             }
 
-            return $"""
-                update {modelDef.DbTableReservedName} set
-                {modelDef.DeletedPropertyDef.DbReservedName}=1,
-                {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{number},
-                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{number}
-                where {where};
-                """;
+            SqlCache[cacheKey] = sql;
+
+            return sql;
         }
 
         public static string CreateDeleteUsingOldNewCompareSql(DbModelDef modelDef, bool trulyDeleted, int number = 0)
@@ -110,6 +137,13 @@ namespace HB.FullStack.Database.SQL
             //    AND
             //    {modelDef.DeletedPropertyDef.DbReservedName}=0
             //    """);
+
+            string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { trulyDeleted, number });
+
+            if (SqlCache.TryGetValue(cacheKey, out var sql))
+            {
+                return sql;
+            }
 
             StringBuilder where = new StringBuilder();
 
@@ -122,20 +156,27 @@ namespace HB.FullStack.Database.SQL
 
             if (trulyDeleted)
             {
-                return $"delete from {modelDef.DbTableReservedName} where {where};";
+                sql = $"delete from {modelDef.DbTableReservedName} where {where};";
             }
+            else
+            {
 
-            StringBuilder assignments = new StringBuilder($"""
+                StringBuilder assignments = new StringBuilder($"""
                 {modelDef.DeletedPropertyDef.DbReservedName}=1,
                 {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{NEW_PROPERTY_VALUE_SUFFIX}_{number}
                 """);
 
-            if (modelDef.IsTimestamp)
-            {
-                assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{number} ");
+                if (modelDef.IsTimestamp)
+                {
+                    assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{number} ");
+                }
+
+                sql = $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
             }
 
-            return $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
+            SqlCache[cacheKey] = sql;
+
+            return sql;
         }
     }
 }

@@ -69,71 +69,20 @@ namespace HB.FullStack.Database.SQL
 
         public static string CreateBatchUpdateUsingTimestampSql(DbModelDef modelDef, int modelCount)
         {
-            return CreateBatchSqlUsingTemplate(
+            return CreateBatchSql(
                 BatchSqlReturnType.ReturnFoundUpdateMatchedRows,
                 modelDef,
                 modelCount,
                 () => CreateUpdateUsingTimestampSql(modelDef, "{0}"));
-
-            //DbEngineType engineType = modelDef.EngineType;
-
-            //string cacheKey = modelDef.FullName + nameof(CreateBatchUpdateUsingTimestampSql);
-            //if (!BatchSqlTemplateCache.TryGetValue(cacheKey, out string? updateTemplate))
-            //{
-            //    updateTemplate = CreateUpdateUsingTimestampSql(modelDef, "{0}");
-            //    BatchSqlTemplateCache[cacheKey] = updateTemplate;
-            //}
-
-            //string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            //StringBuilder innerBuilder = new StringBuilder();
-
-            //for (int i = 0; i < modelCount; ++i)
-            //{
-            //    innerBuilder.AppendFormat(updateTemplate, i);
-            //    innerBuilder.Append($" {SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-            //}
-
-            //return $@"{SqlHelper.Transaction_Begin(engineType)}
-            //                        {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-            //                        {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
-            //                        {innerBuilder}
-            //                        {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
-            //                        {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-            //                        {SqlHelper.Transaction_Commit(engineType)}";
         }
 
         public static string CreateBatchUpdateIgnoreConflictCheckSql(DbModelDef modelDef, int modelCount)
         {
-            return CreateBatchSqlUsingTemplate(
+            return CreateBatchSql(
                 BatchSqlReturnType.ReturnFoundUpdateMatchedRows,
                 modelDef,
                 modelCount,
                 () => CreateUpdateIgnoreConflictCheckSql(modelDef, "{0}"));
-            //DbEngineType engineType = modelDef.EngineType;
-
-            //string cacheKey = modelDef.FullName + nameof(CreateBatchUpdateIgnoreConflictCheckSql);
-            //if (!BatchSqlTemplateCache.TryGetValue(cacheKey, out string? updateTemplate))
-            //{
-            //    updateTemplate = CreateUpdateIgnoreConflictCheckSql(modelDef, "{0}");
-            //    BatchSqlTemplateCache[cacheKey] = updateTemplate;
-            //}
-
-            //string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            //StringBuilder innerBuilder = new StringBuilder();
-
-            //for (int i = 0; i < modelCount; ++i)
-            //{
-            //    innerBuilder.AppendFormat(updateTemplate, i);
-            //    innerBuilder.Append($" {SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundUpdateMatchedRows_Statement(engineType), engineType)}");
-            //}
-
-            //return $@"{SqlHelper.Transaction_Begin(engineType)}
-            //                        {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-            //                        {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
-            //                        {innerBuilder}
-            //                        {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
-            //                        {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-            //                        {SqlHelper.Transaction_Commit(engineType)}";
         }
 
         private static StringBuilder GetUpdateAssignments(DbModelDef modelDef, string placeHolder)

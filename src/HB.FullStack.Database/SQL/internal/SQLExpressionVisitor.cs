@@ -551,7 +551,9 @@ namespace HB.FullStack.Database.SQL
             static void AddParameter(SQLExpressionVisitorContenxt context, List<string> sIn, DbModelPropertyDef? propertyDef, object originValue)
             {
                 string paramPlaceholder = context.GetNextParamPlaceholder();
-                object paramValue = propertyDef == null ? originValue : DbPropertyConvert.PropertyValueToDbFieldValue(originValue, propertyDef, context.EngineType);
+                object paramValue = propertyDef == null 
+                    ? originValue 
+                    : DbPropertyConvert.PropertyValueToDbFieldValue(originValue, propertyDef, context.EngineType);
 
                 context.AddParameter(paramPlaceholder, paramValue);
 

@@ -124,7 +124,7 @@ namespace HB.FullStack.Database.SQL
             }
         }
 
-        private static string CreateBatchSqlUsingTemplate(BatchSqlReturnType returnType, DbModelDef modelDef, int modelCount, Func<string> getTemplateSql, [CallerMemberName] string callerName = "")
+        private static string CreateBatchSql(BatchSqlReturnType returnType, DbModelDef modelDef, int modelCount, Func<string> getTemplateSql, [CallerMemberName] string callerName = "")
         {
             string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { returnType }, callerName);
 
@@ -173,71 +173,36 @@ namespace HB.FullStack.Database.SQL
 
         #endregion
 
+        #region Sql Dialect
+        
+
         /// <summary>
-        /// 只用于客户端，没有做Timestamp检查
+        /// 用于参数化的字符（@）,用于参数化查询
         /// </summary>
-        public static string CreateAddOrUpdateSql(DbModelDef modelDef, bool returnModel, int number = 0)
+        public const string PARAMETERIZED_CHAR = "@";
+
+        /// <summary>
+        /// 用于引号化的字符(')，用于字符串
+        /// </summary>
+        public const string QUOTED_CHAR = "'";
+
+        public const string DOUBLE_QUOTED_CHAR = QUOTED_CHAR + QUOTED_CHAR;
+
+        public static string GetQuoted(string name)
         {
-            StringBuilder addArgs = new StringBuilder();
-            StringBuilder selectArgs = new StringBuilder();
-            StringBuilder addValues = new StringBuilder();
-            StringBuilder updatePairs = new StringBuilder();
-
-            foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
-            {
-                if (returnModel)
-                {
-                    selectArgs.Append(Invariant($"{propertyDef.DbReservedName},"));
-                }
-
-                if (propertyDef.IsAutoIncrementPrimaryKey)
-                {
-                    continue;
-                }
-
-                addArgs.Append(Invariant($"{propertyDef.DbReservedName},"));
-                addValues.Append(Invariant($"{propertyDef.DbParameterizedName}_{number},"));
-
-                if (propertyDef.IsPrimaryKey)
-                {
-                    continue;
-                }
-
-                updatePairs.Append(Invariant($" {propertyDef.DbReservedName}={propertyDef.DbParameterizedName}_{number},"));
-            }
-
-            if (returnModel)
-            {
-                selectArgs.RemoveLast();
-            }
-
-            addValues.RemoveLast();
-            addArgs.RemoveLast();
-            updatePairs.RemoveLast();
-
-            DbModelPropertyDef primaryKeyProperty = modelDef.PrimaryKeyPropertyDef;
-
-            string sql = $"insert into {modelDef.DbTableReservedName}({addArgs}) values({addValues}) {OnDuplicateKeyUpdateStatement(modelDef.EngineType, primaryKeyProperty)} {updatePairs};";
-
-            if (returnModel)
-            {
-                if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
-                {
-                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {LastInsertIdStatement(modelDef.EngineType)};";
-                }
-                else
-                {
-                    sql += $"select {selectArgs} from {modelDef.DbTableReservedName} where {primaryKeyProperty.DbReservedName} = {primaryKeyProperty.DbParameterizedName}_{number};";
-                }
-            }
-
-            return sql;
+            return QUOTED_CHAR + name.Replace(QUOTED_CHAR, DOUBLE_QUOTED_CHAR, StringComparison.InvariantCulture) + QUOTED_CHAR;
         }
 
-        //public static string CreateDeleteModelSql(DbModelDef modelDef, int number = 0)
-        //{
-        //    return CreateUpdateModelSql(modelDef, number);
-        //}
+        public static string GetParameterized(string name)
+        {
+            return PARAMETERIZED_CHAR + name;
+        }
+
+        public static string GetReserved(string name, DbEngineType engineType)
+        {
+            string reservedChar = GetReservedChar(engineType);
+            return reservedChar + name + reservedChar;
+        }
 
         /// <summary>
         /// 用于专有化的字符（`）
@@ -252,37 +217,12 @@ namespace HB.FullStack.Database.SQL
             };
         }
 
-        /// <summary>
-        /// 用于参数化的字符（@）,用于参数化查询
-        /// </summary>
-        public const string PARAMETERIZED_CHAR = "@";
-
-        /// <summary>
-        /// 用于引号化的字符(')，用于字符串
-        /// </summary>
-        public const string QUOTED_CHAR = "'";
-
-        public static string GetQuoted(string name)
-        {
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
-            return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR, Globals.Comparison) + QUOTED_CHAR;
-#elif NETSTANDARD2_0
-            return QUOTED_CHAR + name.Replace(QUOTED_CHAR, QUOTED_CHAR + QUOTED_CHAR) + QUOTED_CHAR;
-#endif
-        }
-
-        public static string GetParameterized(string name)
-        {
-            return PARAMETERIZED_CHAR + name;
-        }
-
-        public static string GetReserved(string name, DbEngineType engineType)
-        {
-            string reservedChar = GetReservedChar(engineType);
-            return reservedChar + name + reservedChar;
-        }
-
-        private static readonly List<Type> _needQuotedTypes = new List<Type> { typeof(string), typeof(char), typeof(Guid), typeof(DateTimeOffset), typeof(byte[]) };
+        private static readonly List<Type> _needQuotedTypes = new List<Type> { 
+            typeof(string), 
+            typeof(char), 
+            typeof(Guid), 
+            typeof(DateTimeOffset), 
+            typeof(byte[]) };
 
         public static bool IsValueNeedQuoted(Type type)
         {
@@ -296,358 +236,6 @@ namespace HB.FullStack.Database.SQL
             return _needQuotedTypes.Contains(type);
         }
 
-        public static bool IsDbFieldNeedLength(DbModelPropertyDef propertyDef, DbEngineType engineType)
-        {
-            DbType dbType = DbPropertyConvert.PropertyTypeToDbType(propertyDef, engineType);
-
-            return dbType == DbType.String
-                || dbType == DbType.StringFixedLength
-                || dbType == DbType.AnsiString
-                || dbType == DbType.AnsiStringFixedLength
-                || dbType == DbType.VarNumeric;
-        }
-
-        public static string TempTable_Insert_Id(string tempTableName, string value, DbEngineType databaseEngineType)
-        {
-            return databaseEngineType switch
-            {
-                DbEngineType.MySQL => $"insert into `{tempTableName}`(`id`) values({value});",
-                DbEngineType.SQLite => $"insert into temp.{tempTableName}(\"id\") values({value});",
-                _ => throw new NotSupportedException()
-            };
-        }
-
-        public static string TempTable_Select_Id(string tempTableName, DbEngineType databaseEngineType)
-        {
-            return databaseEngineType switch
-            {
-                DbEngineType.MySQL => $"select `id` from `{tempTableName}`;",
-                DbEngineType.SQLite => $"select id from temp.{tempTableName};",
-                _ => "",
-            };
-        }
-
-        public static string TempTable_Drop(string tempTableName, DbEngineType databaseEngineType)
-        {
-            return databaseEngineType switch
-            {
-                DbEngineType.MySQL => $"drop temporary table if exists `{tempTableName}`;",
-                DbEngineType.SQLite => $"drop table if EXISTS temp.{tempTableName};",
-                _ => "",
-            };
-        }
-
-        public static string TempTable_Create_Id(string tempTableName, DbEngineType databaseEngineType)
-        {
-            return databaseEngineType switch
-            {
-                DbEngineType.MySQL => $"create temporary table `{tempTableName}` ( `id` int not null);",
-                DbEngineType.SQLite => $"create temporary table temp.{tempTableName} (\"id\" integer not null);",
-                _ => "",
-            };
-        }
-
-        //TODO: sqlite，如果在Batch语句里加上Begin，那么会引起SQLite Error 1: 'cannot start a transaction within a transaction'.
-        //为什么？
-        public static string Transaction_Begin(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => "Begin;",
-                //DbEngineType.SQLite => "Begin;",
-                DbEngineType.SQLite => "",
-                _ => throw new NotImplementedException(),
-            };
-        }
-
-        public static string Transaction_Commit(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => "Commit;",
-                //DbEngineType.SQLite => "Commit;",
-                DbEngineType.SQLite => "",
-                _ => throw new NotImplementedException(),
-            };
-        }
-
-        public static string Transaction_Rollback(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => "Rollback;",
-                //DbEngineType.SQLite => "Rollback;",
-                DbEngineType.SQLite => "",
-                _ => throw new NotImplementedException(),
-            };
-        }
-
-        public static string FoundUpdateMatchedRows_Statement(DbEngineType databaseEngineType)
-        {
-            return databaseEngineType switch
-            {
-                //found_rows()返回匹配到的
-                //row_count() 返回真正被修改的
-
-                DbEngineType.MySQL => " found_rows() ",//$"row_count()", // $" found_rows() ",
-                DbEngineType.SQLite => " changes() ",//sqlite不返回真正受影响的，只返回匹配的
-                _ => throw new NotImplementedException(),
-            };
-        }
-
-        public static string FoundDeletedRows_Statement(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => " row_count() ",
-                DbEngineType.SQLite => " changes() ",
-                _ => throw new NotImplementedException(),
-            };
-        }
-
-        public static string LastInsertIdStatement(DbEngineType databaseEngineType)
-        {
-            return databaseEngineType switch
-            {
-                DbEngineType.SQLite => "last_insert_rowid()",
-                DbEngineType.MySQL => "last_insert_id()",
-                _ => "",
-            };
-        }
-
-        public static string GetOrderBySqlUtilInStatement(string quotedColName, string[] ins, DbEngineType databaseEngineType)
-        {
-            if (databaseEngineType == DbEngineType.MySQL)
-            {
-                return $" ORDER BY FIELD({quotedColName}, {ins.ToJoinedString(",")}) ";
-            }
-            else if (databaseEngineType == DbEngineType.SQLite)
-            {
-                StringBuilder orderCaseBuilder = new StringBuilder(" ORDER BY CASE ");
-
-                orderCaseBuilder.Append(quotedColName);
-
-                for (int i = 0; i < ins.Length; ++i)
-                {
-                    orderCaseBuilder.Append(Invariant($" when {ins[i]} THEN {i} "));
-                }
-
-                orderCaseBuilder.Append(" END ");
-
-                return orderCaseBuilder.ToString();
-            }
-
-            throw new NotSupportedException();
-        }
-
-        public static string SQLite_Table_Create_Statement(DbModelDef modelDef, bool addDropStatement)
-        {
-            StringBuilder propertyInfoSql = new StringBuilder();
-            StringBuilder indexSqlBuilder = new StringBuilder();
-
-            foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
-            {
-                string dbTypeStatement = DbPropertyConvert.PropertyTypeToDbTypeStatement(propertyDef, DbEngineType.SQLite);
-
-                string nullable = propertyDef.IsNullable ? "" : " NOT NULL ";
-
-                string unique = propertyDef.IsUnique /*&& !propertyDef.IsForeignKey*/ && !propertyDef.IsAutoIncrementPrimaryKey ? " UNIQUE " : "";
-
-                string primaryStatement = propertyDef.IsPrimaryKey ? " PRIMARY KEY " : "";
-
-                if (propertyDef.IsAutoIncrementPrimaryKey)
-                {
-                    primaryStatement += " AUTOINCREMENT ";
-                }
-
-                propertyInfoSql.Append(Invariant($" {propertyDef.DbReservedName} {dbTypeStatement} {primaryStatement} {nullable} {unique} ,"));
-
-                //索引
-                if (!propertyDef.IsUnique && !propertyDef.IsAutoIncrementPrimaryKey && (propertyDef.IsForeignKey || propertyDef.IsIndexNeeded))
-                {
-                    indexSqlBuilder.Append(Invariant($" create index {modelDef.TableName}_{propertyDef.Name}_index on {modelDef.DbTableReservedName} ({propertyDef.DbReservedName}); "));
-                }
-            }
-
-            propertyInfoSql.Remove(propertyInfoSql.Length - 1, 1);
-
-            string dropStatement = addDropStatement ? $"Drop table if exists {modelDef.DbTableReservedName};" : string.Empty;
-
-            string tableCreateSql = $"{dropStatement} CREATE TABLE {modelDef.DbTableReservedName} ({propertyInfoSql});{indexSqlBuilder}";
-
-            return tableCreateSql;
-        }
-
-        public static string MySQL_Table_Create_Statement(
-            DbModelDef modelDef,
-            bool addDropStatement,
-            int varcharDefaultLength,
-            int maxVarcharFieldLength,
-            int maxMediumTextFieldLength)
-        {
-            StringBuilder propertySqlBuilder = new StringBuilder();
-            StringBuilder indexSqlBuilder = new StringBuilder();
-
-            DbModelPropertyDef? primaryKeyPropertyDef = null;
-
-            foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
-            {
-                if (propertyDef.IsPrimaryKey)
-                {
-                    primaryKeyPropertyDef = propertyDef;
-                }
-
-                string dbTypeStatement = DbPropertyConvert.PropertyTypeToDbTypeStatement(propertyDef, DbEngineType.MySQL);
-
-                int length = 0;
-
-#if NETSTANDARD2_1 || NET6_0_OR_GREATER
-                if (IsDbFieldNeedLength(propertyDef, DbEngineType.MySQL) && !dbTypeStatement.Contains('(', StringComparison.Ordinal))
-#endif
-#if NETSTANDARD2_0
-                if (IsDbFieldNeedLength(propertyDef, EngineType.MySQL) && !dbTypeStatement.Contains("("))
-#endif
-                {
-                    if (propertyDef.DbMaxLength == null || propertyDef.DbMaxLength == 0)
-                    {
-                        length = varcharDefaultLength;
-                    }
-                    else
-                    {
-                        length = propertyDef.DbMaxLength.Value;
-                    }
-                }
-
-                if (length >= maxVarcharFieldLength) //因为utf8mb4编码，一个汉字4个字节
-                {
-                    dbTypeStatement = "MEDIUMTEXT";
-                }
-
-                if (length >= maxMediumTextFieldLength)
-                {
-                    throw DbExceptions.ModelError(propertyDef.ModelDef.FullName, propertyDef.Name, "字段长度太长");
-                }
-
-                //if (propertyDef.IsLengthFixed )
-                //{
-                //	dbTypeStatement = "CHAR";
-                //}
-
-                string lengthStatement = (length == 0 || dbTypeStatement == "MEDIUMTEXT") ? "" : "(" + length + ")";
-                string nullableStatement = propertyDef.IsNullable == true ? "" : " NOT NULL ";
-                string autoIncrementStatement = propertyDef.IsAutoIncrementPrimaryKey ? "AUTO_INCREMENT" : "";
-                string uniqueStatement = !propertyDef.IsPrimaryKey && !propertyDef.IsForeignKey && propertyDef.IsUnique ? " UNIQUE " : "";
-
-                propertySqlBuilder.Append(Invariant($" {propertyDef.DbReservedName} {dbTypeStatement}{lengthStatement} {nullableStatement} {autoIncrementStatement} {uniqueStatement},"));
-
-                //判断索引
-                if (propertyDef.IsForeignKey || propertyDef.IsIndexNeeded)
-                {
-                    indexSqlBuilder.Append(Invariant($" INDEX {propertyDef.Name}_index ({propertyDef.DbReservedName}), "));
-                }
-            }
-
-            if (primaryKeyPropertyDef == null)
-            {
-                throw DbExceptions.ModelError(modelDef.FullName, "", "no primary key");
-            }
-
-            string dropStatement = addDropStatement ? $"Drop table if exists {modelDef.DbTableReservedName};" : string.Empty;
-
-            return $"{dropStatement} create table {modelDef.DbTableReservedName} ( {propertySqlBuilder} {indexSqlBuilder} PRIMARY KEY ({primaryKeyPropertyDef.DbReservedName})) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
-        }
-
-        public static string GetTableCreateSql(DbModelDef modelDef, bool addDropStatement, int varcharDefaultLength, int maxVarcharFieldLength,
-            int maxMediumTextFieldLength)
-        {
-            return modelDef.EngineType switch
-            {
-                DbEngineType.MySQL => MySQL_Table_Create_Statement(modelDef, addDropStatement, varcharDefaultLength, maxVarcharFieldLength, maxMediumTextFieldLength),
-                DbEngineType.SQLite => SQLite_Table_Create_Statement(modelDef, addDropStatement),
-                _ => throw new NotSupportedException()
-            };
-        }
-
-        public static string OnDuplicateKeyUpdateStatement(DbEngineType engineType, DbModelPropertyDef primaryDef)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => "on duplicate key update",
-                DbEngineType.SQLite => $"on conflict({primaryDef.DbReservedName}) do update set",
-                _ => throw new NotSupportedException()
-            };
-        }
-
-        public static string GetIsTableExistSql(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => MySqlIsTableExistsStatement,
-                DbEngineType.SQLite => SqliteIsTableExistsStatement,
-                _ => throw new NotSupportedException()
-            };
-        }
-
-        public static string GetSystemInfoRetrieveSql(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => MySqlTbSysInfoRetrieve,
-                DbEngineType.SQLite => SqliteTbSysinfoRetrieve,
-                _ => string.Empty
-            };
-        }
-
-        public static string GetSystemInfoUpdateVersionSql(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => MySqlTbSysInfoUpdateVersion,
-                DbEngineType.SQLite => SqliteTbSysinfoUpdateVersion,
-                _ => string.Empty
-            };
-        }
-
-        public static string GetSystemInfoCreateSql(DbEngineType engineType)
-        {
-            return engineType switch
-            {
-                DbEngineType.MySQL => MySqlTbSysinfoCreate,
-                DbEngineType.SQLite => SqliteTbSysinfoCreate,
-                _ => string.Empty
-            };
-        }
-
-        private const string MySqlTbSysinfoCreate =
-$@"CREATE TABLE `tb_sys_info` (
-`Id` int (11) NOT NULL AUTO_INCREMENT,
-`Name` varchar(100) DEFAULT NULL,
-`Value` varchar(1024) DEFAULT NULL,
-PRIMARY KEY(`Id`),
-UNIQUE KEY `Name_UNIQUE` (`Name`)
-);
-INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('{SystemInfoNames.VERSION}', '1');
-INSERT INTO `tb_sys_info`(`Name`, `Value`) VALUES('{SystemInfoNames.DATABASE_SCHEMA}', @{SystemInfoNames.DATABASE_SCHEMA});";
-
-        private const string MySqlTbSysInfoUpdateVersion = $@"UPDATE `tb_sys_info` SET `Value` = @Value WHERE `Name` = '{SystemInfoNames.VERSION}';";
-
-        private const string MySqlTbSysInfoRetrieve = @"SELECT * FROM `tb_sys_info`;";
-
-        private const string MySqlIsTableExistsStatement = "SELECT count(1) FROM information_schema.TABLES WHERE table_name =@tableName and table_schema=Database();";
-
-        private const string SqliteTbSysinfoCreate =
-$@"CREATE TABLE ""tb_sys_info"" (
-""Id"" INTEGER PRIMARY KEY AUTOINCREMENT,
-""Name"" TEXT UNIQUE,
-""Value"" TEXT
-);
-INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('{SystemInfoNames.VERSION}', '1');
-INSERT INTO ""tb_sys_info""(""Name"", ""Value"") VALUES('{SystemInfoNames.DATABASE_SCHEMA}', @{SystemInfoNames.DATABASE_SCHEMA});";
-
-        private const string SqliteTbSysinfoUpdateVersion = $@"UPDATE ""tb_sys_info"" SET ""Value"" = @Value WHERE ""Name"" = '{SystemInfoNames.VERSION}';";
-
-        private const string SqliteTbSysinfoRetrieve = @"SELECT * FROM ""tb_sys_info"";";
-
-        private const string SqliteIsTableExistsStatement = "SELECT count(1) FROM sqlite_master where type='table' and name=@tableName;";
+        #endregion
     }
 }
