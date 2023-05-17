@@ -11,6 +11,8 @@ namespace HB.FullStack.Database
 {
     public interface IDbCommandBuilder
     {
+        
+
         #region Statements
 
         FromExpression<T> From<T>() where T : BaseDbModel, new();

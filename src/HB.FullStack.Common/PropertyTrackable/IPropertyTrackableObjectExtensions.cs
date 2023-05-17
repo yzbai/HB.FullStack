@@ -17,13 +17,18 @@ namespace HB.FullStack.Common.PropertyTrackable
         {
             //TODO: 需要考虑锁吗?
 
-            if (trackableObject is ITimestamp timestampModel)
-            {
-                timestampModel.Timestamp = TimeUtil.Timestamp;
-            }
-
             var addtionalProperties = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(trackableObject);
             var propertyChanges = GetPropertyChangeDict(trackableObject);
+
+            if (trackableObject is ITimestamp timestampModel && !propertyChanges.ContainsKey(nameof(ITimestamp.Timestamp)))
+            {
+                long curTimestamp = TimeUtil.Timestamp;
+                
+                propertyChanges[nameof(ITimestamp.Timestamp)] = new PropertyChange(nameof(ITimestamp.Timestamp), timestampModel.Timestamp, curTimestamp);
+                
+                timestampModel.Timestamp = curTimestamp;
+            }
+
 
             var changePack = new PropertyChangePack
             {

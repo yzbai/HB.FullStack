@@ -7,32 +7,25 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 using HB.FullStack.Common;
-using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Implements;
-
-using static System.FormattableString;
 
 namespace HB.FullStack.Database.SQL
 {
     internal static partial class SqlHelper
     {
-        public const string OLD_PROPERTY_VALUE_SUFFIX = "old";
-        public const string NEW_PROPERTY_VALUE_SUFFIX = "new";
+        public const string NEW_PARAMETER_SUFFIX = "new_";
 
-        public static readonly string DbParameterName_OldTimestamp = GetParameterized($"{nameof(ITimestamp.Timestamp)}_{OLD_PROPERTY_VALUE_SUFFIX}");
-        public static readonly string DbParameterName_NewTimestamp = GetParameterized($"{nameof(ITimestamp.Timestamp)}_{NEW_PROPERTY_VALUE_SUFFIX}");
-        public static readonly string DbParameterName_Timestamp = GetParameterized(nameof(ITimestamp.Timestamp));
+        public const string OLD_PARAMETER_SUFFIX = "old_";
 
-        public static readonly string DbParameterName_LastUser = GetParameterized(nameof(BaseDbModel.LastUser));
-        public static readonly string DbParameterName_Deleted = GetParameterized(nameof(BaseDbModel.Deleted));
-        public static readonly string DbParameterName_Id = GetParameterized(nameof(DbModel2<long>.Id));
+        private static readonly string DbParameterName_Timestamp = GetParameterized(nameof(ITimestamp.Timestamp));
+        private static readonly string DbParameterName_LastUser = GetParameterized(nameof(BaseDbModel.LastUser));
+        private static readonly string DbParameterName_Deleted = GetParameterized(nameof(BaseDbModel.Deleted));
+        private static readonly string DbParameterName_PrimaryKey = GetParameterized(nameof(DbModel2<long>.Id));
 
         #region Cache Sql
 

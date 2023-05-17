@@ -277,9 +277,9 @@ namespace HB.FullStack.Database.Convert
         /// <param name="modelDef"></param>
         /// <param name="engineType"></param>
         /// <returns></returns>
-        public static Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> CreateModelToDbParametersDelegate(DbModelDef modelDef)
+        public static Func<IDbModelDefFactory, object, string, KeyValuePair<string, object>[]> CreateModelToDbParametersDelegate(DbModelDef modelDef)
         {
-            DynamicMethod dm = new DynamicMethod("ModelToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(IDbModelDefFactory), typeof(object), typeof(int) }, true);
+            DynamicMethod dm = new DynamicMethod("ModelToParameters" + Guid.NewGuid().ToString(), typeof(KeyValuePair<string, object>[]), new[] { typeof(IDbModelDefFactory), typeof(object), typeof(string) }, true);
             ILGenerator il = dm.GetILGenerator();
 
             LocalBuilder array = il.DeclareLocal(typeof(KeyValuePair<string, object>[]));
@@ -287,15 +287,15 @@ namespace HB.FullStack.Database.Convert
             LocalBuilder modelTypeLocal = il.DeclareLocal(typeof(Type));
             LocalBuilder tmpTrueTypeLocal = il.DeclareLocal(typeof(Type));
             LocalBuilder modelLocal = il.DeclareLocal(modelDef.ModelType);
-            LocalBuilder numberLocal = il.DeclareLocal(typeof(object));
+            LocalBuilder parameterSuffixLocal = il.DeclareLocal(typeof(string));
 
             il.Emit(OpCodes.Ldarg_1);
             il.Emit(OpCodes.Unbox_Any, modelDef.ModelType);
             il.Emit(OpCodes.Stloc, modelLocal);
 
             il.Emit(OpCodes.Ldarg_2);
-            il.Emit(OpCodes.Box, typeof(int));
-            il.Emit(OpCodes.Stloc, numberLocal);
+            //il.Emit(OpCodes.Box, typeof(int));
+            il.Emit(OpCodes.Stloc, parameterSuffixLocal);
 
             il.Emit(OpCodes.Ldtoken, modelDef.ModelType);
             il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);
@@ -315,7 +315,7 @@ namespace HB.FullStack.Database.Convert
 
                 il.Emit(OpCodes.Ldstr, $"{propertyDef.DbParameterizedName!}_");
 
-                il.Emit(OpCodes.Ldloc, numberLocal);
+                il.Emit(OpCodes.Ldloc, parameterSuffixLocal);
 
                 il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArray][key]
 
@@ -444,7 +444,7 @@ namespace HB.FullStack.Database.Convert
 
             Type funType = Expression.GetFuncType(typeof(IDbModelDefFactory), typeof(object), typeof(int), typeof(KeyValuePair<string, object>[]));
 
-            return (Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
+            return (Func<IDbModelDefFactory, object, string, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
 
             //return emiter.CreateDelegate();
         }

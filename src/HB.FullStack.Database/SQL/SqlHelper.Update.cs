@@ -57,7 +57,7 @@ namespace HB.FullStack.Database.SQL
                 AND
                 {modelDef.DeletedPropertyDef.DbReservedName}=0
                 AND
-                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{placeHolder}
+                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{OLD_PARAMETER_SUFFIX}{placeHolder}
                 """;
 
             sql = $"UPDATE {modelDef.DbTableReservedName} SET {GetUpdateAssignments(modelDef, placeHolder)} WHERE {where};";

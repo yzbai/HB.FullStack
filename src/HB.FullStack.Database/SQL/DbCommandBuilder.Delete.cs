@@ -19,119 +19,74 @@ namespace HB.FullStack.Database.SQL
     {
         public DbEngineCommand CreateDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, object id, string lastUser, bool trulyDelete, long? newTimestamp = null)
         {
-            List<string> propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(BaseDbModel.LastUser) };
-            List<object?> propertyValues = new List<object?> { id, lastUser };
+            //checks
+            newTimestamp ??= TimeUtil.Timestamp;
+
+            //parameters
+            var propertyNames = new List<string> { nameof(DbModel2<long>.Id) };
+            var propertyValues = new List<object?> { id };
+
+            var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, 0);
+
+            //new parameters
+            var newProperyNames = new List<string> { nameof(BaseDbModel.LastUser) };
+            var newPropertyValues = new List<object?> { lastUser };
 
             if (modelDef.IsTimestamp)
             {
-                propertyNames.Add(nameof(ITimestamp.Timestamp));
-                propertyValues.Add(newTimestamp ?? TimeUtil.Timestamp);
+                newProperyNames.Add(nameof(ITimestamp.Timestamp));
+                newPropertyValues.Add(newTimestamp);
             }
 
-            var parameters = DbModelConvert.PropertyValuesToParameters(
-                modelDef,
-                _modelDefFactory,
-                propertyNames,
-                propertyValues);
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newProperyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
 
+            //return
             return new DbEngineCommand(
                 SqlHelper.CreateDeleteIgnoreConflictCheckSql(modelDef, trulyDelete),
-                parameters);
+                parameters,
+                newParameters);
         }
-
-        public DbEngineCommand CreateDeleteTimestampCommand(DbModelDef modelDef, object id, long timestamp, string lastUser, bool trulyDelete, long? newTimestamp = null)
-        {
-            var parameters = DbModelConvert.PropertyValuesToParameters(
-                modelDef,
-                _modelDefFactory,
-                new List<string> { nameof(DbModel2<long>.Id), nameof(BaseDbModel.LastUser), nameof(ITimestamp.Timestamp) },
-                new List<object?> { id, lastUser, timestamp });
-
-            parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_0", newTimestamp ?? TimeUtil.Timestamp));
-
-            return new DbEngineCommand(
-                SqlHelper.CreateDeleteUsingTimestampSql(modelDef, trulyDelete),
-                parameters);
-        }
-
-        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel, new()
-        {
-            var parameters = model.ToDbParameters(modelDef, _modelDefFactory);
-
-            var newParameters = DbModelConvert.PropertyValuesToParameters(
-                modelDef,
-                _modelDefFactory,
-                new List<string> { nameof(BaseDbModel.LastUser) },
-                new List<object?> { lastUser });
-
-            parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_0", newTimestamp ?? TimeUtil.Timestamp));
-
-            return new DbEngineCommand(
-                SqlHelper.CreateDeleteUsingOldNewCompareSql(modelDef, trulyDelete),
-                parameters.AddRange(newParameters));
-        }
-
-        public DbEngineCommand CreateDeleteCommand<T>(
-            DbModelDef modelDef,
-            WhereExpression<T> whereExpression,
-            string lastUser,
-            bool trulyDeleted) where T : TimelessDbModel, new()
-        {
-            Requires.NotNull(whereExpression, nameof(whereExpression));
-
-            IList<KeyValuePair<string, object>> parameters = whereExpression.GetParameters();
-
-            if (!trulyDeleted)
-            {
-                parameters.Add(new KeyValuePair<string, object>(
-                    $"{SqlHelper.DbParameterName_LastUser}_0",
-                    lastUser));
-                parameters.Add(new KeyValuePair<string, object>(
-                    $"{SqlHelper.DbParameterName_Deleted}_0",
-                    true));
-
-                string sql = GetCachedSql(SqlType.UpdateDeletedFields, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
-
-                return new DbEngineCommand(sql, parameters);
-            }
-
-            string deleteSql = GetCachedSql(SqlType.Delete, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
-
-            return new DbEngineCommand(deleteSql, parameters);
-        }
-
 
         public DbEngineCommand CreateBatchDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, IList<object> ids, string lastUser, bool trulyDeleted, long? newTimestamp = null)
         {
+            //Checks
             ThrowIf.NullOrEmpty(ids, nameof(ids));
+            newTimestamp ??= TimeUtil.Timestamp;
 
             IList<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
 
-            List<string> propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(BaseDbModel.LastUser) };
+            var propertyNames = new List<string> { nameof(DbModel2<long>.Id) };
+            var newProperyNames = new List<string> { nameof(BaseDbModel.LastUser) };
 
             if (modelDef.IsTimestamp)
             {
-                propertyNames.Add(nameof(ITimestamp.Timestamp));
+                newProperyNames.Add(nameof(ITimestamp.Timestamp));
             }
 
-            long curTimestamp = TimeUtil.Timestamp;
+            int number = 0;
 
             foreach (var id in ids)
             {
-                List<object?> propertyValues = new List<object?> { id, lastUser };
+                //parameters
+                var propertyValues = new List<object?> { id };
+
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, number);
+
+                totalParameters.AddRange(parameters);
+
+                //new parameters
+                var newPropertyValues = new List<object?> { lastUser };
 
                 if (modelDef.IsTimestamp)
                 {
-                    propertyValues.Add(newTimestamp ?? curTimestamp);
+                    newPropertyValues.Add(newTimestamp);
                 }
 
-                var parameters = DbModelConvert.PropertyValuesToParameters(
-                    modelDef,
-                    _modelDefFactory,
-                    propertyNames,
-                    propertyValues);
+                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newProperyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, number);
 
-                totalParameters.AddRange(parameters);
+                totalParameters.AddRange(newParameters);
+
+                number++;
             }
 
             return new DbEngineCommand(
@@ -139,97 +94,158 @@ namespace HB.FullStack.Database.SQL
                 totalParameters);
         }
 
-        public DbEngineCommand CreateBatchDeleteTimestampCommand(DbModelDef modelDef, IList<object> ids, IList<long> timestamps, string lastUser, bool trulyDelete, long? newTimestamp = null)
+        public DbEngineCommand CreateDeleteTimestampCommand(DbModelDef modelDef, object id, long timestamp, string lastUser, bool trulyDelete, long? newTimestamp = null)
         {
-            IList<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
+            //checks
+            newTimestamp ??= TimeUtil.Timestamp;
 
+            //parameters
+            List<string> propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(ITimestamp.Timestamp) };
+            List<object?> propertyValues = new List<object?> { id, timestamp };
+            var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, 0);
+
+            //new parameters
+            List<string> newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser), nameof(ITimestamp.Timestamp) };
+            List<object?> newPropertyValues = new List<object?> { lastUser, newTimestamp };
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
+
+            //return
             return new DbEngineCommand(
-                SqlHelper.CreateBatchDeleteUsingTimestampSql(modelDef, trulyDelete, ids.Count), 
-                totalParameters);
+                SqlHelper.CreateDeleteUsingTimestampSql(modelDef, trulyDelete),
+                parameters,
+                newParameters);
         }
 
-        public DbEngineCommand CreateBatchDeleteCommand(
-            DbModelDef modelDef,
-            IList<object> ids,
-            IList<long?> oldTimestamps,
-            IList<long?> newTimestamps,
-            string lastUser,
-            bool trulyDeleted,
-            bool needTrans)
+        public DbEngineCommand CreateBatchDeleteTimestampCommand(DbModelDef modelDef, IList<object> ids, IList<long> timestamps, string lastUser, bool trulyDelete, long? newTimestamp = null)
         {
-            int count = ids.Count;
+            //checks
+            ThrowIf.NullOrEmpty(ids, nameof(ids));
+            ThrowIf.CountNotEqual(ids, timestamps, "");
+            newTimestamp ??= TimeUtil.Timestamp;
 
-            DbEngineType engineType = modelDef.EngineType;
+            IList<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
 
-            if (!trulyDeleted)
-            {
-                List<string> propertyNames = new List<string> { nameof(DbModel.Deleted) };
-                List<object?> propertyValues = new List<object?> { true };
-                List<TimestampUpdatePack> updatePacks = new List<TimestampUpdatePack>();
+            var propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(ITimestamp.Timestamp) };
+            var newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser), nameof(ITimestamp.Timestamp) };
 
-                for (int i = 0; i < count; ++i)
-                {
-                    updatePacks.Add(new TimestampUpdatePack
-                    {
-                        Id = ids[i],
-                        OldTimestamp = oldTimestamps[i],
-                        NewTimestamp = newTimestamps[i],
-                        PropertyNames = propertyNames,
-                        NewPropertyValues = propertyValues
-                    });
-                }
-
-                return CreateBatchUpdatePropertiesTimestampCommand(modelDef, updatePacks, lastUser, needTrans);
-            }
-
-            StringBuilder innerBuilder = new StringBuilder();
-            string tempTableName = "t" + SecurityUtil.CreateUniqueToken();
-            List<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
             int number = 0;
 
-            for (int i = 0; i < count; ++i)
+            foreach (var id in ids)
             {
-                List<string> propertyNames = new List<string> { nameof(TimestampLongIdDbModel.Id) };
-                List<object?> propertyValues = new List<object?> { ids[i] };
+                //parameters
+                List<object?> propertyValues = new List<object?> { id, timestamps[number] };
 
-                if (modelDef.IsTimestamp && !oldTimestamps[i].HasValue)
-                {
-                    throw DbExceptions.TimestampNotExists(engineType, modelDef, propertyNames);
-                }
-
-                if (oldTimestamps[i].HasValue)
-                {
-                    propertyNames.Add(nameof(TimestampLongIdDbModel.Timestamp));
-                    propertyValues.Add(oldTimestamps[i]!.Value);
-                }
-
-                IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, number.ToString());
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, number);
 
                 totalParameters.AddRange(parameters);
 
-                string sql = SqlHelper.CreateDeleteByPropertiesSql(modelDef, propertyNames, number);
+                //new parameters
+                var newPropertyValues = new List<object?> { lastUser, newTimestamp };
+                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, number);
 
-#if NET6_0_OR_GREATER
-                innerBuilder.Append(CultureInfo.InvariantCulture, $"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundDeletedRows_Statement(engineType), engineType)}");
-#elif NETSTANDARD2_1
-                innerBuilder.Append($"{sql}{SqlHelper.TempTable_Insert_Id(tempTableName, SqlHelper.FoundDeletedRows_Statement(engineType), engineType)}");
-#endif
+                totalParameters.AddRange(newParameters);
 
                 number++;
             }
 
-            string may_trans_begin = needTrans ? SqlHelper.Transaction_Begin(engineType) : "";
-            string may_trans_commit = needTrans ? SqlHelper.Transaction_Commit(engineType) : "";
-
-            string commandText = $@"{may_trans_begin}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Create_Id(tempTableName, engineType)}
-                                    {innerBuilder}
-                                    {SqlHelper.TempTable_Select_Id(tempTableName, engineType)}
-                                    {SqlHelper.TempTable_Drop(tempTableName, engineType)}
-                                    {may_trans_commit}";
-
-            return new DbEngineCommand(commandText, totalParameters);
+            return new DbEngineCommand(
+                SqlHelper.CreateBatchDeleteUsingTimestampSql(modelDef, trulyDelete, ids.Count),
+                totalParameters);
         }
+
+        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel, new()
+        {
+            //Check
+            newTimestamp ??= TimeUtil.Timestamp;
+
+            //parameters
+            var parameters = model.ToDbParameters(modelDef, _modelDefFactory, null, 0);
+
+            //new parameters
+            List<string> newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser) };
+            List<object?> newPropertyValues = new List<object?> { lastUser };
+
+            if (modelDef.IsTimestamp)
+            {
+                newPropertyNames.Add(nameof(ITimestamp.Timestamp));
+                newPropertyValues.Add(newTimestamp);
+            }
+
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
+
+            //return
+            return new DbEngineCommand(
+                SqlHelper.CreateDeleteUsingOldNewCompareSql(modelDef, trulyDelete),
+                parameters,
+                newParameters);
+        }
+
+        public DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel, new()
+        {
+            //checks
+            ThrowIf.NullOrEmpty(models, nameof(models));
+            newTimestamp ??= TimeUtil.Timestamp;
+
+            IList<KeyValuePair<string, object>> totalParameters = models.ToDbParameters(modelDef, _modelDefFactory, null);
+
+            var newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser) };
+
+            if (modelDef.IsTimestamp)
+            {
+                newPropertyNames.Add(nameof(ITimestamp.Timestamp));
+            }
+
+            for (int i = 0; i < models.Count; ++i)
+            {
+                List<object?> newPropertyValues = new List<object?> { lastUser };
+
+                if (modelDef.IsTimestamp)
+                {
+                    newPropertyValues.Add(newTimestamp);
+                }
+
+                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, i);
+
+                totalParameters.AddRange(newParameters);
+            }
+
+            return new DbEngineCommand(
+                SqlHelper.CreateBatchDeleteUsingOldNewCompareSql(modelDef, trulyDelete, models.Count),
+                totalParameters);
+        }
+
+        //public DbEngineCommand CreateDeleteCommand<T>(
+        //    DbModelDef modelDef,
+        //    WhereExpression<T> whereExpression,
+        //    string lastUser,
+        //    bool trulyDeleted) where T : TimelessDbModel, new()
+        //{
+        //    Requires.NotNull(whereExpression, nameof(whereExpression));
+
+        //    IList<KeyValuePair<string, object>> parameters = whereExpression.GetParameters();
+
+        //    if (!trulyDeleted)
+        //    {
+        //        parameters.Add(new KeyValuePair<string, object>(
+        //            $"{SqlHelper.DbParameterName_LastUser}_0",
+        //            lastUser));
+        //        parameters.Add(new KeyValuePair<string, object>(
+        //            $"{SqlHelper.DbParameterName_Deleted}_0",
+        //            true));
+
+        //        string sql = GetCachedSql(SqlType.UpdateDeletedFields, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
+
+        //        return new DbEngineCommand(sql, parameters);
+        //    }
+
+        //    string deleteSql = GetCachedSql(SqlType.Delete, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
+
+        //    return new DbEngineCommand(deleteSql, parameters);
+        //}
+
+
+
+
+
     }
 }

@@ -15,6 +15,24 @@ namespace HB.FullStack.Database
             Parameters = parameters;
         }
 
+        public DbEngineCommand(string commandText, IList<KeyValuePair<string, object>>? parameters, IList<KeyValuePair<string, object>>? newParameters)
+        {
+            CommandText = commandText;
+            Parameters = parameters;
+
+            if (newParameters != null)
+            {
+                if (Parameters == null)
+                {
+                    Parameters = newParameters;
+                }
+                else
+                {
+                    Parameters.AddRange(newParameters);
+                }
+            }
+        }
+
         public string CommandText { get; set; } = null!;
 
 

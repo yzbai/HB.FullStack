@@ -27,7 +27,7 @@ namespace HB.FullStack.Database.SQL
             }
 
             //assignments
-            StringBuilder assignments = GetUpdatePropertiesAssignments(modelDef.EngineType, propertyNames, number.ToString());
+            StringBuilder assignments = GetUpdatePropertiesAssignments(modelDef.EngineType, propertyNames,null, number);
 
             //where
             string where = $"""
@@ -69,7 +69,7 @@ namespace HB.FullStack.Database.SQL
             }
 
             //assignments
-            StringBuilder assignments = GetUpdatePropertiesAssignments(modelDef.EngineType, propertyNames, number.ToString());
+            StringBuilder assignments = GetUpdatePropertiesAssignments(modelDef.EngineType, propertyNames, null, number);
 
             //where
             string where = $"""
@@ -77,7 +77,7 @@ namespace HB.FullStack.Database.SQL
                 AND
                 {modelDef.DeletedPropertyDef.DbReservedName}=0
                 AND
-                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{OLD_PROPERTY_VALUE_SUFFIX}_{number}
+                {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{SqlHelper.OLD_PARAMETER_SUFFIX}{number}
                 """;
 
             sql= $"UPDATE {modelDef.DbTableReservedName} SET {assignments} WHERE {where};";
@@ -121,17 +121,18 @@ namespace HB.FullStack.Database.SQL
             StringBuilder assignments = GetUpdatePropertiesAssignments(
                 engineType,
                 new List<string>(propertyNames) { nameof(BaseDbModel.LastUser) },
-                $"{NEW_PROPERTY_VALUE_SUFFIX}_{number}");
+                SqlHelper.NEW_PARAMETER_SUFFIX,
+                number);
 
             StringBuilder where = new StringBuilder($"""
-                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{OLD_PROPERTY_VALUE_SUFFIX}_{number}
+                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={DbParameterName_PrimaryKey}_{number}
                 AND
                 {modelDef.DeletedPropertyDef.DbReservedName}=0
                 """);
 
             foreach (string propertyName in propertyNames)
             {
-                where.Append($" AND {GetReserved(propertyName, engineType)}={GetParameterized(propertyName)}_{OLD_PROPERTY_VALUE_SUFFIX}_{number}");
+                where.Append($" AND {GetReserved(propertyName, engineType)}={GetParameterized(propertyName)}_{number}");
             }
 
             sql = $"UPDATE {modelDef.DbTableReservedName} SET {assignments} WHERE {where};";
@@ -157,7 +158,7 @@ namespace HB.FullStack.Database.SQL
                 });
         }
 
-        private static StringBuilder GetUpdatePropertiesAssignments(DbEngineType engineType, IList<string> propertyNames, string placeHolder)
+        private static StringBuilder GetUpdatePropertiesAssignments(DbEngineType engineType, IList<string> propertyNames, string? parameterSuffix, int number)
         {
             StringBuilder assignments = new StringBuilder();
 
@@ -168,7 +169,7 @@ namespace HB.FullStack.Database.SQL
                     continue;
                 }
 
-                assignments.Append($" {GetReserved(propertyName, engineType)}={GetParameterized(propertyName)}_{placeHolder},");
+                assignments.Append($" {GetReserved(propertyName, engineType)}={GetParameterized(propertyName)}_{parameterSuffix}{number},");
             }
 
             assignments.RemoveLast();

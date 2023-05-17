@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using HB.FullStack.Common;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 
-using HB.FullStack.Database.Engine;
-
 namespace HB.FullStack.Database.SQL
 {
+
+
     /// <summary>
     /// DbCommandBuilder.Update
     /// </summary>
@@ -21,48 +16,45 @@ namespace HB.FullStack.Database.SQL
         public DbEngineCommand CreateUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, T model) where T : BaseDbModel, new()
         {
             return new DbEngineCommand(
-                SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDef), 
-                model.ToDbParameters(modelDef, _modelDefFactory));
+                SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDef),
+                model.ToDbParameters(modelDef, _modelDefFactory, null, 0));
         }
-
-        public DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel, new()
-        {
-            IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory);
-
-            paramters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", oldTimestamp));
-
-            return new DbEngineCommand(
-                SqlHelper.CreateUpdateUsingTimestampSql(modelDef), 
-                paramters);
-        }
-
-        public DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel, new()
-        {
-            ThrowIf.Empty(models, nameof(models));
-
-            int number = 0;
-            List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
-
-            foreach (T model in models)
-            {
-                parameters.AddRange(model.ToDbParameters(modelDef, _modelDefFactory, number));
-                parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}", oldTimestamps[number]));
-
-                number++;
-            }
-
-            return new DbEngineCommand(
-                SqlHelper.CreateBatchUpdateUsingTimestampSql(modelDef, models.Count),
-                parameters);
-        }
-
+        
         public DbEngineCommand CreateBatchUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel, new()
         {
             ThrowIf.Empty(models, nameof(models));
 
             return new DbEngineCommand(
                 SqlHelper.CreateBatchUpdateIgnoreConflictCheckSql(modelDef, models.Count),
-                models.ToDbParameters(modelDef, _modelDefFactory));
+                models.ToDbParameters(modelDef, _modelDefFactory, null));
+        }
+
+        public DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel, new()
+        {
+            IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory, null, 0);
+
+            paramters.AddParameter(modelDef.TimestampPropertyDef!, oldTimestamp, SqlHelper.OLD_PARAMETER_SUFFIX, 0);
+
+            return new DbEngineCommand(
+                SqlHelper.CreateUpdateUsingTimestampSql(modelDef),
+                paramters);
+        }
+
+        public DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel, new()
+        {
+            ThrowIf.NullOrEmpty(models, nameof(models));
+            ThrowIf.CountNotEqual(models, oldTimestamps, "count not even.");
+
+            var totalParameters = models.ToDbParameters(modelDef, _modelDefFactory, null);
+
+            for (int i = 0; i < oldTimestamps.Count; ++i)
+            {
+                totalParameters.AddParameter(modelDef.TimestampPropertyDef!, oldTimestamps[i], SqlHelper.OLD_PARAMETER_SUFFIX, i);
+            }
+
+            return new DbEngineCommand(
+                SqlHelper.CreateBatchUpdateUsingTimestampSql(modelDef, models.Count),
+                totalParameters);
         }
     }
 }

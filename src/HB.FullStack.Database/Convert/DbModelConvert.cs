@@ -109,7 +109,7 @@ namespace HB.FullStack.Database.Convert
 
         #region Model To DbParameters
 
-        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, int number = 0) where T : BaseDbModel, new()
+        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, string? parameterNameSuffix, int number) where T : BaseDbModel, new()
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
@@ -122,21 +122,21 @@ namespace HB.FullStack.Database.Convert
             foreach (DbModelPropertyDef propertyDef in modelDef.PropertyDefs)
             {
                 parameters.Add(new KeyValuePair<string, object>(
-                    $"{propertyDef.DbParameterizedName!}_{number}",
+                    $"{propertyDef.DbParameterizedName!}_{parameterNameSuffix}{number}",
                     DbPropertyConvert.PropertyValueToDbFieldValue(propertyDef.GetValueFrom(model), propertyDef, engineType)));
             }
 
             return parameters;
         }
 
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory) where T : BaseDbModel, new()
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix) where T : BaseDbModel, new()
         {
             int number = 0;
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
 
             foreach (T model in models)
             {
-                parameters.AddRange(model.ToDbParameters(modelDef, modelDefFactory, number));
+                parameters.AddRange(model.ToDbParameters(modelDef, modelDefFactory, parameterNameSuffix, number));
 
                 ++number;
             }
@@ -144,24 +144,21 @@ namespace HB.FullStack.Database.Convert
             return parameters;
         }
 
-        /// <summary>
-        /// ToDbParameters. number为属性名的后缀数字
-        /// </summary>
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, int number = 0) where T : BaseDbModel, new()
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix, int number) where T : BaseDbModel, new()
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
                 throw DbExceptions.ModelTimestampError(type: modelDef.FullName, timestamp: serverModel.Timestamp, cause: "DatabaseVersionNotSet, 查看是否是使用了Select + New这个组合");
             }
 
-            Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef);
+            Func<IDbModelDefFactory, object, string, KeyValuePair<string, object>[]> func = GetCachedModelToParametersFunc(modelDef);
 
-            return new List<KeyValuePair<string, object>>(func(modelDefFactory, model, number));
+            return new List<KeyValuePair<string, object>>(func(modelDefFactory, model, $"{parameterNameSuffix}{number}"));
         }
 
-        private static readonly ConcurrentDictionary<string, Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]>> _toDbParametersFuncDict = new ConcurrentDictionary<string, Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]>>();
+        private static readonly ConcurrentDictionary<string, Func<IDbModelDefFactory, object, string, KeyValuePair<string, object>[]>> _toDbParametersFuncDict = new ConcurrentDictionary<string, Func<IDbModelDefFactory, object, string, KeyValuePair<string, object>[]>>();
 
-        private static Func<IDbModelDefFactory, object, int, KeyValuePair<string, object>[]> GetCachedModelToParametersFunc(DbModelDef modelDef)
+        private static Func<IDbModelDefFactory, object, string, KeyValuePair<string, object>[]> GetCachedModelToParametersFunc(DbModelDef modelDef)
         {
             string key = GetKey(modelDef);
 
@@ -177,8 +174,19 @@ namespace HB.FullStack.Database.Convert
 
         #region PropertyValues To DbParameters
 
+        public static IList<KeyValuePair<string, object>> AddParameter(this IList<KeyValuePair<string, object>> parameters,
+            DbModelPropertyDef propertyDef, object propertyValue, string? parameterSuffix, int number)
+        {
+
+            parameters.Add(new KeyValuePair<string, object>(
+                $"{propertyDef.DbParameterizedName}_{parameterSuffix}{number}",
+                DbPropertyConvert.PropertyValueToDbFieldValue(propertyValue, propertyDef, propertyDef.ModelDef.EngineType)));
+
+            return parameters;
+        }
+
         public static IList<KeyValuePair<string, object>> PropertyValuesToParametersUsingReflection(
-            DbModelDef modelDef, IDictionary<string, object?> propertyValues, string parameterNameSuffix = "0")
+            DbModelDef modelDef, IDictionary<string, object?> propertyValues, string? parameterNameSuffix, int number)
         {
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>(propertyValues.Count);
 
@@ -194,11 +202,19 @@ namespace HB.FullStack.Database.Convert
                 }
 
                 parameters.Add(new KeyValuePair<string, object>(
-                    $"{propertyDef.DbParameterizedName}_{parameterNameSuffix}",
+                    $"{propertyDef.DbParameterizedName}_{parameterNameSuffix}{number}",
                     DbPropertyConvert.PropertyValueToDbFieldValue(kv.Value, propertyDef, engineType)));
             }
 
             return parameters;
+        }
+
+        public static IList<KeyValuePair<string, object>> PropertyValuesToParameters(
+                    DbModelDef modelDef, IDbModelDefFactory modelDefFactory, IList<string> propertyNames, IList<object?> propertyValues, string? parameterNameSuffix, int number)
+        {
+            Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]> func = GetCachedPropertyValuesToParametersFunc(modelDef, propertyNames);
+
+            return new List<KeyValuePair<string, object>>(func(modelDefFactory, propertyValues.ToArray(), $"{parameterNameSuffix}{number}"));
         }
 
         private static readonly ConcurrentDictionary<string, Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]>> _propertyValuesToParametersFuncDict =
@@ -215,14 +231,6 @@ namespace HB.FullStack.Database.Convert
             {
                 return $"{modelDef.DbSchema.Name}_{modelDef.TableName}_{SecurityUtil.GetHash(names)}_PropertyValuesToParameters";
             }
-        }
-
-        public static IList<KeyValuePair<string, object>> PropertyValuesToParameters(
-            DbModelDef modelDef, IDbModelDefFactory modelDefFactory, IList<string> propertyNames, IList<object?> propertyValues, string parameterNameSuffix = "0")
-        {
-            Func<IDbModelDefFactory, object?[], string, KeyValuePair<string, object>[]> func = GetCachedPropertyValuesToParametersFunc(modelDef, propertyNames);
-
-            return new List<KeyValuePair<string, object>>(func(modelDefFactory, propertyValues.ToArray(), parameterNameSuffix));
         }
 
         #endregion

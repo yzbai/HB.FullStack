@@ -20,6 +20,8 @@ namespace HB.FullStack.Database.SQL
         {
             modelDef.ThrowIfNotTimestamp();
 
+            updatePack.NewTimestamp ??= TimeUtil.Timestamp;
+
             if (!updatePack.OldTimestamp.HasValue)
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} propertyNames: {updatePack.PropertyNames.ToJoinedString(",")}. Lack of OldTimestamp.");
@@ -35,16 +37,12 @@ namespace HB.FullStack.Database.SQL
             {
                 updatePack.Id,
                 lastUser,
-                updatePack.NewTimestamp ?? TimeUtil.Timestamp
+                updatePack.NewTimestamp
             };
 
-            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
-                modelDef,
-                _modelDefFactory,
-                updatedPropertyNames,
-                updatedPropertyValues);
+            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, 0);
 
-            parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0", updatePack.OldTimestamp.Value));
+            parameters.AddParameter(modelDef.TimestampPropertyDef!, updatePack.OldTimestamp.Value, SqlHelper.OLD_PARAMETER_SUFFIX, 0);
 
             return new DbEngineCommand(
                 SqlHelper.CreateUpdatePropertiesUsingTimestampSql(modelDef, updatedPropertyNames),
@@ -62,6 +60,8 @@ namespace HB.FullStack.Database.SQL
 
             foreach (TimestampUpdatePack updatePack in updatePacks)
             {
+                updatePack.NewTimestamp ??= curTimestamp;
+
                 if (!updatePack.OldTimestamp.HasValue)
                 {
                     throw DbExceptions.ConflictCheckError($"{modelDef.FullName} propertyNames: {updatePack.PropertyNames.ToJoinedString(",")}. Lack of OldTimestamp.");
@@ -77,18 +77,12 @@ namespace HB.FullStack.Database.SQL
                 {
                     updatePack.Id,
                     lastUser,
-                    updatePack.NewTimestamp ?? curTimestamp
+                    updatePack.NewTimestamp
                 };
 
-                IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
-                    modelDef,
-                    _modelDefFactory,
-                    updatedPropertyNames,
-                    updatedPropertyValues,
-                    number.ToString());
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, number);
 
-                //TODO:整理OLD，NEw Paramters,重构
-                parameters.Add(new KeyValuePair<string, object>($"{SqlHelper.DbParameterName_Timestamp}_{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}", updatePack.OldTimestamp.Value));
+                parameters.AddParameter(modelDef.TimestampPropertyDef!, updatePack.OldTimestamp.Value, SqlHelper.OLD_PARAMETER_SUFFIX, number);
 
                 totalParameters.AddRange(parameters);
 
@@ -104,25 +98,31 @@ namespace HB.FullStack.Database.SQL
 
         public DbEngineCommand CreateUpdatePropertiesOldNewCompareCommand(DbModelDef modelDef, OldNewCompareUpdatePack updatePack, string lastUser)
         {
-            var oldParameters = DbModelConvert.PropertyValuesToParameters(
+            var parameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 _modelDefFactory,
                 new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
                 new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
-                $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_0");
+                null,
+                0);
+
+
+            //Remark:没必要添加ITimestamp，因为如果是ITimestamp的话，一定已经包含了Timestamp,因为生成Pack时，改动了。
 
             var newParameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 _modelDefFactory,
                 new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
                 new List<object?>(updatePack.NewPropertyValues) { lastUser },
-                $"{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_0");
+                SqlHelper.NEW_PARAMETER_SUFFIX,
+                0);
 
             //Remark:使用propertyNames而不是curPropertyNames
 
             return new DbEngineCommand(
-                SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDef, updatePack.PropertyNames), 
-                oldParameters.AddRange(newParameters));
+                SqlHelper.CreateUpdatePropertiesUsingOldNewCompareSql(modelDef, updatePack.PropertyNames),
+                parameters,
+                newParameters);
         }
 
         public DbEngineCommand CreateBatchUpdatePropertiesOldNewCompareCommand(DbModelDef modelDef, IList<OldNewCompareUpdatePack> updatePacks, string lastUser)
@@ -136,21 +136,23 @@ namespace HB.FullStack.Database.SQL
 
             foreach (OldNewCompareUpdatePack updatePack in updatePacks)
             {
-                var oldParameters = DbModelConvert.PropertyValuesToParameters(
+                var parameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
                     _modelDefFactory,
                     new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
                     new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
-                    $"{SqlHelper.OLD_PROPERTY_VALUE_SUFFIX}_{number}");
+                    null,
+                    number);
 
                 var newParameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
                     _modelDefFactory,
                     new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
                     new List<object?>(updatePack.NewPropertyValues) { lastUser },
-                    $"{SqlHelper.NEW_PROPERTY_VALUE_SUFFIX}_{number}");
+                    SqlHelper.NEW_PARAMETER_SUFFIX,
+                    number);
 
-                totalParameters.AddRange(oldParameters);
+                totalParameters.AddRange(parameters);
                 totalParameters.AddRange(newParameters);
 
                 propertyNamesList.Add(updatePack.PropertyNames);
@@ -177,11 +179,7 @@ namespace HB.FullStack.Database.SQL
                 lastUser
             };
 
-            IList<KeyValuePair<string, object>> paramters = DbModelConvert.PropertyValuesToParameters(
-                modelDef,
-                _modelDefFactory,
-                updatedPropertyNames,
-                updatedPropertyValues);
+            var paramters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, 0);
 
             return new DbEngineCommand(
                 SqlHelper.CreateUpdatePropertiesIgnoreConflictCheckSql(modelDef, updatedPropertyNames),
@@ -207,12 +205,7 @@ namespace HB.FullStack.Database.SQL
                     lastUser,
                 };
 
-                IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(
-                    modelDef,
-                    _modelDefFactory,
-                    updatedPropertyNames,
-                    updatedPropertyValues,
-                    number.ToString());
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, number);
 
                 totalParameters.AddRange(parameters);
 

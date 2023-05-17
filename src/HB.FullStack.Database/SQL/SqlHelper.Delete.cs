@@ -25,7 +25,7 @@ namespace HB.FullStack.Database.SQL
             }
 
             string where = $"""
-                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{placeHolder}
+                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={DbParameterName_PrimaryKey}_{placeHolder}
                 AND
                 {modelDef.DeletedPropertyDef.DbReservedName}=0
                 """;
@@ -38,12 +38,12 @@ namespace HB.FullStack.Database.SQL
             {
                 StringBuilder assignments = new StringBuilder($"""
                     {modelDef.DeletedPropertyDef.DbReservedName}=1,
-                    {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{placeHolder}
+                    {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{NEW_PARAMETER_SUFFIX}{placeHolder}
                     """);
 
                 if (modelDef.IsTimestamp)
                 {
-                    assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{placeHolder} ");
+                    assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PARAMETER_SUFFIX}{placeHolder} ");
                 }
 
                 sql = $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
@@ -52,15 +52,6 @@ namespace HB.FullStack.Database.SQL
             SqlCache[cacheKey] = sql;
 
             return sql;
-        }
-
-        public static string CreateBatchDeleteIgnoreConflictCheckSql(DbModelDef modelDef, bool trulyDeleted, int modelCount)
-        {
-            return CreateBatchSql(
-                BatchSqlReturnType.ReturnFoundUpdateMatchedRows,
-                modelDef,
-                modelCount,
-                () => CreateDeleteIgnoreConflictCheckSql(modelDef, trulyDeleted, "{0}"));
         }
 
         public static string CreateDeleteUsingTimestampSql(DbModelDef modelDef, bool trulyDeleted, string placeHolder = "0")
@@ -73,7 +64,7 @@ namespace HB.FullStack.Database.SQL
             }
 
             string where = $"""
-                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={modelDef.PrimaryKeyPropertyDef.DbParameterizedName}_{placeHolder}
+                {modelDef.PrimaryKeyPropertyDef.DbReservedName}={DbParameterName_PrimaryKey}_{placeHolder}
                 AND
                 {modelDef.DeletedPropertyDef.DbReservedName}=0
                 AND
@@ -86,27 +77,18 @@ namespace HB.FullStack.Database.SQL
             }
             else
             {
-                sql = $"""
-                    update {modelDef.DbTableReservedName} set
+                StringBuilder assignments = new StringBuilder($"""
                     {modelDef.DeletedPropertyDef.DbReservedName}=1,
-                    {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{placeHolder},
-                    {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{placeHolder}
-                    where {where};
-                    """;
+                    {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{NEW_PARAMETER_SUFFIX}{placeHolder},
+                    {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PARAMETER_SUFFIX}{placeHolder} 
+                    """);
+
+                sql = $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
             }
 
             SqlCache[cacheKey] = sql;
 
             return sql;
-        }
-
-        public static string CreateBatchDeleteUsingTimestampSql(DbModelDef modelDef, bool trulyDeleted, int modelCount)
-        {
-            return CreateBatchSql(
-                BatchSqlReturnType.ReturnFoundUpdateMatchedRows,
-                modelDef,
-                modelCount,
-                () => CreateDeleteUsingTimestampSql(modelDef, trulyDeleted, "{0}"));
         }
 
         public static string CreateDeleteUsingOldNewCompareSql(DbModelDef modelDef, bool trulyDeleted, string placeHolder = "0")
@@ -133,15 +115,14 @@ namespace HB.FullStack.Database.SQL
             }
             else
             {
-
                 StringBuilder assignments = new StringBuilder($"""
-                {modelDef.DeletedPropertyDef.DbReservedName}=1,
-                {modelDef.LastUserPropertyDef.DbReservedName}={modelDef.LastUserPropertyDef.DbParameterizedName}_{NEW_PROPERTY_VALUE_SUFFIX}_{placeHolder}
-                """);
+                    {modelDef.DeletedPropertyDef.DbReservedName}=1,
+                    {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{NEW_PARAMETER_SUFFIX}{placeHolder}
+                    """);
 
                 if (modelDef.IsTimestamp)
                 {
-                    assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PROPERTY_VALUE_SUFFIX}_{placeHolder} ");
+                    assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PARAMETER_SUFFIX}{placeHolder} ");
                 }
 
                 sql = $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
@@ -150,6 +131,24 @@ namespace HB.FullStack.Database.SQL
             SqlCache[cacheKey] = sql;
 
             return sql;
+        }
+
+        public static string CreateBatchDeleteIgnoreConflictCheckSql(DbModelDef modelDef, bool trulyDeleted, int modelCount)
+        {
+            return CreateBatchSql(
+                BatchSqlReturnType.ReturnFoundUpdateMatchedRows,
+                modelDef,
+                modelCount,
+                () => CreateDeleteIgnoreConflictCheckSql(modelDef, trulyDeleted, "{0}"));
+        }
+
+        public static string CreateBatchDeleteUsingTimestampSql(DbModelDef modelDef, bool trulyDeleted, int modelCount)
+        {
+            return CreateBatchSql(
+                BatchSqlReturnType.ReturnFoundUpdateMatchedRows,
+                modelDef,
+                modelCount,
+                () => CreateDeleteUsingTimestampSql(modelDef, trulyDeleted, "{0}"));
         }
 
         public static string CreateBatchDeleteUsingOldNewCompareSql(DbModelDef modelDef, bool trulyDeleted, int modelCount)

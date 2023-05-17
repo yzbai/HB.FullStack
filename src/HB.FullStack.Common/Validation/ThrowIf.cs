@@ -235,6 +235,14 @@ namespace System
             return a;
         }
 
+        public static void CountNotEqual<T1, T2>(IList<T1> a, IList<T2> b, string message)
+        {
+            if (a.Count != b.Count)
+            {
+                throw new ArgumentException(message);
+            }
+        }
+
         public static int NotEqual(int a, int b, string paramName1, string paramName2)
         {
             if (a != b)
