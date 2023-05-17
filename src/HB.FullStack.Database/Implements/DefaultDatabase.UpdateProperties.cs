@@ -13,9 +13,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
-using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
@@ -54,20 +52,8 @@ namespace HB.FullStack.Database
                 long rows = transContext != null
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
-
-                if (rows == 1)
-                {
-                    return;
-                }
-                else if (rows == 0)
-                {
-                    //没有这样的ID，或者版本冲突
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"没有这样的ID，或者使用Timestamp版本的乐观锁，出现冲突。UpdatePack:{SerializeUtil.ToJson(updatePack)}, lastUser:{lastUser}", "");
-                }
-                else
-                {
-                    throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePackUsingTimestamp:{updatePack}, lastUser:{lastUser}");
-                }
+                
+                CheckFoundMatch(modelDef, rows, updatePack, lastUser);
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -105,33 +91,9 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                int count = 0;
-
-                while (reader.Read())
-                {
-                    int matched = reader.GetInt32(0);
-
-                    if (matched == 1)
-                    {
-                    }
-                    else if (matched == 0)
-                    {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingTimestamp. 没有这样的ID，或者产生冲突！");
-                    }
-                    else
-                    {
-                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePropertiesUsingTimestamp. Packs:{SerializeUtil.ToJson(updatePacks)}, ModelDef:{modelDef.FullName}, lastUser:{lastUser}");
-                    }
-
-                    count++;
-                }
-
-                if (count != updatePacks.Count)
-                {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingTimestamp. 数量不对.");
-                }
+                CheckFoundMatches(modelDef, reader, updatePacks, lastUser);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not DbException)
             {
                 throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(updatePacks), ex);
             }
@@ -168,18 +130,7 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false); ;
 
-                if (matchedRows == 1)
-                {
-                    return;
-                }
-                else if (matchedRows == 0)
-                {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, $"没有这样的ID，或者使用新旧值对比的乐观锁出现冲突。UpdatePack:{updatePack}, lastUser:{lastUser}", "");
-                }
-                else
-                {
-                    throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePack:{updatePack}, lastUser:{lastUser}");
-                }
+                CheckFoundMatch(modelDef, matchedRows, updatePack, lastUser);
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -211,33 +162,9 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false) 
                     : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                int count = 0;
-
-                while (reader.Read())
-                {
-                    int matched = reader.GetInt32(0);
-
-                    if (matched == 1)
-                    {
-                    }
-                    else if (matched == 0)
-                    {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingOldNewCompareAsync. 没有这样的ID，或者产生冲突！");
-                    }
-                    else
-                    {
-                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePropertiesUsingOldNewCompareAsync. Packs:{SerializeUtil.ToJson(updatePacks)}, ModelDef:{modelDef.FullName}, lastUser:{lastUser}");
-                    }
-
-                    count++;
-                }
-
-                if (count != updatePacks.Count)
-                {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesUsingOldNewCompareAsync, 数量不对");
-                }
+                CheckFoundMatches(modelDef, reader, updatePacks, lastUser);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not DbException)
             {
                 throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(updatePacks), ex);
             }
@@ -279,18 +206,7 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false) 
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                if (rows == 1)
-                {
-                    return;
-                }
-                else if (rows == 0)
-                {
-                    throw DbExceptions.NotFound($"没有找到这样的ID。UpdatePack:{SerializeUtil.ToJson(updatePack)}, lastUser:{lastUser}, model:{modelDef.FullName}");
-                }
-                else
-                {
-                    throw DbExceptions.FoundTooMuch(modelDef.FullName, $"UpdatePackUsingTimestamp:{updatePack}, lastUser:{lastUser}");
-                }
+                CheckFoundMatch(modelDef, rows, updatePack, lastUser);
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -328,33 +244,9 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandReaderAsync(transactionContext.Transaction, command).ConfigureAwait(false) 
                     : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                int count = 0;
-
-                while (reader.Read())
-                {
-                    int matched = reader.GetInt32(0);
-
-                    if (matched == 1)
-                    {
-                    }
-                    else if (matched == 0)
-                    {
-                        throw DbExceptions.NotFound($"没有找到这样的ID。lastUser:{lastUser}, model:{modelDef.FullName}");
-                    }
-                    else
-                    {
-                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $" lastUser:{lastUser}, model:{modelDef.FullName}");
-                    }
-
-                    count++;
-                }
-
-                if (count != updatePacks.Count)
-                {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(updatePacks), "UpdatePropertiesIgnoreConflictCheckAsync. 数量不对.");
-                }
+                CheckFoundMatches(modelDef, reader, updatePacks, lastUser);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not DbException)
             {
                 throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(updatePacks), ex);
             }

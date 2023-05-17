@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.SQL
         {
             return new DbEngineCommand(
                 SqlHelper.CreateAddSql(modelDef),
-                model.ToDbParameters(modelDef, _modelDefFactory, null, 0));
+                model.ToDbParameters(modelDef, ModelDefFactory, null, 0));
         }
 
         public DbEngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IList<T> models) where T : BaseDbModel, new()
@@ -28,7 +28,7 @@ namespace HB.FullStack.Database.SQL
 
             return new DbEngineCommand(
                 SqlHelper.CreateBatchAddSql(modelDef, models.Count),
-                models.ToDbParameters(modelDef, _modelDefFactory, null));
+                models.ToDbParameters(modelDef, ModelDefFactory, null));
         }
     }
 }

@@ -159,5 +159,42 @@ namespace HB.FullStack.Database.SQL
                 modelCount,
                 () => CreateDeleteUsingOldNewCompareSql(modelDef, trulyDeleted, "{0}"));
         }
+
+        public static string CreateDeleteUsingConditionSql<T>(DbModelDef modelDef, WhereExpression<T> whereExpression, bool trulyDeleted, string placeHolder = "0") where T : BaseDbModel, new()
+        {
+            string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { trulyDeleted, placeHolder });
+
+            if (!SqlCache.TryGetValue(cacheKey, out var sql))
+            {
+                string where = $"""
+                {modelDef.DeletedPropertyDef.DbReservedName}=0
+                """;
+
+                if (trulyDeleted)
+                {
+                    sql = $"delete from {modelDef.DbTableReservedName} where {where};";
+                }
+                else
+                {
+                    StringBuilder assignments = new StringBuilder($"""
+                    {modelDef.DeletedPropertyDef.DbReservedName}=1,
+                    {modelDef.LastUserPropertyDef.DbReservedName}={DbParameterName_LastUser}_{NEW_PARAMETER_SUFFIX}{placeHolder}
+                    """);
+
+                    if (modelDef.IsTimestamp)
+                    {
+                        assignments.Append($", {modelDef.TimestampPropertyDef!.DbReservedName}={DbParameterName_Timestamp}_{NEW_PARAMETER_SUFFIX}{placeHolder} ");
+                    }
+
+                    sql = $"update {modelDef.DbTableReservedName} set {assignments} where {where};";
+                }
+
+                SqlCache[cacheKey] = sql;
+            }
+
+
+
+            return $"{sql} AND ({whereExpression.ToStatement(false)})";
+        }
     }
 }

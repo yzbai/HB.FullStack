@@ -26,7 +26,7 @@ namespace HB.FullStack.Database.SQL
             var propertyNames = new List<string> { nameof(DbModel2<long>.Id) };
             var propertyValues = new List<object?> { id };
 
-            var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, 0);
+            var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, propertyNames, propertyValues, null, 0);
 
             //new parameters
             var newProperyNames = new List<string> { nameof(BaseDbModel.LastUser) };
@@ -38,7 +38,7 @@ namespace HB.FullStack.Database.SQL
                 newPropertyValues.Add(newTimestamp);
             }
 
-            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newProperyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, newProperyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
 
             //return
             return new DbEngineCommand(
@@ -70,7 +70,7 @@ namespace HB.FullStack.Database.SQL
                 //parameters
                 var propertyValues = new List<object?> { id };
 
-                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, number);
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, propertyNames, propertyValues, null, number);
 
                 totalParameters.AddRange(parameters);
 
@@ -82,7 +82,7 @@ namespace HB.FullStack.Database.SQL
                     newPropertyValues.Add(newTimestamp);
                 }
 
-                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newProperyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, number);
+                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, newProperyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, number);
 
                 totalParameters.AddRange(newParameters);
 
@@ -102,12 +102,12 @@ namespace HB.FullStack.Database.SQL
             //parameters
             List<string> propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(ITimestamp.Timestamp) };
             List<object?> propertyValues = new List<object?> { id, timestamp };
-            var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, 0);
+            var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, propertyNames, propertyValues, null, 0);
 
             //new parameters
             List<string> newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser), nameof(ITimestamp.Timestamp) };
             List<object?> newPropertyValues = new List<object?> { lastUser, newTimestamp };
-            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
 
             //return
             return new DbEngineCommand(
@@ -135,13 +135,13 @@ namespace HB.FullStack.Database.SQL
                 //parameters
                 List<object?> propertyValues = new List<object?> { id, timestamps[number] };
 
-                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, propertyNames, propertyValues, null, number);
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, propertyNames, propertyValues, null, number);
 
                 totalParameters.AddRange(parameters);
 
                 //new parameters
                 var newPropertyValues = new List<object?> { lastUser, newTimestamp };
-                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, number);
+                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, number);
 
                 totalParameters.AddRange(newParameters);
 
@@ -159,7 +159,7 @@ namespace HB.FullStack.Database.SQL
             newTimestamp ??= TimeUtil.Timestamp;
 
             //parameters
-            var parameters = model.ToDbParameters(modelDef, _modelDefFactory, null, 0);
+            var parameters = model.ToDbParameters(modelDef, ModelDefFactory, null, 0);
 
             //new parameters
             List<string> newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser) };
@@ -171,7 +171,7 @@ namespace HB.FullStack.Database.SQL
                 newPropertyValues.Add(newTimestamp);
             }
 
-            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
+            var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
 
             //return
             return new DbEngineCommand(
@@ -186,7 +186,7 @@ namespace HB.FullStack.Database.SQL
             ThrowIf.NullOrEmpty(models, nameof(models));
             newTimestamp ??= TimeUtil.Timestamp;
 
-            IList<KeyValuePair<string, object>> totalParameters = models.ToDbParameters(modelDef, _modelDefFactory, null);
+            IList<KeyValuePair<string, object>> totalParameters = models.ToDbParameters(modelDef, ModelDefFactory, null);
 
             var newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser) };
 
@@ -204,7 +204,7 @@ namespace HB.FullStack.Database.SQL
                     newPropertyValues.Add(newTimestamp);
                 }
 
-                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, i);
+                var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, i);
 
                 totalParameters.AddRange(newParameters);
             }
@@ -214,38 +214,28 @@ namespace HB.FullStack.Database.SQL
                 totalParameters);
         }
 
-        //public DbEngineCommand CreateDeleteCommand<T>(
-        //    DbModelDef modelDef,
-        //    WhereExpression<T> whereExpression,
-        //    string lastUser,
-        //    bool trulyDeleted) where T : TimelessDbModel, new()
-        //{
-        //    Requires.NotNull(whereExpression, nameof(whereExpression));
+        public DbEngineCommand CreateDeleteConditonCommand<T>(
+            DbModelDef modelDef,
+            WhereExpression<T> whereExpression,
+            string lastUser,
+            bool trulyDeleted) where T : BaseDbModel, new()
+        {
+            Requires.NotNull(whereExpression, nameof(whereExpression));
 
-        //    IList<KeyValuePair<string, object>> parameters = whereExpression.GetParameters();
+            IList<KeyValuePair<string, object>> parameters = whereExpression.GetParameters();
 
-        //    if (!trulyDeleted)
-        //    {
-        //        parameters.Add(new KeyValuePair<string, object>(
-        //            $"{SqlHelper.DbParameterName_LastUser}_0",
-        //            lastUser));
-        //        parameters.Add(new KeyValuePair<string, object>(
-        //            $"{SqlHelper.DbParameterName_Deleted}_0",
-        //            true));
+            parameters.AddParameter(modelDef.LastUserPropertyDef, lastUser, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
 
-        //        string sql = GetCachedSql(SqlType.UpdateDeletedFields, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
+            if (modelDef.IsTimestamp)
+            {
+                parameters.AddParameter(modelDef.TimestampPropertyDef!, TimeUtil.Timestamp, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
+            }
 
-        //        return new DbEngineCommand(sql, parameters);
-        //    }
+            string sql = SqlHelper.CreateDeleteUsingConditionSql(modelDef, whereExpression, trulyDeleted);
 
-        //    string deleteSql = GetCachedSql(SqlType.Delete, new DbModelDef[] { modelDef }) + whereExpression.ToStatement();
-
-        //    return new DbEngineCommand(deleteSql, parameters);
-        //}
-
-
-
-
+            return new DbEngineCommand(sql, parameters);
+        }
 
     }
 }
+

@@ -1,9 +1,12 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Implements;
@@ -130,5 +133,130 @@ namespace HB.FullStack.Database
         public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : BaseDbModel, new() => DbCommandBuilder.Where(predicate);
 
         #endregion
+
+        private static void CheckFoundMatch(DbModelDef modelDef, long foundMatch, object item, string lastUser, [CallerMemberName] string callerName = "")
+        {
+            ThrowIf.NullOrEmpty(callerName, nameof(callerName));
+
+            if (foundMatch == 1)
+            {
+                return;
+            }
+            else if (foundMatch == 0)
+            {
+                //TODO: 这里返回0，一般是因为version不匹配，单也有可能是Id不存在，或者Deleted=1.
+                //可以改造SqlHelper中的update语句为如下，进行一般改造，排除上述可能。
+                //在原始的update语句，比如：update tb_userdirectorypermission set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5b35-b123-2d4f-876c-6ee360db28c1') and Deleted = 0 and Version='0';
+                //后面select found_rows(), count(1) as 'exits' from tb_userdirectorypermission where Id = uuid_to_bin('08da5b35-b123-2d4f-876c-6ee360db28c1') and Deleted = 0;
+                //然后使用Reader读取，通过两个值进行判断。
+                //如果found_rows=1，正常返回
+                //如果found_rows=0, exists = 1, version冲突
+                //如果found_rows=0, exists = 0, 已删除
+
+                //不存在和Version冲突，统称为冲突，所以不用改，反正后续业务为了解决冲突也会重新select什么的，到时候可以判定是已经删掉了还是version冲突
+
+                throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(item), $"{callerName} 发生冲突，或者不存在这样的ID. modelDef:{modelDef.FullName}, lastUser:{lastUser}");
+            }
+            else
+            {
+                throw DbExceptions.FoundTooMuch(modelDef.FullName, SerializeUtil.ToJson(item), $"{callerName} 发现太多！modelDef:{modelDef.FullName}, lastUser:{lastUser}");
+            }
+        }
+
+        private static void CheckFoundMatches<T>(DbModelDef modelDef, IDataReader reader, IList<T> items, string lastUser, [CallerMemberName] string callerName = "")
+        {
+            ThrowIf.NullOrEmpty(callerName, nameof(callerName));
+
+            int count = 0;
+
+            while (reader.Read())
+            {
+                int matched = reader.GetInt32(0);
+
+                if (matched == 1)
+                {
+                }
+                else if (matched == 0)
+                {
+                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), $"{callerName}. 没有这样的ID，或者产生冲突！");
+                }
+                else
+                {
+                    throw DbExceptions.FoundTooMuch(modelDef.FullName, $"{callerName}: {SerializeUtil.ToJson(items)}, ModelDef:{modelDef.FullName}, lastUser:{lastUser}");
+                }
+
+                count++;
+            }
+
+            if (count != items.Count)
+            {
+                throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), $"{callerName}: 数量不同.");
+            }
+        }
+
+        private void ThrowIfExceedMaxBatchNumber<TObj>(IList<TObj> items, string lastUser, DbModelDef modelDef)
+        {
+            if (modelDef.DbSchema.MaxBatchNumber < items.Count)
+            {
+                throw DbExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count, lastUser);
+            }
+        }
+
+        private static void PrepareItem<T>(T item, string lastUser, ref string oldLastUser, ref long? oldTimestamp) where T : BaseDbModel, new()
+        {
+            long curTimestamp = TimeUtil.Timestamp;
+
+            if (item is ITimestamp timestampModel)
+            {
+                oldTimestamp = timestampModel.Timestamp;
+                timestampModel.Timestamp = curTimestamp;
+            }
+
+            oldLastUser = item.LastUser;
+            item.LastUser = lastUser;
+        }
+
+        private static void RestoreItem<T>(T item, long? oldTimestamp, string oldLastUser) where T : BaseDbModel, new()
+        {
+            if (item is ITimestamp timestampModel)
+            {
+                timestampModel.Timestamp = oldTimestamp!.Value;
+            }
+
+            item.LastUser = oldLastUser;
+        }
+
+        private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel, new()
+        {
+            long curTimestamp = TimeUtil.Timestamp;
+
+            foreach (T item in items)
+            {
+                oldLastUsers.Add(item.LastUser);
+                item.LastUser = lastUser;
+
+                if (item is ITimestamp timestampModel)
+                {
+                    oldTimestamps.Add(timestampModel.Timestamp);
+
+                    timestampModel.Timestamp = curTimestamp;
+                }
+            }
+        }
+
+        private static void RestoreBatchItems<T>(IList<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel, new()
+        {
+            for (int i = 0; i < items.Count; ++i)
+            {
+                T item = items[i];
+
+                item.LastUser = oldLastUsers[i] ?? "";
+
+                if (item is ITimestamp timestampModel)
+                {
+                    timestampModel.Timestamp = oldTimestamps[i];
+                }
+            }
+        }
     }
 }

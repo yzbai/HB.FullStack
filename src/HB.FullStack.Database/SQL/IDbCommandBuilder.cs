@@ -105,31 +105,13 @@ namespace HB.FullStack.Database
 
         #region Delete
 
-        //DbEngineCommand CreateDeleteCommand(
-        //    DbModelDef modelDef,
-        //    object id,
-        //    string lastUser,
-        //    bool trulyDeleted,
-        //    long? oldTimestamp,
-        //    long? newTimestamp);
-
-        //DbEngineCommand CreateDeleteCommand<T>(
-        //    DbModelDef modelDef,
-        //    WhereExpression<T> whereExpression,
-        //    string lastUser,
-        //    bool trulyDeleted) where T : TimelessDbModel, new();
-
-        //public DbEngineCommand CreateBatchDeleteCommand(
-        //    DbModelDef modelDef,
-        //    IList<object> ids,
-        //    IList<long?> oldTimestamps,
-        //    IList<long?> newTimestamps,
-        //    string lastUser,
-        //    bool trulyDeleted,
-        //    bool needTrans);
         DbEngineCommand CreateDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, object id, string lastUser, bool trulyDelete, long? newTimestamp);
         DbEngineCommand CreateDeleteTimestampCommand(DbModelDef modelDef, object id, long timestamp, string lastUser, bool trulyDelete, long? newTimestamp);
         DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp) where T : BaseDbModel, new();
+        DbEngineCommand CreateBatchDeleteTimestampCommand(DbModelDef modelDef, IList<object> ids, IList<long> timestamps, string lastUser, bool trulyDelete, long? newTimestamp = null);
+        DbEngineCommand CreateBatchDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, IList<object> ids, string lastUser, bool trulyDeleted, long? newTimestamp = null);
+        DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel, new();
+        DbEngineCommand CreateDeleteConditonCommand<T>(DbModelDef modelDef, WhereExpression<T> whereExpression, string lastUser, bool trulyDeleted) where T : BaseDbModel, new();
 
         #endregion
     }

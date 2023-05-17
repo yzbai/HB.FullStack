@@ -44,14 +44,14 @@ namespace HB.FullStack.Database.SQL
             return _expressionContext.GetParameters();
         }
 
-        public string ToStatement()
+        public string ToStatement(bool addWhereAtStart = true)
         {
             StringBuilder sql = new StringBuilder();
 
             bool hasStringWhere = !string.IsNullOrEmpty(_whereString);
             bool hasLamdaWhere = _whereExpression != null;
 
-            if (hasStringWhere || hasLamdaWhere)
+            if (addWhereAtStart && (hasStringWhere || hasLamdaWhere))
             {
                 sql.Append(" WHERE ");
             }
@@ -277,7 +277,7 @@ namespace HB.FullStack.Database.SQL
         {
             string oldSeparator = _expressionContext.Seperator;
             _expressionContext.Seperator = string.Empty;
-            _groupByString = _expressionVisitor.Visit(keySelector,_expressionContext).ToString()!;
+            _groupByString = _expressionVisitor.Visit(keySelector, _expressionContext).ToString()!;
             _expressionContext.Seperator = oldSeparator;
 
             if (!string.IsNullOrEmpty(_groupByString))

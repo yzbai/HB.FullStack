@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
-using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
@@ -116,71 +112,6 @@ namespace HB.FullStack.Database
                 }
 
                 throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(items), ex);
-            }
-        }
-        
-        private void ThrowIfExceedMaxBatchNumber<TObj>(IList<TObj> items, string lastUser, DbModelDef modelDef)
-        {
-            if (modelDef.DbSchema.MaxBatchNumber < items.Count)
-            {
-                throw DbExceptions.TooManyForBatch("BatchAdd超过批量操作的最大数目", items.Count, lastUser);
-            }
-        }
-
-        private static void PrepareItem<T>(T item, string lastUser, ref string oldLastUser, ref long? oldTimestamp) where T : BaseDbModel, new()
-        {
-            long curTimestamp = TimeUtil.Timestamp;
-
-            if (item is ITimestamp timestampModel)
-            {
-                oldTimestamp = timestampModel.Timestamp;
-                timestampModel.Timestamp = curTimestamp;
-            }
-
-            oldLastUser = item.LastUser;
-            item.LastUser = lastUser;
-        }
-
-        private static void RestoreItem<T>(T item, long? oldTimestamp, string oldLastUser) where T : BaseDbModel, new()
-        {
-            if (item is ITimestamp timestampModel)
-            {
-                timestampModel.Timestamp = oldTimestamp!.Value;
-            }
-
-            item.LastUser = oldLastUser;
-        }
-
-        private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel, new()
-        {
-            long curTimestamp = TimeUtil.Timestamp;
-
-            foreach (T item in items)
-            {
-                oldLastUsers.Add(item.LastUser);
-                item.LastUser = lastUser;
-
-                if (item is ITimestamp timestampModel)
-                {
-                    oldTimestamps.Add(timestampModel.Timestamp);
-
-                    timestampModel.Timestamp = curTimestamp;
-                }
-            }
-        }
-
-        private static void RestoreBatchItems<T>(IList<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel, new()
-        {
-            for (int i = 0; i < items.Count; ++i)
-            {
-                T item = items[i];
-
-                item.LastUser = oldLastUsers[i] ?? "";
-
-                if (item is ITimestamp timestampModel)
-                {
-                    timestampModel.Timestamp = oldTimestamps[i];
-                }
             }
         }
     }

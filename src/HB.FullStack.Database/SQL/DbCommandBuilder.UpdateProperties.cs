@@ -40,7 +40,7 @@ namespace HB.FullStack.Database.SQL
                 updatePack.NewTimestamp
             };
 
-            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, 0);
+            IList<KeyValuePair<string, object>> parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, updatedPropertyNames, updatedPropertyValues, null, 0);
 
             parameters.AddParameter(modelDef.TimestampPropertyDef!, updatePack.OldTimestamp.Value, SqlHelper.OLD_PARAMETER_SUFFIX, 0);
 
@@ -80,7 +80,7 @@ namespace HB.FullStack.Database.SQL
                     updatePack.NewTimestamp
                 };
 
-                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, number);
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, updatedPropertyNames, updatedPropertyValues, null, number);
 
                 parameters.AddParameter(modelDef.TimestampPropertyDef!, updatePack.OldTimestamp.Value, SqlHelper.OLD_PARAMETER_SUFFIX, number);
 
@@ -100,7 +100,7 @@ namespace HB.FullStack.Database.SQL
         {
             var parameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
-                _modelDefFactory,
+                ModelDefFactory,
                 new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
                 new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
                 null,
@@ -111,7 +111,7 @@ namespace HB.FullStack.Database.SQL
 
             var newParameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
-                _modelDefFactory,
+                ModelDefFactory,
                 new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
                 new List<object?>(updatePack.NewPropertyValues) { lastUser },
                 SqlHelper.NEW_PARAMETER_SUFFIX,
@@ -138,7 +138,7 @@ namespace HB.FullStack.Database.SQL
             {
                 var parameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
-                    _modelDefFactory,
+                    ModelDefFactory,
                     new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
                     new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
                     null,
@@ -146,7 +146,7 @@ namespace HB.FullStack.Database.SQL
 
                 var newParameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
-                    _modelDefFactory,
+                    ModelDefFactory,
                     new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
                     new List<object?>(updatePack.NewPropertyValues) { lastUser },
                     SqlHelper.NEW_PARAMETER_SUFFIX,
@@ -179,7 +179,7 @@ namespace HB.FullStack.Database.SQL
                 lastUser
             };
 
-            var paramters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, 0);
+            var paramters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, updatedPropertyNames, updatedPropertyValues, null, 0);
 
             return new DbEngineCommand(
                 SqlHelper.CreateUpdatePropertiesIgnoreConflictCheckSql(modelDef, updatedPropertyNames),
@@ -205,7 +205,7 @@ namespace HB.FullStack.Database.SQL
                     lastUser,
                 };
 
-                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, _modelDefFactory, updatedPropertyNames, updatedPropertyValues, null, number);
+                var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, updatedPropertyNames, updatedPropertyValues, null, number);
 
                 totalParameters.AddRange(parameters);
 

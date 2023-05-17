@@ -63,11 +63,11 @@ namespace HB.FullStack.Database
 
         Task DeleteAsync<T>(IList<object> ids, IList<long> timestamps, string lastUser, TransactionContext transContext) where T : BaseDbModel, ITimestamp, new();
         
-        Task DeleteIgnoreConflictCheckAsync<T>(object id, TransactionContext? transContext, string lastUser) where T : BaseDbModel, new();
+        Task DeleteIgnoreConflictCheckAsync<T>(object id, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new();
 
-        Task DeleteIgnoreConflictCheckAsync<T>(IList<object> ids, TransactionContext transContext, string lastUser) where T : BaseDbModel, new();
+        Task DeleteIgnoreConflictCheckAsync<T>(IList<object> ids, string lastUser, TransactionContext transContext) where T : BaseDbModel, new();
         
-        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext? transactionContext = null) where T : BaseDbModel, new();
+        Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext transactionContext) where T : BaseDbModel, new();
 
         #endregion
 

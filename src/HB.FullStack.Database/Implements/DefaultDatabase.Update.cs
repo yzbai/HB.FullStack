@@ -51,27 +51,7 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                if (rows == 1)
-                {
-                    return;
-                }
-                else if (rows == 0)
-                {
-                    //TODO: 这里返回0，一般是因为version不匹配，单也有可能是Id不存在，或者Deleted=1.
-                    //可以改造SqlHelper中的update语句为如下，进行一般改造，排除上述可能。
-                    //在原始的update语句，比如：update tb_userdirectorypermission set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5b35-b123-2d4f-876c-6ee360db28c1') and Deleted = 0 and Version='0';
-                    //后面select found_rows(), count(1) as 'exits' from tb_userdirectorypermission where Id = uuid_to_bin('08da5b35-b123-2d4f-876c-6ee360db28c1') and Deleted = 0;
-                    //然后使用Reader读取，通过两个值进行判断。
-                    //如果found_rows=1，正常返回
-                    //如果found_rows=0, exists = 1, version冲突
-                    //如果found_rows=0, exists = 0, 已删除
-
-                    //不存在和Version冲突，统称为冲突，所以不用改，反正后续业务为了解决冲突也会重新select什么的，到时候可以判定是已经删掉了还是version冲突
-
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(item), "");
-                }
-
-                throw DbExceptions.FoundTooMuch(modelDef.FullName, SerializeUtil.ToJson(item));
+                CheckFoundMatch(modelDef, rows, item, lastUser);
             }
             catch (DbException ex)
             {
@@ -143,31 +123,7 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                int count = 0;
-
-                while (reader.Read())
-                {
-                    int matched = reader.GetInt32(0);
-
-                    if (matched == 1)
-                    {
-                    }
-                    else if (matched == 0)
-                    {
-                        throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate. 没有这样的ID，或者产生冲突！");
-                    }
-                    else
-                    {
-                        throw DbExceptions.FoundTooMuch(modelDef.FullName, $"BatchUpadate. {SerializeUtil.ToJson(items)}, ModelDef:{modelDef.FullName}, lastUser:{lastUser}");
-                    }
-
-                    count++;
-                }
-
-                if (count != items.Count)
-                {
-                    throw DbExceptions.ConcurrencyConflict(modelDef.FullName, SerializeUtil.ToJson(items), "BatchUpdate. 数量不同.");
-                }
+                CheckFoundMatches(modelDef, reader, items, lastUser);
             }
             catch (DbException ex)
             {

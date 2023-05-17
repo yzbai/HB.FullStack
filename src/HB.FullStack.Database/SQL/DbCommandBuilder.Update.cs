@@ -17,7 +17,7 @@ namespace HB.FullStack.Database.SQL
         {
             return new DbEngineCommand(
                 SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDef),
-                model.ToDbParameters(modelDef, _modelDefFactory, null, 0));
+                model.ToDbParameters(modelDef, ModelDefFactory, null, 0));
         }
         
         public DbEngineCommand CreateBatchUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel, new()
@@ -26,12 +26,12 @@ namespace HB.FullStack.Database.SQL
 
             return new DbEngineCommand(
                 SqlHelper.CreateBatchUpdateIgnoreConflictCheckSql(modelDef, models.Count),
-                models.ToDbParameters(modelDef, _modelDefFactory, null));
+                models.ToDbParameters(modelDef, ModelDefFactory, null));
         }
 
         public DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel, new()
         {
-            IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, _modelDefFactory, null, 0);
+            IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, ModelDefFactory, null, 0);
 
             paramters.AddParameter(modelDef.TimestampPropertyDef!, oldTimestamp, SqlHelper.OLD_PARAMETER_SUFFIX, 0);
 
@@ -45,7 +45,7 @@ namespace HB.FullStack.Database.SQL
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.CountNotEqual(models, oldTimestamps, "count not even.");
 
-            var totalParameters = models.ToDbParameters(modelDef, _modelDefFactory, null);
+            var totalParameters = models.ToDbParameters(modelDef, ModelDefFactory, null);
 
             for (int i = 0; i < oldTimestamps.Count; ++i)
             {
