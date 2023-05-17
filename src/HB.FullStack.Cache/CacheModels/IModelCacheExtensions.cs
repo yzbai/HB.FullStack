@@ -10,7 +10,7 @@ namespace HB.FullStack.Cache
 {
     public static class IModelCacheExtensions
     {
-        public static async Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(this ICache cache, IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : ITimestampModel, new()
+        public static async Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(this ICache cache, IEnumerable<TCacheModel> models, CancellationToken token = default) where TCacheModel : ITimestamp, new()
         {
             CacheModelDef? modelDef = cache.GetDef<TCacheModel>();
 
@@ -25,7 +25,7 @@ namespace HB.FullStack.Cache
             return await cache.GetModelsAsync<TCacheModel>(dimensionKeyName, dimensionKeyValues, token).ConfigureAwait(false);
         }
 
-        public static async Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default) where TCacheModel : ITimestampModel, new()
+        public static async Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, string dimensionKeyName, object dimensionKeyValue, CancellationToken token = default) where TCacheModel : ITimestamp, new()
         {
             (IEnumerable<TCacheModel>? results, bool exist) = await cache.GetModelsAsync<TCacheModel>(dimensionKeyName, new object[] { dimensionKeyValue }, token).ConfigureAwait(false);
 
@@ -37,7 +37,7 @@ namespace HB.FullStack.Cache
             return (default, false);
         }
 
-        public static async Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : ITimestampModel, new()
+        public static async Task<(TCacheModel?, bool)> GetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : ITimestamp, new()
         {
             CacheModelDef? modelDef = cache.GetDef<TCacheModel>();
 
@@ -54,7 +54,7 @@ namespace HB.FullStack.Cache
             return await cache.GetModelAsync<TCacheModel>(dimensionKeyName, dimensionKeyValue, token).ConfigureAwait(false);
         }
 
-        public static async Task<bool> SetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : ITimestampModel, new()
+        public static async Task<bool> SetModelAsync<TCacheModel>(this ICache cache, TCacheModel model, CancellationToken token = default) where TCacheModel : ITimestamp, new()
         {
             IEnumerable<bool> results = await cache.SetModelsAsync(new TCacheModel[] { model }, token).ConfigureAwait(false);
 
