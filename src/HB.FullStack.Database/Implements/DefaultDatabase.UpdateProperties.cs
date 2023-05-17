@@ -74,6 +74,8 @@ namespace HB.FullStack.Database
                 return;
             }
 
+            ThrowIfExceedMaxBatchNumber(updatePacks, lastUser, modelDef);
+
             transactionContext.ThrowIfNull(nameof(transactionContext));
             updatePacks.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable().ThrowIfNotTimestamp();
@@ -151,6 +153,8 @@ namespace HB.FullStack.Database
                 return;
             }
 
+            ThrowIfExceedMaxBatchNumber(updatePacks, lastUser, modelDef);
+
             transactionContext.ThrowIfNull(nameof(transactionContext));
             modelDef.ThrowIfNotWriteable();
 
@@ -226,6 +230,8 @@ namespace HB.FullStack.Database
                 await UpdatePropertiesIgnoreConflictCheckAsync(modelDef, updatePacks[0], lastUser, transactionContext).ConfigureAwait(false);
                 return;
             }
+
+            ThrowIfExceedMaxBatchNumber(updatePacks, lastUser, modelDef);
 
             transactionContext.ThrowIfNull(nameof(transactionContext));
             updatePacks.ThrowIfNotValid();
@@ -317,7 +323,9 @@ namespace HB.FullStack.Database
                 await UpdatePropertiesAsync<T>(changedPacks.First(), lastUser, transContext).ConfigureAwait(false);
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+
+            ThrowIfExceedMaxBatchNumber(changedPacks, lastUser, modelDef);
 
             //TODO: 是否允许不同的ConflictCheckMethod混杂?
             DbConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPacks[0]);

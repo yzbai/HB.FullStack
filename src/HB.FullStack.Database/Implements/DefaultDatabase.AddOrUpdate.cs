@@ -14,25 +14,21 @@ namespace HB.FullStack.Database
         /// <summary>
         /// AddOrUpdate,即override,不检查Timestamp
         /// </summary>
-        public async Task AddOrUpdateByIdAsync<T>(T item, string lastUser, TransactionContext? transContext = null) where T : TimelessDbModel, new()
+        public async Task AddOrUpdateByIdAsync<T>(T item, string lastUser, TransactionContext? transContext = null) where T : BaseDbModel, new()
         {
             ThrowIf.NotValid(item, nameof(item));
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
-            //TruncateLastUser(ref lastUser);
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-
                 item.LastUser = lastUser;
 
                 var command = DbCommandBuilder.CreateAddOrUpdateCommand(modelDef, item, false);
 
                 _ = transContext != null
-                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -40,7 +36,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task AddOrUpdateByIdAsync<T>(IEnumerable<T> items, string lastUser, TransactionContext? transContext) where T : TimelessDbModel, new()
+        public async Task AddOrUpdateByIdAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel, new()
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -49,11 +45,9 @@ namespace HB.FullStack.Database
                 return;
             }
 
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-            ConnectionString connectionString = _dbSchemaManager.GetRequiredConnectionString(modelDef.DbSchemaName, true);
+            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
 
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
-            //TruncateLastUser(ref lastUser);
 
             foreach (var item in items)
             {
@@ -62,13 +56,11 @@ namespace HB.FullStack.Database
 
             try
             {
-                IDbEngine engine = _dbSchemaManager.GetDatabaseEngine(modelDef.EngineType);
-
-                var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(modelDef, items, transContext == null);
+                var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(modelDef, items);
 
                 _ = transContext != null
-                    ? await engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
-                    : await engine.ExecuteCommandNonQueryAsync(connectionString, command).ConfigureAwait(false);
+                    ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
+                    : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not DbException)
             {

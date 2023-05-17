@@ -37,6 +37,8 @@ namespace HB.FullStack.Database
             return lst.ElementAt(0);
         }
 
+        //TODO: 最大返回量检查
+
         public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(
             FromExpression<TFrom>? fromCondition,
             WhereExpression<TWhere>? whereCondition,

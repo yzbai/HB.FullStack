@@ -28,7 +28,7 @@ namespace HB.FullStack.Database
         /// Server端必须加分布式锁进行。
         /// 可多次反复执行，或者推迟执行
         /// </summary>
-        Task InitializeAsync(IEnumerable<DbInitContext>? dbInitContexts = null);
+        Task InitializeAsync();
 
         IDbModelDefFactory ModelDefFactory { get; }
     }

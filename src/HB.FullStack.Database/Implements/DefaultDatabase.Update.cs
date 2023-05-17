@@ -90,6 +90,8 @@ namespace HB.FullStack.Database
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
+            ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
+
             DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdate;
 
             if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)

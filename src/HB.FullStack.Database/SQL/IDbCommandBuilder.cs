@@ -48,7 +48,7 @@ namespace HB.FullStack.Database
         #region AddOrUpdate
         
         DbEngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : BaseDbModel, new();
-        DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IList<T> models, bool needTrans) where T : BaseDbModel, new();
+        DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IList<T> models) where T : BaseDbModel, new();
 
         #endregion
 

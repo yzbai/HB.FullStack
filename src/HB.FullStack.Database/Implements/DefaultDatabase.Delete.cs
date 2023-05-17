@@ -73,6 +73,8 @@ namespace HB.FullStack.Database
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
+            ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
+
             DbConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
 
             long curTimestamp = TimeUtil.Timestamp;
@@ -151,6 +153,7 @@ namespace HB.FullStack.Database
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
+            ThrowIfExceedMaxBatchNumber(ids, lastUser, modelDef);
 
             long curTimestamp = TimeUtil.Timestamp;
             bool trulyDelete = modelDef.DbSchema.TrulyDelete;
@@ -208,6 +211,7 @@ namespace HB.FullStack.Database
             }
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
+            ThrowIfExceedMaxBatchNumber(ids, lastUser, modelDef);
 
             long curTimestamp = TimeUtil.Timestamp;
             bool trulyDelete = modelDef.DbSchema.TrulyDelete;
@@ -231,6 +235,7 @@ namespace HB.FullStack.Database
         public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext transactionContext) where T : BaseDbModel, new()
         {
             //TODO: 这里应该添加安全限制，检查whereExpr, 或者先select，然后判断是否删除,记录删除日志
+            //ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
 
