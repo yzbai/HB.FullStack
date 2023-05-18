@@ -51,7 +51,7 @@ namespace HB.FullStack.Database
                 _logger.LogInformation("数据初{DbSchemaName}始化成功！, Version:{Version}", dbSchema.Name, dbSchema.Version);
             }
 
-            Dictionary<string, DbInitContext> RangeInitContexts(IList<DbInitContext>? contexts, IEnumerable<DbInitContext>? contextsFromOptions)
+            static Dictionary<string, DbInitContext> RangeInitContexts(IList<DbInitContext>? contexts, IEnumerable<DbInitContext>? contextsFromOptions)
             {
                 Dictionary<string, DbInitContext> dict = new Dictionary<string, DbInitContext>();
 
