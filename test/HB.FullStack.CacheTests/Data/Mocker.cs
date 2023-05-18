@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-using HB.FullStack.BaseTest.Data.Sqlites;
+using HB.FullStack.BaseTest.Models;
 
 namespace HB.FullStack.CacheTests
 {

@@ -72,9 +72,9 @@ namespace HB.FullStack.Client.Components.Users
             throw new NotImplementedException();
         }
 
-        protected override async Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangeJsonPack> cps)
+        protected override async Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> cps)
         {
-            foreach (PropertyChangeJsonPack cp in cps)
+            foreach (PropertyChangePack cp in cps)
             {
                 PatchRequest<UserProfileRes> patchRequest = new PatchRequest<UserProfileRes>(cp);
 

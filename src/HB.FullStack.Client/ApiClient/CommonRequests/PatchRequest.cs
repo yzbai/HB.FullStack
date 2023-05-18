@@ -6,9 +6,9 @@ namespace HB.FullStack.Client.ApiClient
     public sealed class PatchRequest<T> : ApiRequest where T : SharedResource
     {
         [RequestBody]
-        public PropertyChangeJsonPack RequestData { get; set; }
+        public PropertyChangePack RequestData { get; set; }
 
-        public PatchRequest(PropertyChangeJsonPack requestData) : base(typeof(T).Name, ApiMethod.UpdateProperties, null, null)
+        public PatchRequest(PropertyChangePack requestData) : base(typeof(T).Name, ApiMethod.UpdateProperties, null, null)
         {
             RequestData = requestData;
         }

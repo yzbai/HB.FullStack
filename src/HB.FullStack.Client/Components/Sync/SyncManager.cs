@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
-using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.Base;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
@@ -23,6 +23,7 @@ namespace HB.FullStack.Client.Components.Sync
         private readonly IClientEvents _clientEvents;
 
         public event Func<Task>? Syncing { add => _eventManager.Add(value, nameof(Syncing)); remove => _eventManager.Remove(value, nameof(Syncing)); }
+
         public event Func<Task>? Synced { add => _eventManager.Add(value, nameof(Synced)); remove => _eventManager.Remove(value, nameof(Synced)); }
 
         public SyncManager(IDatabase database, IModelDefFactory modelDefFactory, IClientEvents clientEvents)
@@ -73,7 +74,6 @@ namespace HB.FullStack.Client.Components.Sync
                 //TODO: 处理
 
                 //处理Add
-
 
                 //处理Update
                 //处理Delete
@@ -140,7 +140,7 @@ namespace HB.FullStack.Client.Components.Sync
             await _database.AddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
         }
 
-        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangeJsonPack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
         {
             DbModelDef? modelDef = _modelDefFactory.GetDef<TModel>(ModelKind.Db) as DbModelDef;
 
@@ -158,7 +158,6 @@ namespace HB.FullStack.Client.Components.Sync
                     ModelFullName = modelDef.FullName,
                     ChangePack = changedPack
                 };
-
 
                 offlineHistories.Add(offlineChange);
             }

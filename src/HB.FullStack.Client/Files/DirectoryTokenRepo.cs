@@ -9,18 +9,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HB.FullStack.Client.Components.Sync;
+
+using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Client.Base;
+using HB.FullStack.Client.Components.Sync;
 using HB.FullStack.Common.Files;
 using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using HB.FullStack.Client.Base;
-using HB.FullStack.Client.Abstractions;
-using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.Files
 {
@@ -76,7 +76,7 @@ namespace HB.FullStack.Client.Files
             throw new NotImplementedException();
         }
 
-        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangeJsonPack> changedPacks)
+        protected override Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> changedPacks)
         {
             throw new NotImplementedException();
         }

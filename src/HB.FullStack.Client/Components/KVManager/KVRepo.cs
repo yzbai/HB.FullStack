@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database;
@@ -19,9 +17,9 @@ namespace HB.FullStack.Client.Components.KVManager
             _database = database;
         }
 
-        public async Task SetAsync<T>(string key, T? value, TimeSpan? aliveTime, TransactionContext? transactionContext)
+        public async Task SetAsync<T>(string key, T? value, TimeSpan? aliveTime, TransactionContext transactionContext)
         {
-            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext, true).ConfigureAwait(false);
+            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext).ConfigureAwait(false);
 
             KV kv = new KV { Key = key, Value = SerializeUtil.ToJson(value), ExpiredAt = aliveTime.HasValue ? TimeUtil.UtcNow + aliveTime.Value : DateTimeOffset.MaxValue };
 
@@ -40,9 +38,9 @@ namespace HB.FullStack.Client.Components.KVManager
             return default;
         }
 
-        public async Task DeleteAsync(string key, TransactionContext? transactionContext)
+        public async Task DeleteAsync(string key, TransactionContext transactionContext)
         {
-            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext, true).ConfigureAwait(false);
+            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext).ConfigureAwait(false);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
 using HB.FullStack.Cache;
+using HB.FullStack.Database.Engine;
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,6 +17,10 @@ namespace HB.FullStack.CacheTests
     [TestClass]
     public class UpdateInvalidationConcurrencyTests : BaseTestClass
     {
+        public UpdateInvalidationConcurrencyTests() : base(DbEngineType.SQLite)
+        {
+        }
+
         /// <summary>
         /// 同时有多个线程同时来update，最后最大Timestamp获胜
         /// </summary>
@@ -129,10 +134,9 @@ namespace HB.FullStack.CacheTests
             //线程1这时才去更新Cache， 可能会将版本又变为1
 
             await Task.WhenAll(task1, task2);
-
         }
 
-        private static async Task<VersionData> RetrieveDbAndUpdateCacheAsync(DistributedCacheEntryOptions entryOptions, DatabaseMocker dbMocker)
+        private async Task<VersionData> RetrieveDbAndUpdateCacheAsync(DistributedCacheEntryOptions entryOptions, DatabaseMocker dbMocker)
         {
             //模拟Retrieve data
             VersionData versionData = await dbMocker.RetrieveAsync();
@@ -155,7 +159,7 @@ namespace HB.FullStack.CacheTests
             return versionData;
         }
 
-        private static async Task UpdateDbAndInvalidateCacheAsync(DatabaseMocker databaseMocker, DistributedCacheEntryOptions entryOptions)
+        private async Task UpdateDbAndInvalidateCacheAsync(DatabaseMocker databaseMocker, DistributedCacheEntryOptions entryOptions)
         {
             //模拟Update Database
             VersionData versionData = await databaseMocker.RetrieveAsync().ConfigureAwait(false);
@@ -171,8 +175,6 @@ namespace HB.FullStack.CacheTests
             bool rt2 = await Cache.SetAsync(versionData.Id.ToString(), versionData, versionData.Timestamp, entryOptions).ConfigureAwait(false);
             Assert.IsTrue(rt2);
         }
-
-
     }
 
     public class DatabaseMocker
@@ -197,7 +199,5 @@ namespace HB.FullStack.CacheTests
             await Task.Delay(20);
             versionData.Timestamp = TimeUtil.Timestamp;
         }
-
-        
     }
 }

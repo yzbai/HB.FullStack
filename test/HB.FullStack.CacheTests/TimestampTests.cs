@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
-using HB.FullStack.BaseTest.Data.Sqlites;
+using HB.FullStack.BaseTest.Models;
 using HB.FullStack.Cache;
+using HB.FullStack.Database.Engine;
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,6 +17,10 @@ namespace HB.FullStack.CacheTests
     [TestClass]
     public class TimestampCacheTest : BaseTestClass
     {
+        public TimestampCacheTest() : base(DbEngineType.SQLite)
+        {
+        }
+
         [TestMethod]
         [DataRow(50, 40)]
         [DataRow(null, 20)]
@@ -132,7 +137,7 @@ namespace HB.FullStack.CacheTests
             Assert.IsTrue(cached2?.Name == book.Name);
         }
 
-        private async Task AddToDatabaeAsync(IEnumerable<Book> books)
+        private async Task AddToDatabaeAsync(IList<Book> books)
         {
             var transContext = await Trans.BeginTransactionAsync<Book>();
 
@@ -147,7 +152,5 @@ namespace HB.FullStack.CacheTests
                 throw;
             }
         }
-
-    
     }
 }

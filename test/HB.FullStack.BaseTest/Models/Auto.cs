@@ -6,6 +6,7 @@
  */
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Models
@@ -26,15 +27,20 @@ namespace HB.FullStack.BaseTest.Models
         public override string? LastUser { get; set; }
     }
 
-    public class AutoIdBT : DbModel2<long>
+    [PropertyTrackableObject]
+    public partial class AutoIdBT : DbModel2<long>
     {
-        public string Name { get; set; } = SecurityUtil.CreateRandomString(10);
-        public int Age { get; set; } = 66;
+        [TrackProperty]
+        private string _name = SecurityUtil.CreateRandomString(10);
+
+        [TrackProperty]
+        private int _age = 66;
 
         [DbAutoIncrementPrimaryKey]
         public override long Id { get; set; }
 
         public override bool Deleted { get; set; }
+
         public override string? LastUser { get; set; }
     }
 }

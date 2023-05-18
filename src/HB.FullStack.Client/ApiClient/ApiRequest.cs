@@ -10,7 +10,7 @@ namespace HB.FullStack.Client.ApiClient
     /// <summary>
     /// 包含构造一个Request的所有信息
     /// </summary>
-    public abstract class ApiRequest : ValidatableObject, IValidatableDTO
+    public abstract class ApiRequest : ValidatableObject//, IValidatableDTO
     {
         /// <summary>
         /// TODO: 防止同一个RequestID两次被处理
@@ -40,7 +40,7 @@ namespace HB.FullStack.Client.ApiClient
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="resName"></param>
         /// <param name="apiMethod"></param>

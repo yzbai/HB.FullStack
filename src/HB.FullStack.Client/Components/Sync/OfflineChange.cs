@@ -1,4 +1,5 @@
 ﻿using System;
+
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
@@ -8,7 +9,7 @@ namespace HB.FullStack.Client.Components.Sync
     /// <summary>
     /// 使用自增保证顺序
     /// </summary>
-    public class OfflineChange : TimelessAutoIncrementIdDbModel
+    public class OfflineChange : DbModel2<long>
     {
         public OfflineChangeType Type { get; set; }
 
@@ -21,11 +22,17 @@ namespace HB.FullStack.Client.Components.Sync
         //public string? BusinessCatalog { get; set; }
 
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
-        public PropertyChangeJsonPack? ChangePack { get; set; }
+        public PropertyChangePack? ChangePack { get; set; }
 
         //public string? DeletedObjectJson { get; set; }
 
         public long LastTime { get; set; } = TimeUtil.Timestamp;
+
+        [DbAutoIncrementPrimaryKey]
+        public override long Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public override bool Deleted { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override string? LastUser { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
     public enum OfflineChangeType
@@ -43,5 +50,4 @@ namespace HB.FullStack.Client.Components.Sync
         Success = 2,
         Discard = 3
     }
-
 }

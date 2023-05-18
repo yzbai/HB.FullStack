@@ -9,16 +9,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
+using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Components.Sync;
 using HB.FullStack.Common;
-using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
 using HB.FullStack.Database.DbModels;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
-using HB.FullStack.Client.Abstractions;
 
 namespace HB.FullStack.Client.Base
 {
@@ -63,7 +64,7 @@ namespace HB.FullStack.Client.Base
 
         protected abstract Task AddToRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
-        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangeJsonPack> changedPacks);
+        protected abstract Task UpdateToRemoteAsync(IApiClient apiClient, IEnumerable<PropertyChangePack> changedPacks);
 
         protected abstract Task DeleteFromRemoteAsync(IApiClient apiClient, IEnumerable<TModel> models);
 
@@ -231,7 +232,7 @@ namespace HB.FullStack.Client.Base
 
         #region 更改 - 发生在Syncing之后
 
-        public async Task AddAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
+        public async Task AddAsync(IList<TModel> models, TransactionContext transactionContext)
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
@@ -280,7 +281,7 @@ namespace HB.FullStack.Client.Base
             ThrowIf.NotValid(models, nameof(models));
             _syncManager.WaitUntilNotSyncing();
 
-            IList<PropertyChangeJsonPack> changedPacks = models.Select(m => m.GetPropertyChangePack()).ToList();
+            IList<PropertyChangePack> changedPacks = models.Select(m => m.GetPropertyChangePack()).ToList();
 
             try
             {
@@ -306,7 +307,7 @@ namespace HB.FullStack.Client.Base
 
                 //Local
                 await Database.UpdatePropertiesAsync<TModel>(changedPacks, "", transactionContext).ConfigureAwait(false);
-                
+
                 //Clear Tracks
                 ClearPropertyTracks(models);
             }
@@ -316,8 +317,7 @@ namespace HB.FullStack.Client.Base
             }
         }
 
-
-        public async Task DeleteAsync(IEnumerable<TModel> models, TransactionContext transactionContext)
+        public async Task DeleteAsync(IList<TModel> models, TransactionContext transactionContext)
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.NotValid(models, nameof(models));
@@ -350,6 +350,7 @@ namespace HB.FullStack.Client.Base
         }
 
         #endregion
+
         private static void ClearPropertyTracks(IEnumerable<TModel> models)
         {
             foreach (TModel model in models)
