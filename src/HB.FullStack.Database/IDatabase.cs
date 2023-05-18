@@ -28,7 +28,8 @@ namespace HB.FullStack.Database
         /// Server端必须加分布式锁进行。
         /// 可多次反复执行，或者推迟执行
         /// </summary>
-        Task InitializeAsync();
+        Task InitializeAsync(IList<DbInitContext>? initContexts = null);
+        void SetConnectionString(string schemaName, string? connectionString, IList<string>? slaveConnectionStrings);
 
         IDbModelDefFactory ModelDefFactory { get; }
     }

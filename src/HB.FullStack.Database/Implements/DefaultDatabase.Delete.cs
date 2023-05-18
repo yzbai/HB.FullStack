@@ -19,7 +19,7 @@ namespace HB.FullStack.Database
             ThrowIf.NotValid(item, nameof(item));
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
-            DbConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
+            ConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
 
             long curTimestamp = TimeUtil.Timestamp;
             bool trulyDelete = modelDef.DbSchema.TrulyDelete;
@@ -30,14 +30,14 @@ namespace HB.FullStack.Database
 
                 switch (bestConflictMethod)
                 {
-                    case DbConflictCheckMethods.Ignore:
+                    case ConflictCheckMethods.Ignore:
                         object idValue = modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!;
                         command = DbCommandBuilder.CreateDeleteIgnoreConflictCheckCommand(modelDef, idValue, lastUser, trulyDelete, curTimestamp);
                         break;
-                    case DbConflictCheckMethods.OldNewValueCompare:
+                    case ConflictCheckMethods.OldNewValueCompare:
                         command = DbCommandBuilder.CreateDeleteOldNewCompareCommand(modelDef, item, lastUser, trulyDelete, curTimestamp);
                         break;
-                    case DbConflictCheckMethods.Timestamp:
+                    case ConflictCheckMethods.Timestamp:
                         object idValueTimestamp = modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!;
                         command = DbCommandBuilder.CreateDeleteTimestampCommand(modelDef, idValueTimestamp, (item as ITimestamp)!.Timestamp, lastUser, trulyDelete, curTimestamp);
                         break;
@@ -75,7 +75,7 @@ namespace HB.FullStack.Database
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
 
-            DbConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
+            ConflictCheckMethods bestConflictMethod = modelDef.BestConflictCheckMethodWhenDelete;
 
             long curTimestamp = TimeUtil.Timestamp;
             bool trulyDelete = modelDef.DbSchema.TrulyDelete;
@@ -86,14 +86,14 @@ namespace HB.FullStack.Database
 
                 switch (bestConflictMethod)
                 {
-                    case DbConflictCheckMethods.Ignore:
+                    case ConflictCheckMethods.Ignore:
                         var idValues = items.Select(item => modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!).ToList();
                         command = DbCommandBuilder.CreateBatchDeleteIgnoreConflictCheckCommand(modelDef, idValues, lastUser, trulyDelete, curTimestamp);
                         break;
-                    case DbConflictCheckMethods.OldNewValueCompare:
+                    case ConflictCheckMethods.OldNewValueCompare:
                         command = DbCommandBuilder.CreateBatchDeleteOldNewCompareCommand(modelDef, items, lastUser, trulyDelete, curTimestamp);
                         break;
-                    case DbConflictCheckMethods.Timestamp:
+                    case ConflictCheckMethods.Timestamp:
                         var idValues2 = items.Select(item => modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!).ToList();
                         var timestamps = items.Select(item => (item as ITimestamp)!.Timestamp).ToList();
                         command = DbCommandBuilder.CreateBatchDeleteTimestampCommand(modelDef, idValues2, timestamps, lastUser, trulyDelete, curTimestamp);

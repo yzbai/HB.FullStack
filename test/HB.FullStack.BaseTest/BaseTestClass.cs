@@ -46,7 +46,7 @@ namespace HB.FullStack.BaseTest
 
         public static IDatabase Db { get; set; } = null!;
 
-        public static IDbConfigManager DbSettingManager { get; set; } = null!;
+        public static IDbConfigManager DbConfigManager { get; set; } = null!;
 
         public static ITransaction Trans { get; set; } = null!;
 
@@ -104,7 +104,7 @@ namespace HB.FullStack.BaseTest
             #region Db
 
             Db = ServiceProvider.GetRequiredService<IDatabase>();
-            DbSettingManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
+            DbConfigManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
             await DropSysInfoTableFirstForTest();
@@ -160,9 +160,9 @@ namespace HB.FullStack.BaseTest
         {
             string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
 
-            var mysqlEngine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
+            var mysqlEngine = DbConfigManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            await mysqlEngine.ExecuteCommandNonQueryAsync(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
+            await mysqlEngine.ExecuteCommandNonQueryAsync(DbConfigManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
         }
 
         [AssemblyCleanup]

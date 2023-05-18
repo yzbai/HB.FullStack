@@ -170,9 +170,9 @@ namespace HB.FullStack.Database.DbModels
             //AllowedConflictCheckMethods
             modelDef.AllowedConflictCheckMethods = tableSchema.ConflictCheckMethods!.Value;
 
-            if (!modelDef.IsTimestamp && tableSchema.ConflictCheckMethods!.Value.HasFlag(DbConflictCheckMethods.Timestamp))
+            if (!modelDef.IsTimestamp && tableSchema.ConflictCheckMethods!.Value.HasFlag(ConflictCheckMethods.Timestamp))
             {
-                modelDef.AllowedConflictCheckMethods ^= DbConflictCheckMethods.Timestamp;
+                modelDef.AllowedConflictCheckMethods ^= ConflictCheckMethods.Timestamp;
             }
 
             modelDef.BestConflictCheckMethodWhenUpdate = GetBestConflictCheckMethodWhenUpdate(modelDef);
@@ -244,41 +244,41 @@ namespace HB.FullStack.Database.DbModels
             return modelDef;
         }
 
-        private static DbConflictCheckMethods GetBestConflictCheckMethodWhenUpdate(DbModelDef modelDef)
+        private static ConflictCheckMethods GetBestConflictCheckMethodWhenUpdate(DbModelDef modelDef)
         {
-            if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Timestamp))
             {
-                return DbConflictCheckMethods.Timestamp;
+                return ConflictCheckMethods.Timestamp;
             }
 
-            if (modelDef.IsPropertyTrackable && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.OldNewValueCompare))
+            if (modelDef.IsPropertyTrackable && modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.OldNewValueCompare))
             {
-                return DbConflictCheckMethods.OldNewValueCompare;
+                return ConflictCheckMethods.OldNewValueCompare;
             }
 
-            if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            if (modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {
-                return DbConflictCheckMethods.Ignore;
+                return ConflictCheckMethods.Ignore;
             }
 
             throw DbExceptions.ConflictCheckError($"{modelDef.FullName} can not get best conflict check method for update. allowed methods:{modelDef.AllowedConflictCheckMethods}");
         }
 
-        private static DbConflictCheckMethods GetBestConflictCheckMethodWhenDelete(DbModelDef modelDef)
+        private static ConflictCheckMethods GetBestConflictCheckMethodWhenDelete(DbModelDef modelDef)
         {
-            if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            if (modelDef.IsTimestamp && modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Timestamp))
             {
-                return DbConflictCheckMethods.Timestamp;
+                return ConflictCheckMethods.Timestamp;
             }
 
-            if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.OldNewValueCompare))
+            if (modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.OldNewValueCompare))
             {
-                return DbConflictCheckMethods.OldNewValueCompare;
+                return ConflictCheckMethods.OldNewValueCompare;
             }
 
-            if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            if (modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {
-                return DbConflictCheckMethods.Ignore;
+                return ConflictCheckMethods.Ignore;
             }
 
             throw DbExceptions.ConflictCheckError($"{modelDef.FullName} can not get best conflict check method for delete. allowed methods:{modelDef.AllowedConflictCheckMethods}");

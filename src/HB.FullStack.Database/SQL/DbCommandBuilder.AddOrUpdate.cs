@@ -17,7 +17,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         public DbEngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : BaseDbModel, new()
         {
-            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow to use AddOrUpdate, which ignore conflict check.");
             }
@@ -34,7 +34,7 @@ namespace HB.FullStack.Database.SQL
         /// </summary>
         public DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IList<T> models) where T : BaseDbModel, new()
         {
-            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow to use AddOrUpdate, which ignore conflict check.");
             }

@@ -40,7 +40,7 @@ namespace HB.FullStack.Database
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable().ThrowIfNotTimestamp();
 
-            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Timestamp))
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Timestamp Conflict Check.");
             }
@@ -80,7 +80,7 @@ namespace HB.FullStack.Database
             updatePacks.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable().ThrowIfNotTimestamp();
 
-            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Timestamp))
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Timestamp))
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Timestamp Conflict Check.");
             }
@@ -197,7 +197,7 @@ namespace HB.FullStack.Database
             updatePack.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable();
 
-            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Ignore Conflict Check.");
             }
@@ -237,7 +237,7 @@ namespace HB.FullStack.Database
             updatePacks.ThrowIfNotValid();
             modelDef.ThrowIfNotWriteable();
 
-            if (!modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {
                 throw DbExceptions.ConflictCheckError($"{modelDef.FullName} disallow Ignore Conflict Check.");
             }
@@ -262,17 +262,17 @@ namespace HB.FullStack.Database
 
         #region PropertyChangePack
 
-        private static DbConflictCheckMethods GetPropertyChangePackConflictCheckMethod(DbModelDef modelDef, PropertyChangePack changePack)
+        private static ConflictCheckMethods GetPropertyChangePackConflictCheckMethod(DbModelDef modelDef, PropertyChangePack changePack)
         {
-            if (modelDef.BestConflictCheckMethodWhenUpdate == DbConflictCheckMethods.Timestamp && !changePack.ContainsProperty(nameof(ITimestamp.Timestamp)))
+            if (modelDef.BestConflictCheckMethodWhenUpdate == ConflictCheckMethods.Timestamp && !changePack.ContainsProperty(nameof(ITimestamp.Timestamp)))
             {
-                if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.OldNewValueCompare))
+                if (modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.OldNewValueCompare))
                 {
-                    return DbConflictCheckMethods.OldNewValueCompare;
+                    return ConflictCheckMethods.OldNewValueCompare;
                 }
-                else if (modelDef.AllowedConflictCheckMethods.HasFlag(DbConflictCheckMethods.Ignore))
+                else if (modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
                 {
-                    return DbConflictCheckMethods.Ignore;
+                    return ConflictCheckMethods.Ignore;
                 }
                 else
                 {
@@ -287,21 +287,21 @@ namespace HB.FullStack.Database
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            DbConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPack);
+            ConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPack);
 
             switch (conflictCheckMethod)
             {
-                case DbConflictCheckMethods.Ignore:
+                case ConflictCheckMethods.Ignore:
                     IgnoreConflictCheckUpdatePack ignorePack = changedPack.ToIgnoreConflictCheckUpdatePack(modelDef);
                     await UpdatePropertiesIgnoreConflictCheckAsync(modelDef, ignorePack, lastUser, transContext).ConfigureAwait(false);
                     break;
 
-                case DbConflictCheckMethods.OldNewValueCompare:
+                case ConflictCheckMethods.OldNewValueCompare:
                     OldNewCompareUpdatePack pack = changedPack.ToOldNewCompareUpdatePack(modelDef);
                     await UpdatePropertiesUsingOldNewCompareAsync(modelDef, pack, lastUser, transContext).ConfigureAwait(false);
                     break;
 
-                case DbConflictCheckMethods.Timestamp:
+                case ConflictCheckMethods.Timestamp:
                     TimestampUpdatePack timestamPack = changedPack.ToTimestampUpdatePack(modelDef);
                     await UpdatePropertiesUsingTimestampAsync(modelDef, timestamPack, lastUser, transContext).ConfigureAwait(false);
                     break;
@@ -328,11 +328,11 @@ namespace HB.FullStack.Database
             ThrowIfExceedMaxBatchNumber(changedPacks, lastUser, modelDef);
 
             //TODO: 是否允许不同的ConflictCheckMethod混杂?
-            DbConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPacks[0]);
+            ConflictCheckMethods conflictCheckMethod = GetPropertyChangePackConflictCheckMethod(modelDef, changedPacks[0]);
 
             switch (conflictCheckMethod)
             {
-                case DbConflictCheckMethods.Ignore:
+                case ConflictCheckMethods.Ignore:
                     await UpdatePropertiesIgnoreConflictCheckAsync(
                         modelDef,
                         changedPacks.Select(cp => cp.ToIgnoreConflictCheckUpdatePack(modelDef)).ToList(),
@@ -340,7 +340,7 @@ namespace HB.FullStack.Database
                         transContext).ConfigureAwait(false);
                     break;
 
-                case DbConflictCheckMethods.OldNewValueCompare:
+                case ConflictCheckMethods.OldNewValueCompare:
                     await UpdatePropertiesUsingOldNewCompareAsync(
                         modelDef,
                         changedPacks.Select(cp => cp.ToOldNewCompareUpdatePack(modelDef)).ToList(),
@@ -348,7 +348,7 @@ namespace HB.FullStack.Database
                         transContext).ConfigureAwait(false);
                     break;
 
-                case DbConflictCheckMethods.Timestamp:
+                case ConflictCheckMethods.Timestamp:
                     await UpdatePropertiesUsingTimestampAsync(
                         modelDef,
                         changedPacks.Select(cp => cp.ToTimestampUpdatePack(modelDef)).ToList(),

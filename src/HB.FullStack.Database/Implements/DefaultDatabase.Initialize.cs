@@ -22,15 +22,18 @@ namespace HB.FullStack.Database
         /// 初始化，如果在服务端，请加全局分布式锁来初始化
         /// 返回是否真正执行了Migration
         /// </summary>
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(IList<DbInitContext>? initContexts = null)
         {
             using IDisposable? scope = _logger.BeginScope("数据库初始化");
 
+            Dictionary<string, DbInitContext> rangedContexts = RangeInitContexts(initContexts, _dbConfigManager.InitContexts);
+
             foreach (DbSchema dbSchema in _dbConfigManager.AllDbSchemas)
             {
-                DbInitContext? dbInitContext = _dbConfigManager.InitContexts?.Where(c => c.DbSchemaName == dbSchema.Name).FirstOrDefault();
-
-                dbSchema.SetConnectionString(dbInitContext?.ConnectionString, dbInitContext?.SlaveConnectionStrings);
+                if (rangedContexts.TryGetValue(dbSchema.Name, out var dbInitContext))
+                {
+                    dbSchema.SetConnectionString(dbInitContext?.ConnectionString, dbInitContext?.SlaveConnectionStrings);
+                }
 
                 if (dbSchema.ConnectionString == null)
                 {
@@ -47,6 +50,37 @@ namespace HB.FullStack.Database
 
                 _logger.LogInformation("数据初{DbSchemaName}始化成功！, Version:{Version}", dbSchema.Name, dbSchema.Version);
             }
+
+            Dictionary<string, DbInitContext> RangeInitContexts(IList<DbInitContext>? contexts, IEnumerable<DbInitContext>? contextsFromOptions)
+            {
+                Dictionary<string, DbInitContext> dict = new Dictionary<string, DbInitContext>();
+
+                if (contextsFromOptions.IsNotNullOrEmpty())
+                {
+                    //覆盖contextsFromOptions
+                    foreach (var context in contextsFromOptions)
+                    {
+                        dict[context.DbSchemaName] = context;
+                    }
+                }
+
+                if(contexts.IsNotNullOrEmpty())
+                {
+                    foreach(var context in contexts)
+                    {
+                        dict[context.DbSchemaName] = context;
+                    }
+                }
+
+                return dict;
+            }
+        }
+
+
+        public void SetConnectionString(string schemaName, string? connectionString, IList<string>? slaveConnectionStrings)
+        {
+            var schema = _dbConfigManager.GetDbSchema(schemaName);
+            schema.SetConnectionString(connectionString, slaveConnectionStrings);
         }
 
         private async Task CreateTablesIfNeed(IEnumerable<Migration>? migrations, DbSchema dbSchema)

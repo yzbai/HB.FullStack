@@ -112,8 +112,8 @@ update tb_guid_book set LastUser='TTTgdTTTEEST' where Id = '{book.Id}' and Delet
 select count(1) from tb_guid_book where Id = '{book.Id}' and Deleted = 0;
 ";
 
-            var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Sqlite);
-            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetRequiredConnectionString(DbSchema_Sqlite, true), new DbEngineCommand(sql));
+            var engine = DbConfigManager.GetDatabaseEngine(DbSchema_Sqlite);
+            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbConfigManager.GetRequiredConnectionString(DbSchema_Sqlite, true), new DbEngineCommand(sql));
 
             List<string?> rt = new List<string?>();
 

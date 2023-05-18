@@ -15,9 +15,9 @@ namespace HB.FullStack.Database
         {
             ThrowIf.NotValid(item, nameof(item));
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
-            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdate;
+            ConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdate;
 
-            if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)
+            if (bestConflictCheckMethod == ConflictCheckMethods.OldNewValueCompare)
             {
                 IPropertyTrackableObject trackableModel = item as IPropertyTrackableObject
                     ?? throw DbExceptions.ConflictCheckError($"{modelDef.FullName} using old new value compare method update whole, but not a IPropertyTrackable Object.");
@@ -43,7 +43,7 @@ namespace HB.FullStack.Database
             {
                 PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
-                DbEngineCommand command = bestConflictCheckMethod == DbConflictCheckMethods.Timestamp
+                DbEngineCommand command = bestConflictCheckMethod == ConflictCheckMethods.Timestamp
                     ? DbCommandBuilder.CreateUpdateTimestampCommand(modelDef, item, oldTimestamp!.Value)
                     : DbCommandBuilder.CreateUpdateIgnoreConflictCheckCommand(modelDef, item);
 
@@ -92,9 +92,9 @@ namespace HB.FullStack.Database
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
 
-            DbConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdate;
+            ConflictCheckMethods bestConflictCheckMethod = modelDef.BestConflictCheckMethodWhenUpdate;
 
-            if (bestConflictCheckMethod == DbConflictCheckMethods.OldNewValueCompare)
+            if (bestConflictCheckMethod == ConflictCheckMethods.OldNewValueCompare)
             {
                 if (!modelDef.IsPropertyTrackable)
                 {
@@ -117,7 +117,7 @@ namespace HB.FullStack.Database
             {
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
-                DbEngineCommand command = bestConflictCheckMethod == DbConflictCheckMethods.Timestamp
+                DbEngineCommand command = bestConflictCheckMethod == ConflictCheckMethods.Timestamp
                     ? DbCommandBuilder.CreateBatchUpdateTimestampCommand(modelDef, items, oldTimestamps)
                     : DbCommandBuilder.CreateBatchUpdateIgnoreConflictCheckCommand(modelDef, items, oldTimestamps);
 

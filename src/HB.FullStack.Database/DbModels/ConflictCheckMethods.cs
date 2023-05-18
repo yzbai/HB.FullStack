@@ -3,7 +3,7 @@
 namespace HB.FullStack.Database.DbModels
 {
     [Flags]
-    public enum DbConflictCheckMethods
+    public enum ConflictCheckMethods
     {
         Ignore = 1,
         OldNewValueCompare = 2,

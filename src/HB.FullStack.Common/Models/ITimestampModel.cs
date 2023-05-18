@@ -9,7 +9,11 @@ namespace HB.FullStack.Common
 {
     public interface ITimestamp
     {
-        //int Version { get; set; }
+        /// <summary>
+        /// 取代Version，实现行粒度。
+        /// Version存在UserA将Version为1大老数据更改两次得到Version3，UserB将Version为2的数据更改一次变成Version3，都是version3，但经过路径不同，但系统认为相同。
+        /// 就把Timestamp看作Version就行
+        /// </summary>
         long Timestamp { get; set; }
     }
 }

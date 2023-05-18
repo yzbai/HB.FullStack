@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Cache;
 
-namespace HB.FullStack.Database
+namespace HB.FullStack.Database.Config
 {
 
     /// <summary>
@@ -31,7 +31,7 @@ namespace HB.FullStack.Database
         //清理比如xxx开头的CacheItem,要求Cache有统一开头，且不能与KVStore冲突。所以KVStore最好与cache是不同的实例
         public Func<Task>? CacheCleanTask { get; set; }
 
-        public Migration(string dbSchemaName, int oldVersion, int newVersion, string? sql, 
+        public Migration(string dbSchemaName, int oldVersion, int newVersion, string? sql,
             Func<IDatabase, TransactionContext, Task>? func, Func<Task>? cacheCleanTask)
         {
             if (oldVersion < 0)

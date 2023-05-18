@@ -45,11 +45,11 @@ namespace HB.FullStack.Database.DbModels
 
         public bool IsTimestamp { get; set; }
 
-        public DbConflictCheckMethods AllowedConflictCheckMethods { get; set; } = DbConflictCheckMethods.OldNewValueCompare | DbConflictCheckMethods.Timestamp;
+        public ConflictCheckMethods AllowedConflictCheckMethods { get; set; } = ConflictCheckMethods.OldNewValueCompare | ConflictCheckMethods.Timestamp;
 
-        public DbConflictCheckMethods BestConflictCheckMethodWhenUpdate { get; set; }
+        public ConflictCheckMethods BestConflictCheckMethodWhenUpdate { get; set; }
 
-        public DbConflictCheckMethods BestConflictCheckMethodWhenDelete { get; set; }
+        public ConflictCheckMethods BestConflictCheckMethodWhenDelete { get; set; }
 
         /// <summary>
         /// 数据库是否可写

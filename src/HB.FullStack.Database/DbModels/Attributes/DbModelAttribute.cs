@@ -13,7 +13,7 @@ namespace HB.FullStack.Database.DbModels
 
         public bool? ReadOnly { get; set; }
 
-        public DbConflictCheckMethods ConflictCheckMethods { get; set; } = DbConflictCheckMethods.OldNewValueCompare | DbConflictCheckMethods.Timestamp;
+        public ConflictCheckMethods ConflictCheckMethods { get; set; } = ConflictCheckMethods.OldNewValueCompare | ConflictCheckMethods.Timestamp;
 
         public DbModelAttribute(string dbSchemaName)
         {

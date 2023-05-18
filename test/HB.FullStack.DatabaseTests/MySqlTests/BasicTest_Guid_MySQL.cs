@@ -214,9 +214,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             Book2Model? book1 = await Db.ScalarAsync<Book2Model>(book.Id, null);
 
-            var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
+            var engine = DbConfigManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            var connectionString = DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true);
+            var connectionString = DbConfigManager.GetRequiredConnectionString(DbSchema_Mysql, true);
 
             int rt = await engine.ExecuteCommandNonQueryAsync(connectionString,
                 new DbEngineCommand($"update tb_Book set Name='Update_xxx' where Id = {book1!.Id}"));
@@ -248,9 +248,9 @@ namespace HB.FullStack.DatabaseTests.MySQL
 update tb_Guid_Book set LastUser='TTTgdTTTEEST' where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0 and Timestamp={timestamp};
 select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c5-bea1ae49f2a0') and Deleted = 0;
 ";
-            var engine = DbSettingManager.GetDatabaseEngine(DbSchema_Mysql);
+            var engine = DbConfigManager.GetDatabaseEngine(DbSchema_Mysql);
 
-            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
+            using IDataReader reader = await engine.ExecuteCommandReaderAsync(DbConfigManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
 
             List<string?> rt = new List<string?>();
 
@@ -714,7 +714,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             Stopwatch stopwatch = new Stopwatch();
 
-            using MySqlConnection mySqlConnection = new MySqlConnection(DbSettingManager.GetRequiredConnectionString(DbSchema_Mysql, true).ToString());
+            using MySqlConnection mySqlConnection = new MySqlConnection(DbConfigManager.GetRequiredConnectionString(DbSchema_Mysql, true).ToString());
 
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(Guid), new MySqlGuidTypeHandler(), false);
