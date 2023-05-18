@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 
-namespace ClassLibrary1
+namespace HB.FullStack.BaseTest.DapperMapper
 {
     internal static class TypeExtensions
     {

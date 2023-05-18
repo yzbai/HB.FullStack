@@ -1,34 +1,36 @@
-﻿global using Microsoft.VisualStudio.TestTools.UnitTesting;
-global using static HB.FullStack.BaseTest.BaseTestClass;
+﻿global using System;
+
+global using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 global using static HB.FullStack.BaseTest.ApiConstants;
 
-global using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
+using HB.FullStack.Cache;
+using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Common.Test;
 using HB.FullStack.Database;
+using HB.FullStack.Database.Config;
+using HB.FullStack.Database.Engine;
+using HB.FullStack.Database.Implements;
+using HB.FullStack.EventBus;
+using HB.FullStack.EventBus.Abstractions;
+using HB.FullStack.KVStore;
+using HB.FullStack.Lock.Distributed;
+using HB.FullStack.Lock.Memory;
+using HB.Infrastructure.Redis.EventBus;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-using HB.FullStack.Cache;
-using HB.FullStack.Lock.Distributed;
-using HB.FullStack.Lock.Memory;
-using HB.FullStack.KVStore;
-using HB.FullStack.EventBus.Abstractions;
-using HB.FullStack.EventBus;
-using HB.Infrastructure.Redis.EventBus;
 using Microsoft.Extensions.Options;
-using HB.FullStack.Common.Test;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.IO;
-using HB.FullStack.Database.Implements;
-using HB.FullStack.Client.ApiClient;
-using HB.FullStack.Client.Abstractions;
-using HB.FullStack.Database.Config;
 
-[assembly: Parallelize(Workers = 4, Scope = ExecutionScope.ClassLevel)]
+//TODO: change to method level
+[assembly: Parallelize(Workers = 10, Scope = ExecutionScope.ClassLevel)]
 
 namespace HB.FullStack.BaseTest
 {
@@ -40,9 +42,6 @@ namespace HB.FullStack.BaseTest
         public static IConfiguration Configuration { get; set; } = null!;
 
         #region Db
-
-        public const string DbSchema_Mysql = "mysql_test";
-        public const string DbSchema_Sqlite = "sqlite_test";
 
         public static IDatabase Db { get; set; } = null!;
 
@@ -81,7 +80,6 @@ namespace HB.FullStack.BaseTest
 
         #region EventBus
 
-
         public static IEventBus EventBus { get; set; } = null!;
         public static IList<EventSchema> EventSchemas { get; private set; } = null!;
 
@@ -94,7 +92,6 @@ namespace HB.FullStack.BaseTest
         public static ITokenPreferences PreferenceProvider { get; set; } = null!;
 
         #endregion
-
 
         [AssemblyInitialize]
         public static async Task BaseAssemblyInit(TestContext _)
@@ -113,6 +110,7 @@ namespace HB.FullStack.BaseTest
             SqliteConnectionString = $"Data Source={SqliteDbFileName}";
 
             //这里会初始化所有数据库
+            use global locker
             await Db.InitializeAsync(new DbInitContext[] { new DbInitContext { DbSchemaName = DbSchema_Sqlite, ConnectionString = SqliteConnectionString } }).ConfigureAwait(false);
 
             #endregion
@@ -153,17 +151,6 @@ namespace HB.FullStack.BaseTest
             PreferenceProvider = ServiceProvider.GetRequiredService<ITokenPreferences>();
 
             #endregion
-
-        }
-
-        private static async Task DropSysInfoTableFirstForTest()
-        {
-            string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
-
-            var mysqlSchema = DbConfigManager.GetDbSchema(DbSchema_Mysql);
-            var mysqlEngine = mysqlSchema.Engine;
-
-            await mysqlEngine.ExecuteCommandNonQueryAsync(mysqlSchema.GetMasterConnectionString(), new DbEngineCommand(sql));
         }
 
         [AssemblyCleanup]
@@ -179,6 +166,26 @@ namespace HB.FullStack.BaseTest
             RedisConnection.Close();
         }
 
+        [ClassInitialize]
+        public static void BaseClassInit(DbEngineType engineType)
+        {
+        }
+
+        [ClassCleanup]
+        public static void BaseClassCleanup()
+        {
+        }
+
+        private static async Task DropSysInfoTableFirstForTest()
+        {
+            string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
+
+            var mysqlSchema = DbConfigManager.GetDbSchema(DbSchema_Mysql);
+            var mysqlEngine = mysqlSchema.Engine;
+
+            await mysqlEngine.ExecuteCommandNonQueryAsync(mysqlSchema.GetMasterConnectionString(), new DbEngineCommand(sql));
+        }
+
         public static IServiceProvider BuildServices()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
@@ -191,7 +198,6 @@ namespace HB.FullStack.BaseTest
                .AddUserSecrets(typeof(BaseTestClass).Assembly, optional: true);
 
             Configuration = configurationBuilder.Build();
-
 
             DbOptions dbOptions = new DbOptions();
 

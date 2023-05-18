@@ -7,18 +7,20 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using ClassLibrary1;
+using HB.FullStack.BaseTest.DapperMapper;
+using HB.FullStack.BaseTest.Models;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.BaseTest.Data.MySqls;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MySqlConnector;
+
+[assembly: Parallelize(Workers = 10, Scope = ExecutionScope.ClassLevel)]
 
 namespace HB.FullStack.DatabaseTests.MySQL
 {
@@ -53,7 +55,6 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
-
         }
 
         [TestMethod]
@@ -71,7 +72,6 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
-
         }
 
         [TestMethod]
@@ -117,7 +117,6 @@ namespace HB.FullStack.DatabaseTests.MySQL
                     throw ex;
                 }
             }
-
         }
 
         [TestMethod]

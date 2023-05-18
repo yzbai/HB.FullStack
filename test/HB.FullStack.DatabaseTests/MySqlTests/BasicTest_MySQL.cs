@@ -8,18 +8,17 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using ClassLibrary1;
-
 using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.BaseTest.Data.MySqls;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MySqlConnector;
+using HB.FullStack.BaseTest.Models;
+using HB.FullStack.BaseTest.DapperMapper;
 
 namespace HB.FullStack.DatabaseTests.MySQL
 {

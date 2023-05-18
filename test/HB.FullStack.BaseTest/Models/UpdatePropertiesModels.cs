@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yzbai@brlite.com
+ * Github: github.com/yzbai
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
@@ -14,16 +16,14 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 {
     public record InnerModel(string? InnerName);
 
-
     public partial class InnerModel2 : ObservableObject
     {
         [ObservableProperty]
         public string? _innerName;
     }
 
-    [DbModel(DbSchema_Mysql)]
     [PropertyTrackableObject]
-    public partial class UPTimestampModel : TimestampGuidDbModel
+    public partial class UPTimestampModel : DbModel2<Guid>, ITimestamp
     {
         [TrackProperty]
         private string? _name;
@@ -39,11 +39,14 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
         private InnerModel2? _innerModel2;
 
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 
-    [DbModel(DbSchema_Mysql)]
     [PropertyTrackableObject]
-    public partial class UPTimelessModel : TimelessGuidDbModel
+    public partial class UPTimelessModel : DbModel2<Guid>
     {
         [TrackProperty]
         private string? _name;
@@ -58,5 +61,9 @@ namespace HB.FullStack.BaseTest.Data.MySqls
         [TrackProperty]
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
         private InnerModel2? _innerModel2;
+
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
     }
 }

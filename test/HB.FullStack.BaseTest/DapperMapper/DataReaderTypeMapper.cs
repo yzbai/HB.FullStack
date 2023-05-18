@@ -10,7 +10,7 @@ using System.Reflection.Emit;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace ClassLibrary1
+namespace HB.FullStack.BaseTest.DapperMapper
 {
 
     public static partial class DataReaderTypeMapper
@@ -266,7 +266,7 @@ namespace ClassLibrary1
             il.Emit(OpCodes.Ldloc, currentIndexDiagnosticLocal); // stack is Exception, index
             il.Emit(OpCodes.Ldarg_0); // stack is Exception, index, reader
             il.Emit(OpCodes.Ldloc, valueCopyDiagnosticLocal); // stack is Exception, index, reader, value
-            il.EmitCall(OpCodes.Call, typeof(DataReaderTypeMapper).GetMethod(nameof(DataReaderTypeMapper.ThrowDataException)), null);
+            il.EmitCall(OpCodes.Call, typeof(DataReaderTypeMapper).GetMethod(nameof(ThrowDataException)), null);
             il.EndExceptionBlock();
 
             il.Emit(OpCodes.Ldloc, returnValueLocal); // stack is [rval]
@@ -385,9 +385,9 @@ namespace ClassLibrary1
             il.Emit(OpCodes.Ret);
         }
 
-        public static bool IsValueTuple(Type type) => (type?.IsValueType == true
-                                               && type.FullName.StartsWith("System.ValueTuple`", StringComparison.Ordinal))
-                                               || (type != null && IsValueTuple(Nullable.GetUnderlyingType(type)));
+        public static bool IsValueTuple(Type type) => type?.IsValueType == true
+                                               && type.FullName.StartsWith("System.ValueTuple`", StringComparison.Ordinal)
+                                               || type != null && IsValueTuple(Nullable.GetUnderlyingType(type));
         /// <summary>
         /// ThrowDataException
         /// </summary>

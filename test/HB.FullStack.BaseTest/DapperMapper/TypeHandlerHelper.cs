@@ -1,16 +1,11 @@
 ﻿#nullable disable
-using Newtonsoft.Json.Linq;
 
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.Reflection;
-using System.Text;
 
-namespace ClassLibrary1
+namespace HB.FullStack.BaseTest.DapperMapper
 {
-
     public class MySqlGuidTypeHandler : ITypeHandler
     {
         public object Parse(Type destinationType, object value)
@@ -20,7 +15,6 @@ namespace ClassLibrary1
 
         public void SetValue(IDbDataParameter parameter, object value)
         {
-
         }
     }
 
@@ -28,7 +22,6 @@ namespace ClassLibrary1
     {
         public void SetValue(IDbDataParameter parameter, object value)
         {
-
         }
 
         public object Parse(Type destinationType, object value)
@@ -47,17 +40,13 @@ namespace ClassLibrary1
             {
                 return new DateTimeOffset((DateTime)value, TimeSpan.Zero);
             }
-
         }
     }
 
-
     public static class TypeHandlerHelper
     {
-
         static TypeHandlerHelper()
         {
-
         }
 
         internal static bool HasTypeHandler(Type type) => TypeHandlers.ContainsKey(type);
@@ -106,7 +95,7 @@ namespace ClassLibrary1
             }
             TypeHandlers = newCopy;
         }
-
     }
 }
+
 #nullable restore

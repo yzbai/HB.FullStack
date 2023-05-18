@@ -1,14 +1,20 @@
-﻿using System;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yzbai@brlite.com
+ * Github: github.com/yzbai
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
 using System.Collections.Generic;
+
+using HB.FullStack.Common;
+using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.BaseTest.Data.MySqls;
-using HB.FullStack.Database.Config;
 
-namespace HB.FullStack.BaseTest.Data.Sqlites
+namespace HB.FullStack.BaseTest.Models
 {
-    [DbModel(DbSchema_Sqlite)]
-    public class PublisherModel3 : TimestampFlackIdDbModel
+    public class PublisherModel3 : DbModel2<long>, ITimestamp
     {
         [DbField]
         public int Integer { get; set; } = 999;
@@ -24,9 +30,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public string Name3 { get; set; } = "xxxx";
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class Guid_PublisherModel3 : TimestampGuidDbModel
+
+    public class Guid_PublisherModel3 : DbModel2<Guid>, ITimestamp
     {
         [DbField]
         public int Integer { get; set; } = 999;
@@ -42,9 +53,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public string Name3 { get; set; } = "xxxx";
+
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class PublisherModel2 : TimestampFlackIdDbModel
+
+    public class PublisherModel2 : DbModel2<long>, ITimestamp
     {
         [DbField]
         public int Integer { get; set; } = 999;
@@ -81,9 +97,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class Guid_PublisherModel2 : TimestampGuidDbModel
+
+    public class Guid_PublisherModel2 : DbModel2<Guid>, ITimestamp
     {
         [DbField]
         public int Integer { get; set; } = 999;
@@ -120,9 +141,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
+
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class PublisherModel : TimestampFlackIdDbModel
+
+    public class PublisherModel : DbModel2<long>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -162,9 +188,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class Guid_PublisherModel : TimestampGuidDbModel
+
+    public class Guid_PublisherModel : DbModel2<Guid>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -204,10 +235,28 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
+
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 
-    [DbModel(DbSchema_Sqlite)]
-    public class PublisherModel3_Client : TimestampFlackIdDbModel
+    public enum PublisherType
+    {
+        Online,
+        Big,
+        Small
+    }
+
+    public class Author
+    {
+        public string Name { get; set; } = default!;
+
+        public string Mobile { get; set; } = default!;
+    }
+
+    public class PublisherModel3_Client : DbModel2<long>, ITimestamp
     {
         [DbField]
         public int Integer { get; set; } = 999;
@@ -223,9 +272,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public string Name3 { get; set; } = "xxxx";
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class PublisherModel2_Client : TimestampFlackIdDbModel
+
+    public class PublisherModel2_Client : DbModel2<long>, ITimestamp
     {
         [DbField]
         public int Integer { get; set; } = 999;
@@ -262,9 +316,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public DateTimeOffset? EEE { get; set; } = new DateTimeOffset(2020, 12, 12, 12, 12, 12, TimeSpan.Zero);
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class PublisherModel_Client : TimestampFlackIdDbModel
+
+    public class PublisherModel_Client : DbModel2<long>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -304,9 +363,14 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
-    [DbModel(DbSchema_Sqlite)]
-    public class Guid_PublisherModel_Client : TimestampGuidDbModel
+
+    public class Guid_PublisherModel_Client : DbModel2<Guid>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -346,5 +410,10 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
 
         [DbField]
         public DateTimeOffset? EEE { get; set; } = DateTimeOffset.UtcNow;
+
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 }

@@ -20,7 +20,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             await Db.AddAsync(timelessLst, "Tester", null);
 
-            long count = await Db.CountAsync<AutoIdBTTimeless>(null);
+            long count = await Db.CountAsync<AutoIdBT>(null);
 
             Assert.AreEqual(count, timelessLst.Count);
         }
@@ -29,11 +29,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
         public async Task Batch_Update_AutoIdTimeless_Test()
         {
             //Timeless
-            IList<AutoIdBTTimeless> timelessLst = Mocker.GetAutoIdBTTimelesses(10);
+            IList<AutoIdBT> timelessLst = Mocker.GetAutoIdBTTimelesses(10);
 
             await Db.AddAsync(timelessLst, "Tester", null);
 
-            foreach (AutoIdBTTimeless t in timelessLst)
+            foreach (AutoIdBT t in timelessLst)
             {
                 t.Name = "Modified";
                 t.Age = 100;
@@ -41,7 +41,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
 
             await Db.UpdateAsync(timelessLst, "dd", null);
 
-            var rt = await Db.ScalarAsync<AutoIdBTTimeless>(timelessLst[0].Id, null);
+            var rt = await Db.ScalarAsync<AutoIdBT>(timelessLst[0].Id, null);
 
             Assert.IsTrue(SerializeUtil.ToJson(rt) == SerializeUtil.ToJson(timelessLst[0]));
         }

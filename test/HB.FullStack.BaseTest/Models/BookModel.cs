@@ -1,10 +1,15 @@
-﻿using HB.FullStack.Common;
-using HB.FullStack.Common.IdGen;
+﻿/*
+ * Author：Yuzhao Bai
+ * Email: yzbai@brlite.com
+ * Github: github.com/yzbai
+ * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
+ */
+
+using HB.FullStack.Common;
 using HB.FullStack.Database.DbModels;
 
-namespace HB.FullStack.BaseTest.Data.MySqls
+namespace HB.FullStack.BaseTest.Models
 {
-    [DbModel(DbSchema_Mysql)]
     public class Book2Model : DbModel2<long>, ITimestamp
     {
         [DbField]
@@ -12,52 +17,48 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         [DbField]
         public double Price { get; set; } = default!;
+
         public long Timestamp { get; set; }
 
-        public override long Id { get; set; } = StaticIdGen.GetLongId();
+        public override long Id { get; set; }
 
         public override bool Deleted { get; set; }
-        public override string LastUser { get; set; } = null!;
+        public override string? LastUser { get; set; }
     }
 
-    [DbModel(DbSchema_Mysql)]
     public class Guid_BookModel : DbModel2<Guid>, ITimestamp
     {
-
         [DbField]
         public string Name { get; set; } = default!;
 
         [DbField]
         public double Price { get; set; } = default!;
+
         public long Timestamp { get; set; }
-        public override Guid Id { get; set; } = StaticIdGen.GetSequentialGuid();
+        public override Guid Id { get; set; }
         public override bool Deleted { get; set; }
-        public override string LastUser { get; set; } = null!;
+        public override string? LastUser { get; set; }
     }
 
-    [DbModel(DbSchema_Mysql)]
     public class Guid_BookModel_Timeless : DbModel2<Guid>
     {
-
         [DbField]
         public string Name { get; set; } = default!;
 
         [DbField]
         public double Price { get; set; } = default!;
-        public override Guid Id { get; set; } = StaticIdGen.GetSequentialGuid();
+
+        public override Guid Id { get; set; }
         public override bool Deleted { get; set; }
-        public override string LastUser { get; set; } = null!;
+        public override string? LastUser { get; set; }
     }
 
-    [DbModel(DbSchema_Mysql)]
-    public class Book : TimestampFlackIdDbModel
+    public class Book : DbModel2<long>, ITimestamp
     {
         [DbField]
-
         public string Name { get; set; } = null!;
 
         [DbField]
-
         public long BookID { get; set; }
 
         [DbField]
@@ -65,28 +66,33 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         [DbField]
         public double Price { get; set; }
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 
-    [DbModel(DbSchema_Mysql)]
-    public class BookModel_Client : TimestampFlackIdDbModel
+    public class BookModel_Client : DbModel2<long>, ITimestamp
     {
-
         [DbField(NeedIndex = true)]
         public string Name { get; set; } = default!;
 
         [DbField]
         public double Price { get; set; } = default!;
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 
-    [DbModel(DbSchema_Mysql)]
-    public class Book_Client : TimestampFlackIdDbModel
+    public class Book_Client : DbModel2<long>, ITimestamp
     {
-
         [DbField]
         public string Name { get; set; } = null!;
 
         [DbField]
-
         public long BookID { get; set; }
 
         [DbField]
@@ -94,5 +100,10 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         [DbField]
         public double Price { get; set; }
+
+        public override long Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 }

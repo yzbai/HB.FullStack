@@ -5,8 +5,8 @@ using System.Linq;
 
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.BaseTest.Data.MySqls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using HB.FullStack.BaseTest.Models;
 
 namespace HB.FullStack.DatabaseTests.MySQL
 {

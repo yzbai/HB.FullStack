@@ -7,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using ClassLibrary1;
-
 using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
@@ -17,6 +15,7 @@ using HB.FullStack.BaseTest.Data.Sqlites;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using HB.FullStack.BaseTest.DapperMapper;
 
 namespace HB.FullStack.DatabaseTests.SQLite
 {

@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 
-namespace ClassLibrary1
+namespace HB.FullStack.BaseTest.DapperMapper
 {
     public static class TypeMapHelper
     {
@@ -12,7 +12,7 @@ namespace ClassLibrary1
         /// Gets type-map for the given type
         /// </summary>
         /// <returns>Type map instance, default is to create new instance of DefaultTypeMap</returns>
-        public static Func<Type, ITypeMap> TypeMapProvider = (Type type) => new DefaultTypeMap(type);
+        public static Func<Type, ITypeMap> TypeMapProvider = (type) => new DefaultTypeMap(type);
 
 
         public static ITypeMap GetTypeMap(Type type)

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace ClassLibrary1
+namespace HB.FullStack.BaseTest.DapperMapper
 {
     public static class TypeHandlerCache<T>
     {
@@ -27,7 +27,7 @@ namespace ClassLibrary1
 
         internal static void SetHandler(ITypeHandler handler)
         {
-            TypeHandlerCache<T>._handler = handler;
+            _handler = handler;
         }
 
         private static ITypeHandler _handler;

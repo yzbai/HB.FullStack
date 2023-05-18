@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using HB.FullStack.BaseTest.Data.MySqls;
-
+using HB.FullStack.BaseTest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.DatabaseTests

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace ClassLibrary1
+namespace HB.FullStack.BaseTest.DapperMapper
 {
     public sealed class DefaultTypeMap : ITypeMap
     {
@@ -62,7 +62,7 @@ namespace ClassLibrary1
         public ConstructorInfo FindConstructor(string[] names, Type[] types)
         {
             var constructors = _type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (ConstructorInfo ctor in constructors.OrderBy(c => c.IsPublic ? 0 : (c.IsPrivate ? 2 : 1)).ThenBy(c => c.GetParameters().Length))
+            foreach (ConstructorInfo ctor in constructors.OrderBy(c => c.IsPublic ? 0 : c.IsPrivate ? 2 : 1).ThenBy(c => c.GetParameters().Length))
             {
                 ParameterInfo[] ctorParameters = ctor.GetParameters();
                 if (ctorParameters.Length == 0)
@@ -79,7 +79,7 @@ namespace ClassLibrary1
                     if (types[i] == typeof(byte[]) && ctorParameters[i].ParameterType.FullName == LINQ_BINARY)
                         continue;
                     var unboxedType = Nullable.GetUnderlyingType(ctorParameters[i].ParameterType) ?? ctorParameters[i].ParameterType;
-                    if ((unboxedType != types[i] && !TypeHandlerHelper.HasTypeHandler(unboxedType))
+                    if (unboxedType != types[i] && !TypeHandlerHelper.HasTypeHandler(unboxedType)
                         && !(unboxedType.IsEnum && Enum.GetUnderlyingType(unboxedType) == types[i])
                         && !(unboxedType == typeof(char) && types[i] == typeof(string))
                         && !(unboxedType.IsEnum && types[i] == typeof(string)))

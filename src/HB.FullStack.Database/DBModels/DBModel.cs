@@ -23,7 +23,7 @@ namespace HB.FullStack.Database.DbModels
         public abstract bool Deleted { get; set; }
 
         [DbField(2)]
-        public abstract string LastUser { get; set; }
+        public abstract string? LastUser { get; set; }
     }
 
     public abstract class DbModel2<TId> : BaseDbModel

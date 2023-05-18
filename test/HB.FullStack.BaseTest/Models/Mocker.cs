@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HB.FullStack.BaseTest.Data.Sqlites
+namespace HB.FullStack.BaseTest.Models
 {
-    public static partial class Mocker
+    public static class Mocker
     {
         private static readonly Random _random = new Random();
 
@@ -20,13 +20,13 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
             return lst;
         }
 
-        public static IList<AutoIdBTTimeless> GetAutoIdBTTimelesses(int count)
+        public static IList<AutoIdBT> GetAutoIdBTTimelesses(int count)
         {
-            List<AutoIdBTTimeless> lst = new List<AutoIdBTTimeless>();
+            List<AutoIdBT> lst = new List<AutoIdBT>();
 
             for (int i = 0; i < count; ++i)
             {
-                lst.Add(new AutoIdBTTimeless());
+                lst.Add(new AutoIdBT());
             }
 
             return lst;
@@ -90,6 +90,25 @@ namespace HB.FullStack.BaseTest.Data.Sqlites
             for (int i = 0; i < length; ++i)
             {
                 books.Add(new Guid_BookModel
+                {
+                    //Guid = SecurityUtil.CreateUniqueToken(),
+                    Name = "Book" + i.ToString(),
+                    Price = _random.NextDouble()
+                });
+            }
+
+            return books;
+        }
+
+        public static IList<Guid_BookModel_Timeless> Guid_GetBooks_Timeless(int? count = null)
+        {
+            List<Guid_BookModel_Timeless> books = new List<Guid_BookModel_Timeless>();
+
+            int length = count == null ? 50 : count.Value;
+
+            for (int i = 0; i < length; ++i)
+            {
+                books.Add(new Guid_BookModel_Timeless
                 {
                     //Guid = SecurityUtil.CreateUniqueToken(),
                     Name = "Book" + i.ToString(),

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ClassLibrary1
+namespace HB.FullStack.BaseTest.DapperMapper
 {
     [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false)]
     public sealed class ExplicitConstructorAttribute : Attribute
