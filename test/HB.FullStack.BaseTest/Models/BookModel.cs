@@ -6,6 +6,7 @@
  */
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Models
@@ -40,13 +41,14 @@ namespace HB.FullStack.BaseTest.Models
         public override string? LastUser { get; set; }
     }
 
-    public class Guid_BookModel_Timeless : DbModel2<Guid>
+    [PropertyTrackableObject]
+    public partial class Guid_BookModel_Timeless : DbModel2<Guid>
     {
-        [DbField]
-        public string Name { get; set; } = default!;
+        [TrackProperty]
+        private string _name = default!;
 
-        [DbField]
-        public double Price { get; set; } = default!;
+        [TrackProperty]
+        private double _price = default!;
 
         public override Guid Id { get; set; }
         public override bool Deleted { get; set; }

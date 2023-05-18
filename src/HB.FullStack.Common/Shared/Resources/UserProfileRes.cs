@@ -13,7 +13,7 @@ namespace HB.FullStack.Common.Shared
 {
     public class UserProfileRes : SharedResource
     {
-        public Guid Id { get; set; }
+        public override Guid? Id { get; set; }
 
         [NoEmptyGuid]
         public Guid UserId { get; set; }
@@ -26,5 +26,6 @@ namespace HB.FullStack.Common.Shared
         public DateOnly? BirthDay { get; set; }
 
         public string? AvatarFileName { get; set; }
+        public override long? ExpiredAt { get; set; }
     }
 }

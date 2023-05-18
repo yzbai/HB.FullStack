@@ -6,6 +6,7 @@
  */
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Models
@@ -19,9 +20,12 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class DeleteTimelessModel : DbModel2<Guid>
+    [PropertyTrackableObject]
+    public partial class DeleteTimelessModel : DbModel2<Guid>
     {
-        public string? Name { get; set; }
+        [TrackProperty]
+        private string? _name;
+
         public override Guid Id { get; set; }
         public override bool Deleted { get; set; }
         public override string? LastUser { get; set; }

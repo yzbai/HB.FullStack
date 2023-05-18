@@ -6,6 +6,7 @@
         Plain = 1,
         Db = 2,
         KV = 3,
-        Cache = 4
+        Cache = 4,
+        Shared = 5
     }
 }

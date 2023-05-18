@@ -9,7 +9,7 @@ using System;
 namespace HB.FullStack.Client.Base
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class ClientModelSettingAttribute : Attribute
+    public sealed class SyncSettingAttribute : Attribute
     {
         //public static readonly int DefaultExpirySeconds = 3600;
 
@@ -18,7 +18,7 @@ namespace HB.FullStack.Client.Base
         /// 从lasttime算起，这么长时间内是不需要请求api的。
         /// //TODO: 加上 文件配置，可以覆盖属性配置
         /// </summary>
-        public ExpiryTimeType ExpiryTimeType { get; }
+        //public ExpiryTimeType ExpiryTimeType { get; }
 
         public bool AllowOfflineAdd { get; }
         public bool AllowOfflineUpdate { get; }
@@ -28,9 +28,9 @@ namespace HB.FullStack.Client.Base
 
         //public bool NeedLogined { get; } = true;
 
-        public ClientModelSettingAttribute(ExpiryTimeType expiryTimeType, bool allowOfflineRead = true, bool allowOfflineAdd = false, bool allowOfflineUpdate = false, bool allowOfflineDelete = false)
+        public SyncSettingAttribute(/*ExpiryTimeType expiryTimeType, */bool allowOfflineRead = true, bool allowOfflineAdd = false, bool allowOfflineUpdate = false, bool allowOfflineDelete = false)
         {
-            ExpiryTimeType = expiryTimeType;
+            //ExpiryTimeType = expiryTimeType;
 
             //NeedLogined = needLogined;
             AllowOfflineRead = allowOfflineRead;

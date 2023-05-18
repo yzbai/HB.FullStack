@@ -6,15 +6,15 @@
 
 namespace HB.FullStack.Client.Base
 {
-    public enum ExpiryTimeType
-    {
-        Always = 0,
-        Tiny = 1,
-        Short = 2,
-        Medium = 3,
-        Long = 4,
-        NonExpiry = 5
-    }
+    //public enum ExpiryTimeType
+    //{
+    //    Always = 0,
+    //    Tiny = 1,
+    //    Short = 2,
+    //    Medium = 3,
+    //    Long = 4,
+    //    NonExpiry = 5
+    //}
 }
 
 /*

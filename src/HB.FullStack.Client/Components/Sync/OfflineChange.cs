@@ -9,7 +9,8 @@ namespace HB.FullStack.Client.Components.Sync
     /// <summary>
     /// 使用自增保证顺序
     /// </summary>
-    public class OfflineChange : DbModel2<long>
+    [PropertyTrackableObject]
+    public partial class OfflineChange : DbModel2<long>
     {
         public OfflineChangeType Type { get; set; }
 
@@ -29,10 +30,10 @@ namespace HB.FullStack.Client.Components.Sync
         public long LastTime { get; set; } = TimeUtil.Timestamp;
 
         [DbAutoIncrementPrimaryKey]
-        public override long Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override long Id { get; set; }
 
-        public override bool Deleted { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override string? LastUser { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
     }
 
     public enum OfflineChangeType

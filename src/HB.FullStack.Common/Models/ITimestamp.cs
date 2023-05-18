@@ -5,6 +5,7 @@
 [assembly: InternalsVisibleTo("HB.FullStack.Cache")]
 [assembly: InternalsVisibleTo("HB.FullStack.KVStore")]
 [assembly: InternalsVisibleTo("HB.FullStack.Repository")]
+
 namespace HB.FullStack.Common
 {
     public interface ITimestamp

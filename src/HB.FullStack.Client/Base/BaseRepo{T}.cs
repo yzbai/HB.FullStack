@@ -225,7 +225,9 @@ namespace HB.FullStack.Client.Base
         /// </summary>
         private bool DefaultIfUseLocalData(ApiRequest request, IEnumerable<TModel> localModels)
         {
-            return localModels.Any() && localModels.All(t => TimeUtil.UtcNow - t.LastTime < ClientModelSetting.ExpiryTime);
+            long curTimestamp = TimeUtil.Timestamp;
+
+            return localModels.Any() && localModels.All(t => t.ExpiredAt != null && t.ExpiredAt > curTimestamp);
         }
 
         #endregion

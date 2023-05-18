@@ -11,8 +11,7 @@ using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Client.Files
 {
-    [ClientModelSetting(expiryTimeType: ExpiryTimeType.NonExpiry, //由StsToken.ExpirationAt业务逻辑决定
-      allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
+    [SyncSetting(allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
     public partial class DirectoryToken : ClientDbModel
     {
         [TrackProperty]
@@ -35,6 +34,10 @@ namespace HB.FullStack.Client.Files
 
         [TrackProperty]
         private bool _readOnly;
+
+        public override Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override bool Deleted { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override string? LastUser { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
     public static class StsTokenExtensions

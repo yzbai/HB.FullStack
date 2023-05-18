@@ -35,7 +35,7 @@ namespace HB.FullStack.Client.Base
             }
 
             //TODO: Use Source Generation
-            ClientModelSettingAttribute? localDataAttribute = type.GetCustomAttribute<ClientModelSettingAttribute>(true);
+            SyncSettingAttribute? localDataAttribute = type.GetCustomAttribute<SyncSettingAttribute>(true);
 
             if (localDataAttribute == null)
             {
@@ -44,16 +44,16 @@ namespace HB.FullStack.Client.Base
 
             ClientModelSetting newDef = new ClientModelSetting
             {
-                ExpiryTime = localDataAttribute.ExpiryTimeType switch
-                {
-                    ExpiryTimeType.Always => TimeSpan.FromSeconds(0),
-                    ExpiryTimeType.Tiny => TimeSpan.FromSeconds(_clientOptions.TinyExpirySeconds),
-                    ExpiryTimeType.Short => TimeSpan.FromSeconds(_clientOptions.ShortExpirySeconds),
-                    ExpiryTimeType.Medium => TimeSpan.FromSeconds(_clientOptions.MediumExpirySeconds),
-                    ExpiryTimeType.Long => TimeSpan.FromSeconds(_clientOptions.LongExpirySeconds),
-                    ExpiryTimeType.NonExpiry => TimeSpan.FromSeconds(int.MaxValue),
-                    _ => TimeSpan.FromSeconds(0),
-                },
+                //ExpiryTime = localDataAttribute.ExpiryTimeType switch
+                //{
+                //    ExpiryTimeType.Always => TimeSpan.FromSeconds(0),
+                //    ExpiryTimeType.Tiny => TimeSpan.FromSeconds(_clientOptions.TinyExpirySeconds),
+                //    ExpiryTimeType.Short => TimeSpan.FromSeconds(_clientOptions.ShortExpirySeconds),
+                //    ExpiryTimeType.Medium => TimeSpan.FromSeconds(_clientOptions.MediumExpirySeconds),
+                //    ExpiryTimeType.Long => TimeSpan.FromSeconds(_clientOptions.LongExpirySeconds),
+                //    ExpiryTimeType.NonExpiry => TimeSpan.FromSeconds(int.MaxValue),
+                //    _ => TimeSpan.FromSeconds(0),
+                //},
 
                 AllowOfflineRead = localDataAttribute.AllowOfflineRead,
                 AllowOfflineAdd = localDataAttribute.AllowOfflineAdd,

@@ -42,7 +42,9 @@ namespace HB.FullStack.Client.Abstractions
 
         string? RefreshToken { get; }
 
-        DateTimeOffset? TokenCreatedTime { get; }
+        //DateTimeOffset? TokenCreatedTime { get; }
+
+        long? ExpiredAt { get; }
 
         public bool IsLogined() => UserId.HasValue && AccessToken.IsNotNullOrEmpty();
 

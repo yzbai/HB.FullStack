@@ -10,5 +10,7 @@ namespace HB.FullStack.Common.Shared
     public class SmsValidationCodeRes : SharedResource
     {
         public int Length { get; set; }
+        public override Guid? Id { get; set; }
+        public override long? ExpiredAt { get; set; }
     }
 }

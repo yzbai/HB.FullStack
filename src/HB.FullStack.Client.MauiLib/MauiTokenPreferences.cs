@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 
-
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Devices.Sensors;
@@ -50,7 +49,7 @@ namespace HB.FullStack.Client.MauiLib
 
         public bool TwoFactorEnabled { get => TokenPreferences.TwoFactorEnabled; }
 
-        public DateTimeOffset? TokenCreatedTime { get => TokenPreferences.TokenCreateTime; }
+        //public DateTimeOffset? TokenCreatedTime { get => TokenPreferences.TokenCreateTime; }
 
         public string? AccessToken { get => TokenPreferences.AccessToken; }
 
