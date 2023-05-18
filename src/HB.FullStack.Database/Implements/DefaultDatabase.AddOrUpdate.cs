@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database
 {
-    partial class DefaultDatabase
+    internal partial class DefaultDatabase
     {
         /// <summary>
         /// AddOrUpdate,即override,不检查Timestamp
@@ -21,7 +19,7 @@ namespace HB.FullStack.Database
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
 
             long? oldTimestamp = null;
-            string oldLastUser = "";
+            string? oldLastUser = "";
 
             try
             {

@@ -9,7 +9,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
-    partial class DefaultDatabase
+    internal partial class DefaultDatabase
     {
         public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
@@ -37,7 +37,7 @@ namespace HB.FullStack.Database
             //}
 
             long? oldTimestamp = null;
-            string oldLastUser = "";
+            string? oldLastUser = "";
 
             try
             {

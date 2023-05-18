@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
@@ -80,7 +79,6 @@ namespace HB.FullStack.Database
         private async Task SetSystemVersionAsync(int version, DbSchema dbSchema, TransactionContext transContext)
         {
             var command = DbCommandBuilder.CreateSystemVersionSetCommand(dbSchema.EngineType, dbSchema.Name, version);
-
 
             await dbSchema.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false);
         }
@@ -202,7 +200,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void PrepareItem<T>(T item, string lastUser, ref string oldLastUser, ref long? oldTimestamp) where T : BaseDbModel, new()
+        private static void PrepareItem<T>(T item, string lastUser, ref string? oldLastUser, ref long? oldTimestamp) where T : BaseDbModel, new()
         {
             long curTimestamp = TimeUtil.Timestamp;
 
@@ -216,7 +214,7 @@ namespace HB.FullStack.Database
             item.LastUser = lastUser;
         }
 
-        private static void RestoreItem<T>(T item, long? oldTimestamp, string oldLastUser) where T : BaseDbModel, new()
+        private static void RestoreItem<T>(T item, long? oldTimestamp, string? oldLastUser) where T : BaseDbModel, new()
         {
             if (item is ITimestamp timestampModel)
             {

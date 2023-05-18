@@ -2,24 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Convert;
-using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
-
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Database.DbModels
 {
     internal class DbModelDefFactory : IDbModelDefFactory, IModelDefProvider
     {
-        class DbTableSchemaEx
+        private class DbTableSchemaEx
         {
             public DbSchema DbSchema { get; set; } = null!;
 
@@ -74,20 +69,21 @@ namespace HB.FullStack.Database.DbModels
                     {
                         DbModelFullName = type.FullName!,
                         TableName = "tb_" + type.Name,
-                        ReadOnly = false
+                        ReadOnly = false,
+                        ConflictCheckMethods = ConflictCheckMethods.Timestamp | ConflictCheckMethods.OldNewValueCompare
                     };
 
                     string resultDbSchemaName = null!;
 
-                    DbModelAttribute? tableAttribute = type.GetCustomAttribute<DbModelAttribute>(true);
+                    DbModelAttribute? modelAttribute = type.GetCustomAttribute<DbModelAttribute>(true);
 
                     //来自Attribute
-                    if (tableAttribute != null)
+                    if (modelAttribute != null)
                     {
-                        resultDbSchemaName = tableAttribute.DbSchemaName;
-                        resultTableSchema.TableName = tableAttribute.TableName ?? resultTableSchema.TableName;
-                        resultTableSchema.ReadOnly = tableAttribute.ReadOnly ?? resultTableSchema.ReadOnly;
-                        resultTableSchema.ConflictCheckMethods = tableAttribute.ConflictCheckMethods;
+                        resultDbSchemaName = modelAttribute.DbSchemaName;
+                        resultTableSchema.TableName = modelAttribute.TableName ?? resultTableSchema.TableName;
+                        resultTableSchema.ReadOnly = modelAttribute.ReadOnly ?? resultTableSchema.ReadOnly;
+                        resultTableSchema.ConflictCheckMethods = modelAttribute.ConflictCheckMethods;
                     }
 
                     //来自Options, 覆盖Attribute

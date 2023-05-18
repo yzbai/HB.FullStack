@@ -15,7 +15,6 @@ using HB.FullStack.Common.Test;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.Database.Implements;
 using HB.FullStack.EventBus;
 using HB.FullStack.EventBus.Abstractions;
 using HB.FullStack.KVStore;
@@ -28,6 +27,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.Threading;
 
 //TODO: change to method level
 [assembly: Parallelize(Workers = 10, Scope = ExecutionScope.ClassLevel)]
@@ -37,66 +37,70 @@ namespace HB.FullStack.BaseTest
     [TestClass]
     public class BaseTestClass
     {
-        public static IServiceProvider ServiceProvider { get; set; } = null!;
+        public IServiceProvider ServiceProvider { get; set; } = null!;
 
-        public static IConfiguration Configuration { get; set; } = null!;
+        public IConfiguration Configuration { get; set; } = null!;
 
         #region Db
 
-        public static IDatabase Db { get; set; } = null!;
+        public IDatabase Db { get; set; } = null!;
 
-        public static IDbConfigManager DbConfigManager { get; set; } = null!;
+        public const string DbSchema_Mysql = "mysql_test";
+        public const string DbSchema_Sqlite = "sqlite_test";
 
-        public static ITransaction Trans { get; set; } = null!;
+        public IDbConfigManager DbConfigManager { get; set; } = null!;
 
-        public static string SqliteConnectionString = null!;
+        public ITransaction Trans { get; set; } = null!;
 
-        public static string SqliteDbFileName = null!;
+        public string SqliteConnectionString = null!;
+
+        public string SqliteDbFileName = null!;
 
         #endregion
 
         #region KVStore
 
-        public static IKVStore KVStore { get; set; } = null!;
+        public IKVStore KVStore { get; set; } = null!;
 
         #endregion
 
         #region Cache
 
-        public static ICache Cache { get; set; } = null!;
-        public static StackExchange.Redis.ConnectionMultiplexer RedisConnection { get; private set; } = null!;
-        public static int RedisDbNumber { get; private set; }
-        public static string ApplicationName { get; private set; } = null!;
+        public ICache Cache { get; set; } = null!;
+        public StackExchange.Redis.ConnectionMultiplexer RedisConnection { get; private set; } = null!;
+        public int RedisDbNumber { get; private set; }
+        public string ApplicationName { get; private set; } = null!;
 
         #endregion
 
         #region Lock
 
-        public static IDistributedLockManager DistributedLockManager { get; set; } = null!;
+        public IDistributedLockManager DistributedLockManager { get; set; } = null!;
 
-        public static IMemoryLockManager MemoryLockManager { get; set; } = null!;
+        public IMemoryLockManager MemoryLockManager { get; set; } = null!;
 
         #endregion
 
         #region EventBus
 
-        public static IEventBus EventBus { get; set; } = null!;
-        public static IList<EventSchema> EventSchemas { get; private set; } = null!;
+        public IEventBus EventBus { get; set; } = null!;
+        public IList<EventSchema> EventSchemas { get; private set; } = null!;
 
         #endregion
 
         #region Client
 
-        public static IApiClient ApiClient { get; set; } = null!;
+        public IApiClient ApiClient { get; set; } = null!;
 
-        public static ITokenPreferences PreferenceProvider { get; set; } = null!;
+        public ITokenPreferences PreferenceProvider { get; set; } = null!;
 
         #endregion
 
-        [AssemblyInitialize]
-        public static async Task BaseAssemblyInit(TestContext _)
+        public BaseTestClass(DbEngineType defaultEngineType)
         {
-            ServiceProvider = BuildServices();
+            ServiceProvider = BuildServices(defaultEngineType);
+
+            Globals.Logger = ServiceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
             #region Db
 
@@ -104,14 +108,7 @@ namespace HB.FullStack.BaseTest
             DbConfigManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
-            await DropSysInfoTableFirstForTest();
-
-            var SqliteDbFileName = $"s{TimeUtil.UtcNowUnixTimeSeconds}{SecurityUtil.CreateRandomString(6)}.db";
-            SqliteConnectionString = $"Data Source={SqliteDbFileName}";
-
-            //这里会初始化所有数据库
-            use global locker
-            await Db.InitializeAsync(new DbInitContext[] { new DbInitContext { DbSchemaName = DbSchema_Sqlite, ConnectionString = SqliteConnectionString } }).ConfigureAwait(false);
+            InitializeDatabaseAsync().WaitWithoutInlining();
 
             #endregion
 
@@ -153,8 +150,44 @@ namespace HB.FullStack.BaseTest
             #endregion
         }
 
-        [AssemblyCleanup]
-        public static void BaseAssemblyCleanup()
+        private async Task InitializeDatabaseAsync()
+        {
+            //await DropSysInfoTableFirstForTest();
+
+            var SqliteDbFileName = $"s{TimeUtil.UtcNowUnixTimeSeconds}{SecurityUtil.CreateRandomString(6)}.db";
+            SqliteConnectionString = $"Data Source={SqliteDbFileName}";
+
+            Globals.Logger.LogInformation($"测试开始初始化数据库");
+
+            IDistributedLock distributedLock = await DistributedLockManager.LockAsync(
+                resource: nameof(DbSchema_Mysql),
+                expiryTime: TimeSpan.FromSeconds(5 * 60),
+                waitTime: TimeSpan.FromSeconds(6 * 60)).ConfigureAwait(false);
+
+            try
+            {
+                if (!distributedLock.IsAcquired)
+                {
+                    Globals.Logger.LogInformation("无法获取初始化数据库的锁，可能其他站点正在进行初始化");
+                    throw new Exception("等待之后，依然无法获得初始化数据库的锁.");
+                }
+
+                Globals.Logger.LogInformation("获取了初始化数据库的锁");
+
+                await Db.InitializeAsync(new DbInitContext[] {
+                    new DbInitContext
+                    {
+                        DbSchemaName = DbSchema_Sqlite,
+                        ConnectionString = SqliteConnectionString
+                    } }).ConfigureAwait(false);
+            }
+            finally
+            {
+                await distributedLock.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+
+        ~BaseTestClass()
         {
             SqliteConnection.ClearAllPools();
 
@@ -166,27 +199,17 @@ namespace HB.FullStack.BaseTest
             RedisConnection.Close();
         }
 
-        [ClassInitialize]
-        public static void BaseClassInit(DbEngineType engineType)
-        {
-        }
+        //private async Task DropSysInfoTableFirstForTest()
+        //{
+        //    string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
 
-        [ClassCleanup]
-        public static void BaseClassCleanup()
-        {
-        }
+        //    var mysqlSchema = DbConfigManager.GetDbSchema(DbSchema_Mysql);
+        //    var mysqlEngine = mysqlSchema.Engine;
 
-        private static async Task DropSysInfoTableFirstForTest()
-        {
-            string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
+        //    await mysqlEngine.ExecuteCommandNonQueryAsync(mysqlSchema.GetMasterConnectionString(), new DbEngineCommand(sql));
+        //}
 
-            var mysqlSchema = DbConfigManager.GetDbSchema(DbSchema_Mysql);
-            var mysqlEngine = mysqlSchema.Engine;
-
-            await mysqlEngine.ExecuteCommandNonQueryAsync(mysqlSchema.GetMasterConnectionString(), new DbEngineCommand(sql));
-        }
-
-        public static IServiceProvider BuildServices()
+        public IServiceProvider BuildServices(DbEngineType defaultEngineType)
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 
@@ -199,10 +222,6 @@ namespace HB.FullStack.BaseTest
 
             Configuration = configurationBuilder.Build();
 
-            DbOptions dbOptions = new DbOptions();
-
-            Configuration.GetSection("Database").Bind(dbOptions);
-
             IServiceCollection services = new ServiceCollection();
 
             services
@@ -213,7 +232,24 @@ namespace HB.FullStack.BaseTest
                     builder.AddConsole();
                     builder.AddDebug();
                 })
-                .AddDatabase(Configuration.GetSection("Database"), builder => { builder.AddMySQL().AddSQLite(); })
+                .AddDatabase(dbOptions =>
+                {
+                    Configuration.GetSection("Database").Bind(dbOptions);
+
+                    bool flag = true;
+                    foreach (var schema in dbOptions.DbSchemas)
+                    {
+                        if (flag && schema.EngineType == defaultEngineType)
+                        {
+                            schema.IsDefault = true;
+                            flag = false;
+                        }
+                        else
+                        {
+                            schema.IsDefault = false;
+                        }
+                    }
+                }, builder => { builder.AddMySQL().AddSQLite(); })
                 .AddRedisCache(Configuration.GetSection("RedisCache"))
                 .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
                 .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))

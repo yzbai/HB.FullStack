@@ -4,13 +4,12 @@ using System.Data;
 using System.Globalization;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
 {
-    partial class DefaultDatabase
+    internal partial class DefaultDatabase
     {
         public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel, new()
         {
@@ -21,7 +20,7 @@ namespace HB.FullStack.Database
                 .ThrowIfNotWriteable();
 
             long? oldTimestamp = null;
-            string oldLastUser = "";
+            string? oldLastUser = "";
 
             try
             {
@@ -133,24 +132,27 @@ namespace HB.FullStack.Database
             {
                 case DbModelIdType.Unkown:
                     break;
+
                 case DbModelIdType.LongId:
                     foreach (var item in items)
                     {
                         primaryKeyDef.SetValueTo(item, StaticIdGen.GetLongId());
                     }
                     break;
+
                 case DbModelIdType.AutoIncrementLongId:
                     break;
+
                 case DbModelIdType.GuidId:
                     foreach (var item in items)
                     {
                         primaryKeyDef.SetValueTo(item, StaticIdGen.GetSequentialGuid());
                     }
                     break;
+
                 default:
                     break;
             }
         }
-
     }
 }
