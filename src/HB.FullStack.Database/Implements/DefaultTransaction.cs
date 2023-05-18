@@ -12,12 +12,10 @@ namespace HB.FullStack.Database.Implements
     internal class DefaultTransaction : ITransaction
     {
         private readonly IDbModelDefFactory _modelDefFactory;
-        private readonly IDbConfigManager _dbManager;
 
-        public DefaultTransaction(IDbModelDefFactory modelDefFactory, IDbConfigManager dbManager)
+        public DefaultTransaction(IDbModelDefFactory modelDefFactory)
         {
             _modelDefFactory = modelDefFactory;
-            _dbManager = dbManager;
         }
 
         #region 事务
@@ -120,6 +118,6 @@ namespace HB.FullStack.Database.Implements
             }
         }
 
-        #endregion 事务
+        #endregion
     }
 }

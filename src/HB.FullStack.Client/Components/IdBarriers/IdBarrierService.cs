@@ -149,7 +149,7 @@ namespace HB.FullStack.Client.Components.IdBarriers
                 && id > 0
                 && apiMethod == ApiMethod.Get)
             {
-                changedId = StaticIdGen.GetId();
+                changedId = StaticIdGen.GetLongId();
                 await AddServerIdToClientIdAsync(id, changedId).ConfigureAwait(false);
             }
             //TODO: 如果服务器返回Id=-1，即这个数据不是使用Id来作为主键的，客户端实体应该避免使用IdGenModel

@@ -76,7 +76,6 @@ namespace HB.FullStack.Database
             }
         }
 
-
         public void SetConnectionString(string schemaName, string? connectionString, IList<string>? slaveConnectionStrings)
         {
             var schema = _dbConfigManager.GetDbSchema(schemaName);

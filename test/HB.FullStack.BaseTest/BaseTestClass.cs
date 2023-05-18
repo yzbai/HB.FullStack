@@ -160,9 +160,10 @@ namespace HB.FullStack.BaseTest
         {
             string sql = $"DROP TABLE if exists `{SystemInfoNames.SYSTEM_INFO_TABLE_NAME}`;";
 
-            var mysqlEngine = DbConfigManager.GetDatabaseEngine(DbSchema_Mysql);
+            var mysqlSchema = DbConfigManager.GetDbSchema(DbSchema_Mysql);
+            var mysqlEngine = mysqlSchema.Engine;
 
-            await mysqlEngine.ExecuteCommandNonQueryAsync(DbConfigManager.GetRequiredConnectionString(DbSchema_Mysql, true), new DbEngineCommand(sql));
+            await mysqlEngine.ExecuteCommandNonQueryAsync(mysqlSchema.GetMasterConnectionString(), new DbEngineCommand(sql));
         }
 
         [AssemblyCleanup]

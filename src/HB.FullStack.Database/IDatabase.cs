@@ -11,6 +11,7 @@ using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
 
 [assembly: InternalsVisibleTo("HB.FullStack.Client")]
+[assembly: InternalsVisibleTo("HB.FullStack.BaseTest")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.MySQL")]
 [assembly: InternalsVisibleTo("HB.FullStack.DatabaseTests.SQLite")]

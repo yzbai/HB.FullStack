@@ -20,13 +20,13 @@ namespace HB.FullStack.BaseTest.Data.MySqls
             return lst;
         }
 
-        public static IList<AutoIdBTTimeless> GetAutoIdBTTimelesses(int count)
+        public static IList<AutoIdBT> GetAutoIdBTTimelesses(int count)
         {
-            List<AutoIdBTTimeless> lst = new List<AutoIdBTTimeless>();
+            List<AutoIdBT> lst = new List<AutoIdBT>();
 
             for (int i = 0; i < count; ++i)
             {
-                lst.Add(new AutoIdBTTimeless());
+                lst.Add(new AutoIdBT());
             }
 
             return lst;

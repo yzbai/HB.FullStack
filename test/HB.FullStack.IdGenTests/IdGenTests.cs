@@ -42,7 +42,7 @@ namespace HB.Infrastructure.IdGen.Tests
                 int taskID = Task.CurrentId!.Value;
                 for (int i = 0; i < 10; ++i)
                 {
-                    long id = StaticIdGen.GetId();
+                    long id = StaticIdGen.GetLongId();
 
                     Console.WriteLine($"{id}    {taskID}");
 

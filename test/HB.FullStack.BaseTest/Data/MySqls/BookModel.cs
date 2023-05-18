@@ -1,20 +1,27 @@
-﻿using HB.FullStack.Database.DbModels;
+﻿using HB.FullStack.Common;
+using HB.FullStack.Common.IdGen;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Data.MySqls
 {
     [DbModel(DbSchema_Mysql)]
-    public class Book2Model : TimestampFlackIdDbModel
+    public class Book2Model : DbModel2<long>, ITimestamp
     {
-
         [DbField]
         public string Name { get; set; } = default!;
 
         [DbField]
         public double Price { get; set; } = default!;
+        public long Timestamp { get; set; }
+
+        public override long Id { get; set; } = StaticIdGen.GetLongId();
+
+        public override bool Deleted { get; set; }
+        public override string LastUser { get; set; } = null!;
     }
 
     [DbModel(DbSchema_Mysql)]
-    public class Guid_BookModel : TimestampGuidDbModel
+    public class Guid_BookModel : DbModel2<Guid>, ITimestamp
     {
 
         [DbField]
@@ -22,10 +29,14 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         [DbField]
         public double Price { get; set; } = default!;
+        public long Timestamp { get; set; }
+        public override Guid Id { get; set; } = StaticIdGen.GetSequentialGuid();
+        public override bool Deleted { get; set; }
+        public override string LastUser { get; set; } = null!;
     }
 
     [DbModel(DbSchema_Mysql)]
-    public class Guid_BookModel_Timeless : TimelessGuidDbModel
+    public class Guid_BookModel_Timeless : DbModel2<Guid>
     {
 
         [DbField]
@@ -33,6 +44,9 @@ namespace HB.FullStack.BaseTest.Data.MySqls
 
         [DbField]
         public double Price { get; set; } = default!;
+        public override Guid Id { get; set; } = StaticIdGen.GetSequentialGuid();
+        public override bool Deleted { get; set; }
+        public override string LastUser { get; set; } = null!;
     }
 
     [DbModel(DbSchema_Mysql)]

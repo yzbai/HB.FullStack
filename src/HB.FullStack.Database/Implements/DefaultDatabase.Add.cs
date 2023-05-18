@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.IdGen;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
@@ -24,6 +25,8 @@ namespace HB.FullStack.Database
 
             try
             {
+                SetPrimaryValue(new T[] { item }, modelDef);
+
                 PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
                 DbEngineCommand command = DbCommandBuilder.CreateAddCommand(modelDef, item);
@@ -76,6 +79,8 @@ namespace HB.FullStack.Database
 
             try
             {
+                SetPrimaryValue(items, modelDef);
+
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 
                 DbEngineCommand command = DbCommandBuilder.CreateBatchAddCommand(modelDef, items);
@@ -114,5 +119,38 @@ namespace HB.FullStack.Database
                 throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(items), ex);
             }
         }
+
+        private static void SetPrimaryValue<T>(IEnumerable<T> items, DbModelDef modelDef) where T : BaseDbModel, new()
+        {
+            if (items.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            var primaryKeyDef = modelDef.PrimaryKeyPropertyDef;
+
+            switch (modelDef.IdType)
+            {
+                case DbModelIdType.Unkown:
+                    break;
+                case DbModelIdType.LongId:
+                    foreach (var item in items)
+                    {
+                        primaryKeyDef.SetValueTo(item, StaticIdGen.GetLongId());
+                    }
+                    break;
+                case DbModelIdType.AutoIncrementLongId:
+                    break;
+                case DbModelIdType.GuidId:
+                    foreach (var item in items)
+                    {
+                        primaryKeyDef.SetValueTo(item, StaticIdGen.GetSequentialGuid());
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
     }
 }

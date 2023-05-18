@@ -19,7 +19,7 @@ namespace HB.Infrastructure.IdGen
     /// <summary>
     /// warning: 不支持Web Garden
     /// </summary>
-    public class FlackIdGen : IDistributedIdGen
+    public class FlackIdGen : IDistributedLongIdGen
     {
         public static void Initialize(IdGenSettings settings)
         {

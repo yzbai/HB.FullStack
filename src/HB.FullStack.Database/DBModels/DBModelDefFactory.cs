@@ -315,9 +315,9 @@ namespace HB.FullStack.Database.DbModels
             }
 
             //判断是否是主键
-            DbPrimaryKeyAttribute? primaryAttribute = propertyInfo.GetCustomAttribute<DbPrimaryKeyAttribute>(true);
+            var primaryAttributes = propertyInfo.GetCustomAttributes<DbPrimaryKeyAttribute>(true);
 
-            if (primaryAttribute != null)
+            if (primaryAttributes.IsNotNullOrEmpty())
             {
                 if (propertyInfo.Name != nameof(DbModel2<long>.Id))
                 {

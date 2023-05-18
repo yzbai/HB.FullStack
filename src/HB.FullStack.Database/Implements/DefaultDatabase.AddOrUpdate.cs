@@ -20,9 +20,12 @@ namespace HB.FullStack.Database
 
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(nameof(modelDef)).ThrowIfNotWriteable();
 
+            long? oldTimestamp = null;
+            string oldLastUser = "";
+
             try
             {
-                item.LastUser = lastUser;
+                PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
                 var command = DbCommandBuilder.CreateAddOrUpdateCommand(modelDef, item, false);
 
@@ -30,8 +33,21 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
             }
+            catch (DbException ex)
+            {
+                if (transContext != null || ex.ComeFromEngine)
+                {
+                    RestoreItem(item, oldTimestamp, oldLastUser);
+                }
+                throw;
+            }
             catch (Exception ex) when (ex is not DbException)
             {
+                if (transContext != null)
+                {
+                    RestoreItem(item, oldTimestamp, oldLastUser);
+                }
+
                 throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(item), ex);
             }
         }
@@ -49,23 +65,36 @@ namespace HB.FullStack.Database
 
             ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);
 
-            foreach (var item in items)
-            {
-                item.LastUser = lastUser;
-            }
+            List<long> oldTimestamps = new List<long>();
+            List<string?> oldLastUsers = new List<string?>();
 
             try
             {
+                PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
+
                 var command = DbCommandBuilder.CreateBatchAddOrUpdateCommand(modelDef, items);
 
                 _ = transContext != null
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not DbException)
+            catch (DbException ex)
             {
-                string detail = $"Items:{SerializeUtil.ToJson(items)}";
-                throw DbExceptions.UnKown(modelDef.FullName, detail, ex);
+                if (transContext != null || ex.ComeFromEngine)
+                {
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
+                }
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                if (transContext != null)
+                {
+                    RestoreBatchItems(items, oldTimestamps, oldLastUsers, modelDef);
+                }
+
+                throw DbExceptions.UnKown(modelDef.FullName, $"Items:{SerializeUtil.ToJson(items)}", ex);
             }
         }
     }

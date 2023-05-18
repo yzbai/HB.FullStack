@@ -20,10 +20,10 @@ namespace HB.FullStack.Database.DbModels
         /// 不是真正的删除，而是用Deleted=1表示删除。
         /// </summary>
         [DbField(1)]
-        public abstract bool Deleted { get; internal set; }
+        public abstract bool Deleted { get; set; }
 
         [DbField(2)]
-        public abstract string LastUser { get; internal set; }
+        public abstract string LastUser { get; set; }
     }
 
     public abstract class DbModel2<TId> : BaseDbModel
@@ -31,6 +31,6 @@ namespace HB.FullStack.Database.DbModels
         [DbField(0)]
         [DbPrimaryKey]
         [CacheModelKey]
-        public abstract TId Id { get; internal set; }
+        public abstract TId Id { get; set; }
     }
 }

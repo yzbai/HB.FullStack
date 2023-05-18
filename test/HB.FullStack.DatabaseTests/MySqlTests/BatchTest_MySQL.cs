@@ -17,7 +17,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
             await Db.AddAsync(timelessLst, "Tester", null);
 
-            long count = await Db.CountAsync<AutoIdBTTimeless>(null);
+            long count = await Db.CountAsync<AutoIdBT>(null);
 
             Assert.AreEqual(count, timelessLst.Count);
         }
