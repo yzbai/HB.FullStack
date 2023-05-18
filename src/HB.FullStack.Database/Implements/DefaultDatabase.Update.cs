@@ -26,15 +26,10 @@ namespace HB.FullStack.Database
 
                 await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
 
-                //trackableModel.Clear();
+                ReTrackIfTrackable(item, modelDef);
 
                 return;
             }
-
-            //if (bestConflictCheckMethod != DbConflictCheckMethods.Ignore && bestConflictCheckMethod != DbConflictCheckMethods.Timestamp)
-            //{
-            //    throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has wrong Best Conflict Check Method When update entire model: {bestConflictCheckMethod}.");
-            //}
 
             long? oldTimestamp = null;
             string? oldLastUser = "";
@@ -52,6 +47,8 @@ namespace HB.FullStack.Database
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 CheckFoundMatch(modelDef, rows, item, lastUser);
+
+                ReTrackIfTrackable(item, modelDef);
             }
             catch (DbException ex)
             {
@@ -105,6 +102,8 @@ namespace HB.FullStack.Database
 
                 await UpdatePropertiesAsync<T>(propertyChangePacks, lastUser, transContext).ConfigureAwait(false);
 
+                ReTrackIfTrackable(items, modelDef);
+
                 return;
             }
 
@@ -126,6 +125,8 @@ namespace HB.FullStack.Database
                     : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
                 CheckFoundMatches(modelDef, reader, items, lastUser);
+
+                ReTrackIfTrackable(items, modelDef);
             }
             catch (DbException ex)
             {

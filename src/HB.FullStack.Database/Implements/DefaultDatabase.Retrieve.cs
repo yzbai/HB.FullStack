@@ -5,17 +5,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common;
-using HB.FullStack.Common.Models;
-using HB.FullStack.Database.Config;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
 
 namespace HB.FullStack.Database
 {
-    partial class DefaultDatabase
+    internal partial class DefaultDatabase
     {
         #region 单表查询 From, Where
 
@@ -47,7 +43,6 @@ namespace HB.FullStack.Database
             where TFrom : BaseDbModel, new()
             where TWhere : BaseDbModel, new()
         {
-
             DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>().ThrowIfNull(typeof(TSelect).FullName);
             DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>().ThrowIfNull(typeof(TFrom).FullName);
             DbModelDef whereDef = ModelDefFactory.GetDef<TWhere>().ThrowIfNull(typeof(TWhere).FullName);
@@ -56,10 +51,10 @@ namespace HB.FullStack.Database
 
             whereCondition ??= Where<TWhere>();
             whereCondition.And($"""
-                {whereDef.DbTableReservedName}.{deleteDbReservedName}=0 
-                AND 
-                {selectDef.DbTableReservedName}.{deleteDbReservedName}=0 
-                AND {fromDef.DbTableReservedName}.{deleteDbReservedName}=0 
+                {whereDef.DbTableReservedName}.{deleteDbReservedName}=0
+                AND
+                {selectDef.DbTableReservedName}.{deleteDbReservedName}=0
+                AND {fromDef.DbTableReservedName}.{deleteDbReservedName}=0
                 """);
 
             try
@@ -70,7 +65,11 @@ namespace HB.FullStack.Database
                     ? await fromDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await fromDef.Engine.ExecuteCommandReaderAsync(fromDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                return reader.ToDbModels<TSelect>(ModelDefFactory, selectDef);
+                var results = reader.ToDbModels<TSelect>(ModelDefFactory, selectDef);
+
+                ReTrackIfTrackable(results, selectDef);
+
+                return results;
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -94,7 +93,11 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                return reader.ToDbModels<T>(ModelDefFactory, modelDef);
+                var results = reader.ToDbModels<T>(ModelDefFactory, modelDef);
+
+                ReTrackIfTrackable(results, modelDef);
+
+                return results;
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -288,7 +291,11 @@ namespace HB.FullStack.Database
                     ? await sourceModelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await sourceModelDef.Engine.ExecuteCommandReaderAsync(sourceModelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                return reader.ToDbModels<TSource, TTarget>(ModelDefFactory, sourceModelDef, targetModelDef);
+                var results = reader.ToDbModels<TSource, TTarget>(ModelDefFactory, sourceModelDef, targetModelDef);
+
+                ReTrackIfTrackable(results, sourceModelDef, targetModelDef);
+
+                return results;
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -327,7 +334,7 @@ namespace HB.FullStack.Database
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
             DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>().ThrowIfNull(typeof(TTarget1).FullName);
             DbModelDef targetModelDef2 = ModelDefFactory.GetDef<TTarget2>().ThrowIfNull(typeof(TTarget2).FullName);
-            
+
             string deleteDbReservedName = sourceModelDef.DeletedPropertyDef.DbReservedName;
 
             whereCondition ??= Where<TSource>();
@@ -346,9 +353,9 @@ namespace HB.FullStack.Database
 
                 case SqlJoinType.INNER:
                     whereCondition.And($"""
-                        {sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0 
-                        AND {targetModelDef1.DbTableReservedName}.{deleteDbReservedName}=0 
-                        AND {targetModelDef2.DbTableReservedName}.{deleteDbReservedName}=0 
+                        {sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0
+                        AND {targetModelDef1.DbTableReservedName}.{deleteDbReservedName}=0
+                        AND {targetModelDef2.DbTableReservedName}.{deleteDbReservedName}=0
                         """);
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
@@ -358,9 +365,9 @@ namespace HB.FullStack.Database
 
                 case SqlJoinType.CROSS:
                     whereCondition.And($"""
-                        {sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0 
-                        AND {targetModelDef1.DbTableReservedName}.{deleteDbReservedName}=0 
-                        AND {targetModelDef2.DbTableReservedName}.{deleteDbReservedName}=0 
+                        {sourceModelDef.DbTableReservedName}.{deleteDbReservedName}=0
+                        AND {targetModelDef1.DbTableReservedName}.{deleteDbReservedName}=0
+                        AND {targetModelDef2.DbTableReservedName}.{deleteDbReservedName}=0
                         """);
                     //whereCondition.And(t => t.Deleted == false).And<TTarget1>(t => t.Deleted == false).And<TTarget2>(t => t.Deleted == false);
                     break;
@@ -375,7 +382,11 @@ namespace HB.FullStack.Database
                     ? await sourceModelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await sourceModelDef.Engine.ExecuteCommandReaderAsync(sourceModelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                return reader.ToDbModels<TSource, TTarget1, TTarget2>(ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
+                var results = reader.ToDbModels<TSource, TTarget1, TTarget2>(ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
+
+                ReTrackIfTrackable(results, sourceModelDef, targetModelDef1, targetModelDef2);
+
+                return results;
             }
             catch (Exception ex) when (ex is not DbException)
             {

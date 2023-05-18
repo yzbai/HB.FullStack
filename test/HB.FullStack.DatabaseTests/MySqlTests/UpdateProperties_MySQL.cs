@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.PropertyTrackable;
-using HB.FullStack.Database.SQL;
 using HB.FullStack.BaseTest.Data.MySqls;
+using HB.FullStack.Common.PropertyTrackable;
+using HB.FullStack.Database;
+using HB.FullStack.Database.SQL;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using HB.FullStack.Database;
 
 namespace HB.FullStack.DatabaseTests.MySQL
 {
-
     [TestClass]
     public class UpdateProperties_MySQL : BaseTestClass
     {
@@ -51,6 +50,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
                 return lst;
             }
+
             public static IEnumerable<UPTimestampModel> MockTimestampList(int count = 10)
             {
                 var lst = new List<UPTimestampModel>();
@@ -62,6 +62,25 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
                 return lst;
             }
+        }
+
+        /// <summary>
+        /// 测试，各种不同db操作随机顺序下，track到合适的changes
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task Test_Multiple_Action_Track_Status()
+        {
+            var model = Mocker.MockTimestampModel();
+            sdf
+            model.Age = 10;
+
+            await Db.AddAsync(model, "", null).ConfigureAwait(false);
+
+            model.Name = "Test";
+
+            //这个时候，不应该再Update Age
+            await Db.UpdateAsync(model, "", null);
         }
 
         [TestMethod]
@@ -92,7 +111,6 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var rt = await Db.ScalarAsync<UPTimestampModel>(model.Id, null);
 
             Assert.AreEqual(SerializeUtil.ToJson(model), SerializeUtil.ToJson(rt));
-
         }
 
         [TestMethod]

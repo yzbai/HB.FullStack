@@ -30,6 +30,8 @@ namespace HB.FullStack.Database
                 _ = transContext != null
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
+
+                ReTrackIfTrackable(item, modelDef);
             }
             catch (DbException ex)
             {
@@ -75,6 +77,8 @@ namespace HB.FullStack.Database
                 _ = transContext != null
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
+
+                ReTrackIfTrackable(items, modelDef);
             }
             catch (DbException ex)
             {

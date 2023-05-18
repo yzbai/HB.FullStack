@@ -4,7 +4,6 @@ using System.Data;
 using System.Globalization;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common.IdGen;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database
@@ -38,6 +37,8 @@ namespace HB.FullStack.Database
                 {
                     modelDef.PrimaryKeyPropertyDef.SetValueTo(item, System.Convert.ToInt64(rt, CultureInfo.InvariantCulture));
                 }
+
+                ReTrackIfTrackable(item, modelDef);
             }
             catch (DbException ex)
             {
@@ -98,6 +99,8 @@ namespace HB.FullStack.Database
                         ++num;
                     }
                 }
+
+                ReTrackIfTrackable(items, modelDef);
             }
             catch (DbException ex)
             {
@@ -116,42 +119,6 @@ namespace HB.FullStack.Database
                 }
 
                 throw DbExceptions.UnKown(modelDef.FullName, SerializeUtil.ToJson(items), ex);
-            }
-        }
-
-        private static void SetPrimaryValue<T>(IEnumerable<T> items, DbModelDef modelDef) where T : BaseDbModel, new()
-        {
-            if (items.IsNullOrEmpty())
-            {
-                return;
-            }
-
-            var primaryKeyDef = modelDef.PrimaryKeyPropertyDef;
-
-            switch (modelDef.IdType)
-            {
-                case DbModelIdType.Unkown:
-                    break;
-
-                case DbModelIdType.LongId:
-                    foreach (var item in items)
-                    {
-                        primaryKeyDef.SetValueTo(item, StaticIdGen.GetLongId());
-                    }
-                    break;
-
-                case DbModelIdType.AutoIncrementLongId:
-                    break;
-
-                case DbModelIdType.GuidId:
-                    foreach (var item in items)
-                    {
-                        primaryKeyDef.SetValueTo(item, StaticIdGen.GetSequentialGuid());
-                    }
-                    break;
-
-                default:
-                    break;
             }
         }
     }

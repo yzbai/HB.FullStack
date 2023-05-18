@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-using HB.FullStack.Common;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.SQL;
 
@@ -11,7 +10,6 @@ namespace HB.FullStack.Database
 {
     public interface IDbReader
     {
-
         FromExpression<T> From<T>() where T : BaseDbModel, new();
 
         WhereExpression<T> Where<T>() where T : BaseDbModel, new();
@@ -29,7 +27,9 @@ namespace HB.FullStack.Database
         Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext) where T : BaseDbModel, new();
 
         Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page = null, int? perPage = null, string? orderBy = null) where T : BaseDbModel, new();
+
         Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page = null, int? perPage = null, string? orderBy = null) where T : BaseDbModel, new();
+
         Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : BaseDbModel, new();
 
         Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext) where T : BaseDbModel, new();
