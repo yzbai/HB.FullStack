@@ -39,7 +39,7 @@ namespace HB.FullStack.Database.Convert
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="def"></param>
         /// <param name="reader"></param>
@@ -442,7 +442,7 @@ namespace HB.FullStack.Database.Convert
             il.Emit(OpCodes.Ret);
             //emiter.Return();
 
-            Type funType = Expression.GetFuncType(typeof(IDbModelDefFactory), typeof(object), typeof(int), typeof(KeyValuePair<string, object>[]));
+            Type funType = Expression.GetFuncType(typeof(IDbModelDefFactory), typeof(object), typeof(string), typeof(KeyValuePair<string, object>[]));
 
             return (Func<IDbModelDefFactory, object, string, KeyValuePair<string, object>[]>)dm.CreateDelegate(funType);
 

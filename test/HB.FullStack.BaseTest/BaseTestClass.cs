@@ -102,22 +102,12 @@ namespace HB.FullStack.BaseTest
 
             Globals.Logger = ServiceProvider.GetRequiredService<ILogger<BaseTestClass>>();
 
-            #region Db
-
-            Db = ServiceProvider.GetRequiredService<IDatabase>();
-            DbConfigManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
-            Trans = ServiceProvider.GetRequiredService<ITransaction>();
-
-            InitializeDatabaseAsync().WaitWithoutInlining();
-
-            #endregion
-
             #region Cache
 
-            Cache = ServiceProvider.GetRequiredService<ICache>();
+            ApplicationName = Configuration["RedisCache:ApplicationName"]!;
             RedisConnection = StackExchange.Redis.ConnectionMultiplexer.Connect(Configuration["RedisCache:ConnectionSettings:0:ConnectionString"]!);
             RedisDbNumber = Convert.ToInt32(Configuration["RedisCache:ConnectionSettings:0:DatabaseNumber"]);
-            ApplicationName = Configuration["RedisCache:ApplicationName"]!;
+            Cache = ServiceProvider.GetRequiredService<ICache>();
 
             #endregion
 
@@ -125,6 +115,16 @@ namespace HB.FullStack.BaseTest
 
             DistributedLockManager = ServiceProvider.GetRequiredService<IDistributedLockManager>();
             MemoryLockManager = ServiceProvider.GetRequiredService<IMemoryLockManager>();
+
+            #endregion
+
+            #region Db
+
+            Db = ServiceProvider.GetRequiredService<IDatabase>();
+            DbConfigManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
+            Trans = ServiceProvider.GetRequiredService<ITransaction>();
+
+            InitializeDatabaseAsync().WaitWithoutInlining();
 
             #endregion
 

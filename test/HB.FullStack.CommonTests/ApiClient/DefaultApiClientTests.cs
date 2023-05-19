@@ -24,11 +24,6 @@ namespace HB.FullStack.CommonTests.ApiClient
         }
 
         [TestMethod()]
-        public void GetStreamAsyncTest()
-        {
-        }
-
-        [TestMethod()]
         public async Task GetAsyncTest()
         {
             PreferenceProvider.OnTokenFetched(

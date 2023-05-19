@@ -14,10 +14,10 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TestMethod()]
         public void GetChangedPropertiesTest1()
         {
-            string rightJson = "[{\"PropertyName\":\"Name\",\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"Age\",\"OldValue\":0,\"NewValue\":1000},{\"PropertyName\":\"TestRecord\",\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"ImmutableList\",\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]},{\"PropertyName\":\"ImmutableArray\",\"OldValue\":[\"y\"],\"NewValue\":[\"y\",\"ydfd\"]},{\"PropertyName\":\"ObservableInner\",\"OldValue\":null,\"NewValue\":{\"InnerName\":\"sdfs\"}},{\"PropertyName\":\"ObservableInner\",\"OldValue\":{\"InnerName\":\"sdfs\"},\"NewValue\":{\"InnerName\":\"sfasfs\"}}]";
-            string rightJson2 = "[{\"PropertyName\":\"Name\",\"OldValue\":null,\"NewValue\":\"TestName\"},{\"PropertyName\":\"Age\",\"OldValue\":0,\"NewValue\":1000},{\"PropertyName\":\"TestRecord\",\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},{\"PropertyName\":\"ImmutableList\",\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]},{\"PropertyName\":\"ImmutableArray\",\"OldValue\":[\"y\"],\"NewValue\":[\"y\",\"ydfd\"]},{\"PropertyName\":\"ObservableInner\",\"OldValue\":null,\"NewValue\":{\"InnerName\":\"sfasfs\"}}]";
+            string rightJson = "{\"PropertyChanges\":{\"Name\":{\"PropertyName\":\"Name\",\"OldValue\":null,\"NewValue\":\"TestName\"},\"Age\":{\"PropertyName\":\"Age\",\"OldValue\":0,\"NewValue\":1000},\"TestRecord\":{\"PropertyName\":\"TestRecord\",\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},\"ImmutableList\":{\"PropertyName\":\"ImmutableList\",\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]},\"ImmutableArray\":{\"PropertyName\":\"ImmutableArray\",\"OldValue\":[\"y\"],\"NewValue\":[\"y\",\"ydfd\"]},\"ObservableInner\":{\"PropertyName\":\"ObservableInner\",\"OldValue\":null,\"NewValue\":{\"InnerName\":\"sfasfs\"}}},\"AddtionalProperties\":{\"Id\":\"This is a Id\"}}";
+            string rightJson2 = "{\"PropertyChanges\":{\"Name\":{\"PropertyName\":\"Name\",\"OldValue\":null,\"NewValue\":\"TestName\"},\"Age\":{\"PropertyName\":\"Age\",\"OldValue\":0,\"NewValue\":1000},\"TestRecord\":{\"PropertyName\":\"TestRecord\",\"OldValue\":{\"InnerName\":null},\"NewValue\":{\"InnerName\":\"InnerTestRecord\"}},\"ImmutableList\":{\"PropertyName\":\"ImmutableList\",\"OldValue\":[\"x\"],\"NewValue\":[\"x\",\"y\"]},\"ImmutableArray\":{\"PropertyName\":\"ImmutableArray\",\"OldValue\":[\"y\"],\"NewValue\":[\"y\",\"ydfd\"]},\"ObservableInner\":{\"PropertyName\":\"ObservableInner\",\"OldValue\":null,\"NewValue\":{\"InnerName\":\"sfasfs\"}}},\"AddtionalProperties\":{\"Id\":\"This is a Id\"}}";
 
-            TestObject testObject = new TestObject();
+            PropertyTrackableTestObject testObject = new PropertyTrackableTestObject();
             ActionOnTestObject1(testObject);
 
             var changes = testObject.GetPropertyChangePack();
@@ -30,7 +30,7 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
             Assert.AreEqual(json2, rightJson2);
         }
 
-        private static void ActionOnTestObject1(TestObject testObject)
+        private static void ActionOnTestObject1(PropertyTrackableTestObject testObject)
         {
             testObject.TestRecord = new TestRecord(null);
             testObject.ImmutableList = ImmutableList.Create("x");
@@ -51,7 +51,7 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TestMethod]
         public void TestAttributeForward()
         {
-            var attr = typeof(TestObject).GetProperty(nameof(TestObject.Id))?.GetCustomAttribute<AddtionalPropertyAttribute>(true);
+            var attr = typeof(PropertyTrackableTestObject).GetProperty(nameof(PropertyTrackableTestObject.Id))?.GetCustomAttribute<AddtionalPropertyAttribute>(true);
 
             Assert.IsNotNull(attr);
         }
@@ -59,7 +59,7 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TestMethod]
         public void TestCppAddtionalProperties()
         {
-            TestObject testObject = new TestObject();
+            PropertyTrackableTestObject testObject = new PropertyTrackableTestObject();
             ActionOnTestObject1(testObject);
 
             //TODO:continue;

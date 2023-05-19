@@ -181,6 +181,8 @@ namespace HB.FullStack.Database
         public Task<T?> ScalarAsync<T>(object id, TransactionContext? transContext)
             where T : BaseDbModel, new()
         {
+            ThrowIf.Null(id, nameof(id));
+
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             WhereExpression<T> where = Where<T>($"{modelDef.PrimaryKeyPropertyDef.DbReservedName}={{0}}", id);

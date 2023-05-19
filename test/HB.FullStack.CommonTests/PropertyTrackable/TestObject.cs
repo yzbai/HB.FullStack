@@ -1,25 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
-
-using HandlebarsDotNet.Collections;
 
 using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.CommonTests.PropertyTrackable
 {
-
     [PropertyTrackableObject]
-    public partial class TestTestObject
-    {
-
-    }
-
-    [PropertyTrackableObject]
-    public partial class TestObject
+    public partial class PropertyTrackableTestObject
     {
         [AddtionalProperty]
         public string Id { get; set; } = "This is a Id";
@@ -36,7 +25,6 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         [TrackProperty]
         public TestRecord? _testRecord;
 
-
         //ImmutableCollection
         [TrackProperty]
         private ImmutableList<string>? _immutableList;
@@ -44,7 +32,6 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
         //ImmutableCollection
         [TrackProperty]
         private ImmutableArray<string>? _immutableArray;
-
 
         //Observable class
         [TrackProperty]

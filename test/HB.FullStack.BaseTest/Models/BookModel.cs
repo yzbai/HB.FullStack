@@ -55,12 +55,15 @@ namespace HB.FullStack.BaseTest.Models
         public override string? LastUser { get; set; }
     }
 
+    [CacheModel]
     public class Book : DbModel2<long>, ITimestamp
     {
         [DbField]
+        [CacheModelAltKey]
         public string Name { get; set; } = null!;
 
         [DbField]
+        [CacheModelAltKey]
         public long BookID { get; set; }
 
         [DbField]

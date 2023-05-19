@@ -31,7 +31,9 @@ namespace HB.FullStack.Client.Components.KVManager
 
         public async Task<T?> GetAsync<T>(string key, TransactionContext? transactionContext)
         {
-            KV? kv = await _database.ScalarAsync().ScalarAsync<KV>(kv => kv.Key == key, transactionContext).ConfigureAwait(false);
+            ThrowIf.Null(key, nameof(key));
+
+            KV? kv = await _database.ScalarAsync<KV>(key, transactionContext).ConfigureAwait(false);
 
             if (kv != null && !kv.IsExpired())
             {
@@ -41,9 +43,9 @@ namespace HB.FullStack.Client.Components.KVManager
             return default;
         }
 
-        public async Task DeleteAsync(string key, TransactionContext transactionContext)
+        public async Task DeleteAsync(string key, TransactionContext? transactionContext)
         {
-            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext).ConfigureAwait(false);
+            await _database.DeleteIgnoreConflictCheckAsync<KV>(key, "", transactionContext);
         }
     }
 }

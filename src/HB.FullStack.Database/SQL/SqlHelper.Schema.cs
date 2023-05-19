@@ -223,7 +223,7 @@ namespace HB.FullStack.Database.SQL
             """;
 
         private const string SqliteTbSysinfoCreate = $"""
-            CREATE TABLE ""tb_sys_info"" (
+            CREATE TABLE "tb_sys_info" (
                 "Id" INTEGER PRIMARY KEY AUTOINCREMENT,
                 "Name" TEXT UNIQUE,
                 "Value" TEXT
