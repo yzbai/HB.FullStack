@@ -31,17 +31,10 @@ namespace HB.FullStack.Common.Shared
 
         public bool TwoFactorEnabled { get; set; }
 
-        //public DateTimeOffset TokenCreatedTime { get; set; }
-
         public string AccessToken { get; set; } = null!;
 
         public string RefreshToken { get; set; } = null!;
-        public override Guid? Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override long? ExpiredAt { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        //protected override int GetChildHashCode()
-        //{
-        //    return HashCode.Combine(UserId, Mobile, LoginName, LoginName, Email, TokenCreatedTime, AccessToken, RefreshToken);
-        //}
+        public override Guid? Id { get; set; }
+        public override long? ExpiredAt { get; set; }
     }
 }

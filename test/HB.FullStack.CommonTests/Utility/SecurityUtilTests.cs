@@ -1,11 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.Generic;
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HB.FullStack.Common.IdGen;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace System.Tests
 {
@@ -20,9 +17,9 @@ namespace System.Tests
 
             for (int i = 0; i < numbers; i++)
             {
-                Guid guid = SecurityUtil.CreateSequentialGuid(DateTimeOffset.Now, GuidStoredFormat.AsBinary);
+                Guid guid = StaticIdGen.GetSequentialGuid(GuidStoredFormat.AsBinary);
 
-                if(!ids.Add(guid))
+                if (!ids.Add(guid))
                 {
                     Assert.Fail();
                 }

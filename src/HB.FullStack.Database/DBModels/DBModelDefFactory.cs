@@ -73,7 +73,7 @@ namespace HB.FullStack.Database.DbModels
                         ConflictCheckMethods = ConflictCheckMethods.Timestamp | ConflictCheckMethods.OldNewValueCompare
                     };
 
-                    string resultDbSchemaName = null!;
+                    string? resultDbSchemaName = null;
 
                     DbModelAttribute? modelAttribute = type.GetCustomAttribute<DbModelAttribute>(true);
 
@@ -83,7 +83,7 @@ namespace HB.FullStack.Database.DbModels
                         resultDbSchemaName = modelAttribute.DbSchemaName;
                         resultTableSchema.TableName = modelAttribute.TableName ?? resultTableSchema.TableName;
                         resultTableSchema.ReadOnly = modelAttribute.ReadOnly ?? resultTableSchema.ReadOnly;
-                        resultTableSchema.ConflictCheckMethods = modelAttribute.ConflictCheckMethods;
+                        resultTableSchema.ConflictCheckMethods = modelAttribute.ConflictCheckMethods ?? resultTableSchema.ConflictCheckMethods;
                     }
 
                     //来自Options, 覆盖Attribute

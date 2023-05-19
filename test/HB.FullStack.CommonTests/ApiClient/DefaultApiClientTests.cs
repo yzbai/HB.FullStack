@@ -10,6 +10,7 @@ using HB.FullStack.BaseTest;
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.Test;
 using HB.FullStack.CommonTests.Data;
+using HB.FullStack.Database.Engine;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,24 +19,29 @@ namespace HB.FullStack.CommonTests.ApiClient
     [TestClass()]
     public class DefaultApiClientTests : BaseTestClass
     {
+        public DefaultApiClientTests() : base(DbEngineType.SQLite)
+        {
+        }
+
         [TestMethod()]
         public void GetStreamAsyncTest()
         {
-
         }
 
         [TestMethod()]
         public async Task GetAsyncTest()
         {
             PreferenceProvider.OnTokenFetched(
-                new Common.Shared.TokenRes {
-                UserId = Guid.NewGuid(),
-                TokenCreatedTime =  DateTimeOffset.Now,
-                Mobile = null,
-                Email = null,
-                LoginName = null,
-                AccessToken = Guid.NewGuid().ToString(),
-                RefreshToken = Guid.NewGuid().ToString()});
+                new Common.Shared.TokenRes
+                {
+                    UserId = Guid.NewGuid(),
+                    ExpiredAt = TimeUtil.UtcNow.AddHours(1).Ticks,
+                    Mobile = null,
+                    Email = null,
+                    LoginName = null,
+                    AccessToken = Guid.NewGuid().ToString(),
+                    RefreshToken = Guid.NewGuid().ToString()
+                });
 
             TestHttpServer httpServer = StartHttpServer(
                 new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", HttpMethod.Get, (request, response, parameters) =>
@@ -74,7 +80,8 @@ namespace HB.FullStack.CommonTests.ApiClient
         public string? Name { get; set; }
 
         [JsonConstructor]
-        public GetBookByNameRequest() { }
+        public GetBookByNameRequest()
+        { }
 
         public GetBookByNameRequest(string name)
         {

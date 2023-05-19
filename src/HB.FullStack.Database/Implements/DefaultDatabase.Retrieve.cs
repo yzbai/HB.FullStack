@@ -168,25 +168,35 @@ namespace HB.FullStack.Database
 
         #region 单表查询, Expression Where
 
-        public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
-            where T : DbModel2<long>, new()
+        //public Task<T?> ScalarAsync<T>(long id, TransactionContext? transContext)
+        //    where T : DbModel2<long>, new()
+        //{
+        //    DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+
+        //    WhereExpression<T> where = Where<T>($"{modelDef.PrimaryKeyPropertyDef.DbReservedName}={{0}}", id);
+
+        //    return ScalarAsync(where, transContext);
+        //}
+
+        public Task<T?> ScalarAsync<T>(object id, TransactionContext? transContext)
+            where T : BaseDbModel, new()
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            WhereExpression<T> where = Where<T>($"{SqlHelper.GetReserved(nameof(DbModel2<long>.Id), modelDef.EngineType)}={{0}}", id);
+            WhereExpression<T> where = Where<T>($"{modelDef.PrimaryKeyPropertyDef.DbReservedName}={{0}}", id);
 
             return ScalarAsync(where, transContext);
         }
 
-        public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
-            where T : DbModel2<Guid>, new()
-        {
-            DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
+        //public Task<T?> ScalarAsync<T>(Guid id, TransactionContext? transContext)
+        //    where T : DbModel2<Guid>, new()
+        //{
+        //    DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
-            WhereExpression<T> where = Where<T>(t => t.Id == id);
+        //    WhereExpression<T> where = Where<T>(t => t.Id == id);
 
-            return ScalarAsync(where, transContext);
-        }
+        //    return ScalarAsync(where, transContext);
+        //}
 
         public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : BaseDbModel, new()
         {

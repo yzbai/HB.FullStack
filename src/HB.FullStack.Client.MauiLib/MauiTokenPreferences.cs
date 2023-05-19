@@ -55,6 +55,8 @@ namespace HB.FullStack.Client.MauiLib
 
         public string? RefreshToken { get => TokenPreferences.RefreshToken; }
 
+        public long? ExpiredAt { get => TokenPreferences.ExpiredAt; }
+
         public void OnTokenRefreshFailed() => TokenPreferences.DeleteToken();
 
         public void OnTokenFetched(TokenRes tokenRes) => TokenPreferences.SetToken(tokenRes);
@@ -68,7 +70,6 @@ namespace HB.FullStack.Client.MauiLib
     {
         public const string PREFERENCE_NAME_USERID = "wjUfoxCi";
         public const string PREFERENCE_NAME_USER_LEVEL = "wdyz0xCi";
-        public const string PREFERENCE_NAME_TOKEN_CREATETIME = "WMIliRIP";
         public const string PREFERENCE_NAME_MOBILE = "H8YA3d5aj";
         public const string PREFERENCE_NAME_MOBILE_CONFIRMED = "H8xAsedxaj";
         public const string PREFERENCE_NAME_EMAIL = "B2JG5UN5f";
@@ -77,11 +78,10 @@ namespace HB.FullStack.Client.MauiLib
         public const string PREFERENCE_NAME_LOGINNAME = "UwsSmhY1";
         public const string PREFERENCE_NAME_ACCESSTOKEN = "D3SQAAtrv";
         public const string PREFERENCE_NAME_REFRESHTOKEN = "ZTpMCJQl";
+        public const string PREFERENCE_NAME_EXPIRED_AT = "WMIliRIP";
 
         private static Guid? _userId;
         private static bool _userIdFirstRead = true;
-        private static DateTimeOffset? _tokenCreateTime;
-        private static bool _tokenCreateTimeFirstRead = true;
         private static string? _mobile;
         private static bool _mobileFirstRead = true;
         private static string? _userLevel;
@@ -100,6 +100,8 @@ namespace HB.FullStack.Client.MauiLib
         private static bool _mobileConfirmed_FirstRead = true;
         private static bool? _twoFactoryEnabled;
         private static bool _twoFactoryEnabled_FirstRead = true;
+        private static long? _expiredAt;
+        private static bool _expiredAtFirstRead = true;
 
         public static Guid? UserId
         {
@@ -126,26 +128,26 @@ namespace HB.FullStack.Client.MauiLib
             }
         }
 
-        public static DateTimeOffset? TokenCreateTime
+        public static long? ExpiredAt
         {
             get
             {
-                if (_tokenCreateTimeFirstRead && !_tokenCreateTime.HasValue)
+                if (_expiredAtFirstRead && !_expiredAt.HasValue)
                 {
-                    _tokenCreateTimeFirstRead = false;
-                    string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_TOKEN_CREATETIME);
-                    _tokenCreateTime = storedValue == null ? null : DateTimeOffset.Parse(storedValue, CultureInfo.InvariantCulture);
+                    _expiredAtFirstRead = false;
+                    string? storedValue = PreferenceHelper.Get(PREFERENCE_NAME_EXPIRED_AT);
+                    _expiredAt = storedValue == null ? null : long.Parse(storedValue, CultureInfo.InvariantCulture);
                 }
 
-                return _tokenCreateTime;
+                return _expiredAt;
             }
             private set
             {
-                _tokenCreateTime = value;
+                _expiredAt = value;
 
-                if (_tokenCreateTime.HasValue)
+                if (_expiredAt.HasValue)
                 {
-                    PreferenceHelper.Set(PREFERENCE_NAME_TOKEN_CREATETIME, _tokenCreateTime.Value.ToString(CultureInfo.InvariantCulture));
+                    PreferenceHelper.Set(PREFERENCE_NAME_EXPIRED_AT, _expiredAt.Value.ToString(CultureInfo.InvariantCulture));
                 }
             }
         }
@@ -362,7 +364,7 @@ namespace HB.FullStack.Client.MauiLib
             Email = tokenRes.Email;
             AccessToken = tokenRes.AccessToken ?? "";
             RefreshToken = tokenRes.RefreshToken ?? "";
-            TokenCreateTime = tokenRes.TokenCreatedTime;
+            ExpiredAt = tokenRes.ExpiredAt;
         }
 
         public static void DeleteToken()

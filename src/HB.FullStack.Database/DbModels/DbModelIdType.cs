@@ -5,6 +5,7 @@
         Unkown = 0,
         LongId = 1,
         AutoIncrementLongId = 2,
-        GuidId = 3
+        GuidId = 3,
+        StringId = 4
     }
 }

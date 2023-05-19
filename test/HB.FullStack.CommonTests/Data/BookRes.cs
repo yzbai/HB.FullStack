@@ -1,9 +1,9 @@
 ﻿using System;
+
 using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.CommonTests.Data
 {
-
     public class BookRes : SharedResource
     {
         public string? Name { get; set; }
@@ -12,9 +12,7 @@ namespace HB.FullStack.CommonTests.Data
 
         public double Price { get; set; }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, Title, Price);
-        }
+        public override Guid? Id { get; set; }
+        public override long? ExpiredAt { get; set; }
     }
 }

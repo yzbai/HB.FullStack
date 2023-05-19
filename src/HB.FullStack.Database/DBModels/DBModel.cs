@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
@@ -31,6 +32,7 @@ namespace HB.FullStack.Database.DbModels
         [DbField(0)]
         [DbPrimaryKey]
         [CacheModelKey]
+        [Required]
         public abstract TId Id { get; set; }
     }
 }

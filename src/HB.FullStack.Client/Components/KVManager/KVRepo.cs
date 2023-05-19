@@ -17,20 +17,23 @@ namespace HB.FullStack.Client.Components.KVManager
             _database = database;
         }
 
-        public async Task SetAsync<T>(string key, T? value, TimeSpan? aliveTime, TransactionContext transactionContext)
+        public async Task SetAsync<T>(string key, T? value, TimeSpan? aliveTime, TransactionContext? transactionContext)
         {
-            await _database.DeleteAsync<KV>(kv => kv.Key == key, "", transactionContext).ConfigureAwait(false);
+            KV kv = new KV
+            {
+                Id = key,
+                Value = SerializeUtil.ToJson(value),
+                ExpiredAt = aliveTime.HasValue ? (TimeUtil.UtcNow + aliveTime.Value).Ticks : long.MaxValue
+            };
 
-            KV kv = new KV { Key = key, Value = SerializeUtil.ToJson(value), ExpiredAt = aliveTime.HasValue ? TimeUtil.UtcNow + aliveTime.Value : DateTimeOffset.MaxValue };
-
-            await _database.AddAsync(kv, "", transactionContext).ConfigureAwait(false);
+            await _database.AddOrUpdateByIdAsync(kv, "", transactionContext).ConfigureAwait(false);
         }
 
         public async Task<T?> GetAsync<T>(string key, TransactionContext? transactionContext)
         {
-            KV? kv = await _database.ScalarAsync<KV>(kv => kv.Key == key, transactionContext).ConfigureAwait(false);
+            KV? kv = await _database.ScalarAsync().ScalarAsync<KV>(kv => kv.Key == key, transactionContext).ConfigureAwait(false);
 
-            if (kv != null && kv.ExpiredAt > TimeUtil.UtcNow)
+            if (kv != null && !kv.IsExpired())
             {
                 return SerializeUtil.FromJson<T>(kv.Value);
             }

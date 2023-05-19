@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Reflection;
 
 using HB.FullStack.Common.PropertyTrackable;
@@ -21,8 +20,8 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
             TestObject testObject = new TestObject();
             ActionOnTestObject1(testObject);
 
-            var changes = testObject.GetPropertyChangePack(mergeMultipleChanged: false);
-            var changes2 = testObject.GetPropertyChangePack(mergeMultipleChanged: true);
+            var changes = testObject.GetPropertyChangePack();
+            var changes2 = testObject.GetPropertyChangePack();
 
             string json = SerializeUtil.ToJson(changes);
             string json2 = SerializeUtil.ToJson(changes2);
@@ -47,7 +46,6 @@ namespace HB.FullStack.CommonTests.PropertyTrackable
             testObject.ImmutableArray = testObject.ImmutableArray.Value.Add("ydfd");
             testObject.ObservableInner = new ObservableInner { InnerName = "sdfs" };
             testObject.ObservableInner.InnerName = "sfasfs";
-
         }
 
         [TestMethod]

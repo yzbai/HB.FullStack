@@ -1,10 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HB.FullStack.Client.Abstractions;
+﻿using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
-
 
 namespace HB.FullStack.BaseTest
 {
@@ -38,11 +33,8 @@ namespace HB.FullStack.BaseTest
             return false;
         }
 
-        
-
         public void OnTokenRefreshFailed()
         {
-
         }
 
         public bool IsIntroducedYet { get; set; }
@@ -71,7 +63,7 @@ namespace HB.FullStack.BaseTest
 
         public bool TwoFactorEnabled { get; set; }
 
-        public DateTimeOffset? TokenCreatedTime { get; set; }
+        public long? ExpiredAt { get; set; }
 
         public void OnTokenFetched(TokenRes signInReceipt)
         {

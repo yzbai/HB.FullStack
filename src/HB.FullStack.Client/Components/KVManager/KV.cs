@@ -1,18 +1,19 @@
-﻿using System;
-
+﻿using HB.FullStack.Common;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Components.KVManager
 {
-    public class KV : DbModel2<Guid>
+    [DbModel(ConflictCheckMethods.Ignore)]
+    public class KV : DbModel2<string>, IExpired
     {
-        public string Key { get; set; } = null!;
+        public override string Id { get; set; } = null!;
 
         public string? Value { get; set; }
 
-        public DateTimeOffset ExpiredAt { get; set; }
-        public override Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override bool Deleted { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override string? LastUser { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public long? ExpiredAt { get; set; }
+
+        public override bool Deleted { get; set; }
+
+        public override string? LastUser { get; set; }
     }
 }
