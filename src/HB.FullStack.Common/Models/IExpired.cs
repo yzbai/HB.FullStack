@@ -4,6 +4,7 @@
     {
         /// <summary>
         /// Utc Timestamp
+        /// null : expired at once
         /// </summary>
         long? ExpiredAt { get; set; }
     }

@@ -9,6 +9,9 @@ namespace HB.FullStack.Client.Base
     [PropertyTrackableObject]
     public abstract partial class ClientDbModel : DbModel2<Guid>, IExpired
     {
+        [TrackProperty]
+        private long? _expiredAt;
+
         /// <summary>
         /// 改动时间，包括：
         /// 1. Update
@@ -16,7 +19,5 @@ namespace HB.FullStack.Client.Base
         /// </summary>
         //[TrackProperty]
         //private DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
-
-        public abstract long? ExpiredAt { get; set; }
     }
 }

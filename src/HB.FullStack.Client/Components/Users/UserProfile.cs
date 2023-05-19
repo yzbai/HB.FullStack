@@ -13,7 +13,7 @@ using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.Components.Users
 {
-    [ClientModelSetting(expiryTimeType: ExpiryTimeType.Tiny, allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
+    [SyncSetting(allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
     public partial class UserProfile : ClientDbModel
     {
         [NoEmptyGuid]
@@ -37,5 +37,8 @@ namespace HB.FullStack.Client.Components.Users
         [TrackProperty]
         private string? _avatarFileName;
 
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
     }
 }

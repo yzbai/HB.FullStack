@@ -13,6 +13,7 @@ using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Components.Sync;
 using HB.FullStack.Common;
+using HB.FullStack.Common.IdGen;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
@@ -91,7 +92,9 @@ namespace HB.FullStack.Client.Components.Users
         {
             return new UserProfile
             {
-                Id = res.Id,
+                Id = res.Id ?? StaticIdGen.GetSequentialGuid(),
+                ExpiredAt = res.ExpiredAt,
+
                 UserId = res.UserId,
                 NickName = res.NickName,
                 Gender = res.Gender,

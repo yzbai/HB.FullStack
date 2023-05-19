@@ -15,6 +15,7 @@ using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Client.Components.Sync;
 using HB.FullStack.Common.Files;
+using HB.FullStack.Common.IdGen;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
@@ -133,7 +134,7 @@ namespace HB.FullStack.Client.Files
                     }
                     else
                     {
-                        if (!cachedToken.IsExpired())
+                        if (!cachedToken.IsExpired(null, TimeSpan.FromMinutes(1)))
                         {
                             _logger.LogDebug("找到找到未过期的 AliyunStsToken缓存， directoryPermissionName: {DirectoryPermissionName}, needWrite:{NeedWritePermission}", directoryPermissionName, needWritePermission);
                             return cachedToken;
@@ -174,11 +175,13 @@ namespace HB.FullStack.Client.Files
             {
                 return new DirectoryToken
                 {
+                    Id = res.Id ?? StaticIdGen.GetSequentialGuid(),
+                    ExpiredAt = res.ExpiredAt,
+
                     UserId = res.UserId,
                     SecurityToken = res.SecurityToken,
                     AccessKeyId = res.AccessKeyId,
                     AccessKeySecret = res.AccessKeySecret,
-                    ExpirationAt = res.ExpirationAt,
                     DirectoryPermissionName = res.DirectoryPermissionName,
                     ReadOnly = res.ReadOnly
                 };
