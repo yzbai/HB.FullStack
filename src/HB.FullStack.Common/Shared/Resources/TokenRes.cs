@@ -34,7 +34,9 @@ namespace HB.FullStack.Common.Shared
         public string AccessToken { get; set; } = null!;
 
         public string RefreshToken { get; set; } = null!;
+
         public override Guid? Id { get; set; }
+
         public override long? ExpiredAt { get; set; }
     }
 }

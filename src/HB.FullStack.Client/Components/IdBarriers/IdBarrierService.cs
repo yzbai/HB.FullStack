@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+
 using HB.FullStack.Client.ApiClient;
 using HB.FullStack.Common.IdGen;
-using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
 
 namespace HB.FullStack.Client.Components.IdBarriers
@@ -22,7 +22,7 @@ namespace HB.FullStack.Client.Components.IdBarriers
         private readonly IIdBarrierRepo _idBarrierRepo;
         private readonly IApiClient _apiClient;
         private readonly ITransaction _transaction;
-        private readonly Dictionary<string, List<long>> _addRequestClientIdDict = new Dictionary<string, List<long>>();
+        private readonly Dictionary<long, List<long>> _addRequestClientIdDict = new Dictionary<long, List<long>>();
 
         public IdBarrierService(IIdBarrierRepo idBarrierRepo, IApiClient apiClient, ITransaction transaction)
         {
@@ -78,7 +78,7 @@ namespace HB.FullStack.Client.Components.IdBarriers
             }
         }
 
-        private async Task ChangeIdAsync(object? obj, string requestId, ApiMethod apiMethod, ChangeDirection direction)
+        private async Task ChangeIdAsync(object? obj, long requestId, ApiMethod apiMethod, ChangeDirection direction)
         {
             if (obj == null) { return; }
 
@@ -121,7 +121,7 @@ namespace HB.FullStack.Client.Components.IdBarriers
             }
         }
 
-        private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, ApiMethod apiMethod, ChangeDirection direction, string requestId)
+        private async Task ConvertLongIdAsync(object obj, long id, PropertyInfo propertyInfo, ApiMethod apiMethod, ChangeDirection direction, long requestId)
         {
             if (id < 0)
             {

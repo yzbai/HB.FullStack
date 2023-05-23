@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 using HB.FullStack.Common;
+using HB.FullStack.Common.IdGen;
 
 namespace HB.FullStack.Client.ApiClient
 {
@@ -15,7 +15,7 @@ namespace HB.FullStack.Client.ApiClient
         /// <summary>
         /// TODO: 防止同一个RequestID两次被处理
         /// </summary>
-        public string RequestId { get; } = SecurityUtil.CreateUniqueToken();
+        public long RequestId { get; } = StaticIdGen.GetLongId();
 
         [JsonIgnore]
         [Required]
@@ -39,13 +39,6 @@ namespace HB.FullStack.Client.ApiClient
         [JsonIgnore]
         public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="resName"></param>
-        /// <param name="apiMethod"></param>
-        /// <param name="auth">null - use default auth defined in ApiClientOptions</param>
-        /// <param name="condition"></param>
         protected ApiRequest(string resName, ApiMethod apiMethod, ApiRequestAuth? auth, string? condition)
         {
             ResName = resName;
@@ -53,13 +46,5 @@ namespace HB.FullStack.Client.ApiClient
             Auth = auth;
             Condition = condition;
         }
-
-        ///// <summary>
-        ///// NOTICE: 排除了RequestId，所以相同条件的Request的HashCode相同
-        ///// </summary>
-        //public sealed override int GetHashCode()
-        //{
-        //    return HashCode.Combine(GetChildHashCode(), ApiMethod, Auth, Condition, ResName);
-        //}
     }
 }

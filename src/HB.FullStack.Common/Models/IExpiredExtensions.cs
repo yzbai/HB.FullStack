@@ -21,7 +21,7 @@ namespace System
             }
             else
             {
-                return expired.ExpiredAt - nowTimestamp > gap.Value.Ticks;
+                return expired.ExpiredAt - nowTimestamp <= gap.Value.Ticks;
             }
         }
     }

@@ -6,11 +6,12 @@
 
 using System;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.Abstractions
 {
-    public interface ITokenPreferences
+    public interface ITokenPreferences : IExpired
     {
         #region Client
 
@@ -44,7 +45,7 @@ namespace HB.FullStack.Client.Abstractions
 
         //DateTimeOffset? TokenCreatedTime { get; }
 
-        long? ExpiredAt { get; }
+        //long? ExpiredAt { get; }
 
         public bool IsLogined() => UserId.HasValue && AccessToken.IsNotNullOrEmpty();
 

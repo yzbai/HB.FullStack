@@ -55,7 +55,7 @@ namespace HB.FullStack.Client.MauiLib
 
         public string? RefreshToken { get => TokenPreferences.RefreshToken; }
 
-        public long? ExpiredAt { get => TokenPreferences.ExpiredAt; }
+        public long? ExpiredAt { get => TokenPreferences.ExpiredAt; set => TokenPreferences.ExpiredAt = value; }
 
         public void OnTokenRefreshFailed() => TokenPreferences.DeleteToken();
 
@@ -141,7 +141,7 @@ namespace HB.FullStack.Client.MauiLib
 
                 return _expiredAt;
             }
-            private set
+            set
             {
                 _expiredAt = value;
 
@@ -362,6 +362,9 @@ namespace HB.FullStack.Client.MauiLib
             Mobile = tokenRes.Mobile;
             LoginName = tokenRes.LoginName;
             Email = tokenRes.Email;
+            EmailConfirmed = tokenRes.EmailConfirmed;
+            MobileConfirmed = tokenRes.MobileConfirmed;
+            TwoFactorEnabled = tokenRes.TwoFactorEnabled;
             AccessToken = tokenRes.AccessToken ?? "";
             RefreshToken = tokenRes.RefreshToken ?? "";
             ExpiredAt = tokenRes.ExpiredAt;

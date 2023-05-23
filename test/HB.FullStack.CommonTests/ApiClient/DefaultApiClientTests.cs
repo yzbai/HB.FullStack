@@ -2,20 +2,34 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
 using HB.FullStack.Client.ApiClient;
+using HB.FullStack.Common.Models;
 using HB.FullStack.Common.Test;
-using HB.FullStack.CommonTests.Data;
 using HB.FullStack.Database.Engine;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.CommonTests.ApiClient
 {
+    [ResEndpoint(SiteName = ApiEndpointName)]
+    public class BookRes : SharedResource
+    {
+        public override Guid? Id { get; set; }
+
+        public override long? ExpiredAt { get; set; }
+
+        public string? Name { get; set; }
+
+        public string? Title { get; set; }
+
+        public double Price { get; set; }
+    }
+
     [TestClass()]
     public class DefaultApiClientTests : BaseTestClass
     {
@@ -39,7 +53,10 @@ namespace HB.FullStack.CommonTests.ApiClient
                 });
 
             TestHttpServer httpServer = StartHttpServer(
-                new TestRequestHandler($"/api/{ApiVersion}/BookRes/ByName", HttpMethod.Get, (request, response, parameters) =>
+                new TestRequestHandler($"", HttpMethod.Get, (request, response, parameters) =>
+                {
+                }),
+                new TestRequestHandler($"api/{ApiVersion}/Book/ByName", HttpMethod.Get, (request, response, parameters) =>
                 {
                     using StreamReader streamReader = new StreamReader(request.InputStream);
                     string requestJson = streamReader.ReadToEnd();
@@ -48,7 +65,9 @@ namespace HB.FullStack.CommonTests.ApiClient
 
                     //Assert.IsNull(getBookByNameRequest.RequestBuilder);
 
-                    BookRes res = new BookRes { Title = "T", Name = getBookByNameRequest!.Name!, Price = 12.123 };
+                    string name = parameters!.FirstOrDefault(p => p.Key == "Name")!.Value;
+
+                    BookRes res = new BookRes { Title = "T", Name = name, Price = 12.123 };
 
                     response.ContentType = "application/json";
 
@@ -72,15 +91,12 @@ namespace HB.FullStack.CommonTests.ApiClient
 
     public class GetBookByNameRequest : GetRequest<BookRes>
     {
-        public string? Name { get; set; }
-
-        [JsonConstructor]
-        public GetBookByNameRequest()
-        { }
-
-        public GetBookByNameRequest(string name)
+        public GetBookByNameRequest(string name) : base(null, "ByName")
         {
             Name = name;
         }
+
+        [RequestQuery]
+        public string? Name { get; set; }
     }
 }

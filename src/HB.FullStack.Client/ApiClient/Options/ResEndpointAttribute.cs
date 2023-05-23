@@ -1,12 +1,13 @@
 ﻿using System;
-using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Class)]
     public sealed class ResEndpointAttribute : Attribute
     {
         public ResEndpointType? Type { get; set; }
+
+        public string? SiteName { get; set; }
 
         public string? ResName { get; set; }
 
@@ -18,12 +19,6 @@ namespace HB.FullStack.Client.ApiClient
 
         public ResEndpointAttribute()
         {
-
-        }
-
-        public ResEndpointAttribute(string resName)
-        {
-            ResName = resName;
         }
     }
 }

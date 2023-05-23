@@ -34,7 +34,7 @@ namespace HB.FullStack.Server.Identity
 
         public string RefreshToken { get; set; } = null!;
 
-        public DateTimeOffset TokenCreatedTime { get; set; }
+        //public DateTimeOffset TokenCreatedTime { get; set; }
 
         public Token()
         { }

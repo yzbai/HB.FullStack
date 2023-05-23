@@ -6,17 +6,18 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
+
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
+using HB.FullStack.Lock.Distributed;
 using HB.FullStack.Server.Identity.Context;
 using HB.FullStack.Server.Identity.Models;
-using HB.FullStack.Lock.Distributed;
+using HB.FullStack.Server.Identity.Repos;
+using HB.FullStack.Server.Services;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using HB.FullStack.Server.Services;
-using HB.FullStack.Server.Identity.Repos;
 
 namespace HB.FullStack.Server.Identity
 {
@@ -321,6 +322,9 @@ namespace HB.FullStack.Server.Identity
 
                 // 更新SignInCredential
                 tokenCredential.RefreshCount++;
+
+                //Refreshtoken换新
+                //TODO: 是否检测旧的Refreshtoken泄露然后被用来请求？
                 tokenCredential.RefreshToken = SecurityUtil.CreateUniqueToken();
 
                 await _tokenCredentialRepo.UpdateAsync(tokenCredential, lastUser, transactionContext).ConfigureAwait(false);

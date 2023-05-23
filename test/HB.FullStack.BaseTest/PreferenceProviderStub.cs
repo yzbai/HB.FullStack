@@ -65,9 +65,19 @@ namespace HB.FullStack.BaseTest
 
         public long? ExpiredAt { get; set; }
 
-        public void OnTokenFetched(TokenRes signInReceipt)
+        public void OnTokenFetched(TokenRes tokenRes)
         {
-            throw new NotImplementedException();
+            UserId = tokenRes.UserId;
+            UserLevel = tokenRes.UserLevel;
+            Mobile = tokenRes.Mobile;
+            LoginName = tokenRes.LoginName;
+            Email = tokenRes.Email;
+            EmailConfirmed = tokenRes.EmailConfirmed;
+            MobileConfirmed = tokenRes.MobileConfirmed;
+            TwoFactorEnabled = tokenRes.TwoFactorEnabled;
+            AccessToken = tokenRes.AccessToken ?? "";
+            RefreshToken = tokenRes.RefreshToken ?? "";
+            ExpiredAt = tokenRes.ExpiredAt;
         }
 
         public void OnTokenDeleted()

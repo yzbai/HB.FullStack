@@ -6,7 +6,6 @@ namespace HB.FullStack.Client.ApiClient
 {
     public class GetRequest : ApiRequest
     {
-
         [RequestQuery]
         public IList<string> Ids { get; } = new List<string>();
 
@@ -31,11 +30,15 @@ namespace HB.FullStack.Client.ApiClient
         [RequestQuery]
         public IList<string?> WherePropertyValues { get; set; } = new List<string?>();
 
-        public GetRequest(string resName) : base(resName, ApiMethod.Get, null, null) { }
+        public GetRequest(string resName, ApiRequestAuth? requestAuth = null, string? condition = null) : base(resName, ApiMethod.Get, requestAuth, condition)
+        {
+        }
     }
 
     public class GetRequest<T> : GetRequest where T : SharedResource
     {
-        public GetRequest() : base(typeof(T).Name) { }
+        public GetRequest(ApiRequestAuth? requestAuth = null, string? condition = null) : base(typeof(T).Name, requestAuth, condition)
+        {
+        }
     }
 }

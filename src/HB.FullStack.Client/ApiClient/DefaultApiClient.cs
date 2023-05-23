@@ -4,6 +4,8 @@
  * The code of this file and others in HB.FullStack.* are licensed under MIT LICENSE.
  */
 
+global using ResName = System.String;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,7 +41,7 @@ namespace HB.FullStack.Client.ApiClient
 
         private IDictionary<string, string> _apiKeys = null!;
 
-        private readonly IDictionary<string, ResEndpoint> _resEndpoints = new Dictionary<string, ResEndpoint>();
+        private readonly IDictionary<ResName, ResEndpoint> _resEndpoints = new Dictionary<ResName, ResEndpoint>();
 
         public DefaultApiClient(IOptions<ApiClientOptions> options, IHttpClientFactory httpClientFactory, ITokenPreferences preferenceProvider)
         {
@@ -77,6 +79,18 @@ namespace HB.FullStack.Client.ApiClient
 
                         if (attr != null)
                         {
+                            if (attr.SiteName.IsNotNullOrEmpty())
+                            {
+                                if (ApiClientOptions.TokenSiteSetting.SiteName == attr.SiteName)
+                                {
+                                    endpoint.SiteSetting = ApiClientOptions.TokenSiteSetting;
+                                }
+                                else
+                                {
+                                    endpoint.SiteSetting = ApiClientOptions.OtherSiteSettings.FirstOrDefault(s => s.SiteName == attr.SiteName);
+                                }
+                            }
+
                             endpoint.ResName = attr.ResName ?? endpoint.ResName;
                             endpoint.Type = attr.Type ?? endpoint.Type;
                             endpoint.ControllerOrPlainUrl = attr.ControllerOrPlainUrl ?? endpoint.ControllerOrPlainUrl;
@@ -117,7 +131,7 @@ namespace HB.FullStack.Client.ApiClient
                     }
                 }
             }
-        } 
+        }
 
         #region Events
 
@@ -240,6 +254,11 @@ namespace HB.FullStack.Client.ApiClient
                     if (TokenPreferences.AccessToken.IsNullOrEmpty())
                     {
                         throw CommonExceptions.ApiAuthenticationError("缺少AccessToken", null, new { RequeestUri = requestBuilder.BuildUriString() });
+                    }
+
+                    if (TokenPreferences.IsExpired(gap: TimeSpan.FromSeconds(10)))
+                    {
+                        throw new ErrorCodeException(ErrorCodes.AccessTokenExpired, "Local Token Expired Already.");
                     }
 
                     requestBuilder.SetJwt(TokenPreferences.AccessToken);

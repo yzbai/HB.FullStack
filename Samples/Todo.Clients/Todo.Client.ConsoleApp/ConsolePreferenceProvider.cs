@@ -1,10 +1,9 @@
 ﻿using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Common.Shared;
 
-
 namespace Todo.Client.ConsoleApp
 {
-    class ConsolePreferenceProvider : ITokenPreferences
+    internal class ConsolePreferenceProvider : ITokenPreferences
     {
         public Guid? UserId { get; set; }
         public string? AccessToken { get; set; }
@@ -28,7 +27,6 @@ namespace Todo.Client.ConsoleApp
             UserId = userId;
             AccessToken = accessToken;
             RefreshToken = refreshToken;
-
         }
 
         public void OnLogouted()
@@ -53,8 +51,6 @@ namespace Todo.Client.ConsoleApp
         public bool MobileConfirmed { get; set; }
 
         public bool TwoFactorEnabled { get; set; }
-
-        public DateTimeOffset? TokenCreatedTime { get; set; }
 
         public void OnTokenFetched(TokenRes tokenRes)
         {
