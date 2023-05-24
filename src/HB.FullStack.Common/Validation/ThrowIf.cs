@@ -32,7 +32,7 @@ namespace System
         }
 
         [return: NotNull]
-        public static T NotValid<T>(T o, string paramName) where T : ValidatableObject
+        public static T NotValid<T>(T o, string paramName) where T : IValidatableObject
         {
             if (!o.IsValid())
             {
@@ -43,7 +43,7 @@ namespace System
         }
 
         [return: NotNull]
-        public static IEnumerable<T> NotValid<T>([ValidatedNotNull] IEnumerable<T> ts, string paramName) where T : ValidatableObject
+        public static IEnumerable<T> NotValid<T>([ValidatedNotNull] IEnumerable<T> ts, string paramName) where T : IValidatableObject
         {
             if (ts.Any())
             {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
-using HB.FullStack.BaseTest.Models;
 using HB.FullStack.Cache;
 using HB.FullStack.Database.Engine;
 
@@ -14,6 +13,7 @@ using StackExchange.Redis;
 
 namespace HB.FullStack.CacheTests
 {
+
     [TestClass]
     public class TimestampCacheTest : BaseTestClass
     {

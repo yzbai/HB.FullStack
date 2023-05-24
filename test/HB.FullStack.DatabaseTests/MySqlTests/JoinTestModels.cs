@@ -10,7 +10,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.BaseTest.Models
 {
-    public class A : DbModel2<long>, ITimestamp
+    public class A : DbModel<long>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -21,7 +21,7 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class B : DbModel2<long>, ITimestamp
+    public class B : DbModel<long>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -32,12 +32,14 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class AB : DbModel2<long>, ITimestamp
+    public class AB : DbModel<long>, ITimestamp
     {
         [DbField]
+        [DbForeignKey(typeof(A),true)]
         public long AId { get; set; } = default!;
 
         [DbField]
+        [DbForeignKey(typeof(B), true)]
         public long BId { get; set; } = default!;
 
         public override long Id { get; set; }
@@ -46,12 +48,13 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class C : DbModel2<long>, ITimestamp
+    public class C : DbModel<long>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
 
         [DbField]
+        [DbForeignKey(typeof(A), true)]
         public long AId { get; set; } = default!;
 
         public override long Id { get; set; }
@@ -60,7 +63,7 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class Guid_A : DbModel2<Guid>, ITimestamp
+    public class Guid_A : DbModel<Guid>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -71,7 +74,7 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class Guid_B : DbModel2<Guid>, ITimestamp
+    public class Guid_B : DbModel<Guid>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
@@ -82,10 +85,12 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class Guid_AB : DbModel2<Guid>, ITimestamp
+    public class Guid_AB : DbModel<Guid>, ITimestamp
     {
+        [DbForeignKey(typeof(Guid_A), true)]
         public Guid Guid_AId { get; set; }
 
+        [DbForeignKey(typeof(Guid_B), true)]
         public Guid Guid_BId { get; set; }
         public override Guid Id { get; set; }
         public override bool Deleted { get; set; }
@@ -93,12 +98,13 @@ namespace HB.FullStack.BaseTest.Models
         public long Timestamp { get; set; }
     }
 
-    public class Guid_C : DbModel2<Guid>, ITimestamp
+    public class Guid_C : DbModel<Guid>, ITimestamp
     {
         [DbField]
         public string Name { get; set; } = default!;
 
         [DbField]
+        [DbForeignKey(typeof(Guid_A), true)]
         public Guid Guid_AId { get; set; }
 
         public override Guid Id { get; set; }

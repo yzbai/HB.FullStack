@@ -3,7 +3,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Components.IdBarriers
 {
-    public class IdBarrier : DbModel2<long>, ITimestamp
+    public class IdBarrier : DbModel<long>, ITimestamp
     {
         [DbField(NeedIndex = true, Unique = true)]
         public long ClientId { get; set; } = -1;

@@ -13,26 +13,28 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Database.DbModels
 {
-    public abstract class BaseDbModel : ValidatableObject, IModel
+    public interface IDbModel : IModel
     {
-        public ModelKind GetKind() => ModelKind.Db;
-
         /// <summary>
         /// 不是真正的删除，而是用Deleted=1表示删除。
         /// </summary>
-        [DbField(1)]
-        public abstract bool Deleted { get; set; }
+        bool Deleted { get; set; }
 
-        [DbField(2)]
-        public abstract string? LastUser { get; set; }
+        string? LastUser { get; set; }
     }
 
-    public abstract class DbModel2<TId> : BaseDbModel
+    public abstract class DbModel<TId> : ValidatableObject, IDbModel
     {
         [DbField(0)]
         [DbPrimaryKey]
         [CacheModelKey]
         [Required]
         public abstract TId Id { get; set; }
+
+        public abstract bool Deleted { get; set; }
+
+        public abstract string? LastUser { get; set; }
+
+        public ModelKind GetKind() => ModelKind.Db;
     }
 }

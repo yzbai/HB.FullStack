@@ -23,13 +23,13 @@ namespace HB.FullStack.Database.SQL
             newTimestamp ??= TimeUtil.Timestamp;
 
             //parameters
-            var propertyNames = new List<string> { nameof(DbModel2<long>.Id) };
+            var propertyNames = new List<string> { nameof(DbModel<long>.Id) };
             var propertyValues = new List<object?> { id };
 
             var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, propertyNames, propertyValues, null, 0);
 
             //new parameters
-            var newProperyNames = new List<string> { nameof(BaseDbModel.LastUser) };
+            var newProperyNames = new List<string> { nameof(IDbModel.LastUser) };
             var newPropertyValues = new List<object?> { lastUser };
 
             if (modelDef.IsTimestamp)
@@ -55,8 +55,8 @@ namespace HB.FullStack.Database.SQL
 
             IList<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
 
-            var propertyNames = new List<string> { nameof(DbModel2<long>.Id) };
-            var newProperyNames = new List<string> { nameof(BaseDbModel.LastUser) };
+            var propertyNames = new List<string> { nameof(DbModel<long>.Id) };
+            var newProperyNames = new List<string> { nameof(IDbModel.LastUser) };
 
             if (modelDef.IsTimestamp)
             {
@@ -100,12 +100,12 @@ namespace HB.FullStack.Database.SQL
             newTimestamp ??= TimeUtil.Timestamp;
 
             //parameters
-            List<string> propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(ITimestamp.Timestamp) };
+            List<string> propertyNames = new List<string> { nameof(DbModel<long>.Id), nameof(ITimestamp.Timestamp) };
             List<object?> propertyValues = new List<object?> { id, timestamp };
             var parameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, propertyNames, propertyValues, null, 0);
 
             //new parameters
-            List<string> newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser), nameof(ITimestamp.Timestamp) };
+            List<string> newPropertyNames = new List<string> { nameof(IDbModel.LastUser), nameof(ITimestamp.Timestamp) };
             List<object?> newPropertyValues = new List<object?> { lastUser, newTimestamp };
             var newParameters = DbModelConvert.PropertyValuesToParameters(modelDef, ModelDefFactory, newPropertyNames, newPropertyValues, SqlHelper.NEW_PARAMETER_SUFFIX, 0);
 
@@ -125,8 +125,8 @@ namespace HB.FullStack.Database.SQL
 
             IList<KeyValuePair<string, object>> totalParameters = new List<KeyValuePair<string, object>>();
 
-            var propertyNames = new List<string> { nameof(DbModel2<long>.Id), nameof(ITimestamp.Timestamp) };
-            var newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser), nameof(ITimestamp.Timestamp) };
+            var propertyNames = new List<string> { nameof(DbModel<long>.Id), nameof(ITimestamp.Timestamp) };
+            var newPropertyNames = new List<string> { nameof(IDbModel.LastUser), nameof(ITimestamp.Timestamp) };
 
             int number = 0;
 
@@ -153,7 +153,7 @@ namespace HB.FullStack.Database.SQL
                 totalParameters);
         }
 
-        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel, new()
+        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : IDbModel
         {
             //Check
             newTimestamp ??= TimeUtil.Timestamp;
@@ -162,7 +162,7 @@ namespace HB.FullStack.Database.SQL
             var parameters = model.ToDbParameters(modelDef, ModelDefFactory, null, 0);
 
             //new parameters
-            List<string> newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser) };
+            List<string> newPropertyNames = new List<string> { nameof(IDbModel.LastUser) };
             List<object?> newPropertyValues = new List<object?> { lastUser };
 
             if (modelDef.IsTimestamp)
@@ -180,7 +180,7 @@ namespace HB.FullStack.Database.SQL
                 newParameters);
         }
 
-        public DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel, new()
+        public DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : IDbModel
         {
             //checks
             ThrowIf.NullOrEmpty(models, nameof(models));
@@ -188,7 +188,7 @@ namespace HB.FullStack.Database.SQL
 
             IList<KeyValuePair<string, object>> totalParameters = models.ToDbParameters(modelDef, ModelDefFactory, null);
 
-            var newPropertyNames = new List<string> { nameof(BaseDbModel.LastUser) };
+            var newPropertyNames = new List<string> { nameof(IDbModel.LastUser) };
 
             if (modelDef.IsTimestamp)
             {
@@ -218,7 +218,7 @@ namespace HB.FullStack.Database.SQL
             DbModelDef modelDef,
             WhereExpression<T> whereExpression,
             string lastUser,
-            bool trulyDeleted) where T : BaseDbModel, new()
+            bool trulyDeleted) where T : IDbModel
         {
             Requires.NotNull(whereExpression, nameof(whereExpression));
 

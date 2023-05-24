@@ -14,6 +14,12 @@ namespace HB.FullStack.CacheTests
     //TODO: Update与Update之间并行冲突
     //TODO：Update与Invalidation之间并行冲突
 
+    public class VersionData
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public long Timestamp { get; set; } = TimeUtil.Timestamp;
+    }
+
     [TestClass]
     public class UpdateInvalidationConcurrencyTests : BaseTestClass
     {

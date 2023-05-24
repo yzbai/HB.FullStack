@@ -120,7 +120,7 @@ namespace HB.FullStack.Database.SQL
 
             StringBuilder assignments = GetUpdatePropertiesAssignments(
                 engineType,
-                new List<string>(propertyNames) { nameof(BaseDbModel.LastUser) },
+                new List<string>(propertyNames) { nameof(IDbModel.LastUser) },
                 SqlHelper.NEW_PARAMETER_SUFFIX,
                 number);
 
@@ -164,7 +164,7 @@ namespace HB.FullStack.Database.SQL
 
             foreach (string propertyName in propertyNames)
             {
-                if (propertyName == nameof(DbModel2<long>.Id))
+                if (propertyName == nameof(DbModel<long>.Id))
                 {
                     continue;
                 }

@@ -25,92 +25,15 @@ using MySqlConnector;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public interface IGuid_Timestamp_BookModel : ITimestamp
-    {
-        bool Deleted { get; set; }
-        Guid Id { get; set; }
-        string? LastUser { get; set; }
-        string Name { get; set; }
-        double Price { get; set; }
-    }
-
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
-    public class MySql_Guid_Timestamp_BookModel : DbModel2<Guid>, ITimestamp, IGuid_Timestamp_BookModel
-    {
-        [DbField]
-        public string Name { get; set; } = default!;
-
-        [DbField]
-        public double Price { get; set; } = default!;
-
-        public override Guid Id { get; set; }
-        public override bool Deleted { get; set; }
-        public override string? LastUser { get; set; }
-
-        long ITimestamp.Timestamp { get; set; }
-    }
-
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
-    public class Sqlite_Guid_Timestamp_BookModel : DbModel2<Guid>, ITimestamp, IGuid_Timestamp_BookModel
-    {
-        [DbField]
-        public string Name { get; set; } = default!;
-
-        [DbField]
-        public double Price { get; set; } = default!;
-
-        
-        public override Guid Id { get; set; }
-        public override bool Deleted { get; set; }
-        public override string? LastUser { get; set; }
-        
-        long ITimestamp.Timestamp { get; set; }
-    }
-
     [TestClass]
     public class BasicTest_Guid : BaseTestClass
     {
-        private Random _random = new Random();
-
-        public BasicTest_Guid() : base(DbEngineType.MySQL)
-        {
-        }
-
-
-        public IList<IGuid_Timestamp_BookModel> GetBooks(DbEngineType engineType, int? count = null)
-        {
-            List<IGuid_Timestamp_BookModel> books = new List<IGuid_Timestamp_BookModel>();
-
-            int length = count == null ? 50 : count.Value;
-
-            Func<int, IGuid_Timestamp_BookModel> createNew = engineType switch
-            {
-                DbEngineType.MySQL => i=>new MySql_Guid_Timestamp_BookModel {
-                    Name = "Book" + i.ToString(),
-                    Price = _random.NextDouble()
-                },
-                DbEngineType.SQLite => i=> new Sqlite_Guid_Timestamp_BookModel {
-                    Name = "Book" + i.ToString(),
-                    Price = _random.NextDouble()
-                },
-                _ => throw new NotImplementedException(),
-            };
-
-            for (int i = 0; i < length; ++i)
-            {
-                books.Add(createNew(i));
-            }
-
-            return books;
-        }
-
-
         [TestMethod]
         [DataRow(DbEngineType.MySQL)]
         [DataRow(DbEngineType.SQLite)]
         public async Task Test_Add_Key_Conflict_ErrorAsync(DbEngineType engineType)
         {
-            IGuid_Timestamp_BookModel book = GetBooks(engineType, 1).First();
+            ITimestamp_Guid_BookModel book = Mocker3.GetBooks(engineType, 1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -123,7 +46,7 @@ namespace HB.FullStack.DatabaseTests
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
 
-            PublisherModel publisherModel = Mocker.MockOnePublisherModel();
+            Timestamp_Long_PublisherModel publisherModel = Mocker.MockOnePublisherModel();
 
             await Db.AddAsync(publisherModel, "", null);
 
@@ -138,9 +61,11 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_BatchAdd_Key_Conflict_ErrorAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Test_BatchAdd_Key_Conflict_ErrorAsync(DbEngineType engineType)
         {
-            var books = Mocker.Guid_GetBooks(2);
+            var books = GetBooks(2);
 
             await Db.AddAsync(books, "tester", null);
 
@@ -155,10 +80,12 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_Update_Fields_By_Compare_Version()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Test_Update_Fields_By_Compare_Version(DbEngineType engineType)
         {
             //Add
-            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -200,10 +127,12 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_Update_Fields_By_Compare_OldNewValues()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Test_Update_Fields_By_Compare_OldNewValues(DbEngineType engineType)
         {
             //Add
-            Guid_BookModel_Timeless book = Mocker.Guid_GetBooks_Timeless(1).First();
+            Guid_BookModel_Timeless book = GetBooks_Timeless(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -245,9 +174,11 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        public async Task Test_Version_Error()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Test_Version_Error(DbEngineType engineType)
         {
-            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -285,7 +216,9 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <returns></returns>
         [TestMethod]
-        public async Task Test_Repeate_Update_Return()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Test_Repeate_Update_Return(DbEngineType engineType)
         {
             Book2Model book = Mocker.GetBooks(1).First();
 
@@ -314,9 +247,11 @@ namespace HB.FullStack.DatabaseTests
         /// </summary>
         /// <returns></returns>
         [TestMethod]
-        public async Task Test_Mult_SQL_Return_With_Reader()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Test_Mult_SQL_Return_With_Reader(DbEngineType engineType)
         {
-            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = GetBooks(1).First();
             book.Id = new Guid("cd5bda08-e5e2-409f-89c5-bea1ae49f2a0");
 
             await Db.AddAsync(book, "tester", null);
@@ -345,11 +280,13 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_01_Batch_Add_PublisherModelAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_01_Batch_Add_PublisherModelAsync(DbEngineType engineType)
         {
-            IList<Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
+            IList<Timestamp_Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
 
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
@@ -366,9 +303,11 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_02_Batch_Update_PublisherModelAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_02_Batch_Update_PublisherModelAsync(DbEngineType engineType)
         {
-            TransactionContext transContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext transContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             string updatedName = SecurityUtil.CreateUniqueToken();
 
@@ -376,11 +315,11 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             try
             {
-                IEnumerable<Guid_PublisherModel> lst = await Db.RetrieveAllAsync<Guid_PublisherModel>(transContext, 0, count).ConfigureAwait(false);
+                IEnumerable<Timestamp_Guid_PublisherModel> lst = await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(transContext, 0, count).ConfigureAwait(false);
 
                 for (int i = 0; i < lst.Count(); i++)
                 {
-                    Guid_PublisherModel model = lst.ElementAt(i);
+                    Timestamp_Guid_PublisherModel model = lst.ElementAt(i);
                     //model.Guid = Guid.NewGuid().ToString();
                     model.Type = PublisherType.Online;
                     model.Name = updatedName;
@@ -396,7 +335,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
                 await Trans.CommitAsync(transContext).ConfigureAwait(false);
 
-                lst = await Db.RetrieveAllAsync<Guid_PublisherModel>(null, 0, count);
+                lst = await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(null, 0, count);
 
                 Assert.IsTrue(lst.All(t => t.Name == updatedName));
             }
@@ -409,13 +348,15 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_03_Batch_Delete_PublisherModelAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_03_Batch_Delete_PublisherModelAsync(DbEngineType engineType)
         {
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<Guid_PublisherModel> lst = (await Db.RetrieveAllAsync<Guid_PublisherModel>(transactionContext, 1, 5).ConfigureAwait(false)).ToList();
+                IList<Timestamp_Guid_PublisherModel> lst = (await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(transactionContext, 1, 5).ConfigureAwait(false)).ToList();
 
                 if (lst.Count != 0)
                 {
@@ -433,17 +374,19 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_04_Add_PublisherModelAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_04_Add_PublisherModelAsync(DbEngineType engineType)
         {
-            TransactionContext tContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext tContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<Guid_PublisherModel> lst = new List<Guid_PublisherModel>();
+                IList<Timestamp_Guid_PublisherModel> lst = new List<Timestamp_Guid_PublisherModel>();
 
                 for (int i = 0; i < 10; ++i)
                 {
-                    Guid_PublisherModel model = Mocker.Guid_MockOnePublisherModel();
+                    Timestamp_Guid_PublisherModel model = Mocker.Guid_MockOnePublisherModel();
 
                     await Db.AddAsync(model, "lastUsre", tContext).ConfigureAwait(false);
 
@@ -461,27 +404,29 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_05_Update_PublisherModelAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_05_Update_PublisherModelAsync(DbEngineType engineType)
         {
-            TransactionContext tContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext tContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Guid_PublisherModel>(tContext, 1, 1).ConfigureAwait(false)).ToList();
+                IList<Timestamp_Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(tContext, 1, 1).ConfigureAwait(false)).ToList();
 
                 if (testModels.Count == 0)
                 {
                     throw new Exception("No Model to update");
                 }
 
-                Guid_PublisherModel model = testModels[0];
+                Timestamp_Guid_PublisherModel model = testModels[0];
 
                 model.Books.Add("New Book2");
                 //model.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
 
                 await Db.UpdateAsync(model, "lastUsre", tContext).ConfigureAwait(false);
 
-                Guid_PublisherModel? stored = await Db.ScalarAsync<Guid_PublisherModel>(model.Id, tContext).ConfigureAwait(false);
+                Timestamp_Guid_PublisherModel? stored = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(model.Id, tContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(tContext).ConfigureAwait(false);
 
@@ -497,20 +442,22 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_06_Delete_PublisherModelAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_06_Delete_PublisherModelAsync(DbEngineType engineType)
         {
-            TransactionContext tContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext tContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                IList<Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Guid_PublisherModel>(tContext).ConfigureAwait(false)).ToList();
+                IList<Timestamp_Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(tContext).ConfigureAwait(false)).ToList();
 
                 foreach (var model in testModels)
                 {
                     await Db.DeleteAsync(model, "lastUsre", tContext).ConfigureAwait(false);
                 }
 
-                long count = await Db.CountAsync<Guid_PublisherModel>(tContext).ConfigureAwait(false);
+                long count = await Db.CountAsync<Timestamp_Guid_PublisherModel>(tContext).ConfigureAwait(false);
 
                 await Trans.CommitAsync(tContext).ConfigureAwait(false);
 
@@ -525,13 +472,15 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_08_LastTimeTestAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_08_LastTimeTestAsync(DbEngineType engineType)
         {
-            Guid_PublisherModel item = Mocker.Guid_MockOnePublisherModel();
+            Timestamp_Guid_PublisherModel item = Mocker.Guid_MockOnePublisherModel();
 
             await Db.AddAsync(item, "xx", null).ConfigureAwait(false);
 
-            var fetched = await Db.ScalarAsync<Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
+            var fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
 
             Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
@@ -539,23 +488,23 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             await Db.UpdateAsync(fetched, "xxx", null).ConfigureAwait(false);
 
-            fetched = await Db.ScalarAsync<Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
+            fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
 
             //await Db.AddOrUpdateAsync(item, "ss", null);
 
-            fetched = await Db.ScalarAsync<Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
+            fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
 
             //Batch
 
             var items = Mocker.Guid_GetPublishers();
 
-            TransactionContext trans = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext trans = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
                 await Db.AddAsync(items, "xx", trans).ConfigureAwait(false);
 
-                var results = await Db.RetrieveAsync<Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
+                var results = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
                 await Db.UpdateAsync(items, "xx", trans).ConfigureAwait(false);
 
@@ -563,7 +512,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
                 await Db.AddAsync(items2, "xx", trans).ConfigureAwait(false);
 
-                results = await Db.RetrieveAsync<Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
+                results = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
 
                 await Db.UpdateAsync(items2, "xx", trans).ConfigureAwait(false);
 
@@ -586,37 +535,39 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         /// <exception cref="DbException">Ignore.</exception>
         /// <exception cref="Exception">Ignore.</exception>
         [TestMethod]
-        public async Task Guid_Test_09_UpdateLastTimeTestAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_09_UpdateLastTimeTestAsync(DbEngineType engineType)
         {
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
-                Guid_PublisherModel item = Mocker.Guid_MockOnePublisherModel();
+                Timestamp_Guid_PublisherModel item = Mocker.Guid_MockOnePublisherModel();
 
                 await Db.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                IList<Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Guid_PublisherModel>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
+                IList<Timestamp_Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
 
                 if (testModels.Count == 0)
                 {
                     throw new Exception("No Model to update");
                 }
 
-                Guid_PublisherModel model = testModels[0];
+                Timestamp_Guid_PublisherModel model = testModels[0];
 
                 model.Books.Add("New Book2");
                 //model.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
 
                 await Db.UpdateAsync(model, "lastUsre", transactionContext).ConfigureAwait(false);
 
-                Guid_PublisherModel? stored = await Db.ScalarAsync<Guid_PublisherModel>(model.Id, transactionContext).ConfigureAwait(false);
+                Timestamp_Guid_PublisherModel? stored = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(model.Id, transactionContext).ConfigureAwait(false);
 
                 item = Mocker.Guid_MockOnePublisherModel();
 
                 await Db.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
 
-                var fetched = await Db.ScalarAsync<Guid_PublisherModel>(item.Id, transactionContext).ConfigureAwait(false);
+                var fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, transactionContext).ConfigureAwait(false);
 
                 Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
 
@@ -634,11 +585,13 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_10_Enum_TestAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_10_Enum_TestAsync(DbEngineType engineType)
         {
-            IList<Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
+            IList<Timestamp_Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
 
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
@@ -653,22 +606,24 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
                 throw;
             }
 
-            IEnumerable<Guid_PublisherModel> publisherModels = await Db.RetrieveAsync<Guid_PublisherModel>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
+            IEnumerable<Timestamp_Guid_PublisherModel> publisherModels = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
 
             Assert.IsTrue(publisherModels.Any() && publisherModels.All(p => p.Type == PublisherType.Big));
         }
 
         [TestMethod]
-        public async Task Guid_Test_11_StartWith_TestAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_11_StartWith_TestAsync(DbEngineType engineType)
         {
-            IList<Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
+            IList<Timestamp_Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
 
             foreach (var model in publishers)
             {
                 model.Name = "StartWithTest_xxx";
             }
 
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
@@ -683,7 +638,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
                 throw;
             }
 
-            IEnumerable<Guid_PublisherModel> models = await Db.RetrieveAsync<Guid_PublisherModel>(t => t.Name.StartsWith("Star"), null);
+            IEnumerable<Timestamp_Guid_PublisherModel> models = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(t => t.Name.StartsWith("Star"), null);
 
             Assert.IsTrue(models.Any());
 
@@ -691,16 +646,18 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_12_Binary_TestAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_12_Binary_TestAsync(DbEngineType engineType)
         {
-            IList<Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
+            IList<Timestamp_Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
 
             foreach (var model in publishers)
             {
                 model.Name = "StartWithTest_xxx";
             }
 
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Guid_PublisherModel>().ConfigureAwait(false);
+            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
 
             try
             {
@@ -715,7 +672,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
                 throw;
             }
 
-            IEnumerable<Guid_PublisherModel> models = await Db.RetrieveAsync<Guid_PublisherModel>(
+            IEnumerable<Timestamp_Guid_PublisherModel> models = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(
                 t => t.Name.StartsWith("Star") && publishers.Any(), null);
 
             //IEnumerable<Guid_PublisherModel> models = await Db.RetrieveAsync<Guid_PublisherModel>(
@@ -727,17 +684,19 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_13_Mapper_ToModelAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_13_Mapper_ToModelAsync(DbEngineType engineType)
         {
             Globals.Logger.LogDebug($"��ǰProcess,{Environment.ProcessId}");
 
             #region Json验证1
 
-            var publisher3 = new Guid_PublisherModel();
+            var publisher3 = new Timestamp_Guid_PublisherModel();
 
             await Db.AddAsync(publisher3, "sss", null).ConfigureAwait(false);
 
-            var stored3 = await Db.ScalarAsync<Guid_PublisherModel>(publisher3.Id, null).ConfigureAwait(false);
+            var stored3 = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(publisher3.Id, null).ConfigureAwait(false);
 
             Assert.AreEqual(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
 
@@ -762,12 +721,12 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
             var publishers = Mocker.Guid_GetPublishers();
 
-            foreach (Guid_PublisherModel publisher in publishers)
+            foreach (Timestamp_Guid_PublisherModel publisher in publishers)
             {
                 await Db.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
             }
 
-            Guid_PublisherModel? publisher1 = await Db.ScalarAsync<Guid_PublisherModel>(publishers[0].Id, null).ConfigureAwait(false);
+            Timestamp_Guid_PublisherModel? publisher1 = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(publishers[0].Id, null).ConfigureAwait(false);
 
             Assert.AreEqual(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
 
@@ -775,9 +734,11 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public async Task Guid_Test_14_Mapper_ToModel_PerformanceAsync()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Guid_Test_14_Mapper_ToModel_PerformanceAsync(DbEngineType engineType)
         {
-            var books = Mocker.Guid_GetBooks(50);
+            var books = GetBooks(50);
 
             var trans = await Trans.BeginTransactionAsync<Guid_Timestamp_BookModel>().ConfigureAwait(false);
 
@@ -887,14 +848,16 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public void Guid_Test_15_Mapper_ToParameter()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public void Guid_Test_15_Mapper_ToParameter(DbEngineType engineType)
         {
-            Guid_PublisherModel publisherModel = Mocker.Guid_MockOnePublisherModel();
+            Timestamp_Guid_PublisherModel publisherModel = Mocker.Guid_MockOnePublisherModel();
             //publisherModel.Version = 0;
 
-            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, Db.ModelDefFactory, 1);
+            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<Timestamp_Guid_PublisherModel>()!, Db.ModelDefFactory, 1);
 
-            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel>()!, 1);
+            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Timestamp_Guid_PublisherModel>()!, 1);
 
             AssertEqual(emit_results, reflect_results, DbEngineType.MySQL);
 
@@ -920,11 +883,13 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         }
 
         [TestMethod]
-        public void Guid_Test_16_Mapper_ToParameter_Performance()
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public void Guid_Test_16_Mapper_ToParameter_Performance(DbEngineType engineType)
         {
             var models = Mocker.Guid_GetPublishers(1000000);
 
-            var def = Db.ModelDefFactory.GetDef<Guid_PublisherModel>();
+            var def = Db.ModelDefFactory.GetDef<Timestamp_Guid_PublisherModel>();
 
             Stopwatch stopwatch = new Stopwatch();
 
@@ -961,11 +926,6 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
                     DbPropertyConvert.DoNotUseUnSafePropertyValueToDbFieldValueStatement(kv.Value, false, engineType));
             }
-        }
-
-        public static Guid ReturnGuid()
-        {
-            return Guid.NewGuid();
         }
     }
 }

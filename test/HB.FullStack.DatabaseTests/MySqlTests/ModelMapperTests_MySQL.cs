@@ -18,11 +18,11 @@ namespace HB.FullStack.DatabaseTests.MySQL
         [DataRow(DbEngineType.SQLite)]
         public void ModelMapper_ToParameter_Test(DbEngineType engineType)
         {
-            PublisherModel publisherModel = Mocker.MockOnePublisherModel();
+            Timestamp_Long_PublisherModel publisherModel = Mocker.MockOnePublisherModel();
 
-            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<PublisherModel>()!, Db.ModelDefFactory, 1);
+            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<Timestamp_Long_PublisherModel>()!, Db.ModelDefFactory, 1);
 
-            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<PublisherModel>()!, 1);
+            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Timestamp_Long_PublisherModel>()!, 1);
 
             AssertEqual(emit_results, reflect_results, engineType);
 
@@ -70,7 +70,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
         {
             var models = Mocker.GetPublishers(10000);
 
-            var def = Db.ModelDefFactory.GetDef<PublisherModel>();
+            var def = Db.ModelDefFactory.GetDef<Timestamp_Long_PublisherModel>();
 
             Stopwatch stopwatch = new Stopwatch();
 

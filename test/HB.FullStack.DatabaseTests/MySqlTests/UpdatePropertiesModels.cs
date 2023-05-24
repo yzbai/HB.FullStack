@@ -23,7 +23,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
     }
 
     [PropertyTrackableObject]
-    public partial class UPTimestampModel : DbModel2<Guid>, ITimestamp
+    public partial class UPTimestampModel : DbModel<Guid>, ITimestamp
     {
         [TrackProperty]
         private string? _name;
@@ -46,7 +46,7 @@ namespace HB.FullStack.BaseTest.Data.MySqls
     }
 
     [PropertyTrackableObject]
-    public partial class UPTimelessModel : DbModel2<Guid>
+    public partial class UPTimelessModel : DbModel<Guid>
     {
         [TrackProperty]
         private string? _name;

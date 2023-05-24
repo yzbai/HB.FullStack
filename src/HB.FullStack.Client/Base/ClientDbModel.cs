@@ -7,7 +7,7 @@ using HB.FullStack.Database.DbModels;
 namespace HB.FullStack.Client.Base
 {
     [PropertyTrackableObject]
-    public abstract partial class ClientDbModel : DbModel2<Guid>, IExpired
+    public abstract partial class ClientDbModel : DbModel<Guid>, IExpired
     {
         [TrackProperty]
         private long? _expiredAt;

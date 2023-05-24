@@ -15,7 +15,7 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update. 且Version不变,不增长
         /// </summary>
-        public DbEngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : BaseDbModel, new()
+        public DbEngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : IDbModel
         {
             if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {
@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.SQL
         /// <summary>
         /// 只在客户端开放，因为不检查Version就update，并且无法更新models
         /// </summary>
-        public DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IList<T> models) where T : BaseDbModel, new()
+        public DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IList<T> models) where T : IDbModel
         {
             if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
             {

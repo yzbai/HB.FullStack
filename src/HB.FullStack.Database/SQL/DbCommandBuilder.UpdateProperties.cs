@@ -29,8 +29,8 @@ namespace HB.FullStack.Database.SQL
 
             IList<string> updatedPropertyNames = new List<string>(updatePack.PropertyNames)
             {
-                nameof(DbModel2<long>.Id),
-                nameof(BaseDbModel.LastUser),
+                nameof(DbModel<long>.Id),
+                nameof(IDbModel.LastUser),
                 nameof(ITimestamp.Timestamp)
             };
             IList<object?> updatedPropertyValues = new List<object?>(updatePack.NewPropertyValues)
@@ -69,8 +69,8 @@ namespace HB.FullStack.Database.SQL
 
                 IList<string> updatedPropertyNames = new List<string>(updatePack.PropertyNames)
                 {
-                    nameof(DbModel2<long>.Id),
-                    nameof(BaseDbModel.LastUser),
+                    nameof(DbModel<long>.Id),
+                    nameof(IDbModel.LastUser),
                     nameof(ITimestamp.Timestamp)
                 };
                 IList<object?> updatedPropertyValues = new List<object?>(updatePack.NewPropertyValues)
@@ -101,7 +101,7 @@ namespace HB.FullStack.Database.SQL
             var parameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 ModelDefFactory,
-                new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
+                new List<string>(updatePack.PropertyNames) { nameof(DbModel<long>.Id) },
                 new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
                 null,
                 0);
@@ -112,7 +112,7 @@ namespace HB.FullStack.Database.SQL
             var newParameters = DbModelConvert.PropertyValuesToParameters(
                 modelDef,
                 ModelDefFactory,
-                new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
+                new List<string>(updatePack.PropertyNames) { nameof(IDbModel.LastUser) },
                 new List<object?>(updatePack.NewPropertyValues) { lastUser },
                 SqlHelper.NEW_PARAMETER_SUFFIX,
                 0);
@@ -139,7 +139,7 @@ namespace HB.FullStack.Database.SQL
                 var parameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
                     ModelDefFactory,
-                    new List<string>(updatePack.PropertyNames) { nameof(DbModel2<long>.Id) },
+                    new List<string>(updatePack.PropertyNames) { nameof(DbModel<long>.Id) },
                     new List<object?>(updatePack.OldPropertyValues) { updatePack.Id },
                     null,
                     number);
@@ -147,7 +147,7 @@ namespace HB.FullStack.Database.SQL
                 var newParameters = DbModelConvert.PropertyValuesToParameters(
                     modelDef,
                     ModelDefFactory,
-                    new List<string>(updatePack.PropertyNames) { nameof(BaseDbModel.LastUser) },
+                    new List<string>(updatePack.PropertyNames) { nameof(IDbModel.LastUser) },
                     new List<object?>(updatePack.NewPropertyValues) { lastUser },
                     SqlHelper.NEW_PARAMETER_SUFFIX,
                     number);
@@ -169,8 +169,8 @@ namespace HB.FullStack.Database.SQL
         {
             IList<string> updatedPropertyNames = new List<string>(updatePack.PropertyNames)
             {
-                nameof(DbModel2<long>.Id),
-                nameof(BaseDbModel.LastUser)
+                nameof(DbModel<long>.Id),
+                nameof(IDbModel.LastUser)
             };
 
             IList<object?> updatedPropertyValues = new List<object?>(updatePack.NewPropertyValues)
@@ -196,8 +196,8 @@ namespace HB.FullStack.Database.SQL
             {
                 IList<string> updatedPropertyNames = new List<string>(updatePack.PropertyNames)
                 {
-                    nameof(DbModel2<long>.Id),
-                    nameof(BaseDbModel.LastUser),
+                    nameof(DbModel<long>.Id),
+                    nameof(IDbModel.LastUser),
                 };
                 IList<object?> updatedPropertyValues = new List<object?>(updatePack.NewPropertyValues)
                 {

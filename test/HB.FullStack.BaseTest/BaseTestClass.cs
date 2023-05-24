@@ -51,7 +51,7 @@ namespace HB.FullStack.BaseTest
 
         public IDatabase Db { get; set; } = null!;
 
-        
+
 
         public IDbConfigManager DbConfigManager { get; set; } = null!;
 
@@ -101,7 +101,7 @@ namespace HB.FullStack.BaseTest
 
         #endregion
 
-        public BaseTestClass(DbEngineType defaultEngineType)
+        public BaseTestClass(DbEngineType defaultEngineType = DbEngineType.MySQL)
         {
             ServiceProvider = BuildServices(defaultEngineType);
 

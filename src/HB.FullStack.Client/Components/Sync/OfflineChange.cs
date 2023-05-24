@@ -10,7 +10,7 @@ namespace HB.FullStack.Client.Components.Sync
     /// 使用自增保证顺序
     /// </summary>
     [PropertyTrackableObject]
-    public partial class OfflineChange : DbModel2<long>
+    public partial class OfflineChange : DbModel<long>
     {
         public OfflineChangeType Type { get; set; }
 
