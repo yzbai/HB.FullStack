@@ -1,6 +1,4 @@
-﻿global using static HB.FullStack.BaseTest.ApiConstants;
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -16,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HB.FullStack.CommonTests.ApiClient
 {
-    [ResEndpoint(SiteName = ApiEndpointName)]
+    [ResEndpoint(SiteName = BaseTestClass. ApiEndpointName)]
     public class BookRes : SharedResource
     {
         public override Guid? Id { get; set; }
@@ -33,12 +31,9 @@ namespace HB.FullStack.CommonTests.ApiClient
     [TestClass()]
     public class DefaultApiClientTests : BaseTestClass
     {
-        public DefaultApiClientTests() : base(DbEngineType.SQLite)
-        {
-        }
+        private readonly TestHttpServer _httpServer;
 
-        [TestMethod()]
-        public async Task GetAsyncTest()
+        public DefaultApiClientTests() : base(DbEngineType.SQLite)
         {
             PreferenceProvider.OnTokenFetched(
                 new Common.Shared.TokenRes
@@ -52,7 +47,8 @@ namespace HB.FullStack.CommonTests.ApiClient
                     RefreshToken = Guid.NewGuid().ToString()
                 });
 
-            TestHttpServer httpServer = StartHttpServer(
+            _httpServer = StartHttpServer(
+                //TODO: add token handler
                 new TestRequestHandler($"", HttpMethod.Get, (request, response, parameters) =>
                 {
                 }),
@@ -76,16 +72,14 @@ namespace HB.FullStack.CommonTests.ApiClient
                     using StreamWriter streamWriter = new StreamWriter(response.OutputStream);
                     streamWriter.Write(json);
                 }));
-
-            BookRes? bookRes = await ApiClient.GetAsync<BookRes>(new GetBookByNameRequest("TestBook"));
-
-            Assert.IsNotNull(bookRes);
         }
 
         [TestMethod()]
-        public void SendAsyncTest()
+        public async Task GetAsyncTest()
         {
-            //TODO: Continue
+            BookRes? bookRes = await ApiClient.GetAsync<BookRes>(new GetBookByNameRequest("TestBook"));
+
+            Assert.IsNotNull(bookRes);
         }
     }
 

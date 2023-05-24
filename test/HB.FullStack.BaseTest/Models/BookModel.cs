@@ -27,19 +27,7 @@ namespace HB.FullStack.BaseTest.Models
         public override string? LastUser { get; set; }
     }
 
-    public class Guid_BookModel : DbModel2<Guid>, ITimestamp
-    {
-        [DbField]
-        public string Name { get; set; } = default!;
-
-        [DbField]
-        public double Price { get; set; } = default!;
-
-        public long Timestamp { get; set; }
-        public override Guid Id { get; set; }
-        public override bool Deleted { get; set; }
-        public override string? LastUser { get; set; }
-    }
+    
 
     [PropertyTrackableObject]
     public partial class Guid_BookModel_Timeless : DbModel2<Guid>

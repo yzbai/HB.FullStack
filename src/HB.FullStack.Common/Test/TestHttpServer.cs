@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,11 +12,11 @@ namespace HB.FullStack.Common.Test
 {
     public class TestHttpServer : IDisposable
     {
-        readonly HttpListener _listener;
-        readonly IList<TestRequestHandler> _requestHandlers;
-        readonly object _requestHandlersLock = new();
+        private readonly HttpListener _listener;
+        private readonly IList<TestRequestHandler> _requestHandlers;
+        private readonly object _requestHandlersLock = new();
 #pragma warning disable CA2213 // Will dispose in Dispose method
-        readonly CancellationTokenSource _cts = new();
+        private readonly CancellationTokenSource _cts = new();
 #pragma warning restore CA2213 // Disposable fields should be disposed
 
         public int Port { get; }
@@ -55,7 +54,12 @@ namespace HB.FullStack.Common.Test
             _ = Task.Run(() => HandleRequestsAsync(_cts.Token));
         }
 
-        static int GetRandomUnusedPort()
+        public void AddRequestHandler(IList<TestRequestHandler> handlers)
+        {
+            _requestHandlers.AddRange(handlers);
+        }
+
+        private static int GetRandomUnusedPort()
         {
             var listener = new TcpListener(IPAddress.Any, 0);
             listener.Start();
@@ -64,7 +68,7 @@ namespace HB.FullStack.Common.Test
             return port;
         }
 
-        async Task HandleRequestsAsync(CancellationToken cancellationToken)
+        private async Task HandleRequestsAsync(CancellationToken cancellationToken)
         {
             try
             {

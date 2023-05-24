@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using HB.FullStack.Client.ApiClient;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace HB.FullStack.Client.ApiClient.Tests
+namespace HB.FullStack.CommonTests.ApiClient
 {
     public class TestRequestObject
     {
@@ -21,6 +23,7 @@ namespace HB.FullStack.Client.ApiClient.Tests
 
         [RequestQuery]
         public string?[] Times { get; set; } = new string?[] { "a", null };
+
         //public IEnumerable Times2 { get; set; } = new string[] { "a", null };
 
         [RequestQuery]
@@ -34,14 +37,13 @@ namespace HB.FullStack.Client.ApiClient.Tests
 
         [RequestBody]
         public InnerTestRequestObject InnerBody { get; set; } = new InnerTestRequestObject();
-
     }
 
     public class InnerTestRequestObject
     {
         public string Name { get; set; } = "TestName";
 
-        public int Age { get; set; } = 123;         
+        public int Age { get; set; } = 123;
 
         public Guid Id { get; set; } = new Guid("4DF758FB-F612-40B2-A5B1-DAF48E7F8EF7");
 
@@ -53,20 +55,13 @@ namespace HB.FullStack.Client.ApiClient.Tests
         public IEnumerable<string> Times3 { get; set; } = new string[] { "a", "xxx", "ssd" };
 
         public IEnumerable<string> Times4 { get; set; } = new List<string> { "sfasf", "sfasf" };
-
     }
 
     [TestClass()]
-    public class ApiRequestAccessExtensionsTests
+    public class RequestObjectTests
     {
         [TestMethod()]
         public void BuildQueryStringTest()
-        {
-
-        }
-
-        [TestMethod()]
-        public void BuildQueryStringTest1()
         {
             TestRequestObject to = new TestRequestObject();
 
@@ -85,7 +80,6 @@ namespace HB.FullStack.Client.ApiClient.Tests
             string result = "{\"Name\":\"TestName\",\"Age\":123,\"Id\":\"4df758fb-f612-40b2-a5b1-daf48e7f8ef7\",\"Now\":\"2022-12-22T22:22:22+00:00\",\"Times\":[\"a\",null],\"Times3\":[\"a\",\"xxx\",\"ssd\"],\"Times4\":[\"sfasf\",\"sfasf\"]}";
 
             Assert.AreEqual(json, result);
-
         }
     }
 }

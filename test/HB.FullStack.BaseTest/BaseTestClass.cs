@@ -2,8 +2,6 @@
 
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-global using static HB.FullStack.BaseTest.ApiConstants;
-
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -37,6 +35,14 @@ namespace HB.FullStack.BaseTest
     [TestClass]
     public class BaseTestClass
     {
+        public const string ApiEndpointName = "api";
+        public const string ApiVersion = "v1";
+        public const string JwtRes = "JwtRes";
+        public const int Port = 5555;
+
+        public const string DbSchema_Mysql = "mysql_test";
+        public const string DbSchema_Sqlite = "sqlite_test";
+
         public IServiceProvider ServiceProvider { get; set; } = null!;
 
         public IConfiguration Configuration { get; set; } = null!;
@@ -45,8 +51,7 @@ namespace HB.FullStack.BaseTest
 
         public IDatabase Db { get; set; } = null!;
 
-        public const string DbSchema_Mysql = "mysql_test";
-        public const string DbSchema_Sqlite = "sqlite_test";
+        
 
         public IDbConfigManager DbConfigManager { get; set; } = null!;
 

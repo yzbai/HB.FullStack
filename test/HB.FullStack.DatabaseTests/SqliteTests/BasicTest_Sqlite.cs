@@ -26,7 +26,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
         public async Task Test_Update_Fields_By_Compare_Version()
         {
             //Add
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -36,13 +36,13 @@ namespace HB.FullStack.DatabaseTests.SQLite
             {
                 Id = book.Id,
                 OldTimestamp = book.Timestamp,
-                PropertyNames = new List<string> { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
+                PropertyNames = new List<string> { nameof(Guid_Timestamp_BookModel.Price), nameof(Guid_Timestamp_BookModel.Name) },
                 NewPropertyValues = new List<object?> { 123456.789, "TTTTTXXXXTTTTT" }
             };
 
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_Timestamp_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
-            Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? updatedBook = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
 
@@ -54,7 +54,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
             //应该抛出冲突异常
             try
             {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_Timestamp_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DbException ex)
             {
@@ -70,12 +70,12 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [TestMethod]
         public async Task Test_Version_Error()
         {
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
-            Guid_BookModel? book1 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
-            Guid_BookModel? book2 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? book1 = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? book2 = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
 
             //update book1
             book1!.Name = "Update Book1";
@@ -107,11 +107,11 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [TestMethod]
         public async Task Test_Repeate_Update_Return()
         {
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
-            Guid_BookModel? book1 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? book1 = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
 
             var engine = DbConfigManager.GetDatabaseEngine(DbSchema_Sqlite);
             var connectionString = DbConfigManager.GetRequiredConnectionString(DbSchema_Sqlite, true);

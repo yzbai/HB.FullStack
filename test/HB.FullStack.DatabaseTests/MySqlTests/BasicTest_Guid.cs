@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest.DapperMapper;
 using HB.FullStack.BaseTest.Models;
+using HB.FullStack.Common;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
@@ -22,15 +23,94 @@ using MySqlConnector;
 
 [assembly: Parallelize(Workers = 10, Scope = ExecutionScope.ClassLevel)]
 
-namespace HB.FullStack.DatabaseTests.MySQL
+namespace HB.FullStack.DatabaseTests
 {
-    [TestClass]
-    public class BasicTest_Guid_MySQL : BaseTestClass
+    public interface IGuid_Timestamp_BookModel : ITimestamp
     {
-        [TestMethod]
-        public async Task Test_Add_Key_Conflict_ErrorAsync()
+        bool Deleted { get; set; }
+        Guid Id { get; set; }
+        string? LastUser { get; set; }
+        string Name { get; set; }
+        double Price { get; set; }
+    }
+
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    public class MySql_Guid_Timestamp_BookModel : DbModel2<Guid>, ITimestamp, IGuid_Timestamp_BookModel
+    {
+        [DbField]
+        public string Name { get; set; } = default!;
+
+        [DbField]
+        public double Price { get; set; } = default!;
+
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+
+        long ITimestamp.Timestamp { get; set; }
+    }
+
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    public class Sqlite_Guid_Timestamp_BookModel : DbModel2<Guid>, ITimestamp, IGuid_Timestamp_BookModel
+    {
+        [DbField]
+        public string Name { get; set; } = default!;
+
+        [DbField]
+        public double Price { get; set; } = default!;
+
+        
+        public override Guid Id { get; set; }
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        
+        long ITimestamp.Timestamp { get; set; }
+    }
+
+    [TestClass]
+    public class BasicTest_Guid : BaseTestClass
+    {
+        private Random _random = new Random();
+
+        public BasicTest_Guid() : base(DbEngineType.MySQL)
         {
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+        }
+
+
+        public IList<IGuid_Timestamp_BookModel> GetBooks(DbEngineType engineType, int? count = null)
+        {
+            List<IGuid_Timestamp_BookModel> books = new List<IGuid_Timestamp_BookModel>();
+
+            int length = count == null ? 50 : count.Value;
+
+            Func<int, IGuid_Timestamp_BookModel> createNew = engineType switch
+            {
+                DbEngineType.MySQL => i=>new MySql_Guid_Timestamp_BookModel {
+                    Name = "Book" + i.ToString(),
+                    Price = _random.NextDouble()
+                },
+                DbEngineType.SQLite => i=> new Sqlite_Guid_Timestamp_BookModel {
+                    Name = "Book" + i.ToString(),
+                    Price = _random.NextDouble()
+                },
+                _ => throw new NotImplementedException(),
+            };
+
+            for (int i = 0; i < length; ++i)
+            {
+                books.Add(createNew(i));
+            }
+
+            return books;
+        }
+
+
+        [TestMethod]
+        [DataRow(DbEngineType.MySQL)]
+        [DataRow(DbEngineType.SQLite)]
+        public async Task Test_Add_Key_Conflict_ErrorAsync(DbEngineType engineType)
+        {
+            IGuid_Timestamp_BookModel book = GetBooks(engineType, 1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -78,7 +158,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_Update_Fields_By_Compare_Version()
         {
             //Add
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -88,13 +168,13 @@ namespace HB.FullStack.DatabaseTests.MySQL
             {
                 Id = book.Id,
                 OldTimestamp = book.Timestamp,
-                PropertyNames = new string[] { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
+                PropertyNames = new string[] { nameof(Guid_Timestamp_BookModel.Price), nameof(Guid_Timestamp_BookModel.Name) },
                 NewPropertyValues = new object?[] { 123456.789, "TTTTTXXXXTTTTT" }
             };
 
-            await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<Guid_Timestamp_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
-            Guid_BookModel? updatedBook = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? updatedBook = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
 
@@ -106,7 +186,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             //应该抛出冲突异常
             try
             {
-                await Db.UpdatePropertiesAsync<Guid_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
+                await Db.UpdatePropertiesAsync<Guid_Timestamp_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
             }
             catch (DbException ex)
             {
@@ -132,7 +212,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             OldNewCompareUpdatePack updatePack = new OldNewCompareUpdatePack
             {
                 Id = book.Id,
-                PropertyNames = new string[] { nameof(Guid_BookModel.Price), nameof(Guid_BookModel.Name) },
+                PropertyNames = new string[] { nameof(Guid_Timestamp_BookModel.Price), nameof(Guid_Timestamp_BookModel.Name) },
                 OldPropertyValues = new object?[] { book.Price, book.Name },
                 NewPropertyValues = new object?[] { 123456.789, "TTTTTXXXXTTTTT" }
             };
@@ -167,12 +247,12 @@ namespace HB.FullStack.DatabaseTests.MySQL
         [TestMethod]
         public async Task Test_Version_Error()
         {
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
-            Guid_BookModel? book1 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
-            Guid_BookModel? book2 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? book1 = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? book2 = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
 
             //update book1
             book1!.Name = "Update Book1";
@@ -194,7 +274,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
                 }
             }
 
-            Guid_BookModel? book3 = await Db.ScalarAsync<Guid_BookModel>(book.Id, null);
+            Guid_Timestamp_BookModel? book3 = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
 
             Assert.IsTrue(SerializeUtil.ToJson(book1) == SerializeUtil.ToJson(book3));
         }
@@ -236,7 +316,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
         [TestMethod]
         public async Task Test_Mult_SQL_Return_With_Reader()
         {
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
             book.Id = new Guid("cd5bda08-e5e2-409f-89c5-bea1ae49f2a0");
 
             await Db.AddAsync(book, "tester", null);
@@ -699,7 +779,7 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
         {
             var books = Mocker.Guid_GetBooks(50);
 
-            var trans = await Trans.BeginTransactionAsync<Guid_BookModel>().ConfigureAwait(false);
+            var trans = await Trans.BeginTransactionAsync<Guid_Timestamp_BookModel>().ConfigureAwait(false);
 
             try
             {
@@ -730,15 +810,15 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
                 var reader = await command0.ExecuteReaderAsync().ConfigureAwait(false);
 
-                List<Guid_BookModel> list1 = new List<Guid_BookModel>();
-                List<Guid_BookModel> list2 = new List<Guid_BookModel>();
-                List<Guid_BookModel> list3 = new List<Guid_BookModel>();
+                List<Guid_Timestamp_BookModel> list1 = new List<Guid_Timestamp_BookModel>();
+                List<Guid_Timestamp_BookModel> list2 = new List<Guid_Timestamp_BookModel>();
+                List<Guid_Timestamp_BookModel> list3 = new List<Guid_Timestamp_BookModel>();
 
                 int len = reader.FieldCount;
                 DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DbModelDef definition = Db.ModelDefFactory.GetDef<Guid_BookModel>()!;
+                DbModelDef definition = Db.ModelDefFactory.GetDef<Guid_Timestamp_BookModel>()!;
 
                 for (int i = 0; i < len; ++i)
                 {
@@ -748,11 +828,11 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
 
                 Func<IDbModelDefFactory, IDataReader, object> fullStack_mapper = DbModelConvert.CreateDataReaderRowToModelDelegate(definition, reader, 0, definition.FieldCount, false);
 
-                Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Guid_BookModel), reader);
+                Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Guid_Timestamp_BookModel), reader);
 
                 Func<IDataReader, object> reflection_mapper = (r) =>
                 {
-                    Guid_BookModel item = new Guid_BookModel();
+                    Guid_Timestamp_BookModel item = new Guid_Timestamp_BookModel();
 
                     for (int i = 0; i < len; ++i)
                     {
@@ -777,17 +857,17 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
                 {
                     stopwatch1.Start();
                     object obj1 = fullStack_mapper(Db.ModelDefFactory, reader);
-                    list1.Add((Guid_BookModel)obj1);
+                    list1.Add((Guid_Timestamp_BookModel)obj1);
                     stopwatch1.Stop();
 
                     stopwatch2.Start();
                     object obj2 = dapper_mapper(reader);
-                    list2.Add((Guid_BookModel)obj2);
+                    list2.Add((Guid_Timestamp_BookModel)obj2);
                     stopwatch2.Stop();
 
                     stopwatch3.Start();
                     object obj3 = reflection_mapper(reader);
-                    list3.Add((Guid_BookModel)obj3);
+                    list3.Add((Guid_Timestamp_BookModel)obj3);
                     stopwatch3.Stop();
                 }
 

@@ -27,7 +27,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [TestMethod]
         public async Task Test_Add_Key_Conflict_ErrorAsync()
         {
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -101,7 +101,7 @@ namespace HB.FullStack.DatabaseTests.SQLite
         [TestMethod]
         public async Task Test_Mult_SQL_Return_With_Reader()
         {
-            Guid_BookModel book = Mocker.Guid_GetBooks(1).First();
+            Guid_Timestamp_BookModel book = Mocker.Guid_GetBooks(1).First();
 
             await Db.AddAsync(book, "tester", null);
 

@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using HB.FullStack.Common.Meta;
 using HB.FullStack.Common.PropertyTrackable;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace HB.FullStack.Common.Meta.Tests
+namespace HB.FullStack.CommonTests.Meta
 {
     public class MetaAccessObj
     {
@@ -19,7 +16,6 @@ namespace HB.FullStack.Common.Meta.Tests
 
         [AddtionalProperty]
         public IList<string> Keys { get; set; } = new List<string> { "1", "2" };
-
     }
 
     [TestClass()]

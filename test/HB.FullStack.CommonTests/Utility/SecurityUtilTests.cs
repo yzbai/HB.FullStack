@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using HB.FullStack.Common.IdGen;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace System.Tests
+namespace HB.FullStack.CommonTests.Utility
 {
     [TestClass()]
     public class SecurityUtilTests
