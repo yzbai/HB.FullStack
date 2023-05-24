@@ -11,14 +11,14 @@ namespace HB.FullStack.Database.DbModels
 
         public bool? ReadOnly { get; set; }
 
-        public ConflictCheckMethods? ConflictCheckMethods { get; set; }
+        public ConflictCheckMethods ConflictCheckMethods { get; set; } = ConflictCheckMethods.None;
 
         public DbModelAttribute()
         { }
 
-        public DbModelAttribute(ConflictCheckMethods conflictCheckMethods)
-        {
-            ConflictCheckMethods = conflictCheckMethods;
-        }
+        //public DbModelAttribute(ConflictCheckMethods conflictCheckMethods)
+        //{
+        //    ConflictCheckMethods = conflictCheckMethods;
+        //}
     }
 }

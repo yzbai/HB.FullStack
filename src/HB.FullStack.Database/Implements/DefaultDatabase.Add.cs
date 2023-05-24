@@ -10,7 +10,7 @@ namespace HB.FullStack.Database
 {
     internal partial class DefaultDatabase
     {
-        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public async Task AddAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel
         {
             ThrowIf.NotValid(item, nameof(item));
 
@@ -23,7 +23,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                SetPrimaryValue(new T[] { item }, modelDef);
+                SetPrimaryValueIfNull(new T[] { item }, modelDef);
 
                 PrepareItem(item, lastUser, ref oldLastUser, ref oldTimestamp);
 
@@ -60,7 +60,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task AddAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : IDbModel
+        public async Task AddAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel
         {
             if (items.IsNullOrEmpty())
             {
@@ -79,7 +79,7 @@ namespace HB.FullStack.Database
 
             try
             {
-                SetPrimaryValue(items, modelDef);
+                SetPrimaryValueIfNull(items, modelDef);
 
                 PrepareBatchItems(items, lastUser, oldTimestamps, oldLastUsers, modelDef);
 

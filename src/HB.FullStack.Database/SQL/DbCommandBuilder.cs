@@ -31,24 +31,24 @@ namespace HB.FullStack.Database.SQL
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : IDbModel
+        public FromExpression<T> From<T>() where T : BaseDbModel
         {
             return new FromExpression<T>(ModelDefFactory, ExpressionVisitor);
         }
 
-        public WhereExpression<T> Where<T>() where T : IDbModel
+        public WhereExpression<T> Where<T>() where T : BaseDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
             return new WhereExpression<T>(modelDef, ExpressionVisitor);
         }
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : IDbModel
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : BaseDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
             return new WhereExpression<T>(modelDef, ExpressionVisitor).Where(sqlFilter, filterParams);
         }
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : IDbModel
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : BaseDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
             return new WhereExpression<T>(modelDef, ExpressionVisitor).Where(predicate);

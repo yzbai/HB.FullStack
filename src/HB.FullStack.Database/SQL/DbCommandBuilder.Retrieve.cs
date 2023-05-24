@@ -11,7 +11,7 @@ namespace HB.FullStack.Database.SQL
     internal partial class DbCommandBuilder
     {
         public DbEngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
-            where T : IDbModel
+            where T : BaseDbModel
         {
             return AssembleRetrieveCommand(
                 SqlHelper.CreateSelectSql(modelDef), 
@@ -20,14 +20,14 @@ namespace HB.FullStack.Database.SQL
         }
 
         public DbEngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null)
-            where T : IDbModel
+            where T : BaseDbModel
         {
             return AssembleRetrieveCommand("SELECT COUNT(1) ", fromCondition, whereCondition);
         }
 
         public DbEngineCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
-            where T1 : IDbModel
-            where T2 : IDbModel
+            where T1 : BaseDbModel
+            where T2 : BaseDbModel
         {
             return AssembleRetrieveCommand(
                 SqlHelper.CreateSelectSql(returnModelDefs),
@@ -36,9 +36,9 @@ namespace HB.FullStack.Database.SQL
         }
 
         public DbEngineCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
-            where T1 : IDbModel
-            where T2 : IDbModel
-            where T3 : IDbModel
+            where T1 : BaseDbModel
+            where T2 : BaseDbModel
+            where T3 : BaseDbModel
         {
             return AssembleRetrieveCommand(
                 SqlHelper.CreateSelectSql(returnModelDefs),
@@ -47,9 +47,9 @@ namespace HB.FullStack.Database.SQL
         }
 
         public DbEngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition, params DbModelDef[] returnModelDefs)
-            where TSelect : IDbModel
-            where TFrom : IDbModel
-            where TWhere : IDbModel
+            where TSelect : BaseDbModel
+            where TFrom : BaseDbModel
+            where TWhere : BaseDbModel
         {
             return AssembleRetrieveCommand(
                 SqlHelper.CreateSelectSql(returnModelDefs),
@@ -58,8 +58,8 @@ namespace HB.FullStack.Database.SQL
         }
 
         private DbEngineCommand AssembleRetrieveCommand<TFrom, TWhere>(string selectSql, FromExpression<TFrom>? fromCondition, WhereExpression<TWhere>? whereCondition)
-            where TFrom : IDbModel
-            where TWhere : IDbModel
+            where TFrom : BaseDbModel
+            where TWhere : BaseDbModel
         {
             StringBuilder sqlBuilder = new StringBuilder(selectSql);
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();

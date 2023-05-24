@@ -12,7 +12,7 @@ namespace HB.FullStack.Database
         /// <summary>
         /// AddOrUpdate,即override,不检查Timestamp
         /// </summary>
-        public async Task AddOrUpdateByIdAsync<T>(T item, string lastUser, TransactionContext? transContext = null) where T : IDbModel
+        public async Task AddOrUpdateByIdAsync<T>(T item, string lastUser, TransactionContext? transContext = null) where T : BaseDbModel
         {
             ThrowIf.NotValid(item, nameof(item));
 
@@ -52,7 +52,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task AddOrUpdateByIdAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : IDbModel
+        public async Task AddOrUpdateByIdAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel
         {
             ThrowIf.NotValid(items, nameof(items));
 

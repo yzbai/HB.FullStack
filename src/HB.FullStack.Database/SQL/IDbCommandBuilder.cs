@@ -15,10 +15,10 @@ namespace HB.FullStack.Database
 
         #region Statements
 
-        FromExpression<T> From<T>() where T : IDbModel;
-        WhereExpression<T> Where<T>() where T : IDbModel;
-        WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : IDbModel;
-        WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : IDbModel;
+        FromExpression<T> From<T>() where T : BaseDbModel;
+        WhereExpression<T> Where<T>() where T : BaseDbModel;
+        WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : BaseDbModel;
+        WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : BaseDbModel;
 
         #endregion
 
@@ -40,50 +40,50 @@ namespace HB.FullStack.Database
 
         #region Add
 
-        DbEngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : IDbModel;
-        DbEngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IList<T> models) where T : IDbModel;
+        DbEngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : BaseDbModel;
+        DbEngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IList<T> models) where T : BaseDbModel;
 
         #endregion
 
         #region AddOrUpdate
         
-        DbEngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : IDbModel;
-        DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IList<T> models) where T : IDbModel;
+        DbEngineCommand CreateAddOrUpdateCommand<T>(DbModelDef modelDef, T model, bool returnModel) where T : BaseDbModel;
+        DbEngineCommand CreateBatchAddOrUpdateCommand<T>(DbModelDef modelDef, IList<T> models) where T : BaseDbModel;
 
         #endregion
 
         #region Retrieve
 
-        DbEngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : IDbModel;
+        DbEngineCommand CreateCountCommand<T>(FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : BaseDbModel;
         
-        DbEngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : IDbModel;
+        DbEngineCommand CreateRetrieveCommand<T>(DbModelDef modelDef, FromExpression<T>? fromCondition = null, WhereExpression<T>? whereCondition = null) where T : BaseDbModel;
 
         DbEngineCommand CreateRetrieveCommand<T1, T2>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
-            where T1 : IDbModel
-            where T2 : IDbModel;
+            where T1 : BaseDbModel
+            where T2 : BaseDbModel;
         DbEngineCommand CreateRetrieveCommand<T1, T2, T3>(FromExpression<T1> fromCondition, WhereExpression<T1> whereCondition, params DbModelDef[] returnModelDefs)
-            where T1 : IDbModel
-            where T2 : IDbModel
-            where T3 : IDbModel;
+            where T1 : BaseDbModel
+            where T2 : BaseDbModel
+            where T3 : BaseDbModel;
         DbEngineCommand CreateRetrieveCommand<TSelect, TFrom, TWhere>(
             FromExpression<TFrom>? fromCondition,
             WhereExpression<TWhere>? whereCondition,
             params DbModelDef[] returnModelDefs)
-            where TSelect : IDbModel
-            where TFrom :   IDbModel
-            where TWhere : IDbModel;
+            where TSelect : BaseDbModel
+            where TFrom :   BaseDbModel
+            where TWhere : BaseDbModel;
 
         #endregion
 
         #region Update
 
-        DbEngineCommand CreateUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, T model) where T : IDbModel;
+        DbEngineCommand CreateUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, T model) where T : BaseDbModel;
 
-        DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : IDbModel;
+        DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel;
 
-        DbEngineCommand CreateBatchUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : IDbModel;
+        DbEngineCommand CreateBatchUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel;
         
-        DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : IDbModel;
+        DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel;
 
         #endregion
 
@@ -107,11 +107,11 @@ namespace HB.FullStack.Database
 
         DbEngineCommand CreateDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, object id, string lastUser, bool trulyDelete, long? newTimestamp);
         DbEngineCommand CreateDeleteTimestampCommand(DbModelDef modelDef, object id, long timestamp, string lastUser, bool trulyDelete, long? newTimestamp);
-        DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp) where T : IDbModel;
+        DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp) where T : BaseDbModel;
         DbEngineCommand CreateBatchDeleteTimestampCommand(DbModelDef modelDef, IList<object> ids, IList<long> timestamps, string lastUser, bool trulyDelete, long? newTimestamp = null);
         DbEngineCommand CreateBatchDeleteIgnoreConflictCheckCommand(DbModelDef modelDef, IList<object> ids, string lastUser, bool trulyDeleted, long? newTimestamp = null);
-        DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : IDbModel;
-        DbEngineCommand CreateDeleteConditonCommand<T>(DbModelDef modelDef, WhereExpression<T> whereExpression, string lastUser, bool trulyDeleted) where T : IDbModel;
+        DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : BaseDbModel;
+        DbEngineCommand CreateDeleteConditonCommand<T>(DbModelDef modelDef, WhereExpression<T> whereExpression, string lastUser, bool trulyDeleted) where T : BaseDbModel;
 
         #endregion
     }

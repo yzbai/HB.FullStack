@@ -13,14 +13,14 @@ namespace HB.FullStack.Database.SQL
     /// </summary>
     internal partial class DbCommandBuilder
     {
-        public DbEngineCommand CreateUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, T model) where T : IDbModel
+        public DbEngineCommand CreateUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, T model) where T : BaseDbModel
         {
             return new DbEngineCommand(
                 SqlHelper.CreateUpdateIgnoreConflictCheckSql(modelDef),
                 model.ToDbParameters(modelDef, ModelDefFactory, null, 0));
         }
         
-        public DbEngineCommand CreateBatchUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : IDbModel
+        public DbEngineCommand CreateBatchUpdateIgnoreConflictCheckCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel
         {
             ThrowIf.Empty(models, nameof(models));
 
@@ -29,7 +29,7 @@ namespace HB.FullStack.Database.SQL
                 models.ToDbParameters(modelDef, ModelDefFactory, null));
         }
 
-        public DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : IDbModel
+        public DbEngineCommand CreateUpdateTimestampCommand<T>(DbModelDef modelDef, T model, long oldTimestamp) where T : BaseDbModel
         {
             IList<KeyValuePair<string, object>> paramters = model.ToDbParameters(modelDef, ModelDefFactory, null, 0);
 
@@ -40,7 +40,7 @@ namespace HB.FullStack.Database.SQL
                 paramters);
         }
 
-        public DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : IDbModel
+        public DbEngineCommand CreateBatchUpdateTimestampCommand<T>(DbModelDef modelDef, IList<T> models, IList<long> oldTimestamps) where T : BaseDbModel
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
             ThrowIf.CountNotEqual(models, oldTimestamps, "count not even.");

@@ -160,7 +160,7 @@ namespace HB.FullStack.Database.SQL
                 () => CreateDeleteUsingOldNewCompareSql(modelDef, trulyDeleted, "{0}"));
         }
 
-        public static string CreateDeleteUsingConditionSql<T>(DbModelDef modelDef, WhereExpression<T> whereExpression, bool trulyDeleted, string placeHolder = "0") where T : IDbModel
+        public static string CreateDeleteUsingConditionSql<T>(DbModelDef modelDef, WhereExpression<T> whereExpression, bool trulyDeleted, string placeHolder = "0") where T : BaseDbModel
         {
             string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { trulyDeleted, placeHolder });
 

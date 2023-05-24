@@ -5,8 +5,9 @@ namespace HB.FullStack.Database.DbModels
     [Flags]
     public enum ConflictCheckMethods
     {
-        Ignore = 0,
-        OldNewValueCompare = 1,
-        Timestamp = 2
+        None = 0,   
+        Ignore = 1,
+        OldNewValueCompare = 2,
+        Timestamp = 4
     }
 }

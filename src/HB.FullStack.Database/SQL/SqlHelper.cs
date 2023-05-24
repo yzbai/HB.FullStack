@@ -23,8 +23,8 @@ namespace HB.FullStack.Database.SQL
         public const string OLD_PARAMETER_SUFFIX = "old_";
 
         private static readonly string DbParameterName_Timestamp = GetParameterized(nameof(ITimestamp.Timestamp));
-        private static readonly string DbParameterName_LastUser = GetParameterized(nameof(IDbModel.LastUser));
-        private static readonly string DbParameterName_Deleted = GetParameterized(nameof(IDbModel.Deleted));
+        private static readonly string DbParameterName_LastUser = GetParameterized(nameof(BaseDbModel.LastUser));
+        private static readonly string DbParameterName_Deleted = GetParameterized(nameof(BaseDbModel.Deleted));
         private static readonly string DbParameterName_PrimaryKey = GetParameterized(nameof(DbModel<long>.Id));
 
         #region Cache Sql

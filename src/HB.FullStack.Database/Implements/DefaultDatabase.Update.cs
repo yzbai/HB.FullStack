@@ -11,7 +11,7 @@ namespace HB.FullStack.Database
 {
     internal partial class DefaultDatabase
     {
-        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public async Task UpdateAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel
         {
             ThrowIf.NotValid(item, nameof(item));
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!.ThrowIfNotWriteable();
@@ -70,7 +70,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task UpdateAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : IDbModel
+        public async Task UpdateAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel
         {
             if (items.IsNullOrEmpty())
             {

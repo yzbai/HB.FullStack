@@ -124,13 +124,13 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : IDbModel => DbCommandBuilder.From<T>();
+        public FromExpression<T> From<T>() where T : BaseDbModel => DbCommandBuilder.From<T>();
 
-        public WhereExpression<T> Where<T>() where T : IDbModel => DbCommandBuilder.Where<T>();
+        public WhereExpression<T> Where<T>() where T : BaseDbModel => DbCommandBuilder.Where<T>();
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : IDbModel => DbCommandBuilder.Where<T>(sqlFilter, filterParams);
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : BaseDbModel => DbCommandBuilder.Where<T>(sqlFilter, filterParams);
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : IDbModel => DbCommandBuilder.Where(predicate);
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : BaseDbModel => DbCommandBuilder.Where(predicate);
 
         #endregion
 
@@ -202,7 +202,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void PrepareItem<T>(T item, string lastUser, ref string? oldLastUser, ref long? oldTimestamp) where T : IDbModel
+        private static void PrepareItem<T>(T item, string lastUser, ref string? oldLastUser, ref long? oldTimestamp) where T : BaseDbModel
         {
             long curTimestamp = TimeUtil.Timestamp;
 
@@ -216,7 +216,7 @@ namespace HB.FullStack.Database
             item.LastUser = lastUser;
         }
 
-        private static void RestoreItem<T>(T item, long? oldTimestamp, string? oldLastUser) where T : IDbModel
+        private static void RestoreItem<T>(T item, long? oldTimestamp, string? oldLastUser) where T : BaseDbModel
         {
             if (item is ITimestamp timestampModel)
             {
@@ -226,7 +226,7 @@ namespace HB.FullStack.Database
             item.LastUser = oldLastUser;
         }
 
-        private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : IDbModel
+        private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel
         {
             long curTimestamp = TimeUtil.Timestamp;
 
@@ -244,7 +244,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void RestoreBatchItems<T>(IList<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : IDbModel
+        private static void RestoreBatchItems<T>(IList<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : BaseDbModel
         {
             for (int i = 0; i < items.Count; ++i)
             {
@@ -259,7 +259,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void ReTrackIfTrackable<T>(T item, DbModelDef modelDef) where T : IDbModel
+        private static void ReTrackIfTrackable<T>(T item, DbModelDef modelDef) where T : BaseDbModel
         {
             if (modelDef.IsPropertyTrackable)
             {
@@ -270,7 +270,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void ReTrackIfTrackable<T>(IList<T> items, DbModelDef modelDef) where T : IDbModel
+        private static void ReTrackIfTrackable<T>(IList<T> items, DbModelDef modelDef) where T : BaseDbModel
         {
             if (modelDef.IsPropertyTrackable)
             {
@@ -285,8 +285,8 @@ namespace HB.FullStack.Database
         }
 
         private void ReTrackIfTrackable<TSource, TTarget>(IList<Tuple<TSource, TTarget?>> results, DbModelDef sourceModelDef, DbModelDef targetModelDef)
-           where TSource : IDbModel
-           where TTarget : IDbModel
+           where TSource : BaseDbModel
+           where TTarget : BaseDbModel
         {
             bool isSourceTrackable = sourceModelDef.IsPropertyTrackable;
             bool isTargetTrackable = targetModelDef.IsPropertyTrackable;
@@ -313,9 +313,9 @@ namespace HB.FullStack.Database
         }
 
         private void ReTrackIfTrackable<TSource, TTarget1, TTarget2>(IList<Tuple<TSource, TTarget1?, TTarget2?>> results, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
-            where TSource : IDbModel
-            where TTarget1 : IDbModel
-            where TTarget2 : IDbModel
+            where TSource : BaseDbModel
+            where TTarget1 : BaseDbModel
+            where TTarget2 : BaseDbModel
         {
             bool isSourceTrackable = sourceModelDef.IsPropertyTrackable;
             bool isTarget1Trackable = targetModelDef1.IsPropertyTrackable;
@@ -349,7 +349,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void SetPrimaryValue<T>(IList<T> items, DbModelDef modelDef) where T : IDbModel
+        private static void SetPrimaryValueIfNull<T>(IList<T> items, DbModelDef modelDef) where T : BaseDbModel
         {
             if (items.IsNullOrEmpty())
             {
@@ -357,6 +357,7 @@ namespace HB.FullStack.Database
             }
 
             var primaryKeyDef = modelDef.PrimaryKeyPropertyDef;
+
 
             switch (modelDef.IdType)
             {
@@ -366,7 +367,10 @@ namespace HB.FullStack.Database
                 case DbModelIdType.LongId:
                     foreach (var item in items)
                     {
-                        primaryKeyDef.SetValueTo(item, StaticIdGen.GetLongId());
+                        if (primaryKeyDef.GetValueFrom(item) == null)
+                        {
+                            primaryKeyDef.SetValueTo(item, StaticIdGen.GetLongId());
+                        }
                     }
                     break;
 
@@ -376,7 +380,10 @@ namespace HB.FullStack.Database
                 case DbModelIdType.GuidId:
                     foreach (var item in items)
                     {
-                        primaryKeyDef.SetValueTo(item, StaticIdGen.GetSequentialGuid());
+                        if (primaryKeyDef.GetValueFrom(item) == null)
+                        {
+                            primaryKeyDef.SetValueTo(item, StaticIdGen.GetSequentialGuid());
+                        }
                     }
                     break;
 

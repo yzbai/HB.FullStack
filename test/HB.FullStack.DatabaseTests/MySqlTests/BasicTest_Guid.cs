@@ -15,6 +15,7 @@ using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
+using HB.FullStack.DatabaseTests.MySqlTests;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,30 +30,40 @@ namespace HB.FullStack.DatabaseTests
     public class BasicTest_Guid : BaseTestClass
     {
         [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Test_Add_Key_Conflict_ErrorAsync(DbEngineType engineType)
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.GuidId)]
+        [DataRow(DbEngineType.MySQL, false, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.MySQL, false, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.MySQL, false, DbModelIdType.GuidId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.GuidId)]
+        [DataRow(DbEngineType.SQLite, false, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.SQLite, false, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.SQLite, false, DbModelIdType.GuidId)]
+        public async Task Test_Add_Key_Conflict_ErrorAsync(DbEngineType engineType, bool isTimestamp, DbModelIdType idType)
         {
-            ITimestamp_Guid_BookModel book = Mocker3.GetBooks(engineType, 1).First();
+            var publisherModel = Mocker.GetPublishModel(engineType, isTimestamp, idType, 1).First();
 
-            await Db.AddAsync(book, "tester", null);
+            await Db.AddAsync((BaseDbModel)publisherModel, "", null);
 
             try
             {
-                await Db.AddAsync(book, "tester", null);
+                await Db.AddAsync((BaseDbModel)publisherModel, "", null);
             }
             catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
             }
 
-            Timestamp_Long_PublisherModel publisherModel = Mocker.MockOnePublisherModel();
+            IBookModel book = Mocker.GetBookModel(engineType, isTimestamp, idType, publisherModel.Id, 1).First();
 
-            await Db.AddAsync(publisherModel, "", null);
+            await Db.AddAsync((BaseDbModel)book, "tester", null);
 
             try
             {
-                await Db.AddAsync(publisherModel, "", null);
+                await Db.AddAsync((BaseDbModel)book, "tester", null);
             }
             catch (DbException e)
             {
@@ -61,31 +72,65 @@ namespace HB.FullStack.DatabaseTests
         }
 
         [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Test_BatchAdd_Key_Conflict_ErrorAsync(DbEngineType engineType)
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.GuidId)]
+        [DataRow(DbEngineType.MySQL, false, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.MySQL, false, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.MySQL, false, DbModelIdType.GuidId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.GuidId)]
+        [DataRow(DbEngineType.SQLite, false, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.SQLite, false, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.SQLite, false, DbModelIdType.GuidId)]
+        public async Task Test_BatchAdd_Key_Conflict_ErrorAsync(DbEngineType engineType, bool isTimestamp, DbModelIdType idType)
         {
-            var books = GetBooks(2);
+            var publishers = Mocker.GetPublishModel(engineType, isTimestamp, idType);
 
-            await Db.AddAsync(books, "tester", null);
+            Db.ModelDefFactory.get
+
+            TransactionContext trans = await Trans.BeginTransactionAsync<IPublisherModel>().ConfigureAwait(false);
 
             try
             {
-                await Db.AddAsync(books, "tester", null);
+                await Db.AddAsync(publishers.Cast<BaseDbModel>().ToList(), "tester", trans);
+
+                await trans.CommitAsync();
+            }
+            catch
+            {
+                await trans.RollbackAsync();
+                throw;
+            }
+
+            TransactionContext trans2 = await Trans.BeginTransactionAsync<IPublisherModel>();
+
+            try
+            {
+                await Db.AddAsync(publishers.Cast<BaseDbModel>().ToList(), "tester", trans2);
+
+                await trans2.CommitAsync();
             }
             catch (DbException e)
             {
                 Assert.IsTrue(e.ErrorCode == ErrorCodes.DuplicateKeyEntry);
+
+                await trans2.RollbackAsync();
             }
         }
 
         [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Test_Update_Fields_By_Compare_Version(DbEngineType engineType)
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.MySQL, true, DbModelIdType.GuidId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.LongId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.AutoIncrementLongId)]
+        [DataRow(DbEngineType.SQLite, true, DbModelIdType.GuidId)]
+        public async Task Test_UpdateProperties_UsingTimestamp(DbEngineType engineType, bool isTimestamp, DbModelIdType idType)
         {
             //Add
-            Guid_Timestamp_BookModel book = GetBooks(1).First();
+            IBookModel book = Mocker.GetBookModel(engineType, isTimestamp, idType, null, 1).First();
 
             await Db.AddAsync(book, "tester", null);
 
@@ -94,14 +139,14 @@ namespace HB.FullStack.DatabaseTests
             TimestampUpdatePack updatePack = new TimestampUpdatePack
             {
                 Id = book.Id,
-                OldTimestamp = book.Timestamp,
-                PropertyNames = new string[] { nameof(Guid_Timestamp_BookModel.Price), nameof(Guid_Timestamp_BookModel.Name) },
+                OldTimestamp = (book as ITimestamp)!.Timestamp,
+                PropertyNames = new string[] { nameof(IBookModel.Price), nameof(IBookModel.Name) },
                 NewPropertyValues = new object?[] { 123456.789, "TTTTTXXXXTTTTT" }
             };
 
-            await Db.UpdatePropertiesAsync<Guid_Timestamp_BookModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
+            await Db.UpdatePropertiesAsync<IPublisherModel>(updatePack, "UPDATE_FIELDS_VERSION", null);
 
-            Guid_Timestamp_BookModel? updatedBook = await Db.ScalarAsync<Guid_Timestamp_BookModel>(book.Id, null);
+            IBookModel? updatedBook = await Db.ScalarAsync<IBookModel>(book.Id, null);
 
             Assert.IsNotNull(updatedBook);
 
@@ -910,6 +955,18 @@ select count(1) from tb_Guid_Book where Id = uuid_to_bin('08da5bcd-e2e5-9f40-89c
             stopwatch.Stop();
 
             Console.WriteLine($"Reflection: {stopwatch.ElapsedMilliseconds}");
+        }
+
+        [TestMethod]
+        public async Task Test_FieldLength_OversizeAsync()
+        {
+            //TODO: 测试指定字段长度为10，结果赋值字符串长度为100，怎么处理
+
+            FieldLengthTestModel model = new FieldLengthTestModel { Content = "12345678910" };
+
+            var ex = await Assert.ThrowsExceptionAsync<DbException>(() => Db.AddAsync(model, "", null));
+
+            Assert.IsTrue(ex.ErrorCode == ErrorCodes.DbDataTooLong);
         }
 
         private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, DbEngineType engineType)

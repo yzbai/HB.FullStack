@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.DbModels
         {
             _configManager = configManager;
 
-            static bool typeCondition(Type t) => t.IsAssignableTo(typeof(IDbModel)) && !t.IsAbstract;
+            static bool typeCondition(Type t) => t.IsSubclassOf(typeof(BaseDbModel)) && !t.IsAbstract;
 
             IEnumerable<Type> allModelTypes = _configManager.DbModelAssemblies.IsNullOrEmpty()
                 ? ReflectionUtil.GetAllTypeByCondition(typeCondition)
@@ -83,7 +83,11 @@ namespace HB.FullStack.Database.DbModels
                         resultDbSchemaName = modelAttribute.DbSchemaName;
                         resultTableSchema.TableName = modelAttribute.TableName ?? resultTableSchema.TableName;
                         resultTableSchema.ReadOnly = modelAttribute.ReadOnly ?? resultTableSchema.ReadOnly;
-                        resultTableSchema.ConflictCheckMethods = modelAttribute.ConflictCheckMethods ?? resultTableSchema.ConflictCheckMethods;
+
+                        if (modelAttribute.ConflictCheckMethods != ConflictCheckMethods.None)
+                        {
+                            resultTableSchema.ConflictCheckMethods = modelAttribute.ConflictCheckMethods;
+                        }
                     }
 
                     //来自Options, 覆盖Attribute
@@ -341,11 +345,11 @@ namespace HB.FullStack.Database.DbModels
                 }
             }
 
-            if (propertyInfo.Name == nameof(IDbModel.Deleted))
+            if (propertyInfo.Name == nameof(BaseDbModel.Deleted))
             {
                 modelDef.DeletedPropertyDef = propertyDef;
             }
-            else if (propertyInfo.Name == nameof(IDbModel.LastUser))
+            else if (propertyInfo.Name == nameof(BaseDbModel.LastUser))
             {
                 modelDef.LastUserPropertyDef = propertyDef;
             }
@@ -353,7 +357,7 @@ namespace HB.FullStack.Database.DbModels
             return propertyDef;
         }
 
-        public DbModelDef? GetDef<T>() where T : IDbModel
+        public DbModelDef? GetDef<T>() where T : BaseDbModel
         {
             return GetDef(typeof(T));
         }

@@ -10,7 +10,7 @@ using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 
-namespace HB.FullStack.DatabaseTests.MySqlTests
+namespace HB.FullStack.DatabaseTests
 {
     public enum PublisherType
     {
@@ -26,7 +26,7 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
         public string Mobile { get; set; } = default!;
     }
 
-    public interface IPublisherModel
+    public interface IPublisherModel : IModel
     {
         IImmutableDictionary<string, Author>? BookAuthors { get; set; }
         IImmutableDictionary<string, string>? BookNames { get; set; }
@@ -41,53 +41,56 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
         float Float { get; set; }
 
         double? Float2 { get; set; }
+
+        object Id { get; set; }
     }
 
     [PropertyTrackableObject]
     public abstract partial class PublisherModel<TId> : DbModel<TId>, IPublisherModel
     {
         [TrackProperty]
-        string _name = null!;
+        private string _name = null!;
 
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
         [TrackProperty]
-        IImmutableList<string>? _books;
+        private IImmutableList<string>? _books;
 
         [TrackProperty]
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
-        IImmutableDictionary<string, Author>? _bookAuthors;
+        private IImmutableDictionary<string, Author>? _bookAuthors;
 
         [TrackProperty]
         [DbField(MaxLength = DbSchema.MAX_VARCHAR_LENGTH / 2, Converter = typeof(JsonDbPropertyConverter))]
-        IImmutableDictionary<string, string>? _bookNames;
+        private IImmutableDictionary<string, string>? _bookNames;
 
         [TrackProperty]
-        PublisherType _type;
+        private PublisherType _type;
 
         [TrackProperty]
-        float _float = 1.9877f;
+        private float _float = 1.9877f;
 
         [TrackProperty]
-        double? _float2;
+        private double? _float2;
 
         [TrackProperty]
-        int _number;
+        private int _number;
 
         [TrackProperty]
-        int? _number1;
+        private int? _number1;
 
         [TrackProperty]
-        PublisherType? _type2;
+        private PublisherType? _type2;
 
         [TrackProperty]
         [DbField(MaxLength = 20)]
-        string? _name2;
+        private string? _name2;
 
         [TrackProperty]
-        DateTimeOffset? _dDD;
+        private DateTimeOffset? _dDD;
 
         public override bool Deleted { get; set; }
         public override string? LastUser { get; set; }
+        object IPublisherModel.Id { get => Id!; set => Id = (TId)value; }
     }
 
     [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
@@ -97,12 +100,12 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
         public long Timestamp { get; set; }
     }
 
-
     [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
     public class MySql_Timestamp_Long_AutoIncrementId_PublisherModel : PublisherModel<long>, ITimestamp
     {
         [DbAutoIncrementPrimaryKey]
         public override long Id { get; set; }
+
         public long Timestamp { get; set; }
     }
 
@@ -119,11 +122,9 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
         public override long Id { get; set; }
     }
 
-
     [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
     public class MySql_Timeless_Long_AutoIncrementId_PublisherModel : PublisherModel<long>
     {
-
         [DbAutoIncrementPrimaryKey]
         public override long Id { get; set; }
     }
@@ -131,59 +132,53 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
     [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
     public class MySql_Timeless_Guid_PublisherModel : PublisherModel<Guid>
     {
-
         public override Guid Id { get; set; }
     }
 
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Sqlite)]
     public class Sqlite_Timestamp_Long_PublisherModel : PublisherModel<long>, ITimestamp
     {
         public override long Id { get; set; }
         public long Timestamp { get; set; }
     }
 
-
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Sqlite)]
     public class Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel : PublisherModel<long>, ITimestamp
     {
         [DbAutoIncrementPrimaryKey]
         public override long Id { get; set; }
+
         public long Timestamp { get; set; }
     }
 
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Sqlite)]
     public class Sqlite_Timestamp_Guid_PublisherModel : PublisherModel<Guid>, ITimestamp
     {
         public override Guid Id { get; set; }
         public long Timestamp { get; set; }
     }
 
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Sqlite)]
     public class Sqlite_Timeless_Long_PublisherModel : PublisherModel<long>
     {
         public override long Id { get; set; }
     }
 
-
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Sqlite)]
     public class Sqlite_Timeless_Long_AutoIncrementId_PublisherModel : PublisherModel<long>
     {
-
         [DbAutoIncrementPrimaryKey]
         public override long Id { get; set; }
     }
 
-    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
+    [DbModel(DbSchemaName = BaseTestClass.DbSchema_Sqlite)]
     public class Sqlite_Timeless_Guid_PublisherModel : PublisherModel<Guid>
     {
-
         public override Guid Id { get; set; }
     }
 
-    internal partial class Mocker3
+    internal static partial class Mocker
     {
-        private static Random _random = new Random();
-
         public static IList<IPublisherModel> GetPublishModel(DbEngineType engineType, bool isTimestamp, DbModelIdType idType, int? count = null)
         {
             count ??= 50;
@@ -249,7 +244,6 @@ namespace HB.FullStack.DatabaseTests.MySqlTests
             {
                 throw new NotSupportedException();
             }
-
 
             for (int i = 0; i < count; ++i)
             {
