@@ -181,9 +181,9 @@ namespace HB.FullStack.DatabaseTests
 
     internal static partial class Mocker
     {
-        internal static T MockOne<T>() where T : IDbModel => Mock<T>(1).First();
+        internal static T MockOne<T>(Action<T>? additionalAction = null) where T : IDbModel => Mock<T>(1, additionalAction).First();
         
-        internal static IList<T> Mock<T>(int count) where T : IDbModel
+        internal static IList<T> Mock<T>(int count, Action<T>? additionalAction = null) where T : IDbModel
         {
             var results = new List<T>();
 
@@ -219,13 +219,18 @@ namespace HB.FullStack.DatabaseTests
                     book.Price = _random.NextDouble();
                 }
 
+                if (additionalAction != null)
+                {
+                    additionalAction(t);
+                }
+
                 results.Add(t);
             }
 
             return results;
         }
 
-        internal static void Modify<T>(T model) where T : IDbModel
+        internal static void Modify<T>(T model, Action<T>? additionalAction = null) where T : IDbModel
         {
             if (model is IPublisherModel publisher)
             {
@@ -247,13 +252,18 @@ namespace HB.FullStack.DatabaseTests
             {
                 throw new NotImplementedException();
             }
+
+            if (additionalAction != null)
+            {
+                additionalAction(model);
+            }
         }
 
-        internal static void Modify<T>(IList<T> models) where T : IDbModel
+        internal static void Modify<T>(IList<T> models, Action<T>? additionalAction = null) where T : IDbModel
         {
             foreach (var model in models)
             {
-                Modify(model);
+                Modify(model, additionalAction);
             }
         }
 

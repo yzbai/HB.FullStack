@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
@@ -29,8 +30,39 @@ using MySqlConnector;
 namespace HB.FullStack.DatabaseTests
 {
     [TestClass]
-    public class BasicTest_Guid : BaseTestClass
+    public partial class BasicTest_Guid : BaseTestClass
     {
+        #region Common
+
+        private async Task<IList<T>> AddAndRetrieve<T>(int count = 50, Action<T>? additionalAction = null) where T : IDbModel
+        {
+            var models = Mocker.Mock<T>(count, additionalAction);
+
+            IList<T> rts;
+
+            TransactionContext addTrans = await Trans.BeginTransactionAsync<T>();
+
+            try
+            {
+                await Db.AddAsync(models, "", addTrans);
+
+                rts = await Db.RetrieveAsync<T>(m => SqlStatement.In(m.Id, true, models.Select(s => s.Id)), addTrans);
+
+                await addTrans.CommitAsync();
+            }
+            catch
+            {
+                await addTrans.RollbackAsync();
+                throw;
+            }
+
+            Assert.IsTrue(SerializeUtil.ToJson(models) == SerializeUtil.ToJson(rts));
+
+            return rts;
+        }
+
+        #endregion
+
         #region Key Conflict
 
         private async Task Test_Add_Key_Conflict_ErrorAsync_Core<T>() where T : class, IDbModel
@@ -519,14 +551,12 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
 
         private async Task Test_Update_Core<T>() where T : IDbModel
         {
-            var models = Mocker.Mock<T>(50);
+            var models = await AddAndRetrieve<T>();
 
             TransactionContext trans = await Trans.BeginTransactionAsync<T>().ConfigureAwait(false);
 
             try
             {
-                await Db.AddAsync(models, "", trans);
-
                 foreach (var model in models)
                 {
                     Mocker.Modify(model);
@@ -644,19 +674,13 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
 
         private async Task Test_Batch_Delete_Core<T>() where T : IDbModel
         {
-            var models = Mocker.Mock<T>(50);
+            var models = await AddAndRetrieve<T>();
 
             TransactionContext trans = await Trans.BeginTransactionAsync<T>().ConfigureAwait(false);
 
             try
             {
-                await Db.AddAsync(models, "", trans);
-
-                var rts = await Db.RetrieveAsync<T>(m => SqlStatement.In(m.Id, true, models.Select(s => s.Id)), trans);
-
-                Assert.IsTrue(rts.Count == models.Count);
-
-                await Db.DeleteAsync(rts, "Delete", trans);
+                await Db.DeleteAsync(models, "Delete", trans);
 
                 await Trans.CommitAsync(trans).ConfigureAwait(false);
 
@@ -702,363 +726,222 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
             await Test_Batch_Delete_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
         }
 
-        #endregion
 
 
-
-        [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_06_Delete_PublisherModelAsync(DbEngineType engineType)
+        private async Task Test_Delete_Core<T>() where T : IDbModel
         {
-            TransactionContext tContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
+            var models = await AddAndRetrieve<T>();
+
+            TransactionContext trans = await Trans.BeginTransactionAsync<T>().ConfigureAwait(false);
 
             try
             {
-                IList<Timestamp_Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(tContext).ConfigureAwait(false)).ToList();
-
-                foreach (var model in testModels)
+                foreach (var model in models)
                 {
-                    await Db.DeleteAsync(model, "lastUsre", tContext).ConfigureAwait(false);
+                    await Db.DeleteAsync(model, "lastUsre", trans).ConfigureAwait(false);
                 }
 
-                long count = await Db.CountAsync<Timestamp_Guid_PublisherModel>(tContext).ConfigureAwait(false);
+                long count = await Db.CountAsync<T>(m => SqlStatement.In(m.Id, false, models.Select(s => s.Id)), trans).ConfigureAwait(false);
 
-                await Trans.CommitAsync(tContext).ConfigureAwait(false);
+                await Trans.CommitAsync(trans).ConfigureAwait(false);
 
                 Assert.IsTrue(count == 0);
             }
             catch (Exception ex)
             {
-                await Trans.RollbackAsync(tContext).ConfigureAwait(false);
-                Console.WriteLine(ex.Message);
-                throw;
-            }
-        }
-
-        [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_08_LastTimeTestAsync(DbEngineType engineType)
-        {
-            Timestamp_Guid_PublisherModel item = Mocker.Guid_MockOnePublisherModel();
-
-            await Db.AddAsync(item, "xx", null).ConfigureAwait(false);
-
-            var fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
-
-            Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
-
-            fetched.Name = "ssssss";
-
-            await Db.UpdateAsync(fetched, "xxx", null).ConfigureAwait(false);
-
-            fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
-
-            //await Db.AddOrUpdateAsync(item, "ss", null);
-
-            fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, null).ConfigureAwait(false);
-
-            //Batch
-
-            var items = Mocker.Guid_GetPublishers();
-
-            TransactionContext trans = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
-
-            try
-            {
-                await Db.AddAsync(items, "xx", trans).ConfigureAwait(false);
-
-                var results = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
-
-                await Db.UpdateAsync(items, "xx", trans).ConfigureAwait(false);
-
-                var items2 = Mocker.Guid_GetPublishers();
-
-                await Db.AddAsync(items2, "xx", trans).ConfigureAwait(false);
-
-                results = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(item => SqlStatement.In(item.Id, true, items2.Select(item => (object)item.Id).ToArray()), trans).ConfigureAwait(false);
-
-                await Db.UpdateAsync(items2, "xx", trans).ConfigureAwait(false);
-
-                await Trans.CommitAsync(trans).ConfigureAwait(false);
-            }
-            catch
-            {
                 await Trans.RollbackAsync(trans).ConfigureAwait(false);
+                Console.WriteLine(ex.Message);
                 throw;
-            }
-            finally
-            {
             }
         }
 
-        /// <summary>
-        /// Test_9_UpdateLastTimeTestAsync
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="DbException">Ignore.</exception>
-        /// <exception cref="Exception">Ignore.</exception>
         [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_09_UpdateLastTimeTestAsync(DbEngineType engineType)
+        public async Task Test_Delete()
         {
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
+            await Test_Delete_Core<MySql_Timestamp_Guid_BookModel>();
+            await Test_Delete_Core<MySql_Timestamp_Long_BookModel>();
+            await Test_Delete_Core<MySql_Timestamp_Long_AutoIncrementId_BookModel>();
+            await Test_Delete_Core<MySql_Timeless_Guid_BookModel>();
+            await Test_Delete_Core<MySql_Timeless_Long_BookModel>();
+            await Test_Delete_Core<MySql_Timeless_Long_AutoIncrementId_BookModel>();
+            await Test_Delete_Core<Sqlite_Timestamp_Guid_BookModel>();
+            await Test_Delete_Core<Sqlite_Timestamp_Long_BookModel>();
+            await Test_Delete_Core<Sqlite_Timestamp_Long_AutoIncrementId_BookModel>();
+            await Test_Delete_Core<Sqlite_Timeless_Guid_BookModel>();
+            await Test_Delete_Core<Sqlite_Timeless_Long_BookModel>();
+            await Test_Delete_Core<Sqlite_Timeless_Long_AutoIncrementId_BookModel>();
+
+            await Test_Delete_Core<MySql_Timestamp_Guid_PublisherModel>();
+            await Test_Delete_Core<MySql_Timestamp_Long_PublisherModel>();
+            await Test_Delete_Core<MySql_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_Delete_Core<MySql_Timeless_Guid_PublisherModel>();
+            await Test_Delete_Core<MySql_Timeless_Long_PublisherModel>();
+            await Test_Delete_Core<MySql_Timeless_Long_AutoIncrementId_PublisherModel>();
+            await Test_Delete_Core<Sqlite_Timestamp_Guid_PublisherModel>();
+            await Test_Delete_Core<Sqlite_Timestamp_Long_PublisherModel>();
+            await Test_Delete_Core<Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_Delete_Core<Sqlite_Timeless_Guid_PublisherModel>();
+            await Test_Delete_Core<Sqlite_Timeless_Long_PublisherModel>();
+            await Test_Delete_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
+        }
+
+        #endregion
+
+        #region SQL Expression / Fields
+
+        private async Task Test_FieldLength_Oversize_Core<T>() where T : IPublisherModel
+        {
+            var modelDef = Db.ModelDefFactory.GetDef<T>()!;
+
+            var propertyDef = modelDef.GetDbPropertyDef(nameof(IPublisherModel.Name2))!;
+
+            if (!propertyDef.IsLengthFixed)
+            {
+                throw new Exception("Not Length Fixed");
+            }
+
+            var model = Mocker.MockOne<T>(t => { t.Name2 = SecurityUtil.CreateRandomString(propertyDef.DbMaxLength!.Value + 1); });
+
+            //TODO: 测试指定字段长度为10，结果赋值字符串长度为100，怎么处理
+
+            var ex = await Assert.ThrowsExceptionAsync<DbException>(() => Db.AddAsync(model, "", null));
+
+            Assert.IsTrue(ex.ErrorCode == ErrorCodes.DbDataTooLong);
+        }
+
+        [TestMethod]
+        public async Task Test_FieldLength_Oversize()
+        {
+            await Test_FieldLength_Oversize_Core<MySql_Timestamp_Guid_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<MySql_Timestamp_Long_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<MySql_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<MySql_Timeless_Guid_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<MySql_Timeless_Long_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<MySql_Timeless_Long_AutoIncrementId_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<Sqlite_Timestamp_Guid_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<Sqlite_Timestamp_Long_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<Sqlite_Timeless_Guid_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<Sqlite_Timeless_Long_PublisherModel>();
+            await Test_FieldLength_Oversize_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
+        }
+
+        private async Task Test_Enum_Core<T>() where T : IPublisherModel
+        {
+            var models = await AddAndRetrieve<T>();
+
+            IList<T> rts = await Db.RetrieveAsync<T>(p => p.Type == PublisherType.Big, null).ConfigureAwait(false);
+
+            Assert.IsTrue(rts.Any() && rts.All(p => p.Type == PublisherType.Big));
+        }
+
+        [TestMethod]
+        public async Task Test_Enum()
+        {
+            await Test_Enum_Core<MySql_Timestamp_Guid_PublisherModel>();
+            await Test_Enum_Core<MySql_Timestamp_Long_PublisherModel>();
+            await Test_Enum_Core<MySql_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_Enum_Core<MySql_Timeless_Guid_PublisherModel>();
+            await Test_Enum_Core<MySql_Timeless_Long_PublisherModel>();
+            await Test_Enum_Core<MySql_Timeless_Long_AutoIncrementId_PublisherModel>();
+            await Test_Enum_Core<Sqlite_Timestamp_Guid_PublisherModel>();
+            await Test_Enum_Core<Sqlite_Timestamp_Long_PublisherModel>();
+            await Test_Enum_Core<Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_Enum_Core<Sqlite_Timeless_Guid_PublisherModel>();
+            await Test_Enum_Core<Sqlite_Timeless_Long_PublisherModel>();
+            await Test_Enum_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
+        }
+
+        private async Task Test_StartWith_Core<T>() where T : IPublisherModel
+        {
+            //Clear
+            var trans = await Trans.BeginTransactionAsync<T>();
 
             try
             {
-                Timestamp_Guid_PublisherModel item = Mocker.Guid_MockOnePublisherModel();
+                await Db.DeleteAsync<T>(t => t.Name.StartsWith("StartWith_"), "", trans);
 
-                await Db.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
-
-                IList<Timestamp_Guid_PublisherModel> testModels = (await Db.RetrieveAllAsync<Timestamp_Guid_PublisherModel>(transactionContext, 0, 1).ConfigureAwait(false)).ToList();
-
-                if (testModels.Count == 0)
-                {
-                    throw new Exception("No Model to update");
-                }
-
-                Timestamp_Guid_PublisherModel model = testModels[0];
-
-                model.Books.Add("New Book2");
-                //model.BookAuthors.Add("New Book2", new Author() { Mobile = "15190208956", Code = "Yuzhaobai" });
-
-                await Db.UpdateAsync(model, "lastUsre", transactionContext).ConfigureAwait(false);
-
-                Timestamp_Guid_PublisherModel? stored = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(model.Id, transactionContext).ConfigureAwait(false);
-
-                item = Mocker.Guid_MockOnePublisherModel();
-
-                await Db.AddAsync(item, "xx", transactionContext).ConfigureAwait(false);
-
-                var fetched = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(item.Id, transactionContext).ConfigureAwait(false);
-
-                Assert.AreEqual(item.Timestamp, fetched!.Timestamp);
-
-                fetched.Name = "ssssss";
-
-                await Db.UpdateAsync(fetched, "xxx", transactionContext).ConfigureAwait(false);
-
-                await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
+                await trans.CommitAsync();
             }
             catch
             {
-                await Trans.RollbackAsync(transactionContext).ConfigureAwait(false);
-                throw;
-            }
-        }
-
-        [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_10_Enum_TestAsync(DbEngineType engineType)
-        {
-            IList<Timestamp_Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
-
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
-
-            try
-            {
-                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
-
-                await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                await Trans.RollbackAsync(transactionContext).ConfigureAwait(false);
+                await trans.RollbackAsync();
                 throw;
             }
 
-            IEnumerable<Timestamp_Guid_PublisherModel> publisherModels = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(p => p.Type == PublisherType.Big && p.LastUser == "lastUsre", null).ConfigureAwait(false);
+            var models = await AddAndRetrieve<T>(50, t => { t.Name = $"StartWith_{SecurityUtil.CreateRandomString(4)}"; });
 
-            Assert.IsTrue(publisherModels.Any() && publisherModels.All(p => p.Type == PublisherType.Big));
+            var rts = await Db.RetrieveAsync<T>(t => t.Name.StartsWith("StarWith_"), null);
+
+            string modelsJson = SerializeUtil.ToJson(models.OrderBy(m => m.Id).ToList());
+            string rtsJson = SerializeUtil.ToJson(rts.OrderBy(models => models.Id).ToList());
+
+            Assert.AreEqual(modelsJson, rtsJson);
         }
 
+
         [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_11_StartWith_TestAsync(DbEngineType engineType)
+        public async Task Test_StartWith()
         {
-            IList<Timestamp_Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
-
-            foreach (var model in publishers)
-            {
-                model.Name = "StartWithTest_xxx";
-            }
-
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
-
-            try
-            {
-                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
-
-                await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                await Trans.RollbackAsync(transactionContext).ConfigureAwait(false);
-                throw;
-            }
-
-            IEnumerable<Timestamp_Guid_PublisherModel> models = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(t => t.Name.StartsWith("Star"), null);
-
-            Assert.IsTrue(models.Any());
-
-            Assert.IsTrue(models.All(t => t.Name.StartsWith("Star")));
+            await Test_StartWith_Core<MySql_Timestamp_Guid_PublisherModel>();
+            await Test_StartWith_Core<MySql_Timestamp_Long_PublisherModel>();
+            await Test_StartWith_Core<MySql_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_StartWith_Core<MySql_Timeless_Guid_PublisherModel>();
+            await Test_StartWith_Core<MySql_Timeless_Long_PublisherModel>();
+            await Test_StartWith_Core<MySql_Timeless_Long_AutoIncrementId_PublisherModel>();
+            await Test_StartWith_Core<Sqlite_Timestamp_Guid_PublisherModel>();
+            await Test_StartWith_Core<Sqlite_Timestamp_Long_PublisherModel>();
+            await Test_StartWith_Core<Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_StartWith_Core<Sqlite_Timeless_Guid_PublisherModel>();
+            await Test_StartWith_Core<Sqlite_Timeless_Long_PublisherModel>();
+            await Test_StartWith_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
         }
 
-        [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_12_Binary_TestAsync(DbEngineType engineType)
+        #endregion
+
+        #region Convert
+
+        private async Task Test_Mapper_ToModel_Performance_Core<T>() where T : IDbModel
         {
-            IList<Timestamp_Guid_PublisherModel> publishers = Mocker.Guid_GetPublishers();
+            var modelDef = Db.ModelDefFactory.GetDef<T>()!;
+            var books = await AddAndRetrieve<T>(50);
 
-            foreach (var model in publishers)
-            {
-                model.Name = "StartWithTest_xxx";
-            }
-
-            TransactionContext transactionContext = await Trans.BeginTransactionAsync<Timestamp_Guid_PublisherModel>().ConfigureAwait(false);
-
-            try
-            {
-                await Db.AddAsync(publishers, "lastUsre", transactionContext).ConfigureAwait(false);
-
-                await Trans.CommitAsync(transactionContext).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                await Trans.RollbackAsync(transactionContext).ConfigureAwait(false);
-                throw;
-            }
-
-            IEnumerable<Timestamp_Guid_PublisherModel> models = await Db.RetrieveAsync<Timestamp_Guid_PublisherModel>(
-                t => t.Name.StartsWith("Star") && publishers.Any(), null);
-
-            //IEnumerable<Guid_PublisherModel> models = await Db.RetrieveAsync<Guid_PublisherModel>(
-            //    t => ReturnGuid() == ReturnGuid(), null);
-
-            Assert.IsTrue(models.Any());
-
-            Assert.IsTrue(models.All(t => t.Name.StartsWith("Star")));
-        }
-
-        [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_13_Mapper_ToModelAsync(DbEngineType engineType)
-        {
-            Globals.Logger.LogDebug($"��ǰProcess,{Environment.ProcessId}");
-
-            #region Json验证1
-
-            var publisher3 = new Timestamp_Guid_PublisherModel();
-
-            await Db.AddAsync(publisher3, "sss", null).ConfigureAwait(false);
-
-            var stored3 = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(publisher3.Id, null).ConfigureAwait(false);
-
-            Assert.AreEqual(SerializeUtil.ToJson(publisher3), SerializeUtil.ToJson(stored3));
-
-            #endregion
-
-            #region Json验证2
-
-            var publisher2s = Mocker.Guid_GetPublishers2();
-
-            foreach (Guid_PublisherModel2 publisher in publisher2s)
-            {
-                await Db.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
-            }
-
-            Guid_PublisherModel2? publisher2 = await Db.ScalarAsync<Guid_PublisherModel2>(publisher2s[0].Id, null).ConfigureAwait(false);
-
-            Assert.AreEqual(SerializeUtil.ToJson(publisher2), SerializeUtil.ToJson(publisher2s[0]));
-
-            #endregion
-
-            #region Json验证3
-
-            var publishers = Mocker.Guid_GetPublishers();
-
-            foreach (Timestamp_Guid_PublisherModel publisher in publishers)
-            {
-                await Db.AddAsync(publisher, "yuzhaobai", null).ConfigureAwait(false);
-            }
-
-            Timestamp_Guid_PublisherModel? publisher1 = await Db.ScalarAsync<Timestamp_Guid_PublisherModel>(publishers[0].Id, null).ConfigureAwait(false);
-
-            Assert.AreEqual(SerializeUtil.ToJson(publisher1), SerializeUtil.ToJson(publishers[0]));
-
-            #endregion
-        }
-
-        [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public async Task Guid_Test_14_Mapper_ToModel_PerformanceAsync(DbEngineType engineType)
-        {
-            var books = GetBooks(50);
-
-            var trans = await Trans.BeginTransactionAsync<Guid_Timestamp_BookModel>().ConfigureAwait(false);
-
-            try
-            {
-                await Db.AddAsync(books, "x", trans).ConfigureAwait(false);
-                await Trans.CommitAsync(trans).ConfigureAwait(false);
-            }
-            catch
-            {
-                await Trans.RollbackAsync(trans).ConfigureAwait(false);
-            }
-
-            Stopwatch stopwatch = new Stopwatch();
-
-            using MySqlConnection mySqlConnection = new MySqlConnection(DbConfigManager.GetRequiredConnectionString(DbSchema_Mysql, true).ToString());
-
+            //SetUp Dapper
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(DateTimeOffset), new DateTimeOffsetTypeHandler(), false);
             TypeHandlerHelper.AddTypeHandlerImpl(typeof(Guid), new MySqlGuidTypeHandler(), false);
 
             //time = 0;
-            int loop = 1;
+            int loop = 10;
 
             TimeSpan time0 = TimeSpan.Zero, time1 = TimeSpan.Zero, time2 = TimeSpan.Zero, time3 = TimeSpan.Zero;
             for (int cur = 0; cur < loop; ++cur)
             {
-                await mySqlConnection.OpenAsync().ConfigureAwait(false);
+                using var reader = await modelDef.Engine.ExecuteCommandReaderAsync(
+                    modelDef.MasterConnectionString,
+                    new DbEngineCommand("select * from {modelDef.DbTableReservedName} limit 5000")).ConfigureAwait(false);
 
-                using MySqlCommand command0 = new MySqlCommand("select * from tb_Guid_Book limit 5000", mySqlConnection);
-
-                var reader = await command0.ExecuteReaderAsync().ConfigureAwait(false);
-
-                List<Guid_Timestamp_BookModel> list1 = new List<Guid_Timestamp_BookModel>();
-                List<Guid_Timestamp_BookModel> list2 = new List<Guid_Timestamp_BookModel>();
-                List<Guid_Timestamp_BookModel> list3 = new List<Guid_Timestamp_BookModel>();
+                List<T> list1 = new List<T>();
+                List<T> list2 = new List<T>();
+                List<T> list3 = new List<T>();
 
                 int len = reader.FieldCount;
                 DbModelPropertyDef[] propertyDefs = new DbModelPropertyDef[len];
                 MethodInfo[] setMethods = new MethodInfo[len];
 
-                DbModelDef definition = Db.ModelDefFactory.GetDef<Guid_Timestamp_BookModel>()!;
-
                 for (int i = 0; i < len; ++i)
                 {
-                    propertyDefs[i] = definition.GetDbPropertyDef(reader.GetName(i))!;
+                    propertyDefs[i] = modelDef.GetDbPropertyDef(reader.GetName(i))!;
                     setMethods[i] = propertyDefs[i].SetMethod;
                 }
 
-                Func<IDbModelDefFactory, IDataReader, object> fullStack_mapper = DbModelConvert.CreateDataReaderRowToModelDelegate(definition, reader, 0, definition.FieldCount, false);
+                Func<IDbModelDefFactory, IDataReader, object> fullStack_mapper = DbModelConvert.CreateDataReaderRowToModelDelegate(
+                    modelDef, reader, 0, modelDef.FieldCount, false);
 
-                Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(Guid_Timestamp_BookModel), reader);
+                Func<IDataReader, object> dapper_mapper = DataReaderTypeMapper.GetTypeDeserializerImpl(typeof(T), reader);
 
                 Func<IDataReader, object> reflection_mapper = (r) =>
                 {
-                    Guid_Timestamp_BookModel item = new Guid_Timestamp_BookModel();
+                    T item = Activator.CreateInstance<T>();
 
                     for (int i = 0; i < len; ++i)
                     {
@@ -1083,28 +966,23 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
                 {
                     stopwatch1.Start();
                     object obj1 = fullStack_mapper(Db.ModelDefFactory, reader);
-                    list1.Add((Guid_Timestamp_BookModel)obj1);
+                    list1.Add((T)obj1);
                     stopwatch1.Stop();
 
                     stopwatch2.Start();
                     object obj2 = dapper_mapper(reader);
-                    list2.Add((Guid_Timestamp_BookModel)obj2);
+                    list2.Add((T)obj2);
                     stopwatch2.Stop();
 
                     stopwatch3.Start();
                     object obj3 = reflection_mapper(reader);
-                    list3.Add((Guid_Timestamp_BookModel)obj3);
+                    list3.Add((T)obj3);
                     stopwatch3.Stop();
                 }
 
                 time1 += stopwatch1.Elapsed;
                 time2 += stopwatch2.Elapsed;
                 time3 += stopwatch3.Elapsed;
-
-                await reader.DisposeAsync().ConfigureAwait(false);
-                command0.Dispose();
-
-                await mySqlConnection.CloseAsync().ConfigureAwait(false);
             }
 
             Console.WriteLine("FullStack_Emit : " + (time1.TotalMilliseconds / (loop * 1.0)).ToString(CultureInfo.InvariantCulture));
@@ -1113,64 +991,100 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
         }
 
         [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public void Guid_Test_15_Mapper_ToParameter(DbEngineType engineType)
+        public async Task Test_Mapper_ToModel_Performance()
         {
-            Timestamp_Guid_PublisherModel publisherModel = Mocker.Guid_MockOnePublisherModel();
-            //publisherModel.Version = 0;
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timestamp_Guid_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timestamp_Long_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timestamp_Long_AutoIncrementId_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timeless_Guid_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timeless_Long_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timeless_Long_AutoIncrementId_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timestamp_Guid_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timestamp_Long_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timestamp_Long_AutoIncrementId_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timeless_Guid_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timeless_Long_BookModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timeless_Long_AutoIncrementId_BookModel>();
 
-            var emit_results = publisherModel.ToDbParameters(Db.ModelDefFactory.GetDef<Timestamp_Guid_PublisherModel>()!, Db.ModelDefFactory, 1);
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timestamp_Guid_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timestamp_Long_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timeless_Guid_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timeless_Long_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<MySql_Timeless_Long_AutoIncrementId_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timestamp_Guid_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timestamp_Long_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timeless_Guid_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timeless_Long_PublisherModel>();
+            await Test_Mapper_ToModel_Performance_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
+        }
 
-            var reflect_results = publisherModel.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Timestamp_Guid_PublisherModel>()!, 1);
+        private void Test_Mapper_ToParameter_Core<T>() where T : IDbModel
+        {
+            var modelDef = Db.ModelDefFactory.GetDef<T>()!;
+            T model = Mocker.MockOne<T>();
 
-            AssertEqual(emit_results, reflect_results, DbEngineType.MySQL);
+            var emit_results = model.ToDbParameters(modelDef, Db.ModelDefFactory, null, 0);
 
-            //PublisherModel2
+            var reflect_results = model.ToDbParametersUsingReflection(modelDef, null, 0);
 
-            Guid_PublisherModel2 publisherModel2 = new Guid_PublisherModel2();
-
-            IList<KeyValuePair<string, object>>? emit_results2 = publisherModel2.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, Db.ModelDefFactory, 1);
-
-            var reflect_results2 = publisherModel2.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel2>()!, 1);
-
-            AssertEqual(emit_results2, reflect_results2, DbEngineType.MySQL);
-
-            //PublisherModel3
-
-            Guid_PublisherModel3 publisherModel3 = new Guid_PublisherModel3();
-
-            var emit_results3 = publisherModel3.ToDbParameters(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, Db.ModelDefFactory, 1);
-
-            var reflect_results3 = publisherModel3.ToDbParametersUsingReflection(Db.ModelDefFactory.GetDef<Guid_PublisherModel3>()!, 1);
-
-            AssertEqual(emit_results3, reflect_results3, DbEngineType.MySQL);
+            AssertEqual(emit_results, reflect_results, modelDef.EngineType);
         }
 
         [TestMethod]
-        [DataRow(DbEngineType.MySQL)]
-        [DataRow(DbEngineType.SQLite)]
-        public void Guid_Test_16_Mapper_ToParameter_Performance(DbEngineType engineType)
+        public void Test_Mapper_ToParameter()
         {
-            var models = Mocker.Guid_GetPublishers(1000000);
+            Test_Mapper_ToParameter_Core<MySql_Timestamp_Guid_BookModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timestamp_Long_BookModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timestamp_Long_AutoIncrementId_BookModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timeless_Guid_BookModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timeless_Long_BookModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timeless_Long_AutoIncrementId_BookModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timestamp_Guid_BookModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timestamp_Long_BookModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timestamp_Long_AutoIncrementId_BookModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timeless_Guid_BookModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timeless_Long_BookModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timeless_Long_AutoIncrementId_BookModel>();
 
-            var def = Db.ModelDefFactory.GetDef<Timestamp_Guid_PublisherModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timestamp_Guid_PublisherModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timestamp_Long_PublisherModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timeless_Guid_PublisherModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timeless_Long_PublisherModel>();
+            Test_Mapper_ToParameter_Core<MySql_Timeless_Long_AutoIncrementId_PublisherModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timestamp_Guid_PublisherModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timestamp_Long_PublisherModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timeless_Guid_PublisherModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timeless_Long_PublisherModel>();
+            Test_Mapper_ToParameter_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
+        }
+
+        private void Test_Mapper_ToParameter_Performance_Core<T>() where T : IDbModel
+        {
+            var modelDef = Db.ModelDefFactory.GetDef<T>()!;
+            var models = Mocker.Mock<T>(1000000);
 
             Stopwatch stopwatch = new Stopwatch();
 
+            int i = 0;
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ToDbParameters(def!, Db.ModelDefFactory);
+                _ = model.ToDbParameters(modelDef, Db.ModelDefFactory, null, i++);
             }
+
             stopwatch.Stop();
 
             Console.WriteLine($"Emit: {stopwatch.ElapsedMilliseconds}");
 
+            i = 0;
             stopwatch.Restart();
             foreach (var model in models)
             {
-                _ = model.ToDbParametersUsingReflection(def!);
+                _ = model.ToDbParametersUsingReflection(modelDef, null, i++);
             }
             stopwatch.Stop();
 
@@ -1178,15 +1092,13 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
         }
 
         [TestMethod]
-        public async Task Test_FieldLength_OversizeAsync()
+        public void Test_Mapper_ToParameter_Performance()
         {
-            //TODO: 测试指定字段长度为10，结果赋值字符串长度为100，怎么处理
+            Test_Mapper_ToParameter_Performance_Core<MySql_Timestamp_Guid_BookModel>();
+            Test_Mapper_ToParameter_Performance_Core<MySql_Timestamp_Guid_PublisherModel>();
 
-            FieldLengthTestModel model = new FieldLengthTestModel { Content = "12345678910" };
-
-            var ex = await Assert.ThrowsExceptionAsync<DbException>(() => Db.AddAsync(model, "", null));
-
-            Assert.IsTrue(ex.ErrorCode == ErrorCodes.DbDataTooLong);
+            Test_Mapper_ToParameter_Performance_Core<Sqlite_Timestamp_Guid_BookModel>();
+            Test_Mapper_ToParameter_Performance_Core<Sqlite_Timestamp_Guid_PublisherModel>();
         }
 
         private static void AssertEqual(IEnumerable<KeyValuePair<string, object>> emit_results, IEnumerable<KeyValuePair<string, object>> results, DbEngineType engineType)
@@ -1204,5 +1116,7 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
                     DbPropertyConvert.DoNotUseUnSafePropertyValueToDbFieldValueStatement(kv.Value, false, engineType));
             }
         }
+
+        #endregion
     }
 }
