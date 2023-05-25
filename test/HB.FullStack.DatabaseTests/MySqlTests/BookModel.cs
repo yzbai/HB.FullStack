@@ -1,26 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.Xml.Linq;
 
 using HB.FullStack.Common;
-using HB.FullStack.Common.IdGen;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
-using HB.FullStack.DatabaseTests.MySqlTests;
 
 namespace HB.FullStack.DatabaseTests
 {
-    public interface IBookModel : IModel
+    public interface IBookModel : IDbModel
     {
-        object Id { get; set; }
+        //object Id { get; set; }
+
+        //TODO:思考，是否在IBookModel上加一个Attribute来表明与Publisher的关系即可？
+        object? PublisherId { get; set; }
+        
+        
         string Name { get; set; }
 
         double Price { get; set; }
 
-        //TODO:思考，是否在IBookModel上加一个Attribute来表明与Publisher的关系即可？
-        object? PublisherId { get; set; }
     }
 
     public abstract partial class BookModel<TId> : DbModel<TId>, IBookModel
@@ -33,7 +31,7 @@ namespace HB.FullStack.DatabaseTests
         public override bool Deleted { get; set; }
         public override string? LastUser { get; set; }
         object? IBookModel.PublisherId { get => PublisherId; set => PublisherId = (TId?)value; }
-        object IBookModel.Id { get => Id!; set => Id = (TId)value; }
+        //object IBookModel.Id { get => Id!; set => Id = (TId)value; }
     }
 
     [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql, ConflictCheckMethods = ConflictCheckMethods.Ignore | ConflictCheckMethods.OldNewValueCompare | ConflictCheckMethods.Timestamp)]
@@ -267,5 +265,7 @@ namespace HB.FullStack.DatabaseTests
 
             return books;
         }
+
+        
     }
 }

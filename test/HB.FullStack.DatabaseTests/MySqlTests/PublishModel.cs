@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
+using HB.FullStack.Client.Base;
 using HB.FullStack.Common;
 using HB.FullStack.Common.IdGen;
 using HB.FullStack.Common.PropertyTrackable;
@@ -26,7 +28,7 @@ namespace HB.FullStack.DatabaseTests
         public string Mobile { get; set; } = default!;
     }
 
-    public interface IPublisherModel : IModel
+    public interface IPublisherModel : IDbModel
     {
         IImmutableDictionary<string, Author>? BookAuthors { get; set; }
         IImmutableDictionary<string, string>? BookNames { get; set; }
@@ -42,7 +44,7 @@ namespace HB.FullStack.DatabaseTests
 
         double? Float2 { get; set; }
 
-        object Id { get; set; }
+        //object Id { get; set; }
     }
 
     [PropertyTrackableObject]
@@ -90,7 +92,7 @@ namespace HB.FullStack.DatabaseTests
 
         public override bool Deleted { get; set; }
         public override string? LastUser { get; set; }
-        object IPublisherModel.Id { get => Id!; set => Id = (TId)value; }
+        //object IPublisherModel.Id { get => Id!; set => Id = (TId)value; }
     }
 
     [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
@@ -179,6 +181,82 @@ namespace HB.FullStack.DatabaseTests
 
     internal static partial class Mocker
     {
+        internal static T MockOne<T>() where T : IDbModel => Mock<T>(1).First();
+        
+        internal static IList<T> Mock<T>(int count) where T : IDbModel
+        {
+            var results = new List<T>();
+
+            for (int i = 0; i < count; ++i)
+            {
+                var t = (T)Activator.CreateInstance(typeof(T))!;
+
+                if (t is IPublisherModel publisher)
+                {
+                    publisher.Type = (PublisherType)(i % 3);
+                    publisher.Type2 = i % 2 == 0 ? (PublisherType)(i % 3) : null;
+                    publisher.Name = "中文名字" + StaticIdGen.GetLongId();
+                    publisher.Name2 = i % 2 == 0 ? null : "中文名字2_" + StaticIdGen.GetLongId();
+                    publisher.Books = ImmutableList.Create("Cat", "Dog");
+                    publisher.BookNames = new Dictionary<string, string> { { "a", "b" }, { "c", "d" } }.ToImmutableDictionary();
+                    publisher.BookAuthors = new Dictionary<string, Author>()
+                    {
+                        { "Cat", new Author() { Mobile="111", Name="BB" } },
+                        { "Dog", new Author() { Mobile="222", Name="sx" } }
+                    }.ToImmutableDictionary();
+
+                    publisher.Number = _random.Next(1, 100);
+                    publisher.Number1 = i % 2 == 0 ? _random.Next(1, 100) : null;
+
+                    publisher.DDD = i % 2 == 0 ? null : TimeUtil.UtcNow;
+
+                    publisher.Float = (float)_random.NextDouble();
+                    publisher.Float2 = i % 2 == 0 ? null : _random.NextDouble();
+                }
+                else if (t is IBookModel book)
+                {
+                    book.Name = "Book" + i.ToString();
+                    book.Price = _random.NextDouble();
+                }
+
+                results.Add(t);
+            }
+
+            return results;
+        }
+
+        internal static void Modify<T>(T model) where T : IDbModel
+        {
+            if (model is IPublisherModel publisher)
+            {
+                //model.Guid = Guid.NewGuid().ToString();
+                publisher.Type = PublisherType.Online;
+                publisher.Name += "Updated";
+                publisher.Books = new List<string>() { "xxx", "tttt" }.ToImmutableList();
+                publisher.BookAuthors = new Dictionary<string, Author>()
+                {
+                    { "Cat", new Author() { Mobile = "111", Name = "BB" } },
+                    { "Dog", new Author() { Mobile = "222", Name = "sx" } }
+                }.ToImmutableDictionary();
+            }
+            else if (model is IBookModel book)
+            {
+                book.Name += "Updated";
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        internal static void Modify<T>(IList<T> models) where T : IDbModel
+        {
+            foreach (var model in models)
+            {
+                Modify(model);
+            }
+        }
+
         public static IList<IPublisherModel> GetPublishModel(DbEngineType engineType, bool isTimestamp, DbModelIdType idType, int? count = null)
         {
             count ??= 50;

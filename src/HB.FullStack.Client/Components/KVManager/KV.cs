@@ -3,7 +3,7 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Components.KVManager
 {
-    [DbModel(ConflictCheckMethods.Ignore)]
+    [DbModel(ConflictCheckMethods = ConflictCheckMethods.Ignore)]
     public class KV : DbModel<string>, IExpired
     {
         public override string Id { get; set; } = null!;

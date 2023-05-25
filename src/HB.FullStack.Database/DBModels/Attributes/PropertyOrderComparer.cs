@@ -49,8 +49,8 @@ namespace HB.FullStack.Database.DbModels
             return info.Name switch
             {
                 nameof(DbModel<long>.Id) => new DbFieldAttribute(0),
-                nameof(BaseDbModel.Deleted) => new DbFieldAttribute(1),
-                nameof(BaseDbModel.LastUser) => new DbFieldAttribute(2),
+                nameof(IDbModel.Deleted) => new DbFieldAttribute(1),
+                nameof(IDbModel.LastUser) => new DbFieldAttribute(2),
                 nameof(ITimestamp.Timestamp) => new DbFieldAttribute(3),
                 "LastTime" => new DbFieldAttribute(4),
                 _ => null

@@ -14,7 +14,7 @@ namespace HB.FullStack.Database
 {
     partial class DefaultDatabase
     {
-        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : BaseDbModel
+        public async Task DeleteAsync<T>(T item, string lastUser, TransactionContext? transContext) where T : IDbModel
         {
             ThrowIf.NotValid(item, nameof(item));
 
@@ -57,7 +57,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : BaseDbModel
+        public async Task DeleteAsync<T>(IList<T> items, string lastUser, TransactionContext transContext) where T : IDbModel
         {
             ThrowIf.NotValid(items, nameof(items));
 
@@ -114,7 +114,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext) where T : BaseDbModel, ITimestamp
+        public async Task DeleteAsync<T>(object id, long timestamp, string lastUser, TransactionContext? transContext) where T : IDbModel, ITimestamp
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
 
@@ -137,7 +137,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteAsync<T>(IList<object> ids, IList<long> timestamps, string lastUser, TransactionContext transContext) where T : BaseDbModel, ITimestamp
+        public async Task DeleteAsync<T>(IList<object> ids, IList<long> timestamps, string lastUser, TransactionContext transContext) where T : IDbModel, ITimestamp
         {
             if (!ids.Any())
             {
@@ -174,7 +174,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteIgnoreConflictCheckAsync<T>(object id, string lastUser, TransactionContext? transContext) where T : BaseDbModel
+        public async Task DeleteIgnoreConflictCheckAsync<T>(object id, string lastUser, TransactionContext? transContext) where T : IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull($"Lack ModelDef of {typeof(T).FullName}").ThrowIfNotWriteable();
 
@@ -197,7 +197,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteIgnoreConflictCheckAsync<T>(IList<object> ids, string lastUser, TransactionContext transContext) where T : BaseDbModel
+        public async Task DeleteIgnoreConflictCheckAsync<T>(IList<object> ids, string lastUser, TransactionContext transContext) where T : IDbModel
         {
             if (!ids.Any())
             {
@@ -232,7 +232,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext transactionContext) where T : BaseDbModel
+        public async Task DeleteAsync<T>(Expression<Func<T, bool>> whereExpr, string lastUser, TransactionContext transactionContext) where T : IDbModel
         {
             //TODO: 这里应该添加安全限制，检查whereExpr, 或者先select，然后判断是否删除,记录删除日志
             //ThrowIfExceedMaxBatchNumber(items, lastUser, modelDef);

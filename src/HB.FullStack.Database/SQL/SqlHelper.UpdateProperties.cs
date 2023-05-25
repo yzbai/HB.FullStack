@@ -120,7 +120,7 @@ namespace HB.FullStack.Database.SQL
 
             StringBuilder assignments = GetUpdatePropertiesAssignments(
                 engineType,
-                new List<string>(propertyNames) { nameof(BaseDbModel.LastUser) },
+                new List<string>(propertyNames) { nameof(IDbModel.LastUser) },
                 SqlHelper.NEW_PARAMETER_SUFFIX,
                 number);
 

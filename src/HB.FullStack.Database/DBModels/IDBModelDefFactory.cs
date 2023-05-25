@@ -7,7 +7,7 @@ namespace HB.FullStack.Database.DbModels
 {
     public interface IDbModelDefFactory
     {
-        DbModelDef? GetDef<T>() where T : BaseDbModel;
+        DbModelDef? GetDef<T>() where T : IDbModel;
 
         DbModelDef? GetDef(Type? modelType);
 

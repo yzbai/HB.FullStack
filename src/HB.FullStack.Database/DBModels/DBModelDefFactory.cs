@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.DbModels
         {
             _configManager = configManager;
 
-            static bool typeCondition(Type t) => t.IsSubclassOf(typeof(BaseDbModel)) && !t.IsAbstract;
+            static bool typeCondition(Type t) => t.IsClass && !t.IsAbstract && t.IsAssignableTo(typeof(IDbModel));
 
             IEnumerable<Type> allModelTypes = _configManager.DbModelAssemblies.IsNullOrEmpty()
                 ? ReflectionUtil.GetAllTypeByCondition(typeCondition)
@@ -345,11 +345,11 @@ namespace HB.FullStack.Database.DbModels
                 }
             }
 
-            if (propertyInfo.Name == nameof(BaseDbModel.Deleted))
+            if (propertyInfo.Name == nameof(IDbModel.Deleted))
             {
                 modelDef.DeletedPropertyDef = propertyDef;
             }
-            else if (propertyInfo.Name == nameof(BaseDbModel.LastUser))
+            else if (propertyInfo.Name == nameof(IDbModel.LastUser))
             {
                 modelDef.LastUserPropertyDef = propertyDef;
             }
@@ -357,7 +357,7 @@ namespace HB.FullStack.Database.DbModels
             return propertyDef;
         }
 
-        public DbModelDef? GetDef<T>() where T : BaseDbModel
+        public DbModelDef? GetDef<T>() where T : IDbModel
         {
             return GetDef(typeof(T));
         }

@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.Convert
         #region IDataReader Row To Model
 
         public static IList<T> ToDbModels<T>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
-            where T : BaseDbModel
+            where T : IDbModel
         {
             Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedDataReaderRowToModelFunc(reader, modelDef, 0, reader.FieldCount, false);
 
@@ -36,8 +36,8 @@ namespace HB.FullStack.Database.Convert
         }
 
         public static IList<Tuple<TSource, TTarget?>> ToDbModels<TSource, TTarget>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef)
-            where TSource : BaseDbModel
-            where TTarget : BaseDbModel
+            where TSource : IDbModel
+            where TTarget : IDbModel
         {
             Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false);
             Func<IDbModelDefFactory, IDataReader, object?> targetFunc = GetCachedDataReaderRowToModelFunc(reader, targetModelDef, sourceModelDef.FieldCount, reader.FieldCount - sourceModelDef.FieldCount, true);
@@ -56,9 +56,9 @@ namespace HB.FullStack.Database.Convert
         }
 
         public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToDbModels<TSource, TTarget2, TTarget3>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
-            where TSource : BaseDbModel
-            where TTarget2 : BaseDbModel
-            where TTarget3 : BaseDbModel
+            where TSource : IDbModel
+            where TTarget2 : IDbModel
+            where TTarget3 : IDbModel
         {
             Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false);
             Func<IDbModelDefFactory, IDataReader, object?> targetFunc1 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef1, sourceModelDef.FieldCount, targetModelDef1.FieldCount, true);
@@ -109,7 +109,7 @@ namespace HB.FullStack.Database.Convert
 
         #region Model To DbParameters
 
-        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, string? parameterNameSuffix, int number) where T : BaseDbModel
+        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, string? parameterNameSuffix, int number) where T : IDbModel
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
@@ -129,7 +129,7 @@ namespace HB.FullStack.Database.Convert
             return parameters;
         }
 
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix) where T : BaseDbModel
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix) where T : IDbModel
         {
             int number = 0;
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
@@ -144,7 +144,7 @@ namespace HB.FullStack.Database.Convert
             return parameters;
         }
 
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix, int number) where T : BaseDbModel
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix, int number) where T : IDbModel
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
@@ -175,7 +175,7 @@ namespace HB.FullStack.Database.Convert
         #region PropertyValues To DbParameters
 
         public static IList<KeyValuePair<string, object>> AddParameter(this IList<KeyValuePair<string, object>> parameters,
-            DbModelPropertyDef propertyDef, object propertyValue, string? parameterSuffix, int number)
+            DbModelPropertyDef propertyDef, object? propertyValue, string? parameterSuffix, int number)
         {
 
             parameters.Add(new KeyValuePair<string, object>(
@@ -194,12 +194,7 @@ namespace HB.FullStack.Database.Convert
 
             foreach (KeyValuePair<string, object?> kv in propertyValues)
             {
-                DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(kv.Key);
-
-                if (propertyDef == null)
-                {
-                    throw DbExceptions.PropertyNotFound(modelDef.FullName, kv.Key);
-                }
+                DbModelPropertyDef? propertyDef = modelDef.GetDbPropertyDef(kv.Key) ?? throw DbExceptions.PropertyNotFound(modelDef.FullName, kv.Key);
 
                 parameters.Add(new KeyValuePair<string, object>(
                     $"{propertyDef.DbParameterizedName}_{parameterNameSuffix}{number}",

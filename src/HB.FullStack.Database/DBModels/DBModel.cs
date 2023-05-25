@@ -13,11 +13,26 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Database.DbModels
 {
-    public abstract class BaseDbModel : ValidatableObject,  IModel
+    public interface IDbModel : IModel
     {
+        object Id { get; set; }
+
         /// <summary>
         /// 不是真正的删除，而是用Deleted=1表示删除。
         /// </summary>
+        bool Deleted { get; set; }
+
+        string? LastUser { get; set; }
+    }
+
+    public abstract class DbModel<TId> : ValidatableObject, IDbModel
+    {
+        [DbField(0)]
+        [DbPrimaryKey]
+        [CacheModelKey]
+        [Required]
+        public abstract TId Id { get; set; }
+
         [DbField(1)]
         public abstract bool Deleted { get; set; }
 
@@ -25,14 +40,7 @@ namespace HB.FullStack.Database.DbModels
         public abstract string? LastUser { get; set; }
 
         public ModelKind GetKind() => ModelKind.Db;
-    }
 
-    public abstract class DbModel<TId> : BaseDbModel
-    {
-        [DbField(0)]
-        [DbPrimaryKey]
-        [CacheModelKey]
-        [Required]
-        public abstract TId Id { get; set; }
+        object IDbModel.Id { get => Id!; set => Id = (TId)value; }
     }
 }
