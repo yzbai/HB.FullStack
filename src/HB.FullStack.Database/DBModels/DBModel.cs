@@ -15,7 +15,7 @@ namespace HB.FullStack.Database.DbModels
 {
     public interface IDbModel : IModel
     {
-        object Id { get; set; }
+        object? Id { get; set; }
 
         /// <summary>
         /// 不是真正的删除，而是用Deleted=1表示删除。
@@ -41,6 +41,6 @@ namespace HB.FullStack.Database.DbModels
 
         public ModelKind GetKind() => ModelKind.Db;
 
-        object IDbModel.Id { get => Id!; set => Id = (TId)value; }
+        object? IDbModel.Id { get => Id; set => Id = (TId)value!; }
     }
 }

@@ -367,22 +367,39 @@ namespace HB.FullStack.Database
                 case DbModelIdType.LongId:
                     foreach (var item in items)
                     {
-                        if (primaryKeyDef.GetValueFrom(item) == null)
+                        var idObj = item.Id;
+
+                        if (idObj == null || ((long)idObj) <= 0)
                         {
-                            primaryKeyDef.SetValueTo(item, StaticIdGen.GetLongId());
+                            item.Id = StaticIdGen.GetLongId();
                         }
                     }
                     break;
 
                 case DbModelIdType.AutoIncrementLongId:
+
+                    foreach (var item in items)
+                    {
+                        var idObj = item.Id;
+
+                        if (idObj != null && ((long)idObj) > 0)
+                        {
+                            throw DbExceptions.AddError(
+                                $"AutoIncrementId of {modelDef.FullName} is greater than 0 ! Should not assign value to AutoincrementId.");
+                        }
+                    }
+
                     break;
 
                 case DbModelIdType.GuidId:
+
                     foreach (var item in items)
                     {
-                        if (primaryKeyDef.GetValueFrom(item) == null)
+                        var idObj = item.Id;
+
+                        if (idObj == null || ((Guid)idObj) == Guid.Empty)
                         {
-                            primaryKeyDef.SetValueTo(item, StaticIdGen.GetSequentialGuid());
+                            item.Id = StaticIdGen.GetSequentialGuid();
                         }
                     }
                     break;

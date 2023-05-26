@@ -169,6 +169,7 @@
         #endregion
         #region Db
 
+        public static ErrorCode DbAddError { get; set; } = new ErrorCode(nameof(DbAddError), "");
         public static ErrorCode DbConflictMethodError { get; set; } = new ErrorCode(nameof(DbConflictMethodError), "");
         public static ErrorCode DbUpdatePropertiesError { get; set; } = new ErrorCode(nameof(DbUpdatePropertiesError), "");
 
@@ -190,6 +191,8 @@
         public static ErrorCode MigrateError = new ErrorCode(nameof(MigrateError), "");
         public static ErrorCode FoundTooMuch = new ErrorCode(nameof(FoundTooMuch), "");
         public static ErrorCode DatabaseNotWriteable = new ErrorCode(nameof(DatabaseNotWriteable), "");
+        
+        //Important
         public static ErrorCode ConcurrencyConflict = new ErrorCode(nameof(ConcurrencyConflict), "");
         public static ErrorCode TransactionError = new ErrorCode(nameof(TransactionError), "");
         public static ErrorCode SystemInfoError = new ErrorCode(nameof(SystemInfoError), "");

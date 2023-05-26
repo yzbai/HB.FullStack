@@ -72,7 +72,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
         public async Task Test_Multiple_Action_Track_Status()
         {
             var model = Mocker.MockTimestampModel();
-            sdf
+            
             model.Age = 10;
 
             await Db.AddAsync(model, "", null).ConfigureAwait(false);

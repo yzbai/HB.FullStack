@@ -35,7 +35,7 @@ namespace HB.FullStack.Database
 
                 if (modelDef.IdType == DbModelIdType.AutoIncrementLongId)
                 {
-                    modelDef.PrimaryKeyPropertyDef.SetValueTo(item, System.Convert.ToInt64(rt, CultureInfo.InvariantCulture));
+                    item.Id = System.Convert.ToInt64(rt);
                 }
 
                 ReTrackIfTrackable(item, modelDef);
@@ -95,7 +95,7 @@ namespace HB.FullStack.Database
 
                     while (reader.Read())
                     {
-                        modelDef.PrimaryKeyPropertyDef.SetValueTo(items[num], reader.GetInt64(0));
+                        items[num].Id = reader.GetInt64(0);
                         ++num;
                     }
                 }

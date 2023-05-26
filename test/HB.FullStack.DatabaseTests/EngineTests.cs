@@ -23,7 +23,7 @@ using Microsoft.Data.Sqlite;
 using System.Data.Common;
 using HB.FullStack.Database.Config;
 
-namespace HB.FullStack.DatabaseTests.MySQL
+namespace HB.FullStack.DatabaseTests
 {
     [TestClass]
     public class EngineTests : DatabaseTestClass
@@ -38,7 +38,7 @@ namespace HB.FullStack.DatabaseTests.MySQL
             var modelDef = Db.ModelDefFactory.GetDef<T>()!;
 
             var parameters = new List<KeyValuePair<string, object>>()
-                .AddParameter(modelDef.PrimaryKeyPropertyDef, modelDef.PrimaryKeyPropertyDef.GetValueFrom(dbModel), null, 0);
+                .AddParameter(modelDef.PrimaryKeyPropertyDef, dbModel.Id, null, 0);
 
             var command = new DbEngineCommand(
                 $"update {modelDef.DbTableReservedName} set LastUser ='Update_xxx' where Id = {parameters[0].Key}",
@@ -79,13 +79,17 @@ namespace HB.FullStack.DatabaseTests.MySQL
 
         private async Task Test_Mult_SQL_Return_With_Reader_Core<T>() where T : IBookModel
         {
-            var book = Mocker.Mock<T>(1).First();
+            var model = Mocker.Mock<T>(1).First();
 
-            await Db.AddAsync(book, "tester", null);
+            await Db.AddAsync(model, "tester", null);
 
             var modelDef = Db.ModelDefFactory.GetDef<T>()!;
 
-            var parameters = new List<KeyValuePair<string, object>>().AddParameter(modelDef.PrimaryKeyPropertyDef, modelDef.PrimaryKeyPropertyDef.GetValueFrom(book), null, 0);
+            var parameters = new List<KeyValuePair<string, object>>().AddParameter(
+                modelDef.PrimaryKeyPropertyDef, 
+                model.Id, 
+                null, 
+                0);
 
             string sql = @$"
 update {modelDef.DbTableReservedName} set LastUser='TTTgdTTTEEST' where Id = {parameters[0].Key};
@@ -134,8 +138,7 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
 
         //NOTICE: 在重复update时，即值不发生改变。默认useAffectedRows=false，即update返回matched的数量。 而useAffectedRows=true，则返回真正发生过改变的数量。
         //应该保持useAffectedRows=false
-        [TestMethod]
-        public async void Test_MySQL_UseAffectedRow_Core<T>() where T : IDbModel
+        public async Task Test_MySQL_RepeateUpdate_UseAffectedRow_Core<T>() where T : IDbModel
         {
             var modelDef = Db.ModelDefFactory.GetDef<T>()!;
 
@@ -164,15 +167,15 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
 
             string commandText = $"update {modelDef.DbTableReservedName} set LastUser ={modelDef.LastUserPropertyDef.DbParameterizedName} WHERE Id ={modelDef.PrimaryKeyPropertyDef.DbParameterizedName};";
 
+            var getParameters = () => new List<KeyValuePair<string, object>>()
+                .AddParameter(modelDef.PrimaryKeyPropertyDef, model.Id)
+                .AddParameter(modelDef.LastUserPropertyDef, SecurityUtil.CreateRandomString(5));
+
             var engine = modelDef.Engine;
 
             var selectRowCountCommand = new DbEngineCommand("select row_count()");
 
             //UseAffectedRows = false
-            var getParameters =()=> new List<KeyValuePair<string, object>>()
-                .AddParameter(modelDef.PrimaryKeyPropertyDef, model.Id)
-                .AddParameter(modelDef.LastUserPropertyDef, SecurityUtil.CreateRandomString(5));
-
             var falseCommand = new DbEngineCommand(commandText, getParameters());
 
             int falseRt1 = await engine.ExecuteCommandNonQueryAsync(falseUseAffectedRowsConnection, falseCommand);
@@ -185,70 +188,80 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
             Assert.IsTrue(Convert.ToInt64(falseCount1) == 1);
             Assert.IsTrue(Convert.ToInt64(falseCount2) == 1);
 
-            int fa
+            //UseAffectedRows = true
+            var trueCommand = new DbEngineCommand(commandText, getParameters());
 
-            using MySqlCommand mySqlCommand1 = new MySqlCommand(commandText, mySqlConnection);
+            int trueRt1 = await engine.ExecuteCommandNonQueryAsync(trueUseAffectedRowConnection, trueCommand);
+            var trueCount1 = await engine.ExecuteCommandScalarAsync(trueUseAffectedRowConnection, selectRowCountCommand);
+            int trueRt2 = await engine.ExecuteCommandNonQueryAsync(trueUseAffectedRowConnection, trueCommand);
+            var trueCount2 = await engine.ExecuteCommandScalarAsync(trueUseAffectedRowConnection, selectRowCountCommand);
 
-            int rt1 = mySqlCommand1.ExecuteNonQuery();
 
-            using MySqlCommand rowCountCommand1 = new MySqlCommand("select row_count()", mySqlConnection);
+            Assert.IsTrue(trueRt1 == 1);
+            Assert.IsTrue(trueRt2 == 1);
+            Assert.IsTrue(Convert.ToInt64(trueCount1) == 1);
+            Assert.IsTrue(Convert.ToInt64(trueCount2) == 1);
 
-            long? rowCount1 = (long?)rowCountCommand1.ExecuteScalar();
+            //none UseAffectedRows
+            var noneCommand = new DbEngineCommand(commandText, getParameters());
 
-            using MySqlCommand mySqlCommand2 = new MySqlCommand(commandText, mySqlConnection);
+            int noneRt1 = await engine.ExecuteCommandNonQueryAsync(noneUseAffectedRowConnection, noneCommand);
+            var noneCount1 = await engine.ExecuteCommandScalarAsync(noneUseAffectedRowConnection, selectRowCountCommand);
+            int noneRt2 = await engine.ExecuteCommandNonQueryAsync(noneUseAffectedRowConnection, noneCommand);
+            var noneCount2 = await engine.ExecuteCommandScalarAsync(noneUseAffectedRowConnection, selectRowCountCommand);
 
-            int rt2 = mySqlCommand1.ExecuteNonQuery();
-
-            using MySqlCommand rowCountCommand2 = new MySqlCommand("select row_count()", mySqlConnection);
-
-            long? rowCount2 = (long?)rowCountCommand2.ExecuteScalar();
-
-            if (UseAffectedRows.HasValue && UseAffectedRows.Value) //真正改变的行数
-            {
-                Assert.AreNotEqual(rt1, rt2);
-                Assert.AreNotEqual(rowCount1, rowCount2);
-            }
-            else //found_rows 找到的行数  by default in mysql
-            {
-                Assert.AreEqual(rt1, rt2);
-                Assert.AreEqual(rowCount1, rowCount2);
-            }
+            Assert.IsTrue(noneRt1 == 1);
+            Assert.IsTrue(noneRt2 == 1);
+            Assert.IsTrue(Convert.ToInt64(noneCount1) == 1);
+            Assert.IsTrue(Convert.ToInt64(noneCount2) == 1);
         }
 
         [TestMethod]
-        public void TestSQLite_Changes_Test()
+        public async Task Test_MySQL_UseAffectedRow()
         {
-            using SqliteConnection conn = new SqliteConnection(SqliteConnectionString);
-            conn.Open();
+            await Test_MySQL_RepeateUpdate_UseAffectedRow_Core<MySql_Timestamp_Guid_BookModel>();
+            await Test_MySQL_RepeateUpdate_UseAffectedRow_Core<MySql_Timestamp_Guid_PublisherModel>();
+        }
 
-            long id = new Random().NextInt64(long.MaxValue);
-            long timestamp = TimeUtil.Timestamp;
+        private async Task Test_SQLite_RepeateUpdate_Changes_Core<T>() where T : IDbModel
+        {
+            var modelDef = Db.ModelDefFactory.GetDef<T>()!;
 
-            string insertCommandText = $"insert into tb_publisher(`Name`, `Id`, `Timestamp`) values('FSFSF', '{id}', {timestamp})";
+            if (modelDef.EngineType != DbEngineType.SQLite)
+            {
+                return;
+            }
 
-            using SqliteCommand insertCommand = new SqliteCommand(insertCommandText, conn);
+            var model = (await AddAndRetrieve<T>(1)).First();
 
-            insertCommand.ExecuteScalar();
+            string commandText = $"update {modelDef.DbTableReservedName} set LastUser ={modelDef.LastUserPropertyDef.DbParameterizedName} WHERE Id ={modelDef.PrimaryKeyPropertyDef.DbParameterizedName};";
 
-            string commandText = $"update `tb_publisher` set  `Name`='{new Random().NextDouble()}', `Timestamp`={timestamp} WHERE `Id`='{id}' ;";
+            var getParameters = () => new List<KeyValuePair<string, object>>()
+                .AddParameter(modelDef.PrimaryKeyPropertyDef, model.Id)
+                .AddParameter(modelDef.LastUserPropertyDef, SecurityUtil.CreateRandomString(5));
 
-            using SqliteCommand mySqlCommand1 = new SqliteCommand(commandText, conn);
+            var engine = modelDef.Engine;
 
-            int rt1 = mySqlCommand1.ExecuteNonQuery();
+            var selectRowCountCommand = new DbEngineCommand("select changes()");
 
-            using SqliteCommand rowCountCommand1 = new SqliteCommand("select changes()", conn);
+            var updateCommand = new DbEngineCommand(commandText, getParameters());
 
-            long? rowCount1 = (long?)rowCountCommand1.ExecuteScalar();
+            int rt1 = await engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, updateCommand);
+            var count1 = await engine.ExecuteCommandScalarAsync(modelDef.MasterConnectionString, selectRowCountCommand);
+            int rt2 = await engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, updateCommand);
+            var count2 = await engine.ExecuteCommandScalarAsync(modelDef.MasterConnectionString, selectRowCountCommand);
 
-            using SqliteCommand mySqlCommand2 = new SqliteCommand(commandText, conn);
+            Assert.IsTrue(rt1 == 1);
+            Assert.IsTrue(rt2 == 1);
+            Assert.IsTrue(Convert.ToInt64(count1) == 1);
+            Assert.IsTrue(Convert.ToInt64(count2) == 1);
+        }
 
-            int rt2 = mySqlCommand1.ExecuteNonQuery();
-
-            using SqliteCommand rowCountCommand2 = new SqliteCommand("select changes()", conn);
-
-            long? rowCount2 = (long?)rowCountCommand2.ExecuteScalar();
-
-            Assert.AreEqual(rt1, rt2, rowCount1.ToString(), rowCount2.ToString());
+        [TestMethod]
+        public async Task Test_SQLite_RepeateUpdate_Changes()
+        {
+            await Test_SQLite_RepeateUpdate_Changes_Core<Sqlite_Timestamp_Guid_BookModel>();
+            await Test_SQLite_RepeateUpdate_Changes_Core<Sqlite_Timestamp_Guid_PublisherModel>();
         }
     }
 }

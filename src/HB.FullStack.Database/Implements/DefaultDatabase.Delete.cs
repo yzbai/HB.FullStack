@@ -31,15 +31,13 @@ namespace HB.FullStack.Database
                 switch (bestConflictMethod)
                 {
                     case ConflictCheckMethods.Ignore:
-                        object idValue = modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!;
-                        command = DbCommandBuilder.CreateDeleteIgnoreConflictCheckCommand(modelDef, idValue, lastUser, trulyDelete, curTimestamp);
+                        command = DbCommandBuilder.CreateDeleteIgnoreConflictCheckCommand(modelDef, item.Id!, lastUser, trulyDelete, curTimestamp);
                         break;
                     case ConflictCheckMethods.OldNewValueCompare:
                         command = DbCommandBuilder.CreateDeleteOldNewCompareCommand(modelDef, item, lastUser, trulyDelete, curTimestamp);
                         break;
                     case ConflictCheckMethods.Timestamp:
-                        object idValueTimestamp = modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!;
-                        command = DbCommandBuilder.CreateDeleteTimestampCommand(modelDef, idValueTimestamp, (item as ITimestamp)!.Timestamp, lastUser, trulyDelete, curTimestamp);
+                        command = DbCommandBuilder.CreateDeleteTimestampCommand(modelDef, item.Id!, (item as ITimestamp)!.Timestamp, lastUser, trulyDelete, curTimestamp);
                         break;
                     default:
                         throw DbExceptions.ConflictCheckError($"{modelDef.FullName} has wrong Best Conflict Check Method. {bestConflictMethod}");
@@ -87,14 +85,14 @@ namespace HB.FullStack.Database
                 switch (bestConflictMethod)
                 {
                     case ConflictCheckMethods.Ignore:
-                        var idValues = items.Select(item => modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!).ToList();
+                        var idValues = items.Select(item => item.Id!).ToList();
                         command = DbCommandBuilder.CreateBatchDeleteIgnoreConflictCheckCommand(modelDef, idValues, lastUser, trulyDelete, curTimestamp);
                         break;
                     case ConflictCheckMethods.OldNewValueCompare:
                         command = DbCommandBuilder.CreateBatchDeleteOldNewCompareCommand(modelDef, items, lastUser, trulyDelete, curTimestamp);
                         break;
                     case ConflictCheckMethods.Timestamp:
-                        var idValues2 = items.Select(item => modelDef.PrimaryKeyPropertyDef.GetValueFrom(item)!).ToList();
+                        var idValues2 = items.Select(item => item.Id!).ToList();
                         var timestamps = items.Select(item => (item as ITimestamp)!.Timestamp).ToList();
                         command = DbCommandBuilder.CreateBatchDeleteTimestampCommand(modelDef, idValues2, timestamps, lastUser, trulyDelete, curTimestamp);
                         break;

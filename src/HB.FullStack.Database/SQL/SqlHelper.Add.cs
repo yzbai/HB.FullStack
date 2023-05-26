@@ -12,7 +12,7 @@ namespace HB.FullStack.Database.SQL
         {
             string cacheKey = GetCachedSqlKey(new DbModelDef[] { modelDef }, null, new List<object?> { placeHolder, returnId });
 
-            if(SqlCache.TryGetValue(cacheKey, out var sql))
+            if (SqlCache.TryGetValue(cacheKey, out var sql))
             {
                 return sql;
             }
@@ -35,8 +35,8 @@ namespace HB.FullStack.Database.SQL
             args.RemoveLast();
             values.RemoveLast();
 
-            string returnIdStatement = returnId && modelDef.IdType == DbModelIdType.AutoIncrementLongId 
-                ? $"select {LastInsertIdStatement(modelDef.EngineType)};" 
+            string returnIdStatement = returnId && modelDef.IdType == DbModelIdType.AutoIncrementLongId
+                ? $"select {LastInsertIdStatement(modelDef.EngineType)};"
                 : string.Empty;
 
             sql = $"insert into {modelDef.DbTableReservedName}({args}) values({values});{returnIdStatement}";
@@ -48,17 +48,17 @@ namespace HB.FullStack.Database.SQL
 
         public static string CreateBatchAddSql(DbModelDef modelDef, int modelCount)
         {
-            var batchSqlReturnType = modelDef.IdType == DbModelIdType.AutoIncrementLongId 
-                ? BatchSqlReturnType.ReturnLastInsertIds 
+            var batchSqlReturnType = modelDef.IdType == DbModelIdType.AutoIncrementLongId
+                ? BatchSqlReturnType.ReturnLastInsertIds
                 : BatchSqlReturnType.None;
 
-                return CreateBatchSql(
-                    batchSqlReturnType,
-                    modelDef,
-                    modelCount,
-                    () => CreateAddSql(modelDef, "{0}", false));
+            return CreateBatchSql(
+                batchSqlReturnType,
+                modelDef,
+                modelCount,
+                () => CreateAddSql(modelDef, "{0}", false));
         }
 
-        
+
     }
 }

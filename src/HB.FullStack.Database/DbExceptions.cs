@@ -461,5 +461,12 @@ namespace HB.FullStack.Database
             DbException ex = new DbException(ErrorCodes.DbConflictMethodError, message, null, null);
             return ex;
         }
+
+        internal static Exception AddError(string message)
+        {
+            DbException ex = new DbException(ErrorCodes.DbAddError, message, null, null);
+
+            return ex;
+        }
     }
 }
