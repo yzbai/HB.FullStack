@@ -1,40 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Reflection;
-using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest.DapperMapper;
-using HB.FullStack.BaseTest.Models;
 using HB.FullStack.Common;
 using HB.FullStack.Database;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
 using HB.FullStack.Database.Engine;
 using HB.FullStack.Database.SQL;
-using HB.FullStack.DatabaseTests.MySqlTests;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using MySqlConnector;
 
 [assembly: Parallelize(Workers = 10, Scope = ExecutionScope.ClassLevel)]
 
 namespace HB.FullStack.DatabaseTests
 {
     [TestClass]
-    public partial class BasicTest_Guid : BaseTestClass
+    public class DatabaseTestClass : BaseTestClass
     {
         #region Common
 
-        private async Task<IList<T>> AddAndRetrieve<T>(int count = 50, Action<T>? additionalAction = null) where T : IDbModel
+        internal async Task<IList<T>> AddAndRetrieve<T>(int count = 50, Action<int, T>? additionalAction = null) where T : IDbModel
         {
             var models = Mocker.Mock<T>(count, additionalAction);
 
@@ -323,146 +315,17 @@ namespace HB.FullStack.DatabaseTests
 
         #endregion
 
-        #region Engine
-
-        private async Task Test_Repeate_Update_Return_1_Core<T>() where T : IDbModel
-        {
-            var dbModel = Mocker.Mock<T>(1).First();
-
-            await Db.AddAsync(dbModel, "tester", null);
-
-
-            var modelDef = Db.ModelDefFactory.GetDef<T>()!;
-
-            var parameters = new List<KeyValuePair<string, object>>()
-                .AddParameter(modelDef.PrimaryKeyPropertyDef, modelDef.PrimaryKeyPropertyDef.GetValueFrom(dbModel), null, 0);
-
-            var command = new DbEngineCommand(
-                $"update {modelDef.DbTableReservedName} set LastUser ='Update_xxx' where Id = {parameters[0].Key}",
-                parameters);
-
-            int rt = await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command);
-            int rt2 = await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command);
-            int rt3 = await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command);
-
-            Assert.IsTrue(1 == rt);
-
-            Assert.IsTrue(1 == rt2);
-
-            Assert.IsTrue(1 == rt3);
-        }
-
-        /// <summary>
-        /// //NOTICE: 在sqlite下，重复update，返回1.即matched
-        /// //NOTICE: 在mysql下，重复update，返回1，即mactched
-        /// </summary>
-        /// <returns></returns>
-        [TestMethod]
-        public async Task Test_Repeate_Update_Return_1()
-        {
-            await Test_ConcurrencyConflict_Error_Core<MySql_Timestamp_Guid_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<MySql_Timestamp_Long_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<MySql_Timestamp_Long_AutoIncrementId_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<MySql_Timeless_Guid_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<MySql_Timeless_Long_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<MySql_Timeless_Long_AutoIncrementId_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<Sqlite_Timestamp_Guid_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<Sqlite_Timestamp_Long_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<Sqlite_Timestamp_Long_AutoIncrementId_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<Sqlite_Timeless_Guid_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<Sqlite_Timeless_Long_PublisherModel>();
-            await Test_ConcurrencyConflict_Error_Core<Sqlite_Timeless_Long_AutoIncrementId_PublisherModel>();
-        }
-
-
-
-        private async Task Test_Mult_SQL_Return_With_Reader_Core<T>() where T : IBookModel
-        {
-            var book = Mocker.Mock<T>(1).First();
-
-            await Db.AddAsync(book, "tester", null);
-
-            var modelDef = Db.ModelDefFactory.GetDef<T>()!;
-
-            var parameters = new List<KeyValuePair<string, object>>().AddParameter(modelDef.PrimaryKeyPropertyDef, modelDef.PrimaryKeyPropertyDef.GetValueFrom(book), null, 0);
-
-            string sql = @$"
-update {modelDef.DbTableReservedName} set LastUser='TTTgdTTTEEST' where Id = {parameters[0].Key};
-select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Key};
-";
-            var command = new DbEngineCommand(sql, parameters);
-
-            using IDataReader reader = await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.MasterConnectionString, command);
-
-            List<string?> rt = new List<string?>();
-
-            while (reader.Read())
-            {
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    rt.Add(reader.GetValue(i)?.ToString());
-                }
-            }
-
-            Assert.AreEqual(rt.Count, 1);
-            Assert.AreNotEqual(rt.Count, 1);
-        }
-
-
-        /// <summary>
-        /// //NOTICE: Mysql执行多条语句的时候，ExecuteCommandReader只返回最后一个结果。
-        /// </summary>
-        /// <returns></returns>
-        [TestMethod]
-        public async Task Test_Mult_SQL_Return_With_Reader()
-        {
-            await Test_Mult_SQL_Return_With_Reader_Core<MySql_Timestamp_Guid_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<MySql_Timestamp_Long_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<MySql_Timestamp_Long_AutoIncrementId_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<MySql_Timeless_Guid_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<MySql_Timeless_Long_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<MySql_Timeless_Long_AutoIncrementId_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<Sqlite_Timestamp_Guid_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<Sqlite_Timestamp_Long_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<Sqlite_Timestamp_Long_AutoIncrementId_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<Sqlite_Timeless_Guid_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<Sqlite_Timeless_Long_BookModel>();
-            await Test_Mult_SQL_Return_With_Reader_Core<Sqlite_Timeless_Long_AutoIncrementId_BookModel>();
-        }
-
-        #endregion
-
         #region Add
 
         private async Task Test_Add_Core<T>() where T : IDbModel
         {
-            TransactionContext trans = await Trans.BeginTransactionAsync<T>().ConfigureAwait(false);
+            T model = Mocker.MockOne<T>();
 
-            try
-            {
-                IList<T> lst = new List<T>();
+            await Db.AddAsync(model, "lastUsre", null).ConfigureAwait(false);
 
-                for (int i = 0; i < 10; ++i)
-                {
-                    T model = Mocker.MockOne<T>();
+            var rt = await Db.ScalarAsync<T>(model.Id, null);
 
-                    await Db.AddAsync(model, "lastUsre", trans).ConfigureAwait(false);
-
-                    lst.Add(model);
-                }
-
-                await Trans.CommitAsync(trans).ConfigureAwait(false);
-
-                var rt = await Db.RetrieveAsync<T>(m => SqlStatement.In(m.Id, true, lst.Select(s => s.Id)), null);
-
-                Assert.IsTrue(SerializeUtil.ToJson(lst) == SerializeUtil.ToJson(rt));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                await Trans.RollbackAsync(trans).ConfigureAwait(false);
-                throw;
-            }
+            Assert.IsTrue(SerializeUtil.ToJson(model) == SerializeUtil.ToJson(rt));
         }
 
         [TestMethod]
@@ -869,7 +732,7 @@ select count(1) from {modelDef.DbTableReservedName} where Id = {parameters[0].Ke
                 throw;
             }
 
-            var models = await AddAndRetrieve<T>(50, t => { t.Name = $"StartWith_{SecurityUtil.CreateRandomString(4)}"; });
+            var models = await AddAndRetrieve<T>(50, (_, t) => { t.Name = $"StartWith_{SecurityUtil.CreateRandomString(4)}"; });
 
             var rts = await Db.RetrieveAsync<T>(t => t.Name.StartsWith("StarWith_"), null);
 

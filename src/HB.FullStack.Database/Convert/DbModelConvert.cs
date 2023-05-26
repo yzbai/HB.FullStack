@@ -185,6 +185,17 @@ namespace HB.FullStack.Database.Convert
             return parameters;
         }
 
+        public static IList<KeyValuePair<string, object>> AddParameter(this IList<KeyValuePair<string, object>> parameters,
+            DbModelPropertyDef propertyDef, object? propertyValue)
+        {
+
+            parameters.Add(new KeyValuePair<string, object>(
+                propertyDef.DbParameterizedName,
+                DbPropertyConvert.PropertyValueToDbFieldValue(propertyValue, propertyDef, propertyDef.ModelDef.EngineType)));
+
+            return parameters;
+        }
+
         public static IList<KeyValuePair<string, object>> PropertyValuesToParametersUsingReflection(
             DbModelDef modelDef, IDictionary<string, object?> propertyValues, string? parameterNameSuffix, int number)
         {

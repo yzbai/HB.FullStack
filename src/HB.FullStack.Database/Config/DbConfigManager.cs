@@ -8,6 +8,8 @@ using HB.FullStack.Database.Engine;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HB.FullStack.Database.Config
 {
@@ -15,7 +17,6 @@ namespace HB.FullStack.Database.Config
     //TODO: 增加数据库坏掉，自动切换, 比如屏蔽某个Slave，或者master切换到slave
     //TODO: 记录Settings到tb_sys_info表中，自动加载
     //TODO: 处理slave库的brandNewCreate，以及Migration
-    //TODO: 确保mysql中useAffectedRows=false
     internal class DbConfigManager : IDbConfigManager
     {
         private readonly DbOptions _options;
@@ -55,6 +56,8 @@ namespace HB.FullStack.Database.Config
                     throw DbExceptions.DbSchemaError(schema.Version, schema.Name, "DbSchema Name Can not be null or empty");
                 }
 
+                schema.EnsureUseAffectedRowsIsFalse();
+
                 if (schema.IsDefault && DefaultDbSchema == null)
                 {
                     DefaultDbSchema = schema;
@@ -92,6 +95,6 @@ namespace HB.FullStack.Database.Config
 
         public IList<DbSchema> AllDbSchemas => _options.DbSchemas;
 
-        
+
     }
 }

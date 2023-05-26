@@ -21,6 +21,10 @@ namespace System
 
         public static DateTime LocalNow => DateTime.Now;
 
+        public static TimeOnly UtcTimeOnlyNow => TimeOnly.FromDateTime(DateTime.UtcNow);
+
+        public static DateOnly UtcDateOnlyNow => DateOnly.FromDateTime(DateTime.UtcNow);
+
         /// <summary>
         /// 把公历转换为人们口中的农历
         /// 机器农历里闰月是继续编下取的，可以有13个月

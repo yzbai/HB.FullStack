@@ -32,7 +32,6 @@ using Microsoft.VisualStudio.Threading;
 
 namespace HB.FullStack.BaseTest
 {
-    [TestClass]
     public class BaseTestClass
     {
         public const string ApiEndpointName = "api";
@@ -51,13 +50,7 @@ namespace HB.FullStack.BaseTest
 
         public IDatabase Db { get; set; } = null!;
 
-
-
-        public IDbConfigManager DbConfigManager { get; set; } = null!;
-
         public ITransaction Trans { get; set; } = null!;
-
-        public string SqliteConnectionString = null!;
 
         public string SqliteDbFileName = null!;
 
@@ -126,7 +119,7 @@ namespace HB.FullStack.BaseTest
             #region Db
 
             Db = ServiceProvider.GetRequiredService<IDatabase>();
-            DbConfigManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
+            //DbConfigManager = ServiceProvider.GetRequiredService<IDbConfigManager>();
             Trans = ServiceProvider.GetRequiredService<ITransaction>();
 
             InitializeDatabaseAsync().WaitWithoutInlining();
@@ -160,7 +153,7 @@ namespace HB.FullStack.BaseTest
             //await DropSysInfoTableFirstForTest();
 
             var SqliteDbFileName = $"s{TimeUtil.UtcNowUnixTimeSeconds}{SecurityUtil.CreateRandomString(6)}.db";
-            SqliteConnectionString = $"Data Source={SqliteDbFileName}";
+            var SqliteConnectionString = $"Data Source={SqliteDbFileName}";
 
             Globals.Logger.LogInformation($"测试开始初始化数据库");
 
