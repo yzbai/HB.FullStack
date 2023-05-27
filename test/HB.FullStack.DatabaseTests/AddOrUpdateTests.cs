@@ -6,10 +6,10 @@ using HB.FullStack.Database.SQL;
 using HB.FullStack.BaseTest.Data.Sqlites;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace HB.FullStack.DatabaseTests.SQLite
+namespace HB.FullStack.DatabaseTests
 {
-    [TestClass()]
-    public class DatabaseClientExtensionsTests_Sqlite : BaseTestClass
+    [TestClass]
+    public class AddOrUpdateTests : DatabaseTestClass
     {
         [TestMethod()]
         public async Task AddOrUpdateByIdAsyncTestAsync()

@@ -13,6 +13,9 @@ namespace HB.FullStack.Common.PropertyTrackable
 
         void StopTrack();
 
+        //use method but not property
+        bool IsTracking();
+
         void Clear();
 
         void Track<T>(string propertyName, T oldValue, T newValue);

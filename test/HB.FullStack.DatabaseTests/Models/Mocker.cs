@@ -52,6 +52,9 @@ namespace HB.FullStack.DatabaseTests
                     publisher.NullableTimeOnly = i % 2 == 0 ? null : TimeUtil.UtcTimeOnlyNow;
                     publisher.NullableDateOnly = i % 2 == 0 ? null : TimeUtil.UtcDateOnlyNow;
 
+                    publisher.InnerRecord = new InnerRecord(publisher.Name);
+                    publisher.InnerObservableModel = new InnerObservableModel() { InnerObservableName = publisher.Name2 };
+
                 }
                 else if (t is IBookModel book)
                 {
@@ -87,15 +90,27 @@ namespace HB.FullStack.DatabaseTests
         {
             if (model is IPublisherModel publisher)
             {
-                //model.Guid = Guid.NewGuid().ToString();
                 publisher.Type = PublisherType.Online;
-                publisher.Name += "Updated";
-                publisher.Books = new List<string>() { "xxx", "tttt" }.ToImmutableList();
+                publisher.Type2 = _random.Next() % 2 == 0 ? PublisherType.Small : null;
+                publisher.Name += "Updated" + _random.Next();
+                publisher.Name2 += "Updated" + _random.Next();
+                publisher.Books = new List<string>() { "Book_" + _random.Next(), "Book_" + _random.Next() }.ToImmutableList();
                 publisher.BookAuthors = new Dictionary<string, Author>()
                 {
                     { "Cat", new Author() { Mobile = "111", Name = "BB" } },
                     { "Dog", new Author() { Mobile = "222", Name = "sx" } }
                 }.ToImmutableDictionary();
+                publisher.Number = _random.Next();
+                publisher.Number1 = _random.Next() % 2 == 0 ? null : _random.Next();
+
+                publisher.TimeOnly = TimeUtil.UtcTimeOnlyNow;
+                publisher.DateOnly = TimeUtil.UtcDateOnlyNow;
+
+                publisher.NullableTimeOnly = _random.Next() % 2 == 0 ? null : TimeUtil.UtcTimeOnlyNow;
+                publisher.NullableDateOnly = _random.Next() % 2 == 0 ? null : TimeUtil.UtcDateOnlyNow;
+
+                publisher.InnerRecord = new InnerRecord(publisher.Name);
+                publisher.InnerObservableModel = new InnerObservableModel() { InnerObservableName = publisher.Name2 };
             }
             else if (model is IBookModel book)
             {

@@ -5,7 +5,7 @@
 /// </summary>
 public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrackable.IPropertyTrackableObject
 {
-    public bool _startTrack = false;
+    public bool _isTracking = false;
 
     private global::System.Collections.Generic.IList<global::HB.FullStack.Common.PropertyTrackable.PropertyChange> _changes = new global::System.Collections.Generic.List<global::HB.FullStack.Common.PropertyTrackable.PropertyChange>();
 
@@ -18,12 +18,17 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
 
     public void StartTrack()
     {
-        _startTrack = true;
+        _isTracking = true;
     }
 
     public void StopTrack()
     {
-        _startTrack = false;
+        _isTracking = false;
+    }
+
+    public bool IsTracking()
+    {
+        return _isTracking;
     }
 
     public void Clear()
@@ -33,7 +38,7 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
 
     public void Track<T>(string propertyName, T oldValue, T newValue)
     {
-        if (!_startTrack)
+        if (!_isTracking)
         {
             return;
         }
@@ -43,7 +48,7 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
 
     public void TrackOldValue<T>(string propertyName, T oldValue)
     {
-        if (!_startTrack)
+        if (!_isTracking)
         {
             return;
         }
@@ -58,7 +63,7 @@ public class PropertyTrackableObject : global::HB.FullStack.Common.PropertyTrack
 
     public void TrackNewValue<T>(string propertyName, T newValue)
     {
-        if (!_startTrack)
+        if (!_isTracking)
         {
             return;
         }

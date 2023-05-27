@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Immutable;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Config;
@@ -32,6 +34,10 @@ namespace HB.FullStack.DatabaseTests
         DateOnly? NullableDateOnly { get; set; }
 
         TimeOnly? NullableTimeOnly { get; set; }
+
+        InnerRecord? InnerRecord { get; set; }
+
+        InnerObservableModel? InnerObservableModel { get; set; }
     }
 
     [PropertyTrackableObject]
@@ -89,9 +95,16 @@ namespace HB.FullStack.DatabaseTests
         [TrackProperty]
         private TimeOnly? _nullableTimeOnly;
 
+        [TrackProperty]
+        private InnerRecord? _innerRecord;
+
+        [TrackProperty]
+        private InnerObservableModel? _innerObservableModel;
+        
         public override bool Deleted { get; set; }
+        
         public override string? LastUser { get; set; }
-        //object IPublisherModel.Id { get => Id!; set => Id = (TId)value; }
+        
     }
 
     [DbModel(DbSchemaName = BaseTestClass.DbSchema_Mysql)]
@@ -190,5 +203,13 @@ namespace HB.FullStack.DatabaseTests
         public string Name { get; set; } = default!;
 
         public string Mobile { get; set; } = default!;
+    }
+
+    public record InnerRecord(string? InnerRecordName);
+
+    public partial class InnerObservableModel : ObservableObject
+    {
+        [ObservableProperty]
+        public string? _innerObservableName;
     }
 }
