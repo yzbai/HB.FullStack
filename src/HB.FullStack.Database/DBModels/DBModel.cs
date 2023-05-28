@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
+using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Database.DbModels
 {
@@ -42,5 +43,20 @@ namespace HB.FullStack.Database.DbModels
         public ModelKind GetKind() => ModelKind.Db;
 
         object? IDbModel.Id { get => Id; set => Id = (TId)value!; }
+    }
+
+    [PropertyTrackableObject]
+    public abstract partial class ExpiredDbModel<TId> : DbModel<TId>, IExpired
+    {
+        [TrackProperty]
+        private long? _expiredAt;
+
+        /// <summary>
+        /// 改动时间，包括：
+        /// 1. Update
+        /// 2. Get from network
+        /// </summary>
+        //[TrackProperty]
+        //private DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
     }
 }

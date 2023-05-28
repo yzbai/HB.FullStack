@@ -11,10 +11,11 @@ using HB.FullStack.Client.ApiClient;
 
 using Microsoft;
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Base
 {
-    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : ClientDbModel;
+    public delegate bool IfUseLocalData<TModel>(ApiRequest request, IEnumerable<TModel> models) where TModel : IDbModel;
 
     public abstract class BaseRepo
     {

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Text.Json;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database.Convert;
 using HB.FullStack.Database.DbModels;
@@ -9,31 +11,31 @@ namespace HB.FullStack.Client.Components.Sync
     /// <summary>
     /// 使用自增保证顺序
     /// </summary>
-    [PropertyTrackableObject]
-    public partial class OfflineChange : DbModel<long>
+    public class OfflineChange : DbModel<long>, ITimestamp
     {
         public OfflineChangeType Type { get; set; }
 
         public OfflineChangeStatus Status { get; set; }
 
-        public Guid ModelId { get; set; }
+        public JsonElement ModelIdJsonElement { get; set; }
 
         public string ModelFullName { get; set; } = null!;
 
         //public string? BusinessCatalog { get; set; }
 
+        //TODO: 字段长度问题, 所有DbModel的字段长度检查
         [DbField(Converter = typeof(JsonDbPropertyConverter))]
         public PropertyChangePack? ChangePack { get; set; }
 
         //public string? DeletedObjectJson { get; set; }
 
-        public long LastTime { get; set; } = TimeUtil.Timestamp;
 
         [DbAutoIncrementPrimaryKey]
         public override long Id { get; set; }
 
         public override bool Deleted { get; set; }
         public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 
     public enum OfflineChangeType

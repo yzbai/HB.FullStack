@@ -110,13 +110,13 @@ namespace HB.FullStack.Client.Components.Sync
 
         #region Offline Data
 
-        public Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : IDbModel
             => RecordOfflineAddOrDeleteAsync(models, OfflineChangeType.Add, transactionContext);
 
-        public Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : IDbModel
             => RecordOfflineAddOrDeleteAsync(models, OfflineChangeType.Delete, transactionContext);
 
-        private async Task RecordOfflineAddOrDeleteAsync<TModel>(IEnumerable<TModel> models, OfflineChangeType offlineChangeType, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        private async Task RecordOfflineAddOrDeleteAsync<TModel>(IEnumerable<TModel> models, OfflineChangeType offlineChangeType, TransactionContext transactionContext) where TModel : IDbModel
         {
             DbModelDef? modelDef = _modelDefFactory.GetDef<TModel>(ModelKind.Db) as DbModelDef;
 
@@ -130,7 +130,7 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = offlineChangeType,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelId = model.Id,
+                    ModelIdJson = SerializeUtil.ToJson(model.Id.ThrowIfNull(nameof(model.Id))),
                     ModelFullName = modelDef.FullName
                 };
 
@@ -140,7 +140,7 @@ namespace HB.FullStack.Client.Components.Sync
             await _database.AddAsync(offlineHistories, "", transactionContext).ConfigureAwait(false);
         }
 
-        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new()
+        public async Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : IDbModel
         {
             DbModelDef? modelDef = _modelDefFactory.GetDef<TModel>(ModelKind.Db) as DbModelDef;
 
@@ -154,7 +154,7 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = OfflineChangeType.UpdateProperties,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelId = changedPack.AddtionalProperties["Id"].To<Guid>()!,
+                    ModelIdJson = changedPack.AddtionalProperties["Id"].To(modelDef.PrimaryKeyPropertyDef.Type),
                     ModelFullName = modelDef.FullName,
                     ChangePack = changedPack
                 };

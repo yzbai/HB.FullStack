@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Components.Sync
 {
@@ -33,11 +34,11 @@ namespace HB.FullStack.Client.Components.Sync
 
         #region Offline Data
 
-        Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
+        Task RecordOfflineAddAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : IDbModel;
 
-        Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : ClientDbModel, new();
+        Task RecordOfflineUpdateAsync<TModel>(IEnumerable<PropertyChangePack> cps, TransactionContext transactionContext) where TModel : IDbModel;
 
-        Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : ClientDbModel, new();
+        Task RecordOfflineDeleteAsync<TModel>(IEnumerable<TModel> models, TransactionContext transactionContext) where TModel : IDbModel;
 
         #endregion
     }

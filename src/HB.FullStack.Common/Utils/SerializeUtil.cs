@@ -44,6 +44,15 @@ namespace System
             return JsonSerializer.Serialize(model, _jsonSerializerOptions);
         }
 
+        //TODO: figure out best performance of json
+
+#nullable disable
+        public static string ToJson<T>(T model)
+        {
+            return JsonSerializer.Serialize<T>(model, _jsonSerializerOptions);
+        }
+#nullable restore
+
         public static bool TryToJson(object? model, out string? json)
         {
             try
@@ -221,6 +230,11 @@ namespace System
         public static T? To<T>(this JsonElement jsonElement)
         {
             return (T?)FromJsonElement(typeof(T), jsonElement);
+        }
+
+        public static object? To(this JsonElement jsonElement, Type type)
+        {
+            return FromJsonElement(type, jsonElement);
         }
 
         #endregion Json
