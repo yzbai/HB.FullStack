@@ -4,7 +4,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Common.Shared
 {
-    public class DirectoryTokenRes : SharedResource
+    public class DirectoryTokenRes : ISharedResource
     {
         public Guid UserId { get; set; }
 

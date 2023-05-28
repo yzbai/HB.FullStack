@@ -17,7 +17,7 @@ namespace HB.FullStack.Client.Components.Sync
 
         public OfflineChangeStatus Status { get; set; }
 
-        public JsonElement ModelIdJsonElement { get; set; }
+        public string ModelIdString { get; set; } = null!;
 
         public string ModelFullName { get; set; } = null!;
 

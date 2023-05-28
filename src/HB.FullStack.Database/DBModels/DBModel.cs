@@ -18,9 +18,6 @@ namespace HB.FullStack.Database.DbModels
     {
         object? Id { get; set; }
 
-        /// <summary>
-        /// 不是真正的删除，而是用Deleted=1表示删除。
-        /// </summary>
         bool Deleted { get; set; }
 
         string? LastUser { get; set; }

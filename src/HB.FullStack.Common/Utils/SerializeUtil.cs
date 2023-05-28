@@ -229,12 +229,12 @@ namespace System
 
         public static T? To<T>(this JsonElement jsonElement)
         {
-            return (T?)FromJsonElement(typeof(T), jsonElement);
+            return (T?)JsonSerializer.Deserialize<T>(jsonElement, _jsonSerializerOptions);
         }
 
         public static object? To(this JsonElement jsonElement, Type type)
         {
-            return FromJsonElement(type, jsonElement);
+            return JsonSerializer.Deserialize(jsonElement, type, _jsonSerializerOptions);
         }
 
         #endregion Json

@@ -8,6 +8,7 @@ using AsyncAwaitBestPractices;
 using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.Base;
 using HB.FullStack.Common;
+using HB.FullStack.Common.Convert;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Database;
@@ -130,7 +131,9 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = offlineChangeType,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelIdJson = SerializeUtil.ToJson(model.Id.ThrowIfNull(nameof(model.Id))),
+                    ModelIdString = StringConvertCenter.ConvertToString(
+                        model.Id.ThrowIfNull(nameof(model.Id)), 
+                        modelDef.PrimaryKeyPropertyDef.Type, StringConvertPurpose.NONE).ThrowIfNull(nameof(OfflineChange.ModelIdString)),
                     ModelFullName = modelDef.FullName
                 };
 
@@ -154,7 +157,10 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = OfflineChangeType.UpdateProperties,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelIdJson = changedPack.AddtionalProperties["Id"].To(modelDef.PrimaryKeyPropertyDef.Type),
+                    ModelIdString = StringConvertCenter.ConvertToString( 
+                        changedPack.AddtionalProperties["Id"].To(modelDef.PrimaryKeyPropertyDef.Type).ThrowIfNull(nameof(changedPack)),
+                        modelDef.PrimaryKeyPropertyDef.Type,
+                        StringConvertPurpose.NONE).ThrowIfNull(nameof(OfflineChange.ModelIdString)),
                     ModelFullName = modelDef.FullName,
                     ChangePack = changedPack
                 };
