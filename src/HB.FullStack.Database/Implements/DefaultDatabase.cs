@@ -124,13 +124,13 @@ namespace HB.FullStack.Database
 
         #region 条件构造
 
-        public FromExpression<T> From<T>() where T : IDbModel => DbCommandBuilder.From<T>();
+        public FromExpression<T> From<T>() where T : class, IDbModel => DbCommandBuilder.From<T>();
 
-        public WhereExpression<T> Where<T>() where T : IDbModel => DbCommandBuilder.Where<T>();
+        public WhereExpression<T> Where<T>() where T : class, IDbModel => DbCommandBuilder.Where<T>();
 
-        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : IDbModel => DbCommandBuilder.Where<T>(sqlFilter, filterParams);
+        public WhereExpression<T> Where<T>(string sqlFilter, params object[] filterParams) where T : class, IDbModel => DbCommandBuilder.Where<T>(sqlFilter, filterParams);
 
-        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : IDbModel => DbCommandBuilder.Where(predicate);
+        public WhereExpression<T> Where<T>(Expression<Func<T, bool>> predicate) where T : class, IDbModel => DbCommandBuilder.Where(predicate);
 
         #endregion
 
@@ -202,7 +202,15 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void PrepareItem<T>(T item, string lastUser, ref string? oldLastUser, ref long? oldTimestamp) where T : IDbModel
+        private static void ThrowIfNotAllowedIgnoreConflictCheck(DbModelDef modelDef)
+        {
+            if (!modelDef.AllowedConflictCheckMethods.HasFlag(ConflictCheckMethods.Ignore))
+            {
+                throw DbExceptions.ConflictCheckError($"{modelDef.FullName} does not allow ConfictCheckMethods.Ignore.");
+            }
+        }
+
+        private static void PrepareItem<T>(T item, string lastUser, ref string? oldLastUser, ref long? oldTimestamp) where T : class, IDbModel
         {
             long curTimestamp = TimeUtil.Timestamp;
 
@@ -216,7 +224,7 @@ namespace HB.FullStack.Database
             item.LastUser = lastUser;
         }
 
-        private static void RestoreItem<T>(T item, long? oldTimestamp, string? oldLastUser) where T : IDbModel
+        private static void RestoreItem<T>(T item, long? oldTimestamp, string? oldLastUser) where T : class, IDbModel
         {
             if (item is ITimestamp timestampModel)
             {
@@ -226,7 +234,7 @@ namespace HB.FullStack.Database
             item.LastUser = oldLastUser;
         }
 
-        private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : IDbModel
+        private static void PrepareBatchItems<T>(IList<T> items, string lastUser, List<long> oldTimestamps, List<string?> oldLastUsers, DbModelDef modelDef) where T : class, IDbModel
         {
             long curTimestamp = TimeUtil.Timestamp;
 
@@ -244,7 +252,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void RestoreBatchItems<T>(IList<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : IDbModel
+        private static void RestoreBatchItems<T>(IList<T> items, IList<long> oldTimestamps, IList<string?> oldLastUsers, DbModelDef modelDef) where T : class, IDbModel
         {
             for (int i = 0; i < items.Count; ++i)
             {
@@ -259,7 +267,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void ReTrackIfTrackable<T>(T item, DbModelDef modelDef) where T : IDbModel
+        private static void ReTrackIfTrackable<T>(T item, DbModelDef modelDef) where T : class, IDbModel
         {
             if (modelDef.IsPropertyTrackable)
             {
@@ -270,7 +278,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void ReTrackIfTrackable<T>(IList<T> items, DbModelDef modelDef) where T : IDbModel
+        private static void ReTrackIfTrackable<T>(IList<T> items, DbModelDef modelDef) where T : class, IDbModel
         {
             if (modelDef.IsPropertyTrackable)
             {
@@ -349,7 +357,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void SetPrimaryValueIfNull<T>(IList<T> items, DbModelDef modelDef) where T : IDbModel
+        private static void SetPrimaryValueIfNull<T>(IList<T> items, DbModelDef modelDef) where T : class, IDbModel
         {
             if (items.IsNullOrEmpty())
             {

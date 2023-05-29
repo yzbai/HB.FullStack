@@ -8,19 +8,19 @@ using HB.FullStack.Server.Identity.Models;
 
 namespace HB.FullStack.Server.Identity
 {
-    public interface IIdentityService
+    public interface IIdentityService<TId>
     {
         #region Token
 
         string JsonWebKeySet { get; }
 
-        Task<Token> RefreshTokenAsync(RefreshContext context, string lastUser);
+        Task<Token<TId>> RefreshTokenAsync(RefreshContext context, string lastUser);
 
-        Task<Token> GetTokenAsync(SignInContext context, string lastUser);
+        Task<Token<TId>> GetTokenAsync(SignInContext context, string lastUser);
 
-        Task DeleteTokenAsync(Guid userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser);
+        Task DeleteTokenAsync(TId userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser);
 
-        Task DeleteTokenAsync(Guid signInCredentialId, string lastUser);
+        Task DeleteTokenAsync(TId signInCredentialId, string lastUser);
 
         #endregion
 
@@ -32,25 +32,24 @@ namespace HB.FullStack.Server.Identity
 
         #region UserProfile
 
-        Task<UserProfile> GetUserProfileByUserIdAsync(Guid userId, string lastUser);
+        Task<UserProfile<TId>> GetUserProfileByUserIdAsync(TId userId, string lastUser);
 
-        Task UpdateUserProfileAsync(PropertyChangeJsonPack cp, string lastUser);
+        Task UpdateUserProfileAsync(PropertyChangePack cp, string lastUser);
 
         #endregion
 
         #region Role
 
-        //Task AddRolesToUserAsync(Guid userId, Guid roleId, string lastUser);
+        //Task AddRolesToUserAsync(TId userId, TId roleId, string lastUser);
 
-        //Task RemoveRoleFromUserAsync(Guid userId, Guid roleId, string lastUser);
+        //Task RemoveRoleFromUserAsync(TId userId, TId roleId, string lastUser);
 
         #endregion
 
         #region UserActivity
 
-        Task RecordUserActivityAsync(Guid? signInCredentialId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
+        Task RecordUserActivityAsync(TId? signInCredentialId, TId? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode);
         
-
         #endregion
     }
 }

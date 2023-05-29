@@ -13,21 +13,21 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class TokenCredentialRepo : DbModelRepository<TokenCredential>
+    public class TokenCredentialRepo<TId> : DbModelRepository<TokenCredential<TId>>
     {
-        public TokenCredentialRepo(ILogger<TokenCredentialRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public TokenCredentialRepo(ILogger<TokenCredentialRepo<TId>> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         #region Read
 
-        public Task<IEnumerable<TokenCredential>> GetByUserIdAsync(Guid userId, TransactionContext? transactionContext)
+        public Task<IList<TokenCredential<TId>>> GetByUserIdAsync(TId userId, TransactionContext? transactionContext)
         {
-            return DbReader.RetrieveAsync<TokenCredential>(s => s.UserId == userId, transactionContext);
+            return DbReader.RetrieveAsync<TokenCredential<TId>>(s => s.UserId!.Equals(userId), transactionContext);
         }
 
-        public Task<TokenCredential?> GetByIdAsync(Guid signInCredentialId, TransactionContext? transactionContext)
+        public Task<TokenCredential<TId>?> GetByIdAsync(TId signInCredentialId, TransactionContext? transactionContext)
         {
-            return DbReader.ScalarAsync<TokenCredential>(signInCredentialId, transactionContext);
+            return DbReader.ScalarAsync<TokenCredential<TId>>(signInCredentialId!, transactionContext);
         }
 
         protected override Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args) => Task.CompletedTask;

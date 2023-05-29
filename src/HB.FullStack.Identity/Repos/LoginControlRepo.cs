@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class LoginControlRepo : KVStoreModelRepository<LoginControl>
+    public class LoginControlRepo<TId> : KVStoreModelRepository<LoginControl<TId>>
     {
         public LoginControlRepo(IKVStore kvStore) : base(kvStore)
         {

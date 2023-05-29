@@ -13,6 +13,8 @@ using HB.FullStack.Repository;
 
 namespace HB.FullStack.Server.Repository
 {
+
+    //TODO: 之后可以考虑考虑这个，让所有的东西都接口化，
     public interface IModelRepo<T> where T : IModel
     {
         #region Events

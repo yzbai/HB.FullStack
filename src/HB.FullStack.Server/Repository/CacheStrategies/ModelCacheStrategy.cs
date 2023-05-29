@@ -20,10 +20,10 @@ namespace HB.FullStack.Repository.CacheStrategies
 {
     internal static class ModelCacheStrategy
     {
-        public static async Task<IEnumerable<TModel>> GetUsingCacheAsideAsync<TModel>(
+        public static async Task<IList<TModel>> GetUsingCacheAsideAsync<TModel>(
             string keyName,
             IEnumerable keyValues,
-            Func<IDbReader, Task<IEnumerable<TModel>>> dbRetrieve,
+            Func<IDbReader, Task<IList<TModel>>> dbRetrieve,
             IDatabase database,
             ICache cache,
             IMemoryLockManager memoryLockManager,
@@ -36,7 +36,7 @@ namespace HB.FullStack.Repository.CacheStrategies
 
             try
             {
-                (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
+                (IList<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
 
                 if (allExists)
                 {
@@ -89,7 +89,7 @@ namespace HB.FullStack.Repository.CacheStrategies
                     logger.LogCacheGetError(keyName, keyValues, ex);
                 }
 
-                IEnumerable<TModel> models = await dbRetrieve(database).ConfigureAwait(false);
+                IList<TModel> models = await dbRetrieve(database).ConfigureAwait(false);
 
                 if (models.IsNotNullOrEmpty())
                 {

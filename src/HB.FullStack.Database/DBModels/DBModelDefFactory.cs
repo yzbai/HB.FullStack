@@ -32,7 +32,7 @@ namespace HB.FullStack.Database.DbModels
         {
             _configManager = configManager;
 
-            static bool typeCondition(Type t) => t.IsClass && !t.IsAbstract && t.IsAssignableTo(typeof(IDbModel));
+            static bool typeCondition(Type t) => t.IsClass && !t.IsAbstract && !t.IsGenericType && t.IsAssignableTo(typeof(IDbModel));
 
             IEnumerable<Type> allModelTypes = _configManager.DbModelAssemblies.IsNullOrEmpty()
                 ? ReflectionUtil.GetAllTypeByCondition(typeCondition)
@@ -357,7 +357,7 @@ namespace HB.FullStack.Database.DbModels
             return propertyDef;
         }
 
-        public DbModelDef? GetDef<T>() where T : IDbModel
+        public DbModelDef? GetDef<T>() where T : class, IDbModel
         {
             return GetDef(typeof(T));
         }

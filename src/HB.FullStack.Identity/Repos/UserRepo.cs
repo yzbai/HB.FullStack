@@ -21,14 +21,14 @@ namespace HB.FullStack.Server.Identity
     /// 所有的User这个Model的增删改查都要经过这里
     /// 所有通过User来使用与User相关的关系表的，都经过这里
     /// </summary>
-    public class UserRepo<TUser> : ModelRepo<TUser> where TUser : IUser
+    public class UserRepo<TId> : DbModelRepository<User<TId>>
     {
-        public UserRepo(ILogger<UserRepo<TUser>> logger, IDbReader databaseReader, IKVStore kvStore, ICache cache, IMemoryLockManager memoryLockManager)
-            : base(logger, databaseReader, kvStore, cache, memoryLockManager)
+        public UserRepo(ILogger<UserRepo<TId>> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+            : base(logger, databaseReader, cache, memoryLockManager)
         {
             ModelUpdating += (sender, args) =>
             {
-                if (sender is IEnumerable<TUser> users)
+                if (sender is IEnumerable<User<TId>> users)
                 {
                     foreach (var user in users)
                     {
@@ -44,13 +44,13 @@ namespace HB.FullStack.Server.Identity
 
         protected override Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args)
         {
-            if (sender is IEnumerable<UserRole> userRoles)
+            if (sender is IEnumerable<UserRole<TId>> userRoles)
             {
-                foreach (UserRole userRole in userRoles)
+                foreach (UserRole<TId> userRole in userRoles)
                 {
                     //User-Role发生变化，就Invalidate
                     //比如：为用户添加角色，删除角色
-                    InvalidateCache(new CachedRolesByUserId(userRole.UserId));
+                    InvalidateCache(new CachedRolesByUserId<TId>(userRole.UserId));
                 }
             }
 
@@ -59,64 +59,64 @@ namespace HB.FullStack.Server.Identity
 
         #region 主表 Read 所有的查询都要经过这里
 
-        public async Task<TUser?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
+        public async Task<User<TId>?> GetByIdAsync(TId userId, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                keyName: nameof(IUser.Id),
-                keyValue: userId.ToString(),
+                keyName: nameof(IDbModel.Id),
+                keyValue: userId!,
                 dbRetrieve: db =>
                 {
-                    return db.ScalarAsync<TUser>(userId, transContext);
+                    return db.ScalarAsync<User<TId>>(userId!, transContext);
                 }).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<IUser>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
+        public async Task<IList<User<TId>>> GetByIdsAsync(IList<long> userIds, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                nameof(IUser.Id),
+                nameof(IDbModel.Id),
                 userIds,
                 db =>
                 {
-                    return db.RetrieveAsync<TUser>(u => SqlStatement.In(u.Id, true, userIds), transContext);
+                    return db.RetrieveAsync<User<TId>>(u => SqlStatement.In(u.Id, true, userIds), transContext);
                 }).ConfigureAwait(false);
         }
 
-        public async Task<TUser?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
+        public async Task<User<TId>?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                nameof(IUser.Mobile),
+                nameof(User<TId>.Mobile),
                 mobile,
                 db =>
                 {
-                    return db.ScalarAsync<User>(u => u.Mobile == mobile, transContext);
+                    return db.ScalarAsync<User<TId>>(u => u.Mobile == mobile, transContext);
                 }).ConfigureAwait(false);
         }
 
-        public async Task<IUser?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
+        public async Task<User<TId>?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                nameof(IUser.LoginName),
+                nameof(User<TId>.LoginName),
                 loginName,
                 db =>
                 {
-                    return db.ScalarAsync<TUser>(u => u.LoginName == loginName, transContext);
+                    return db.ScalarAsync<User<TId>>(u => u.LoginName == loginName, transContext);
                 }).ConfigureAwait(false);
         }
 
-        public async Task<User?> GetByEmailAsync(string email, TransactionContext? transContext = null)
+        public async Task<User<TId>?> GetByEmailAsync(string email, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                nameof(User.Email),
+                nameof(User<TId>.Email),
                 email,
                 db =>
                 {
-                    return db.ScalarAsync<User>(u => u.Email == email, transContext);
+                    return db.ScalarAsync<User<TId>>(u => u.Email == email, transContext);
                 }).ConfigureAwait(false);
         }
 
         public Task<long> CountUserAsync(string? loginName, string? mobile, string? email, TransactionContext? transContext)
         {
-            WhereExpression<User> where = DbReader.Where<User>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
+            WhereExpression<User<TId>> where = DbReader.Where<User<TId>>(u => u.Mobile == mobile).Or(u => u.LoginName == loginName).Or(u => u.Email == email);
             return DbReader.CountAsync(where, transContext);
         }
 
@@ -124,23 +124,23 @@ namespace HB.FullStack.Server.Identity
 
         #region 关系表 User-Role CRUD
 
-        private FromExpression<User>? _fromUserToRole;
-        private FromExpression<User> FromUserToRole => _fromUserToRole ??= DbReader
-                                                                            .From<User>()
-                                                                            .LeftJoin<User, UserRole>((u, ur) => u.Id == ur.UserId)
-                                                                            .LeftJoin<UserRole, Role>((ur, r) => ur.RoleId == r.Id);
+        private FromExpression<User<TId>>? _fromUserToRole;
+        private FromExpression<User<TId>> FromUserToRole => _fromUserToRole ??= DbReader
+                                                                            .From<User<TId>>()
+                                                                            .LeftJoin<User<TId>, UserRole<TId>>((u, ur) => u.Id!.Equals(ur.UserId))
+                                                                            .LeftJoin<UserRole<TId>, Role<TId>>((ur, r) => ur.RoleId!.Equals(r.Id));
 
-        public async Task<IEnumerable<Role>> GetRolesByUserIdAsync(Guid userId, TransactionContext? transactionContext)
+        public async Task<IList<Role<TId>>> GetRolesByUserIdAsync(TId userId, TransactionContext? transactionContext)
         {
-            return await GetUsingCacheAsideAsync<Role>(
-                new CachedRolesByUserId(userId),
+            return await GetUsingCacheAsideAsync<Role<TId>>(
+                new CachedRolesByUserId<TId>(userId),
                 dbReader => GetRolesByUserIdCoreAsync(userId, transactionContext)).ConfigureAwait(false);
 
-            async Task<IEnumerable<Role>> GetRolesByUserIdCoreAsync(Guid userId, TransactionContext? transactionContext)
+            async Task<IList<Role<TId>>> GetRolesByUserIdCoreAsync(TId userId, TransactionContext? transactionContext)
             {
-                var where = DbReader.Where<User>(u => u.Id == userId);
+                var where = DbReader.Where<User<TId>>(u => u.Id!.Equals(userId));
 
-                IEnumerable<Tuple<User, UserRole?, Role?>> result = await DbReader.RetrieveAsync<User, UserRole, Role>(
+                IList<Tuple<User<TId>, UserRole<TId>?, Role<TId>?>> result = await DbReader.RetrieveAsync<User<TId>, UserRole<TId>, Role<TId>>(
                     FromUserToRole,
                     where,
                     transactionContext).ConfigureAwait(false);
@@ -152,30 +152,30 @@ namespace HB.FullStack.Server.Identity
         /// <summary>
         /// 如果已经存在其中一些，则报错
         /// </summary>
-        public async Task AddRolesByUserIdAsync(object userId, IEnumerable<Role> roles, string lastUser, TransactionContext transactionContext)
+        public async Task AddRolesByUserIdAsync(TId userId, IEnumerable<Role<TId>> roles, string lastUser, TransactionContext transactionContext)
         {
             ThrowIf.Null(transactionContext, nameof(transactionContext));
 
-            long count = await DbReader.CountAsync<UserRole>(
-                ur => ur.UserId == userId && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
+            long count = await DbReader.CountAsync<UserRole<TId>>(
+                ur => ur.UserId!.Equals(userId) && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
                 transactionContext).ConfigureAwait(false);
 
             if (count != 0)
             {
-                throw IdentityExceptions.AlreadyHaveRoles(userId, roles, lastUser);
+                throw IdentityExceptions.AlreadyHaveRoles(userId!, roles, lastUser);
             }
 
-            List<UserRole> userRoles = roles.Select(r => new UserRole(userId, r.Id)).ToList();
+            List<UserRole<TId>> userRoles = roles.Select(r => new UserRole<TId>(userId, r.Id)).ToList();
 
-            _ = await AddAsync<UserRole>(userRoles, lastUser, transactionContext).ConfigureAwait(false);
+            await AddAsync<UserRole<TId>>(userRoles, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        public async Task RemoveRolesByUserIdAsync(object userId, IEnumerable<IRole> roles, string lastUser, TransactionContext transactionContext)
+        public async Task RemoveRolesByUserIdAsync(TId userId, IEnumerable<Role<TId>> roles, string lastUser, TransactionContext transactionContext)
         {
             ThrowIf.Null(transactionContext, nameof(transactionContext));
 
-            IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(
-                ur => ur.UserId == userId && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
+            IList<UserRole<TId>> userRoles = await DbReader.RetrieveAsync<UserRole<TId>>(
+                ur => ur.UserId!.Equals(userId) && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
                 transactionContext).ConfigureAwait(false);
 
             if (!userRoles.Any())
@@ -183,7 +183,7 @@ namespace HB.FullStack.Server.Identity
                 return;
             }
 
-            await DeleteAsync<UserRole>(userRoles, lastUser, transactionContext).ConfigureAwait(false);
+            await DeleteAsync<UserRole<TId>>(userRoles, lastUser, transactionContext).ConfigureAwait(false);
         }
 
         #endregion

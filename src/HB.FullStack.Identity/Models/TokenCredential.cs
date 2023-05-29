@@ -1,16 +1,18 @@
-﻿using HB.FullStack.Common.Shared;
-using HB.FullStack.Database.DbModels;
-
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+
+using HB.FullStack.Common;
+using HB.FullStack.Common.Shared;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public class TokenCredential : TimestampGuidDbModel
+    [DbModel(ConflictCheckMethods = ConflictCheckMethods.Timestamp)]
+    public class TokenCredential<TId> : DbModel<TId>, ITimestamp
     {
         [NoEmptyGuid]
-        [DbForeignKey(typeof(User), false)]
-        public Guid UserId { get; set; }
+        [DbForeignKey(typeof(User<>), false)]
+        public TId UserId { get; set; } = default!;
 
         [Required]
         [DbField(NotNull = true, NeedIndex = true)]
@@ -59,11 +61,10 @@ namespace HB.FullStack.Server.Identity.Models
         #endregion
 
         public TokenCredential()
-        {
-        }
+        { }
 
         public TokenCredential(
-            Guid userId,
+            TId userId,
             string refreshToken,
             DateTimeOffset? expireAt,
             string clientId,
@@ -91,5 +92,10 @@ namespace HB.FullStack.Server.Identity.Models
             DeviceIdiom = deviceIdiom;
             DeviceType = deviceType;
         }
+
+        public override TId Id { get; set; } = default!;
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 }

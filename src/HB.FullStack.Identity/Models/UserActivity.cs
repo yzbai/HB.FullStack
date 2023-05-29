@@ -1,18 +1,18 @@
-﻿using HB.FullStack.Common.Shared;
+﻿using HB.FullStack.Common;
+using HB.FullStack.Common.Shared;
 using HB.FullStack.Database.DbModels;
 
 using System;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    //TODO: 改用KVStore
-    public class UserActivity : TimestampGuidDbModel
+    public class UserActivity<TId> : DbModel<TId>, ITimestamp
     {
-        [DbForeignKey(typeof(User), false)]
-        public Guid? UserId { get; set; }
+        [DbForeignKey(typeof(User<>), false)]
+        public TId? UserId { get; set; }
 
-        [DbForeignKey(typeof(TokenCredential), false)]
-        public Guid? SignInCredentialId { get; set; }
+        [DbForeignKey(typeof(TokenCredential<>), false)]
+        public TId? SignInCredentialId { get; set; }
 
         public string? Ip { get; set; }
 
@@ -31,5 +31,9 @@ namespace HB.FullStack.Server.Identity.Models
 
         [DbField(MaxLength = SharedNames.Length.MAX_RESULT_ERROR_LENGTH)]
         public string? ResultError { get; set; }
+        public override TId Id { get; set; } = default!;
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
     }
 }

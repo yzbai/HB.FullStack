@@ -9,9 +9,9 @@ namespace HB.FullStack.Server.Identity
     /// <summary>
     /// 关联实体：UserClaim
     /// </summary>
-    internal class CachedUserClaimsByUserId : CachedItem<IEnumerable<UserClaim>>
+    internal class CachedUserClaimsByUserId<TId> : CachedItem<IList<UserClaim<TId>>>
     {
-        public CachedUserClaimsByUserId(Guid userId) : base(userId)
+        public CachedUserClaimsByUserId(TId userId) : base(userId)
         {
         }
 

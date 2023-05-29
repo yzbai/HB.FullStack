@@ -10,45 +10,45 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceRegister
     {
-        public static IServiceCollection AddIdentity(this IServiceCollection services, Action<IdentityOptions> optionsSetup)
+        public static IServiceCollection AddIdentity<TId>(this IServiceCollection services, Action<IdentityOptions> optionsSetup)
         {
             //services.AddOptions();
 
             services.Configure(optionsSetup);
-            AddIdentityCore(services);
+            AddIdentityCore<TId>(services);
 
             return services;
         }
 
-        public static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddIdentity<TId>(this IServiceCollection services, IConfiguration configuration)
         {
             //services.AddOptions();
 
             services.Configure<IdentityOptions>(configuration);
 
-            AddIdentityCore(services);
+            AddIdentityCore<TId>(services);
 
             return services;
         }
 
-        private static void AddIdentityCore(IServiceCollection services)
+        private static void AddIdentityCore<TId>(IServiceCollection services)
         {
             //internal
-            services.AddSingleton<UserRepo>();
-            services.AddSingleton<UserProfileRepo>();
-            services.AddSingleton<UserClaimRepo>();
-            services.AddSingleton<RoleRepo>();
-            services.AddSingleton<LoginControlRepo>();
-            services.AddSingleton<TokenCredentialRepo>();
-            services.AddSingleton<UserActivityRepo>();
+            services.AddSingleton<UserRepo<TId>>();
+            services.AddSingleton<UserProfileRepo<TId>>();
+            services.AddSingleton<UserClaimRepo<TId>>();
+            services.AddSingleton<RoleRepo<TId>>();
+            services.AddSingleton<LoginControlRepo<TId>>();
+            services.AddSingleton<TokenCredentialRepo<TId>>();
+            services.AddSingleton<UserActivityRepo<TId>>();
 
             //public interface
-            services.AddSingleton<IIdentityService, IdentityService>();
+            services.AddSingleton<IIdentityService<TId>, IdentityService<TId>>();
         }
 
-        public static IServiceCollection AddIdentity(this IServiceCollection services)
+        public static IServiceCollection AddIdentity<TId>(this IServiceCollection services)
         {
-            return services.AddIdentity(o => { });
+            return services.AddIdentity<TId>(o => { });
         }
     }
 

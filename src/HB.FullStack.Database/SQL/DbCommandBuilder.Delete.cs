@@ -153,7 +153,7 @@ namespace HB.FullStack.Database.SQL
                 totalParameters);
         }
 
-        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : IDbModel
+        public DbEngineCommand CreateDeleteOldNewCompareCommand<T>(DbModelDef modelDef, T model, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : class, IDbModel
         {
             //Check
             newTimestamp ??= TimeUtil.Timestamp;
@@ -180,7 +180,7 @@ namespace HB.FullStack.Database.SQL
                 newParameters);
         }
 
-        public DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : IDbModel
+        public DbEngineCommand CreateBatchDeleteOldNewCompareCommand<T>(DbModelDef modelDef, IList<T> models, string lastUser, bool trulyDelete, long? newTimestamp = null) where T : class, IDbModel
         {
             //checks
             ThrowIf.NullOrEmpty(models, nameof(models));
@@ -218,7 +218,7 @@ namespace HB.FullStack.Database.SQL
             DbModelDef modelDef,
             WhereExpression<T> whereExpression,
             string lastUser,
-            bool trulyDeleted) where T : IDbModel
+            bool trulyDeleted) where T : class, IDbModel
         {
             Requires.NotNull(whereExpression, nameof(whereExpression));
 

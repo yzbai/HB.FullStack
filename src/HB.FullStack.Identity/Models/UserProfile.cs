@@ -11,19 +11,19 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public interface IUserProfile
-    {
-        string? AvatarFileName { get; set; }
-        DateOnly? BirthDay { get; set; }
-        Gender? Gender { get; set; }
-        string NickName { get; set; }
-        object UserId { get; set; }
-    }
+    //public interface IUserProfile
+    //{
+    //    string? AvatarFileName { get; set; }
+    //    DateOnly? BirthDay { get; set; }
+    //    Gender? Gender { get; set; }
+    //    string NickName { get; set; }
+    //    object UserId { get; set; }
+    //}
 
-    public class UserProfile : TimestampGuidDbModel, IUserProfile
+    public class UserProfile<TId> : DbModel<TId>
     {
         [NoEmptyGuid]
-        [DbForeignKey(typeof(User), true)]
+        [DbForeignKey(typeof(User<>), true)]
         public Guid UserId { get; set; }
 
         [NickName(CanBeNull = false)]
@@ -35,5 +35,8 @@ namespace HB.FullStack.Server.Identity.Models
 
         [DbField(MaxLength = SharedNames.Length.MAX_FILE_NAME_LENGTH)]
         public string? AvatarFileName { get; set; }
+        public override TId Id { get; set; } = default!;
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
     }
 }

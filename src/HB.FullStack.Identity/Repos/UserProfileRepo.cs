@@ -14,9 +14,9 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity.Repos
 {
-    public class UserProfileRepo : DbModelRepository<UserProfile>
+    public class UserProfileRepo<TId> : DbModelRepository<UserProfile<TId>>
     {
-        public UserProfileRepo(ILogger<UserProfileRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
+        public UserProfileRepo(ILogger<UserProfileRepo<TId>> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
         }
 
@@ -25,9 +25,9 @@ namespace HB.FullStack.Server.Identity.Repos
             return Task.CompletedTask;
         }
 
-        internal Task<UserProfile?> GetByUserIdAsync(Guid userId, TransactionContext trans)
+        internal Task<UserProfile<TId>?> GetByUserIdAsync(TId userId, TransactionContext trans)
         {
-            return DbReader.ScalarAsync<UserProfile>(up => up.UserId == userId, trans);
+            return DbReader.ScalarAsync<UserProfile<TId>>(up => up.UserId!.Equals(userId), trans);
         }
     }
 }

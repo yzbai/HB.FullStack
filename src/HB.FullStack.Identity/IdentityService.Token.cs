@@ -21,7 +21,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HB.FullStack.Server.Identity
 {
-    internal partial class IdentityService : IIdentityService
+    internal partial class IdentityService<TId> : IIdentityService<TId>
     {
         private readonly IdentityOptions _options;
         private readonly ILogger _logger;
@@ -29,13 +29,13 @@ namespace HB.FullStack.Server.Identity
         private readonly IDistributedLockManager _lockManager;
         private readonly ISmsService _smsServerService;
 
-        private readonly UserRepo _userRepo;
-        private readonly UserProfileRepo _userProfileRepo;
-        private readonly TokenCredentialRepo _tokenCredentialRepo;
-        private readonly UserClaimRepo _userClaimRepo;
-        private readonly LoginControlRepo _userLoginControlRepo;
-        private readonly RoleRepo _roleRepo;
-        private readonly UserActivityRepo _userActivityModelRepo;
+        private readonly UserRepo<TId> _userRepo;
+        private readonly UserProfileRepo<TId> _userProfileRepo;
+        private readonly TokenCredentialRepo<TId> _tokenCredentialRepo;
+        private readonly UserClaimRepo<TId> _userClaimRepo;
+        private readonly LoginControlRepo<TId> _userLoginControlRepo;
+        private readonly RoleRepo<TId> _roleRepo;
+        private readonly UserActivityRepo<TId> _userActivityModelRepo;
 
         private string _jwtJsonWebKeySet = null!;
         private SigningCredentials _jwtSigningCredentials = null!;
@@ -51,13 +51,13 @@ namespace HB.FullStack.Server.Identity
             ITransaction transaction,
             IDistributedLockManager lockManager,
             ISmsService smsServerService,
-            UserRepo userRepo,
-            UserProfileRepo userProfileRepo,
-            TokenCredentialRepo signInCredentialRepo,
-            UserClaimRepo userClaimRepo,
-            LoginControlRepo userLoginControlRepo,
-            RoleRepo roleRepo,
-            UserActivityRepo userActivityModelRepo)
+            UserRepo<TId> userRepo,
+            UserProfileRepo<TId> userProfileRepo,
+            TokenCredentialRepo<TId> signInCredentialRepo,
+            UserClaimRepo<TId> userClaimRepo,
+            LoginControlRepo<TId> userLoginControlRepo,
+            RoleRepo<TId> roleRepo,
+            UserActivityRepo<TId> userActivityModelRepo)
         {
             _options = options.Value;
             _logger = logger;
@@ -112,23 +112,23 @@ namespace HB.FullStack.Server.Identity
 
         public string JsonWebKeySet => _jwtJsonWebKeySet;
 
-        public async Task<Token> GetTokenAsync(SignInContext context, string lastUser)
+        public async Task<Token<TId>> GetTokenAsync(SignInContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
             EnsureValidAudience(context);
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential<TId>>().ConfigureAwait(false);
 
             try
             {
-                User user = await EnsureUser(context, lastUser, transactionContext).ConfigureAwait(false);
+                User<TId> user = await EnsureUser(context, lastUser, transactionContext).ConfigureAwait(false);
 
                 await EnsureTokenCheckAsync(context, user, lastUser).ConfigureAwait(false);
 
                 await DeleteTokenCredentialsAsync(context.Exclusivity, user.Id, context.DeviceInfos.Idiom, context.DeviceInfos.Name, transactionContext).ConfigureAwait(false);
 
                 //创建Credential
-                TokenCredential tokenCredential = new TokenCredential
+                TokenCredential<TId> tokenCredential = new TokenCredential<TId>
                 (
                     userId: user.Id,
                     refreshToken: SecurityUtil.CreateUniqueToken(),
@@ -151,7 +151,7 @@ namespace HB.FullStack.Server.Identity
                 //构造 Jwt
                 string accessToken = await ConstructAccessTokenAsync(user, tokenCredential, context.Audience, transactionContext).ConfigureAwait(false);
 
-                Token token = new Token(accessToken, tokenCredential.RefreshToken, user);
+                Token<TId> token = new Token<TId>(accessToken, tokenCredential.RefreshToken, user);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -163,9 +163,9 @@ namespace HB.FullStack.Server.Identity
                 throw;
             }
 
-            async Task EnsureTokenCheckAsync(SignInContext context, User user, string lastUser)
+            async Task EnsureTokenCheckAsync(SignInContext context, User<TId> user, string lastUser)
             {
-                LoginControl loginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
+                LoginControl<TId> loginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
                 //1, Password验证
                 if (context is IHasPassword hasPassword)

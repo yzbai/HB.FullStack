@@ -4,19 +4,20 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public interface IRole : IModel
-    {
-        object Id { get; }
+    //public interface IRole : IModel
+    //{
+    //    object Id { get; }
 
-        string? Comment { get; set; }
-        string DisplayName { get; set; }
-        bool IsActivated { get; set; }
-        string Name { get; set; }
+    //    string? Comment { get; set; }
+    //    string DisplayName { get; set; }
+    //    bool IsActivated { get; set; }
+    //    string Name { get; set; }
 
-        void Update(string name, string displayName, bool isActivated, string? comment);
-    }
+    //    void Update(string name, string displayName, bool isActivated, string? comment);
+    //}
 
-    public class Role2 : TimestampGuidDbModel, IRole
+    [DbModel(ConflictCheckMethods = ConflictCheckMethods.Timestamp)]
+    public class Role<TId> : DbModel<TId>, ITimestamp
     {
         [DbField(Unique = true, NotNull = true)]
         public string Name { get; set; } = default!;
@@ -29,6 +30,11 @@ namespace HB.FullStack.Server.Identity.Models
         [DbField(MaxLength = SharedNames.Length.MAX_ROLE_COMMENT_LENGTH)]
         public string? Comment { get; set; }
 
+        public override TId Id { get; set; } = default!;
+        public override bool Deleted { get; set; }
+        public override string? LastUser { get; set; }
+        public long Timestamp { get; set; }
+        
         public void Update(string name, string displayName, bool isActivated, string? comment)
         {
             Name = name;

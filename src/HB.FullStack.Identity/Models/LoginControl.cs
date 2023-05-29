@@ -9,11 +9,10 @@ using System.Text;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public class LoginControl : KVStoreModel
+    public class LoginControl<TId> : KVStoreModel
     {
-        [NoEmptyGuid]
         [KVStoreKey]
-        public Guid UserId { get; set; }
+        public TId UserId { get; set; } = default!;
 
         public bool LockoutEnabled { get; set; }
 

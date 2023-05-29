@@ -22,7 +22,7 @@ namespace HB.FullStack.KVStore
             _modelDefFactory.Initialize(kvstoreEngine);
         }
 
-        private static string GetModelKey<T>(T item, KVStoreModelDef modelDef) where T : KVStoreModel, new()
+        private static string GetModelKey<T>(T item, KVStoreModelDef modelDef) where T : class, IKVStoreModel
         {
             StringBuilder builder = new StringBuilder();
 
@@ -41,14 +41,14 @@ namespace HB.FullStack.KVStore
             return builder.ToString();
         }
 
-        public string GetModelKey<T>(T item) where T : KVStoreModel, new()
+        public string GetModelKey<T>(T item) where T : class, IKVStoreModel
         {
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             return GetModelKey(item, modelDef);
         }
 
-        public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : KVStoreModel, new()
+        public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : class, IKVStoreModel
         {
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
@@ -67,7 +67,7 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : KVStoreModel, new()
+        public async Task<IEnumerable<T?>> GetAllAsync<T>() where T : class, IKVStoreModel
         {
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
             try
@@ -87,7 +87,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
+        public async Task AddAsync<T>(IEnumerable<T> items, string lastUser) where T : class, IKVStoreModel
         {
             if (!items.Any())
             {
@@ -126,7 +126,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : KVStoreModel, new()
+        public async Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : class, IKVStoreModel
         {
             if (!items.Any())
             {
@@ -162,7 +162,7 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        public async Task DeleteAllAsync<T>() where T : KVStoreModel, new()
+        public async Task DeleteAllAsync<T>() where T : class, IKVStoreModel
         {
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
@@ -182,7 +182,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<long> timestamps) where T : KVStoreModel, new()
+        public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<long> timestamps) where T : class, IKVStoreModel
         {
             ThrowIf.NullOrEmpty(timestamps, nameof(timestamps));
 
@@ -208,7 +208,7 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        private static IEnumerable<T?> MapTupleToModel<T>(IEnumerable<Tuple<string?, long>> tuples) where T : KVStoreModel, new()
+        private static IEnumerable<T?> MapTupleToModel<T>(IEnumerable<Tuple<string?, long>> tuples) where T : class, IKVStoreModel
         {
             List<T?> rt = new List<T?>();
 

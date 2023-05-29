@@ -15,14 +15,14 @@ namespace HB.FullStack.Database.SQL
 {
     internal partial class DbCommandBuilder
     {
-        public DbEngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : IDbModel
+        public DbEngineCommand CreateAddCommand<T>(DbModelDef modelDef, T model) where T : class, IDbModel
         {
             return new DbEngineCommand(
                 SqlHelper.CreateAddSql(modelDef),
                 model.ToDbParameters(modelDef, ModelDefFactory, null, 0));
         }
 
-        public DbEngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IList<T> models) where T : IDbModel
+        public DbEngineCommand CreateBatchAddCommand<T>(DbModelDef modelDef, IList<T> models) where T : class, IDbModel
         {
             ThrowIf.Empty(models, nameof(models));
 

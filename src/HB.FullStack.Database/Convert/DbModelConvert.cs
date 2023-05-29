@@ -19,7 +19,7 @@ namespace HB.FullStack.Database.Convert
         #region IDataReader Row To Model
 
         public static IList<T> ToDbModels<T>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedDataReaderRowToModelFunc(reader, modelDef, 0, reader.FieldCount, false);
 
@@ -109,7 +109,7 @@ namespace HB.FullStack.Database.Convert
 
         #region Model To DbParameters
 
-        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, string? parameterNameSuffix, int number) where T : IDbModel
+        public static IList<KeyValuePair<string, object>> ToDbParametersUsingReflection<T>(this T model, DbModelDef modelDef, string? parameterNameSuffix, int number) where T : class, IDbModel
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {
@@ -129,7 +129,7 @@ namespace HB.FullStack.Database.Convert
             return parameters;
         }
 
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix) where T : IDbModel
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this IEnumerable<T> models, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix) where T : class, IDbModel
         {
             int number = 0;
             List<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();
@@ -144,7 +144,7 @@ namespace HB.FullStack.Database.Convert
             return parameters;
         }
 
-        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix, int number) where T : IDbModel
+        public static IList<KeyValuePair<string, object>> ToDbParameters<T>(this T model, DbModelDef modelDef, IDbModelDefFactory modelDefFactory, string? parameterNameSuffix, int number) where T : class, IDbModel
         {
             if (model is ITimestamp serverModel && serverModel.Timestamp <= 0)
             {

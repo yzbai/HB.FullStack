@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using HB.FullStack.Server.Identity.Models;
@@ -179,7 +180,7 @@ namespace HB.FullStack.Server.Identity
             return exception;
         }
 
-        internal static Exception AlreadyHaveRoles(Guid userId, IEnumerable<Role> roles, string lastUser)
+        internal static Exception AlreadyHaveRoles(object userId, IEnumerable roles, string lastUser)
         {
             IdentityException ex = new IdentityException(ErrorCodes.AlreadyHaveRoles, nameof(AlreadyHaveRoles));
 

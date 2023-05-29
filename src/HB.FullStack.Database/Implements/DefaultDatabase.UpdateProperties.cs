@@ -21,14 +21,14 @@ namespace HB.FullStack.Database
     {
         #region Timestamp
 
-        public Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public Task UpdatePropertiesAsync<T>(TimestampUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             return UpdatePropertiesUsingTimestampAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : IDbModel
+        public Task UpdatePropertiesAsync<T>(IList<TimestampUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
@@ -105,14 +105,14 @@ namespace HB.FullStack.Database
 
         #region OldNewCompare
 
-        public Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public Task UpdatePropertiesAsync<T>(OldNewCompareUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             return UpdatePropertiesUsingOldNewCompareAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : IDbModel
+        public Task UpdatePropertiesAsync<T>(IList<OldNewCompareUpdatePack> updatePacks, string lastUser, TransactionContext transactionContext) where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>()!;
 
@@ -178,14 +178,14 @@ namespace HB.FullStack.Database
 
         #region IgnoreConflictCheck
 
-        public Task UpdatePropertiesAsync<T>(IgnoreConflictCheckUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public Task UpdatePropertiesAsync<T>(IgnoreConflictCheckUpdatePack updatePack, string lastUser, TransactionContext? transContext) where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
             return UpdatePropertiesIgnoreConflictCheckAsync(modelDef, updatePack, lastUser, transContext);
         }
 
-        public Task UpdatePropertiesAsync<T>(IList<IgnoreConflictCheckUpdatePack> updatePacks, string lastUser, TransactionContext transContext) where T : IDbModel
+        public Task UpdatePropertiesAsync<T>(IList<IgnoreConflictCheckUpdatePack> updatePacks, string lastUser, TransactionContext transContext) where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
@@ -283,7 +283,7 @@ namespace HB.FullStack.Database
             return modelDef.BestConflictCheckMethodWhenUpdate;
         }
 
-        public async Task UpdatePropertiesAsync<T>(PropertyChangePack changedPack, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public async Task UpdatePropertiesAsync<T>(PropertyChangePack changedPack, string lastUser, TransactionContext? transContext) where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
@@ -311,7 +311,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task UpdatePropertiesAsync<T>(IList<PropertyChangePack> changedPacks, string lastUser, TransactionContext transContext) where T : IDbModel
+        public async Task UpdatePropertiesAsync<T>(IList<PropertyChangePack> changedPacks, string lastUser, TransactionContext transContext) where T : class, IDbModel
         {
             if (changedPacks.IsNullOrEmpty())
             {

@@ -39,7 +39,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
 
             static bool kvstoreModelTypeCondition(Type t)
             {
-                return t.IsSubclassOf(typeof(KVStoreModel)) && !t.IsAbstract;
+                return t.IsClass && !t.IsAbstract && !t.IsGenericType && t.IsAssignableTo(typeof(IKVStoreModel));
             }
         }
 
@@ -116,7 +116,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
                 {
                     modelDef.KeyPropertyInfos.Add(keyAttr.Order, info);
                 }
-                else if (info.GetCustomAttribute<KVStoreBackupKeyAttribute>(true) != null)
+                else if (info.GetCustomAttribute<KVStoreSubstituteKeyAttribute>(true) != null)
                 {
                     backupKeyPropertyInfo = info;
                 }

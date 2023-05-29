@@ -16,7 +16,7 @@ namespace HB.FullStack.Database
         #region 单表查询 From, Where
 
         public async Task<T?> ScalarAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             IEnumerable<T> lst = await RetrieveAsync(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -39,9 +39,9 @@ namespace HB.FullStack.Database
             FromExpression<TFrom>? fromCondition,
             WhereExpression<TWhere>? whereCondition,
             TransactionContext? transContext = null)
-            where TSelect : IDbModel
-            where TFrom : IDbModel
-            where TWhere : IDbModel
+            where TSelect :class, IDbModel
+            where TFrom : class,IDbModel
+            where TWhere : class, IDbModel
         {
             DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>().ThrowIfNull(typeof(TSelect).FullName);
             DbModelDef fromDef = ModelDefFactory.GetDef<TFrom>().ThrowIfNull(typeof(TFrom).FullName);
@@ -78,7 +78,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task<IList<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
@@ -106,7 +106,7 @@ namespace HB.FullStack.Database
         }
 
         public async Task<long> CountAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
 
@@ -133,7 +133,7 @@ namespace HB.FullStack.Database
         #region 单表查询, Where
 
         public Task<IList<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             WhereExpression<T> where = Where<T>().AddOrderAndLimits(page, perPage, orderBy);
 
@@ -141,25 +141,25 @@ namespace HB.FullStack.Database
         }
 
         public Task<T?> ScalarAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             return ScalarAsync(null, whereCondition, transContext);
         }
 
         public Task<IList<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             return RetrieveAsync(null, whereCondition, transContext);
         }
 
         public Task<long> CountAsync<T>(WhereExpression<T>? condition, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             return CountAsync(null, condition, transContext);
         }
 
         public Task<long> CountAsync<T>(TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             return CountAsync<T>(null, null, transContext);
         }
@@ -179,7 +179,7 @@ namespace HB.FullStack.Database
         //}
 
         public Task<T?> ScalarAsync<T>(object id, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             ThrowIf.Null(id, nameof(id));
 
@@ -200,7 +200,7 @@ namespace HB.FullStack.Database
         //    return ScalarAsync(where, transContext);
         //}
 
-        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : IDbModel
+        public Task<T?> ScalarAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext) where T : class, IDbModel
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -208,7 +208,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<IList<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page, int? perPage, string? orderBy)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             WhereExpression<T> whereCondition = Where(whereExpr).AddOrderAndLimits(page, perPage, orderBy);
 
@@ -216,7 +216,7 @@ namespace HB.FullStack.Database
         }
 
         public Task<long> CountAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext)
-            where T : IDbModel
+            where T : class, IDbModel
         {
             WhereExpression<T> whereCondition = Where(whereExpr);
 
@@ -259,8 +259,8 @@ namespace HB.FullStack.Database
         #region 双表查询
 
         public async Task<IList<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : IDbModel
-            where TTarget : IDbModel
+            where TSource : class, IDbModel
+            where TTarget : class, IDbModel
         {
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
             DbModelDef targetModelDef = ModelDefFactory.GetDef<TTarget>().ThrowIfNull(typeof(TTarget).FullName);
@@ -316,8 +316,8 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget?>?> ScalarAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : IDbModel
-            where TTarget : IDbModel
+            where TSource : class, IDbModel
+            where TTarget : class, IDbModel
         {
             IEnumerable<Tuple<TSource, TTarget?>> lst = await RetrieveAsync<TSource, TTarget>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 
@@ -339,9 +339,9 @@ namespace HB.FullStack.Database
         #region 三表查询
 
         public async Task<IList<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : IDbModel
-            where TTarget1 : IDbModel
-            where TTarget2 : IDbModel
+            where TSource : class,IDbModel
+            where TTarget1 : class, IDbModel
+            where TTarget2 : class, IDbModel
         {
             DbModelDef sourceModelDef = ModelDefFactory.GetDef<TSource>().ThrowIfNull(typeof(TSource).FullName);
             DbModelDef targetModelDef1 = ModelDefFactory.GetDef<TTarget1>().ThrowIfNull(typeof(TTarget1).FullName);
@@ -407,9 +407,9 @@ namespace HB.FullStack.Database
         }
 
         public async Task<Tuple<TSource, TTarget1?, TTarget2?>?> ScalarAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : IDbModel
-            where TTarget1 : IDbModel
-            where TTarget2 : IDbModel
+            where TSource : class, IDbModel
+            where TTarget1 : class, IDbModel
+            where TTarget2 : class, IDbModel
         {
             IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> lst = await RetrieveAsync<TSource, TTarget1, TTarget2>(fromCondition, whereCondition, transContext).ConfigureAwait(false);
 

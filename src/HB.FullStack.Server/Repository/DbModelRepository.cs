@@ -28,7 +28,7 @@ namespace HB.FullStack.Repository
     /// Invalidation Strategy: delete from cache when database update/delete, add to cache when database add
     /// Cache架构策略可以参考笔记
     /// </summary>
-    internal abstract class DbModelRepository<TMain> : IModelRepo<TMain> where TMain : IDbModel
+    public abstract class DbModelRepository<TMain> /* :IModelRepo<TMain> */where TMain : class, IDbModel
     {
         protected WeakAsyncEventManager AsyncEventManager { get; } = new WeakAsyncEventManager();
 
@@ -199,7 +199,7 @@ namespace HB.FullStack.Repository
 
         #region Add
 
-        public async Task AddAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public async Task AddAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : class, IDbModel
         {
             await OnModelAddingAsync(new T[] { model }).ConfigureAwait(false);
 
@@ -216,7 +216,7 @@ namespace HB.FullStack.Repository
             await OnModelAddedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
-        public async Task AddAsync<T>(IList<T> models, string lastUser, TransactionContext transContext) where T : IDbModel
+        public async Task AddAsync<T>(IList<T> models, string lastUser, TransactionContext transContext) where T : class, IDbModel
         {
             await OnModelAddingAsync(models).ConfigureAwait(false);
 
@@ -238,7 +238,7 @@ namespace HB.FullStack.Repository
 
         #region Update
 
-        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public async Task UpdateAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : class, IDbModel
         {
             await OnModelUpdatingAsync(new T[] { model }).ConfigureAwait(false);
 
@@ -258,7 +258,7 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
-        public async Task UpdateAsync<T>(IList<T> models, string lastUser, TransactionContext transContext) where T : IDbModel
+        public async Task UpdateAsync<T>(IList<T> models, string lastUser, TransactionContext transContext) where T : class, IDbModel
         {
             await OnModelUpdatingAsync(models).ConfigureAwait(false);
 
@@ -278,7 +278,7 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedAsync(models).ConfigureAwait(false);
         }
 
-        public async Task UpdateProperties<T>(PropertyChangePack cp, string lastUser, TransactionContext? transactionContext) where T : IDbModel
+        public async Task UpdateProperties<T>(PropertyChangePack cp, string lastUser, TransactionContext? transactionContext) where T : class, IDbModel
         {
             //检查必要的AddtionalProperties
             //TODO: 是否需要创建一个Attribute，标记哪些是必须包含的？而不是默认指定ForeignKey
@@ -304,7 +304,7 @@ namespace HB.FullStack.Repository
             await OnModelUpdatedPropertiesAsync(new PropertyChangePack[] { cp }).ConfigureAwait(false);
         }
 
-        public async Task UpdateProperties<T>(IList<PropertyChangePack> cps, string lastUser, TransactionContext transactionContext) where T :IDbModel
+        public async Task UpdateProperties<T>(IList<PropertyChangePack> cps, string lastUser, TransactionContext transactionContext) where T : class, IDbModel
         {
             DbModelDef modelDef = Database.ModelDefFactory.GetDef<T>()!;
 
@@ -342,7 +342,7 @@ namespace HB.FullStack.Repository
 
         #region Delete
 
-        public async Task DeleteAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : IDbModel
+        public async Task DeleteAsync<T>(T model, string lastUser, TransactionContext? transContext) where T : class, IDbModel
         {
             await OnModelDeletingAsync(new T[] { model }).ConfigureAwait(false);
 
@@ -362,7 +362,7 @@ namespace HB.FullStack.Repository
             await OnModelDeletedAsync(new T[] { model }).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync<T>(IList<T> models, string lastUser, TransactionContext transContext) where T : IDbModel
+        public async Task DeleteAsync<T>(IList<T> models, string lastUser, TransactionContext transContext) where T : class, IDbModel
         {
             await OnModelDeletingAsync(models).ConfigureAwait(false);
 
@@ -387,21 +387,21 @@ namespace HB.FullStack.Repository
 
         #region Cached Model Strategy
 
-        protected async Task<TMain?> GetUsingCacheAsideAsync(string keyName, object keyValue, Func<IDbReader, Task<TMain?>> dbRetrieve)
+        protected async Task<T?> GetUsingCacheAsideAsync<T>(string keyName, object keyValue, Func<IDbReader, Task<T?>> dbRetrieve) where T : IModel
         {
-            IEnumerable<TMain>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<TMain>(
+            IList<T>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<T>(
                 keyName,
                 new object[] { keyValue },
                 async dbReader =>
                 {
-                    TMain? single = await dbRetrieve(dbReader).ConfigureAwait(false);
+                    T? single = await dbRetrieve(dbReader).ConfigureAwait(false);
 
                     if (single == null)
                     {
-                        return Array.Empty<TMain>();
+                        return Array.Empty<T>();
                     }
 
-                    return new TMain[] { single };
+                    return new T[] { single };
                 },
                 Database,
                 Cache,
@@ -411,7 +411,7 @@ namespace HB.FullStack.Repository
             if (results.IsNullOrEmpty())
             {
                 Logger.LogDebug("Repo中没有找到 {ModelType}, KeyName :{KeyName}, KeyValue :{KeyValue}", typeof(TMain).Name, keyName, keyValue);
-                return default(TMain);
+                return default;
             }
 
             Logger.LogDebug("Repo中 找到 {@Context}", new { ModelName = typeof(TMain).Name, KeyName = keyName, KeyValue = keyValue });
@@ -419,23 +419,23 @@ namespace HB.FullStack.Repository
             return results.ElementAt(0);
         }
 
-        protected Task<IEnumerable<TMain>> GetUsingCacheAsideAsync(string keyName, IEnumerable keyValues, Func<IDbReader, Task<IEnumerable<TMain>>> dbRetrieve)
+        protected Task<IList<T>> GetUsingCacheAsideAsync<T>(string keyName, IEnumerable keyValues, Func<IDbReader, Task<IList<T>>> dbRetrieve) where T:IModel
         {
-            return ModelCacheStrategy.GetUsingCacheAsideAsync(keyName, keyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
+            return ModelCacheStrategy.GetUsingCacheAsideAsync<T>(keyName, keyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
         }
 
         #endregion
 
         #region CachedItem Strategy
 
-        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedItem<TResult> cachedItem, Func<IDbReader, Task<TResult>> dbRetrieve) where TResult : class
+        protected Task<T?> GetUsingCacheAsideAsync<T>(CachedItem<T> cachedItem, Func<IDbReader, Task<T>> dbRetrieve) where T : class
         {
             return CachedItemCacheStrategy.GetUsingCacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedItem<IEnumerable<TResult>> cachedItem, Func<IDbReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        protected Task<IList<T>> GetUsingCacheAsideAsync<T>(CachedItem<IList<T>> cachedItem, Func<IDbReader, Task<IList<T>>> dbRetrieve) where T : class
         {
-            return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+            return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IList<T>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
         public void InvalidateCache(ICachedItem cachedItem)
@@ -452,14 +452,14 @@ namespace HB.FullStack.Repository
 
         #region Collection Cache Strategy
 
-        protected Task<TResult?> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<TResult> cachedCollectionItem, Func<IDbReader, Task<TResult>> dbRetrieve) where TResult : class
+        protected Task<T?> GetUsingCacheAsideAsync<T>(CachedCollectionItem<T> cachedCollectionItem, Func<IDbReader, Task<T>> dbRetrieve) where T : class
         {
             return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
         }
 
-        protected Task<IEnumerable<TResult>> GetUsingCacheAsideAsync<TResult>(CachedCollectionItem<IEnumerable<TResult>> cachedCollectionItem, Func<IDbReader, Task<IEnumerable<TResult>>> dbRetrieve) where TResult : class
+        protected Task<IList<T>> GetUsingCacheAsideAsync<T>(CachedCollectionItem<IList<T>> cachedCollectionItem, Func<IDbReader, Task<IList<T>>> dbRetrieve) where T : class
         {
-            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<TResult>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IList<T>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
         }
 
         public void InvalidateCache(ICachedCollectionItem cachedCollectionItem)

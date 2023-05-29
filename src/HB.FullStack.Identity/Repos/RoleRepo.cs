@@ -14,9 +14,9 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class RoleRepo : DbModelRepository<Role>
+    public class RoleRepo<TId> : DbModelRepository<Role<TId>>
     {
-        public RoleRepo(ILogger<RoleRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public RoleRepo(ILogger<RoleRepo<TId>> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override async Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args)
@@ -32,15 +32,15 @@ namespace HB.FullStack.Server.Identity
 
             if (args.ChangeType == ModelChangeType.Update || args.ChangeType == ModelChangeType.Delete || args.ChangeType == ModelChangeType.UpdateProperties)
             {
-                if (sender is IEnumerable<Role> roles)
+                if (sender is IEnumerable<Role<TId>> roles)
                 {
-                    IEnumerable<Guid> roleIdList = roles.Select(r => r.Id).ToList();
+                    IEnumerable<TId> roleIdList = roles.Select(r => r.Id).ToList();
 
                     await InvalidCachedRolesByUserId(roleIdList).ConfigureAwait(false);
                 }
-                else if (sender is IEnumerable<PropertyChangeJsonPack> cpps)
+                else if (sender is IEnumerable<PropertyChangePack> cpps)
                 {
-                    IEnumerable<Guid> roleIdList = cpps.Select(cpp => SerializeUtil.To<Guid>(cpp.AddtionalProperties[nameof(Role.Id)])!);
+                    IEnumerable<TId> roleIdList = cpps.Select(cpp => SerializeUtil.To<TId>(cpp.AddtionalProperties[nameof(Role<TId>.Id)])!);
 
                     await InvalidCachedRolesByUserId(roleIdList).ConfigureAwait(false);
                 }
@@ -50,13 +50,13 @@ namespace HB.FullStack.Server.Identity
                 }
             }
 
-            async Task InvalidCachedRolesByUserId(IEnumerable<Guid> roleIdList)
+            async Task InvalidCachedRolesByUserId(IEnumerable<TId> roleIdList)
             {
-                foreach (var id in roleIdList)
+                foreach (TId id in roleIdList)
                 {
-                    IEnumerable<UserRole> userRoles = await DbReader.RetrieveAsync<UserRole>(ur => ur.RoleId == id, null).ConfigureAwait(false);
+                    IEnumerable<UserRole<TId>> userRoles = await DbReader.RetrieveAsync<UserRole<TId>>(ur => ur.RoleId!.Equals(id), null).ConfigureAwait(false);
 
-                    InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId(ur.UserId)).ToList());
+                    InvalidateCache(userRoles.Select(ur => new CachedRolesByUserId<TId>(ur.UserId)).ToList());
                 }
             }
         }

@@ -11,19 +11,19 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public class Token : ValidatableObject, IModel
+    public class Token<TId> : ValidatableObject, IModel
     {
-        public Guid UserId { get; set; }
+        public TId UserId { get; set; } = default!;
 
         public string? UserLevel { get; set; }
-
-        public string? Mobile { get; set; }
 
         public string? LoginName { get; set; }
 
         public string? Email { get; set; }
 
         public bool EmailConfirmed { get; set; }
+
+        public string? Mobile { get; set; }
 
         public bool MobileConfirmed { get; set; }
 
@@ -35,22 +35,21 @@ namespace HB.FullStack.Server.Identity.Models
 
         //public DateTimeOffset TokenCreatedTime { get; set; }
 
-        public Token()
-        { }
+        public Token() { }
 
-        public Token(string accessToken, string refreshToken, User user)
+        public Token(string accessToken, string refreshToken, User<TId> user)
         {
-            UserLevel = user.UserLevel;
-            AccessToken = accessToken;
-            RefreshToken = refreshToken;
             UserId = user.Id;
-            Email = user.Email;
+            UserLevel = user.UserLevel;
             LoginName = user.Email;
-            Mobile = user.Mobile;
+            Email = user.Email;
             EmailConfirmed = user.EmailConfirmed;
+            Mobile = user.Mobile;
             MobileConfirmed = user.MobileConfirmed;
             TwoFactorEnabled = user.TwoFactorEnabled;
-            TokenCreatedTime = DateTimeOffset.UtcNow;
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
+            //TokenCreatedTime = DateTimeOffset.UtcNow;
         }
 
         public ModelKind GetKind() => ModelKind.Plain;

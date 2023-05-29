@@ -12,9 +12,9 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class UserActivityRepo : DbModelRepository<UserActivity>
+    public class UserActivityRepo<TId> : DbModelRepository<UserActivity<TId>>
     {
-        public UserActivityRepo(ILogger<UserActivityRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
+        public UserActivityRepo(ILogger<UserActivityRepo<TId>> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
         protected override Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args) => Task.CompletedTask;

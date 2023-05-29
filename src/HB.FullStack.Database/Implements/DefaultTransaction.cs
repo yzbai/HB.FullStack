@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
 using HB.FullStack.Database.Config;
 using HB.FullStack.Database.DbModels;
-using HB.FullStack.Database.Engine;
 
 namespace HB.FullStack.Database.Implements
 {
@@ -27,7 +26,7 @@ namespace HB.FullStack.Database.Implements
             return new TransactionContext(dbTransaction, TransactionStatus.InTransaction, this, dbSchema.Engine);
         }
 
-        public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T :  IDbModel
+        public async Task<TransactionContext> BeginTransactionAsync<T>(IsolationLevel? isolationLevel = null) where T : class, IDbModel
         {
             DbModelDef? modelDef = _modelDefFactory.GetDef<T>();
 
