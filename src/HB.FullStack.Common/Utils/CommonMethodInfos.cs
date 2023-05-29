@@ -20,7 +20,7 @@ namespace System
         public static readonly MethodInfo ArrayGetLengthMethod = typeof(Array).GetMethod(nameof(Array.GetLength), new Type[] { typeof(int) })!;
 
         public static readonly MethodInfo StringConcatMethod = typeof(string).GetMethod(nameof(string.Concat), new Type[] { typeof(object), typeof(object) })!;
-        public static readonly MethodInfo ConvertToStringMethod = typeof(StringConvertCenter).GetMethod(nameof(StringConvertCenter.ConvertToString), new Type[] { typeof(object), typeof(Type), typeof(StringConvertPurpose) })!;
+        public static readonly MethodInfo ConvertToStringMethod = typeof(StringConvertCenter).GetMethod(nameof(StringConvertCenter.ToString), new Type[] { typeof(object), typeof(Type), typeof(StringConvertPurpose) })!;
 
         public static readonly ConstructorInfo StringListConstructorInfo = typeof(List<>).MakeGenericType(typeof(string)).GetConstructor(Array.Empty<Type>())!;
 

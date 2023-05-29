@@ -17,8 +17,6 @@ namespace HB.FullStack.KVStore.KVStoreModels
         private KVStoreSettings _settings = null!;
         private string? _firstDefaultInstanceName = null!;
 
-
-
         public void Initialize(IKVStoreEngine kVStoreEngine)
         {
             _settings = kVStoreEngine.Settings;
@@ -100,43 +98,50 @@ namespace HB.FullStack.KVStore.KVStoreModels
                 throw Exceptions.NoModelSchemaFound(type: type.FullName);
             }
 
-            KVStoreModelDef modelDef = new KVStoreModelDef(storeModelSchema.InstanceName, type) { Kind = ModelKind.KV };
-
-            #region Handle Key Properties
-
-            PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
-
-            PropertyInfo? backupKeyPropertyInfo = null;
-
-            foreach (PropertyInfo info in properties)
+            KVStoreModelDef modelDef = new KVStoreModelDef(storeModelSchema.InstanceName, type)
             {
-                KVStoreKeyAttribute? keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>(true);
-
-                if (keyAttr != null)
-                {
-                    modelDef.KeyPropertyInfos.Add(keyAttr.Order, info);
-                }
-                else if (info.GetCustomAttribute<KVStoreSubstituteKeyAttribute>(true) != null)
-                {
-                    backupKeyPropertyInfo = info;
-                }
-            }
-
-            //如果KVStoreKey没有找到，就启用BackupKey
-
-            if (!modelDef.KeyPropertyInfos.Any())
-            {
-                if (backupKeyPropertyInfo == null)
-                {
-                    throw Exceptions.LackKVStoreKeyAttributeError(type: modelDef.ModelType.FullName);
-                }
-
-                modelDef.KeyPropertyInfos.Add(0, backupKeyPropertyInfo);
-            }
-
-            #endregion
+                Kind = ModelKind.KV,
+                OrderedKeyPropertyInfos = GetOrderedKeyPropertyInfos(type)
+            };
 
             return modelDef;
+
+            static IList<PropertyInfo> GetOrderedKeyPropertyInfos(Type type)
+            {
+                PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
+
+                PropertyInfo? backupKeyPropertyInfo = null;
+
+                Dictionary<int, PropertyInfo> keyPropertyInfos = new Dictionary<int, PropertyInfo>();
+
+                foreach (PropertyInfo info in properties)
+                {
+                    KVStoreKeyAttribute? keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>(true);
+
+                    if (keyAttr != null)
+                    {
+                        keyPropertyInfos.Add(keyAttr.Order, info);
+                    }
+                    else if (info.GetCustomAttribute<KVStoreSubstituteKeyAttribute>(true) != null)
+                    {
+                        backupKeyPropertyInfo = info;
+                    }
+                }
+
+                //如果KVStoreKey没有找到，就启用BackupKey
+
+                if (!keyPropertyInfos.Any())
+                {
+                    if (backupKeyPropertyInfo == null)
+                    {
+                        throw Exceptions.LackKVStoreKeyAttributeError(type: type.FullName);
+                    }
+
+                    keyPropertyInfos.Add(0, backupKeyPropertyInfo);
+                }
+
+                return keyPropertyInfos.OrderBy(p => p.Key).Select(p => p.Value).ToList();
+            }
         }
 
         #region IModelDefProvider Memebers

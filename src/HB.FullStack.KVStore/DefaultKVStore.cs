@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common.Convert;
 using HB.FullStack.KVStore.Engine;
 using HB.FullStack.KVStore.KVStoreModels;
 
@@ -26,19 +28,13 @@ namespace HB.FullStack.KVStore
         {
             StringBuilder builder = new StringBuilder();
 
-            int count = modelDef.KeyPropertyInfos.Count;
-
-            for (int i = 0; i < count; ++i)
+            foreach (var propertyInfo in modelDef.OrderedKeyPropertyInfos)
             {
-                builder.Append(modelDef.KeyPropertyInfos[i].GetValue(item));
-
-                if (i != count - 1)
-                {
-                    builder.Append('_');
-                }
+                builder.Append(StringConvertCenter.ToStringFrom(propertyInfo.PropertyType, propertyInfo.GetValue(item), StringConvertPurpose.NONE)!);
+                builder.Append('_');
             }
 
-            return builder.ToString();
+            return builder.RemoveLast().ToString();
         }
 
         public string GetModelKey<T>(T item) where T : class, IKVStoreModel
@@ -48,7 +44,7 @@ namespace HB.FullStack.KVStore
             return GetModelKey(item, modelDef);
         }
 
-        public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<string> keys) where T : class, IKVStoreModel
+        public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<object> keys) where T : class, IKVStoreModel
         {
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
@@ -182,7 +178,7 @@ namespace HB.FullStack.KVStore
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task DeleteAsync<T>(IEnumerable<string> keys, IEnumerable<long> timestamps) where T : class, IKVStoreModel
+        public async Task DeleteAsync<T>(IEnumerable<object> keys, IEnumerable<long> timestamps) where T : class, IKVStoreModel
         {
             ThrowIf.NullOrEmpty(timestamps, nameof(timestamps));
 

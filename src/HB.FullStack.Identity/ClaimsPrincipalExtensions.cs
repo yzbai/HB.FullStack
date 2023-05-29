@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Security.Claims;
 
+using HB.FullStack.Common.Convert;
+
 namespace System
 {
     public static class ClaimsPrincipalExtensions
@@ -18,16 +20,11 @@ namespace System
             return null;
         }
 
-        public static Guid? GetUserId(this ClaimsPrincipal principal)
+        public static TId? GetUserId<TId>(this ClaimsPrincipal principal)
         {
-            string? strUserId = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
+            string? userIdString = principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
 
-            if (strUserId.IsNullOrEmpty())
-            {
-                return null;
-            }
-
-            return new Guid(strUserId);
+            return StringConvertCenter.FromStringTo<TId>(userIdString, StringConvertPurpose.NONE);
         }
 
         public static string? GetUserLevel(this ClaimsPrincipal principal)
@@ -45,11 +42,11 @@ namespace System
             return principal.GetClaimValue(ClaimExtensionTypes.AUDIENCE);
         }
 
-        public static Guid? GetTokenCredentialId(this ClaimsPrincipal principal)
+        public static TId? GetTokenCredentialId<TId>(this ClaimsPrincipal principal)
         {
-            string? str = principal.GetClaimValue(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID);
+            string? idString = principal.GetClaimValue(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID);
 
-            return str.IsNullOrEmpty() ? null : new Guid(str);
+            return StringConvertCenter.FromStringTo<TId>(idString, StringConvertPurpose.NONE);
         }
 
         public static string? GetClientId(this ClaimsPrincipal principal)

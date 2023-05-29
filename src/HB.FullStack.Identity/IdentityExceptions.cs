@@ -97,7 +97,7 @@ namespace HB.FullStack.Server.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationMobileNotConfirmed(Guid userId)
+        internal static Exception AuthorizationMobileNotConfirmed<TId>(TId userId)
         {
             IdentityException exception = new IdentityException(ErrorCodes.AuthorizationMobileNotConfirmed, nameof(AuthorizationMobileNotConfirmed));
             exception.Data["UserId"] = userId;
@@ -105,7 +105,7 @@ namespace HB.FullStack.Server.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationEmailNotConfirmed(Guid userId)
+        internal static Exception AuthorizationEmailNotConfirmed<TId>(TId userId)
         {
             IdentityException exception = new IdentityException(ErrorCodes.AuthorizationEmailNotConfirmed, nameof(AuthorizationEmailNotConfirmed));
             exception.Data["UserId"] = userId;
@@ -113,7 +113,7 @@ namespace HB.FullStack.Server.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationLockedOut(DateTimeOffset? lockoutEndDate, Guid userId)
+        internal static Exception AuthorizationLockedOut<TId>(DateTimeOffset? lockoutEndDate, TId userId)
         {
             IdentityException exception = new IdentityException(ErrorCodes.AuthorizationLockedOut, nameof(AuthorizationLockedOut));
             exception.Data["UserId"] = userId;
@@ -122,7 +122,7 @@ namespace HB.FullStack.Server.Identity
             return exception;
         }
 
-        internal static Exception AuthorizationOverMaxFailedCount(Guid userId)
+        internal static Exception AuthorizationOverMaxFailedCount<TId>(TId userId)
         {
             IdentityException exception = new IdentityException(ErrorCodes.AuthorizationOverMaxFailedCount, nameof(AuthorizationOverMaxFailedCount));
             exception.Data["UserId"] = userId;

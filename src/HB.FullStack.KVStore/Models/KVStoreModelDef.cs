@@ -11,7 +11,7 @@ namespace HB.FullStack.KVStore.KVStoreModels
         public string KVStoreName { get; set; }
 
 
-        public IDictionary<int, PropertyInfo> KeyPropertyInfos { get; } = new Dictionary<int, PropertyInfo>();
+        public IList<PropertyInfo> OrderedKeyPropertyInfos { get; set; } = new List<PropertyInfo>();
 
         public KVStoreModelDef(string kvstoreName, Type type)
         {

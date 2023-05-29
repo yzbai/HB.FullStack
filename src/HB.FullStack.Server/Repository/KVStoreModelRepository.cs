@@ -27,7 +27,7 @@ namespace HB.FullStack.Repository
 
         public Task<TModel?> GetAsync(object key)
         {
-            return KVStore.GetAsync<TModel>(key.ToString()!);
+            return KVStore.GetAsync<TModel>(key);
         }
         
         public Task AddAsync(TModel model, string lastUser)
@@ -43,8 +43,7 @@ namespace HB.FullStack.Repository
         public Task DeleteAsync(TModel model, string lastUser)
         {
             model.LastUser = lastUser;
-            string key = KVStore.GetModelKey(model);
-            return KVStore.DeleteAsync<TModel>(key, model.Timestamp);
+            return KVStore.DeleteAsync<TModel>(model);
         }
 
      

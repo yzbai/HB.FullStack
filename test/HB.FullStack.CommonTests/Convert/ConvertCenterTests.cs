@@ -14,11 +14,11 @@ namespace HB.FullStack.CommonTests.Convert
         public void ConvertToStringTest()
         {
             string str = "This is a Text(xx);$#$";
-            var result = StringConvertCenter.ConvertToString(str, null, StringConvertPurpose.NONE);
+            var result = StringConvertCenter.ToString(str, null, StringConvertPurpose.NONE);
 
             Assert.AreEqual(str, result);
 
-            var result2 = StringConvertCenter.ConvertToString(str, null, StringConvertPurpose.HTTP_QUERY);
+            var result2 = StringConvertCenter.ToString(str, null, StringConvertPurpose.HTTP_QUERY);
 
             Assert.AreEqual(HttpUtility.UrlEncode(str), result2);
 

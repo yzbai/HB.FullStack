@@ -131,7 +131,7 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = offlineChangeType,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelIdString = StringConvertCenter.ConvertToString(
+                    ModelIdString = StringConvertCenter.ToString(
                         model.Id.ThrowIfNull(nameof(model.Id)), 
                         modelDef.PrimaryKeyPropertyDef.Type, StringConvertPurpose.NONE).ThrowIfNull(nameof(OfflineChange.ModelIdString)),
                     ModelFullName = modelDef.FullName
@@ -157,7 +157,7 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = OfflineChangeType.UpdateProperties,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelIdString = StringConvertCenter.ConvertToString( 
+                    ModelIdString = StringConvertCenter.ToString( 
                         changedPack.AddtionalProperties["Id"].To(modelDef.PrimaryKeyPropertyDef.Type).ThrowIfNull(nameof(changedPack)),
                         modelDef.PrimaryKeyPropertyDef.Type,
                         StringConvertPurpose.NONE).ThrowIfNull(nameof(OfflineChange.ModelIdString)),

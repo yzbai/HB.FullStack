@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.Common.Convert.Converters
 {
-    public class IntStringConverter : IStringConverter
+    public class LongStringConverter : IStringConverter
     {
         public Type ObjectType { get; } = typeof(int);
 
@@ -10,7 +10,7 @@ namespace HB.FullStack.Common.Convert.Converters
         {
             if (str.IsNullOrEmpty()) return null;
 
-            return int.Parse(str, Globals.Culture);
+            return long.Parse(str, Globals.Culture);
         }
 
         public string? ConvertToString(object? obj, StringConvertPurpose purpose)
@@ -18,4 +18,5 @@ namespace HB.FullStack.Common.Convert.Converters
             return obj?.ToString();
         }
     }
+
 }

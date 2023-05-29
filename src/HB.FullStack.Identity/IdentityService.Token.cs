@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
 
+using HB.FullStack.Common.Convert;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Database;
 using HB.FullStack.Lock.Distributed;
@@ -227,9 +228,9 @@ namespace HB.FullStack.Server.Identity
                 }
             }
 
-            async Task<User> EnsureUser(SignInContext context, string lastUser, TransactionContext transactionContext)
+            async Task<User<TId>> EnsureUser(SignInContext context, string lastUser, TransactionContext transactionContext)
             {
-                User? user = null;
+                User<TId>? user = null;
 
                 switch (context)
                 {
@@ -253,7 +254,7 @@ namespace HB.FullStack.Server.Identity
 
                         if (user == null && signInBySms.RegisterIfNotExists)
                         {
-                            user = await CreateUserAsync(null, signInBySms.Mobile, null, null, null, true, false, lastUser, transactionContext).ConfigureAwait(false);
+                            user = await CreateUserAsync(null, signInBySms.Mobile, null, null, null, true, false,false, lastUser, transactionContext).ConfigureAwait(false);
                         }
                         break;
 
@@ -265,7 +266,7 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task<Token> RefreshTokenAsync(RefreshContext context, string lastUser)
+        public async Task<Token<TId>> RefreshTokenAsync(RefreshContext context, string lastUser)
         {
             ThrowIf.NotValid(context, nameof(context));
 
@@ -285,13 +286,15 @@ namespace HB.FullStack.Server.Identity
 
             ClaimsPrincipal claimsPrincipal = EnsureClaimsPrincipal(context);
 
-            Guid userId = claimsPrincipal.GetUserId() ?? throw IdentityExceptions.RefreshSignInReceiptError("UserId验证不通过", null, context);
-            Guid tokenCredentialId = claimsPrincipal.GetTokenCredentialId() ?? throw IdentityExceptions.RefreshSignInReceiptError("SignInCredentialId验证不通过", null, context);
+
+
+            TId userId = claimsPrincipal.GetUserId<TId>() ?? throw IdentityExceptions.RefreshSignInReceiptError("UserId验证不通过", null, context);
+            TId tokenCredentialId = claimsPrincipal.GetTokenCredentialId<TId>() ?? throw IdentityExceptions.RefreshSignInReceiptError("SignInCredentialId验证不通过", null, context);
 
             //TokenCredential 验证
-            User? user;
-            TokenCredential? tokenCredential = null;
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
+            User<TId>? user;
+            TokenCredential<TId>? tokenCredential = null;
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential<TId>>().ConfigureAwait(false);
 
             try
             {
@@ -301,9 +304,12 @@ namespace HB.FullStack.Server.Identity
                     tokenCredential.Blacked ||
                     tokenCredential.RefreshToken != context.RefreshToken ||
                     tokenCredential.ClientId != context.ClientInfos.ClientId ||
-                    tokenCredential.UserId != userId)
+                    !tokenCredential.UserId!.Equals(userId))
                 {
-                    throw IdentityExceptions.RefreshSignInReceiptError("SignInCredential验证不通过", null, new { tokenCredential?.Blacked, tokenCredential?.ClientId, tokenCredential?.UserId });
+                    throw IdentityExceptions.RefreshSignInReceiptError(
+                        "SignInCredential验证不通过",
+                        null,
+                        new { tokenCredential?.Blacked, tokenCredential?.ClientId, UserId = tokenCredential?.UserId?.ToString() });
                 }
 
                 //验证SignInCredential过期问题,即RefreshToken是否过期
@@ -334,7 +340,7 @@ namespace HB.FullStack.Server.Identity
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new Token(accessToken, tokenCredential.RefreshToken, user);
+                return new Token<TId>(accessToken, tokenCredential.RefreshToken, user);
             }
             catch
             {
@@ -381,15 +387,18 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task DeleteTokenAsync(Guid signInCredentialId, string lastUser)
+        public async Task DeleteTokenAsync(TId signInCredentialId, string lastUser)
         {
-            ThrowIf.Empty(ref signInCredentialId, nameof(signInCredentialId));
+            if (signInCredentialId == null)
+            {
+                throw new ArgumentNullException(nameof(signInCredentialId));
+            }
 
-            TransactionContext transContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
+            TransactionContext transContext = await _transaction.BeginTransactionAsync<TokenCredential<TId>>().ConfigureAwait(false);
 
             try
             {
-                TokenCredential? signInCredential = await _tokenCredentialRepo.GetByIdAsync(signInCredentialId, transContext).ConfigureAwait(false);
+                TokenCredential<TId>? signInCredential = await _tokenCredentialRepo.GetByIdAsync(signInCredentialId, transContext).ConfigureAwait(false);
 
                 if (signInCredential != null)
                 {
@@ -409,11 +418,14 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task DeleteTokenAsync(Guid userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser)
+        public async Task DeleteTokenAsync(TId userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser)
         {
-            ThrowIf.Empty(ref userId, nameof(userId));
+            if(userId == null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
 
-            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential>().ConfigureAwait(false);
+            TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential<TId>>().ConfigureAwait(false);
 
             try
             {
@@ -448,35 +460,35 @@ namespace HB.FullStack.Server.Identity
 
             async Task OnInvalidSmsCode(IBySmsCode context, string lastUser)
             {
-                User? user = await _userRepo.GetByMobileAsync(context.Mobile).ConfigureAwait(false);
+                User<TId>? user = await _userRepo.GetByMobileAsync(context.Mobile).ConfigureAwait(false);
 
                 if (user != null)
                 {
-                    LoginControl loginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
+                    LoginControl<TId> loginControl = await GetOrCreateUserLoginControlAsync(lastUser, user.Id).ConfigureAwait(false);
 
                     await OnInvalidPasswordOrCodeAsync(loginControl, lastUser).ConfigureAwait(false);
                 }
             }
         }
 
-        private async Task DeleteTokenCredentialsAsync(SignInExclusivity logOffType, Guid userId, DeviceIdiom idiom, string lastUser, TransactionContext transactionContext)
+        private async Task DeleteTokenCredentialsAsync(SignInExclusivity logOffType, TId userId, DeviceIdiom idiom, string lastUser, TransactionContext transactionContext)
         {
-            IEnumerable<TokenCredential> resultList = await _tokenCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
+            IList<TokenCredential<TId>> resultList = await _tokenCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
 
-            IEnumerable<TokenCredential> toDeletes = logOffType switch
+            IList<TokenCredential<TId>> toDeletes = logOffType switch
             {
                 SignInExclusivity.LogOffAllOthers => resultList,
-                SignInExclusivity.LogOffAllButWeb => resultList.Where(s => s.DeviceIdiom != DeviceIdiom.Web),
-                SignInExclusivity.LogOffSameIdiom => resultList.Where(s => s.DeviceIdiom == idiom),
-                _ => new List<TokenCredential>()
+                SignInExclusivity.LogOffAllButWeb => resultList.Where(s => s.DeviceIdiom != DeviceIdiom.Web).ToList(),
+                SignInExclusivity.LogOffSameIdiom => resultList.Where(s => s.DeviceIdiom == idiom).ToList(),
+                _ => new List<TokenCredential<TId>>()
             };
 
             await _tokenCredentialRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        private async Task<string> ConstructAccessTokenAsync(User user, TokenCredential signInCredential, string audience, TransactionContext transactionContext)
+        private async Task<string> ConstructAccessTokenAsync(User<TId> user, TokenCredential<TId> signInCredential, string audience, TransactionContext transactionContext)
         {
-            IEnumerable<Claim> jwtClaims = await GetClaimsAsync(user, signInCredential).ConfigureAwait(false);
+            IList<Claim> jwtClaims = await GetClaimsAsync(user, signInCredential).ConfigureAwait(false);
 
             string jwt = JwtHelper.CreateJwt(
                 jwtClaims,
@@ -488,26 +500,26 @@ namespace HB.FullStack.Server.Identity
 
             return jwt;
 
-            async Task<IEnumerable<Claim>> GetClaimsAsync(User user, TokenCredential tokenCredential)
+            async Task<IList<Claim>> GetClaimsAsync(User<TId> user, TokenCredential<TId> tokenCredential)
             {
-                IEnumerable<Role> roles = await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
-                IEnumerable<UserClaim> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+                IList<Role<TId>> roles = await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+                IList<UserClaim<TId>> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
 
                 IList<Claim> claims = new List<Claim>
                 {
-                    new Claim(ClaimExtensionTypes.USER_ID, user.Id.ToString()),
+                    new Claim(ClaimExtensionTypes.USER_ID, StringConvertCenter.ToStrngFrom<TId>(user.Id!, StringConvertPurpose.NONE) ),
                     new Claim(ClaimExtensionTypes.SECURITY_STAMP, user.SecurityStamp),
-                    new Claim(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID, tokenCredential.Id.ToString()),
+                    new Claim(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID, StringConvertCenter.ToStrngFrom<TId>(tokenCredential.Id!, StringConvertPurpose.NONE)),
                     new Claim(ClaimExtensionTypes.CLIENT_ID, tokenCredential.ClientId),
                 };
 
-                foreach (UserClaim item in userClaims)
+                foreach (UserClaim<TId> item in userClaims)
                 {
                     //if (item.AddToJwt)
                     claims.Add(new Claim(item.ClaimType, item.ClaimValue));
                 }
 
-                foreach (Role item in roles)
+                foreach (Role<TId> item in roles)
                 {
                     claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, item.Name));
                 }
@@ -516,7 +528,7 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        private async Task OnInvalidPasswordOrCodeAsync(LoginControl loginControl, string lastUser)
+        private async Task OnInvalidPasswordOrCodeAsync(LoginControl<TId> loginControl, string lastUser)
         {
             if (_options.SignInSettings.RequiredLockoutCheck)
             {
@@ -537,20 +549,20 @@ namespace HB.FullStack.Server.Identity
             await _userLoginControlRepo.UpdateAsync(loginControl, lastUser).ConfigureAwait(false);
         }
 
-        private async Task<LoginControl> GetOrCreateUserLoginControlAsync(string lastUser, Guid userId)
+        private async Task<LoginControl<TId>> GetOrCreateUserLoginControlAsync(string lastUser, TId userId)
         {
-            LoginControl? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
+            LoginControl<TId>? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
 
             if (userLoginControl == null)
             {
-                userLoginControl = new LoginControl { UserId = userId };
+                userLoginControl = new LoginControl<TId> { UserId = userId };
                 await _userLoginControlRepo.AddAsync(userLoginControl, lastUser).ConfigureAwait(false);
             }
 
             return userLoginControl;
         }
 
-        private async Task<User> CreateUserAsync(string? userLevel, string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, string lastUser, TransactionContext? transactionContext = null)
+        private async Task<User<TId>> CreateUserAsync(string? userLevel, string? mobile, string? email, string? loginName, string? password, bool mobileConfirmed, bool emailConfirmed, bool twoFactorEnabled, string lastUser, TransactionContext? transactionContext = null)
         {
             ThrowIf.NotMobile(mobile, nameof(mobile), true);
             ThrowIf.NotEmail(email, nameof(email), true);
@@ -569,7 +581,7 @@ namespace HB.FullStack.Server.Identity
 
             bool ownTrans = transactionContext == null;
 
-            TransactionContext transContext = transactionContext ?? await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
+            TransactionContext transContext = transactionContext ?? await _transaction.BeginTransactionAsync<User<TId>>().ConfigureAwait(false);
 
             try
             {
@@ -580,7 +592,7 @@ namespace HB.FullStack.Server.Identity
                     throw IdentityExceptions.IdentityAlreadyTaken(mobile: mobile, email: email, loginName: loginName);
                 }
 
-                User user = new User(userLevel, loginName, mobile, email, password, mobileConfirmed, emailConfirmed);
+                User<TId> user = new User<TId>(userLevel, loginName, mobile, email, password, mobileConfirmed, emailConfirmed, twoFactorEnabled);
 
                 await _userRepo.AddAsync(user, lastUser, transContext).ConfigureAwait(false);
 
