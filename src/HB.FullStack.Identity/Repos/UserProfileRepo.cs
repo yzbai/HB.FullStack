@@ -14,13 +14,13 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity.Repos
 {
-    public class UserProfileRepo : ModelRepository<UserProfile>
+    public class UserProfileRepo : DbModelRepository<UserProfile>
     {
         public UserProfileRepo(ILogger<UserProfileRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager) : base(logger, databaseReader, cache, memoryLockManager)
         {
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args)
         {
             return Task.CompletedTask;
         }

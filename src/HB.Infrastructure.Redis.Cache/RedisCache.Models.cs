@@ -350,7 +350,7 @@ end
             _modelDefFactory = modelDefFactory;
         }
 
-        public async Task<(IList<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : ITimestamp, new()
+        public async Task<(IList<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : IModel
         {
             ThrowIf.Null(keyValues, nameof(keyValues));
 
@@ -410,7 +410,7 @@ end
         /// //TODO:并不把models作为一个整体看待，里面有的可能会因为timestamp冲突而不成功。
         /// 需要改变吗？
         /// </summary>
-        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : ITimestamp, new()
+        public async Task<IEnumerable<bool>> SetModelsAsync<TModel>(IEnumerable<TModel> models, CancellationToken token = default) where TModel : IModel
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
 
@@ -636,7 +636,7 @@ end
             return loadedScript;
         }
 
-        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : ITimestamp, new()
+        private void AddSetModelsRedisInfo<TModel>(IEnumerable<TModel> models, CacheModelDef modelDef, List<RedisKey> redisKeys, List<RedisValue> redisValues) where TModel : IModel
         {
             /// keys: model1_idKey, model1_dimensionkey1, model1_dimensionkey2, model1_dimensionkey3, model2_idKey, model2_dimensionkey1, model2_dimensionkey2, model2_dimensionkey3
             /// argv: absexp_value, expire_value,2(model_cout), 3(dimensionkey_count), model1_data, model1_timestamp, model1_dimensionKeyJoinedString, model2_data, model2_timestamp, model2_dimensionKeyJoinedString
@@ -652,6 +652,8 @@ end
 
             redisValues.Add(models.Count());
             redisValues.Add(modelDef.AltKeyProperties.Count);
+
+            long curTimestamp = TimeUtil.Timestamp;
 
             foreach (TModel model in models)
             {
@@ -677,12 +679,12 @@ end
                 byte[] data = SerializeUtil.Serialize(model);
 
                 redisValues.Add(data);
-                redisValues.Add(model.Timestamp);
+                redisValues.Add((model as ITimestamp)?.Timestamp ?? curTimestamp);
                 redisValues.Add(joinedDimensinKeyBuilder.ToString());
             }
         }
 
-        private static (IList<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : ITimestamp, new()
+        private static (IList<TModel>?, bool) MapGetModelsRedisResult<TModel>(RedisResult result) where TModel : IModel
         {
             if (result.IsNull)
             {

@@ -9,7 +9,7 @@ namespace HB.FullStack.Client.ApiClient
     /// POST /Model
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class AddRequest<T> : ApiRequest where T : SharedResource
+    public sealed class AddRequest<T> : ApiRequest where T : class, ISharedResource
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]

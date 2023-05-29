@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public class EmptyApiResource : SharedResource
+    public class EmptyApiResource : ValidatableObject, ISharedResource
     {
         public static EmptyApiResource Value { get; }
-        public override Guid? Id { get; set; } = null;
-        public override long? ExpiredAt { get; set; } = null;
+        public object? Id { get; set; }
+        public long? ExpiredAt { get; set; }
 
         static EmptyApiResource()
         {
@@ -17,5 +20,7 @@ namespace HB.FullStack.Client.ApiClient
 
         private EmptyApiResource()
         { }
+
+        public ModelKind GetKind() => ModelKind.Shared;
     }
 }

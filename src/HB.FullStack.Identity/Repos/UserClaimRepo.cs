@@ -14,13 +14,13 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class UserClaimRepo : ModelRepository<UserClaim>
+    public class UserClaimRepo : DbModelRepository<UserClaim>
     {
 
         public UserClaimRepo(ILogger<UserClaimRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args)
         {
             if (sender is IEnumerable<UserClaim> userClaims)
             {

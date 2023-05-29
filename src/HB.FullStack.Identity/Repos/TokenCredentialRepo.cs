@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class TokenCredentialRepo : ModelRepository<TokenCredential>
+    public class TokenCredentialRepo : DbModelRepository<TokenCredential>
     {
         public TokenCredentialRepo(ILogger<TokenCredentialRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
@@ -30,7 +30,7 @@ namespace HB.FullStack.Server.Identity
             return DbReader.ScalarAsync<TokenCredential>(signInCredentialId, transactionContext);
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args) => Task.CompletedTask;
+        protected override Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args) => Task.CompletedTask;
 
         //public Task<Token?> GetByConditionAsync(Guid signInReceiptId, string? refreshToken, string deviceId, Guid userId, TransactionContext? transContext = null)
         //{

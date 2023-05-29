@@ -49,7 +49,7 @@ namespace HB.FullStack.Client.Abstractions
 
         public bool IsLogined() => UserId.HasValue && AccessToken.IsNotNullOrEmpty();
 
-        public void OnTokenFetched(TokenRes tokenRes);
+        public void OnTokenFetched(ITokenRes tokenRes);
 
         public void OnTokenDeleted();
 

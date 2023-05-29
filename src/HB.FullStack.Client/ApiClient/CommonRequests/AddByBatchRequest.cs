@@ -11,7 +11,7 @@ namespace HB.FullStack.Client.ApiClient
     /// POST /Model/ByBatch
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class AddByBatchRequest<T> : ApiRequest where T : SharedResource
+    public sealed class AddByBatchRequest<T> : ApiRequest where T : class, ISharedResource
     {
         [IdBarrier]
         [CollectionMemeberValidated(CanBeNullOrEmpty = false)]

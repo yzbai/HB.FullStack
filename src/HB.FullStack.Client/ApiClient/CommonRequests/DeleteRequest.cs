@@ -9,7 +9,7 @@ namespace HB.FullStack.Client.ApiClient
     /// DELETE /Model
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class DeleteRequest<T> : ApiRequest where T : SharedResource
+    public sealed class DeleteRequest<T> : ApiRequest where T : class, ISharedResource
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]

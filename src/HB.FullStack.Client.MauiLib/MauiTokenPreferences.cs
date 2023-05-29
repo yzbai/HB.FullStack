@@ -59,7 +59,7 @@ namespace HB.FullStack.Client.MauiLib
 
         public void OnTokenRefreshFailed() => TokenPreferences.DeleteToken();
 
-        public void OnTokenFetched(TokenRes tokenRes) => TokenPreferences.SetToken(tokenRes);
+        public void OnTokenFetched(ITokenRes tokenRes) => TokenPreferences.SetToken(tokenRes);
 
         public void OnTokenDeleted() => TokenPreferences.DeleteToken();
 
@@ -355,7 +355,7 @@ namespace HB.FullStack.Client.MauiLib
             }
         }
 
-        public static void SetToken(TokenRes tokenRes)
+        public static void SetToken(ITokenRes tokenRes)
         {
             UserId = tokenRes.UserId;
             UserLevel = tokenRes.UserLevel;

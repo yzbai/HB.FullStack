@@ -27,7 +27,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             IDatabase database,
             ICache cache,
             IMemoryLockManager memoryLockManager,
-            ILogger logger) where TModel : ITimestampModel, new()
+            ILogger logger) where TModel : IModel
         {
             if (!cache.IsModelCachable<TModel>())
             {
@@ -74,7 +74,7 @@ namespace HB.FullStack.Repository.CacheStrategies
                 try
                 {
                     //Double check
-                    (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
+                    (IList<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
 
                     if (allExists)
                     {
@@ -112,7 +112,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             }
         }
 
-        private static void SetCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : ITimestampModel, new()
+        private static void SetCache<TModel>(IEnumerable<TModel> models, ICache cache) where TModel : IModel
         {
             #region 普通缓存，加锁的做法
             //using IDistributedLock distributedLock = await _lockManager.LockModelsAsync(models, OccupiedTime, PatienceTime).ConfigureAwait(false);
@@ -145,23 +145,23 @@ namespace HB.FullStack.Repository.CacheStrategies
 
         }
 
-        public static void InvalidateCache<T>(IEnumerable<T> models, ICache cache) where T : DbModel
+        public static void InvalidateCache<T>(IEnumerable<T> models, ICache cache) where T : IDbModel
         {
             cache.RemoveModelsAsync(models).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache<T>(T model, ICache cache) where T : DbModel
+        public static void InvalidateCache<T>(T model, ICache cache) where T : IDbModel
         {
             cache.RemoveModelAsync(model).SafeFireAndForget(OnException);
         }
 
-        public static void InvalidateCache<T>(IEnumerable<PropertyChangeJsonPack> cps, DbModelDef modelDef, ICache cache)
+        public static void InvalidateCache<T>(IEnumerable<PropertyChangePack> cps, DbModelDef modelDef, ICache cache)
         {
             List<object> ids = new List<object>();
 
             foreach (var cp in cps)
             {
-                if (cp.AddtionalProperties.TryGetValue(nameof(ILongId.Id), out JsonElement idElement))
+                if (cp.AddtionalProperties.TryGetValue(nameof(IDbModel.Id), out JsonElement idElement))
                 {
                     object? id = SerializeUtil.FromJsonElement(modelDef.PrimaryKeyPropertyDef.Type, idElement);
 

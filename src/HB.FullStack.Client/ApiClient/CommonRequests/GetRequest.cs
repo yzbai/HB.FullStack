@@ -35,7 +35,7 @@ namespace HB.FullStack.Client.ApiClient
         }
     }
 
-    public class GetRequest<T> : GetRequest where T : SharedResource
+    public class GetRequest<T> : GetRequest where T : class, ISharedResource
     {
         public GetRequest(ApiRequestAuth? requestAuth = null, string? condition = null) : base(typeof(T).Name, requestAuth, condition)
         {

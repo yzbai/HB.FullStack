@@ -11,21 +11,38 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Common.Shared
 {
-    public class UserProfileRes : SharedResource
+    public interface IUserProfileRes : ISharedResource
     {
-        public override Guid? Id { get; set; }
+        object UserId { get; set; }
 
-        [NoEmptyGuid]
-        public Guid UserId { get; set; }
+        string? AvatarFileName { get; set; }
 
-        [NickName(CanBeNull = false)]
-        public string NickName { get; set; } = null!;
+        DateOnly? BirthDay { get; set; }
 
-        public Gender? Gender { get; set; }
+        Gender? Gender { get; set; }
 
-        public DateOnly? BirthDay { get; set; }
-
-        public string? AvatarFileName { get; set; }
-        public override long? ExpiredAt { get; set; }
+        string NickName { get; set; }
     }
+
+    //public class UserProfileRes<TId> : ValidatableObject, IUserProfileRes
+    //{
+    //    public TId UserId { get; set; } = default!;
+
+    //    [NickName(CanBeNull = false)]
+    //    public string NickName { get; set; } = null!;
+
+    //    public Gender? Gender { get; set; }
+
+    //    public DateOnly? BirthDay { get; set; }
+
+    //    public string? AvatarFileName { get; set; }
+    //    public object? Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    //    public long? ExpiredAt { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    //    object IUserProfileRes.UserId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    //    public ModelKind GetKind()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 }

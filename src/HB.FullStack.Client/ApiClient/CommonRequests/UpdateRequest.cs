@@ -5,7 +5,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public sealed class UpdateRequest<T> : ApiRequest where T : SharedResource
+    public sealed class UpdateRequest<T> : ApiRequest where T : class, ISharedResource
     {
         [IdBarrier]
         [ValidatedObject(CanBeNull = false)]

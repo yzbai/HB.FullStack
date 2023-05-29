@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Server.Identity;
 using HB.FullStack.Server.Identity.Context;
+using HB.FullStack.Server.Identity.Models;
 using HB.FullStack.Server.Services;
 
 using Microsoft.AspNetCore.Authorization;

@@ -1,6 +1,6 @@
 ﻿namespace HB.FullStack.Repository
 {
-    public enum DBChangeType
+    public enum ModelChangeType
     {
         Add,
         Update,

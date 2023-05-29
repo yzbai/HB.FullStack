@@ -14,12 +14,12 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    public class RoleRepo : ModelRepository<Role>
+    public class RoleRepo : DbModelRepository<Role>
     {
         public RoleRepo(ILogger<RoleRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
             : base(logger, databaseReader, cache, memoryLockManager) { }
 
-        protected override async Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
+        protected override async Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args)
         {
             //解决方案1：删除所有。Role改变，对于CachedRolesByUserId来说，就是Values变了，所以要全部Invalidate
             //问题：速度慢
@@ -30,7 +30,7 @@ namespace HB.FullStack.Server.Identity
 
             //TODO: 解决方案3：删除某个前缀的所有key
 
-            if (args.ChangeType == DBChangeType.Update || args.ChangeType == DBChangeType.Delete || args.ChangeType == DBChangeType.UpdateProperties)
+            if (args.ChangeType == ModelChangeType.Update || args.ChangeType == ModelChangeType.Delete || args.ChangeType == ModelChangeType.UpdateProperties)
             {
                 if (sender is IEnumerable<Role> roles)
                 {

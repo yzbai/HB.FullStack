@@ -8,9 +8,8 @@ using System;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Models;
-using HB.FullStack.Server.Identity.Models;
 
-namespace HB.FullStack.Server.Identity
+namespace HB.FullStack.Server.Identity.Models
 {
     public class Token : ValidatableObject, IModel
     {

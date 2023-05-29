@@ -4,24 +4,23 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Common.Shared
 {
-    public class DirectoryTokenRes : ISharedResource
+    public interface IDirectoryTokenRes : ISharedResource
     {
-        public Guid UserId { get; set; }
+         object UserId { get; set; }
 
-        public string SecurityToken { get; set; } = null!;
+         string SecurityToken { get; set; }
 
-        public string AccessKeyId { get; set; } = null!;
+         string AccessKeyId { get; set; }
 
-        public string AccessKeySecret { get; set; } = null!;
+         string AccessKeySecret { get; set; }
 
         /// <summary>
         /// 修正后的Directory,比如请求/a/b/c的权限，返回了/a的权限，即权限扩大
         /// </summary>
-        public string DirectoryPermissionName { get; set; } = null!;
+         string DirectoryPermissionName { get; set; }
 
-        public bool ReadOnly { get; set; }
-        public override Guid? Id { get; set; }
-        public override long? ExpiredAt { get; set; }
+         bool ReadOnly { get; set; }
+
 
         //protected override int GetChildHashCode()
         //{

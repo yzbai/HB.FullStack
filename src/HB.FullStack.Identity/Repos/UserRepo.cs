@@ -12,6 +12,8 @@ using HB.FullStack.Lock.Memory;
 using HB.FullStack.Repository;
 
 using Microsoft.Extensions.Logging;
+using HB.FullStack.KVStore;
+using HB.FullStack.Common;
 
 namespace HB.FullStack.Server.Identity
 {
@@ -19,14 +21,14 @@ namespace HB.FullStack.Server.Identity
     /// 所有的User这个Model的增删改查都要经过这里
     /// 所有通过User来使用与User相关的关系表的，都经过这里
     /// </summary>
-    public class UserRepo : ModelRepository<User>
+    public class UserRepo<TUser> : ModelRepo<TUser> where TUser : IUser
     {
-        public UserRepo(ILogger<UserRepo> logger, IDbReader databaseReader, ICache cache, IMemoryLockManager memoryLockManager)
-            : base(logger, databaseReader, cache, memoryLockManager)
+        public UserRepo(ILogger<UserRepo<TUser>> logger, IDbReader databaseReader, IKVStore kvStore, ICache cache, IMemoryLockManager memoryLockManager)
+            : base(logger, databaseReader, kvStore, cache, memoryLockManager)
         {
             ModelUpdating += (sender, args) =>
             {
-                if (sender is IEnumerable<User> users)
+                if (sender is IEnumerable<TUser> users)
                 {
                     foreach (var user in users)
                     {
@@ -40,7 +42,7 @@ namespace HB.FullStack.Server.Identity
             };
         }
 
-        protected override Task InvalidateCacheItemsOnChanged(object sender, DBChangeEventArgs args)
+        protected override Task InvalidateCacheItemsOnChanged(object sender, ModelChangeEventArgs args)
         {
             if (sender is IEnumerable<UserRole> userRoles)
             {
@@ -57,32 +59,32 @@ namespace HB.FullStack.Server.Identity
 
         #region 主表 Read 所有的查询都要经过这里
 
-        public async Task<User?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
+        public async Task<TUser?> GetByIdAsync(Guid userId, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                keyName: nameof(User.Id),
+                keyName: nameof(IUser.Id),
                 keyValue: userId.ToString(),
                 dbRetrieve: db =>
                 {
-                    return db.ScalarAsync<User>(userId, transContext);
+                    return db.ScalarAsync<TUser>(userId, transContext);
                 }).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
+        public async Task<IEnumerable<IUser>> GetByIdsAsync(IEnumerable<long> userIds, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                nameof(User.Id),
+                nameof(IUser.Id),
                 userIds,
                 db =>
                 {
-                    return db.RetrieveAsync<User>(u => SqlStatement.In(u.Id, true, userIds), transContext);
+                    return db.RetrieveAsync<TUser>(u => SqlStatement.In(u.Id, true, userIds), transContext);
                 }).ConfigureAwait(false);
         }
 
-        public async Task<User?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
+        public async Task<TUser?> GetByMobileAsync(string mobile, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                nameof(User.Mobile),
+                nameof(IUser.Mobile),
                 mobile,
                 db =>
                 {
@@ -90,14 +92,14 @@ namespace HB.FullStack.Server.Identity
                 }).ConfigureAwait(false);
         }
 
-        public async Task<User?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
+        public async Task<IUser?> GetByLoginNameAsync(string loginName, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
-                nameof(User.LoginName),
+                nameof(IUser.LoginName),
                 loginName,
                 db =>
                 {
-                    return db.ScalarAsync<User>(u => u.LoginName == loginName, transContext);
+                    return db.ScalarAsync<TUser>(u => u.LoginName == loginName, transContext);
                 }).ConfigureAwait(false);
         }
 
@@ -150,7 +152,7 @@ namespace HB.FullStack.Server.Identity
         /// <summary>
         /// 如果已经存在其中一些，则报错
         /// </summary>
-        public async Task AddRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext transactionContext)
+        public async Task AddRolesByUserIdAsync(object userId, IEnumerable<Role> roles, string lastUser, TransactionContext transactionContext)
         {
             ThrowIf.Null(transactionContext, nameof(transactionContext));
 
@@ -168,7 +170,7 @@ namespace HB.FullStack.Server.Identity
             _ = await AddAsync<UserRole>(userRoles, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        public async Task RemoveRolesByUserIdAsync(Guid userId, IEnumerable<Role> roles, string lastUser, TransactionContext transactionContext)
+        public async Task RemoveRolesByUserIdAsync(object userId, IEnumerable<IRole> roles, string lastUser, TransactionContext transactionContext)
         {
             ThrowIf.Null(transactionContext, nameof(transactionContext));
 

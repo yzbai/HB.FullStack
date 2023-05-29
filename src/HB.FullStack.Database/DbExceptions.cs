@@ -117,7 +117,7 @@ namespace HB.FullStack.Database
 
         internal static Exception DbSchemaError(int version, string? dbSchemaName, string cause, Exception? innerException = null)
         {
-            DbException exception = new DbException(ErrorCodes.DbConfigError, nameof(DbSchemaError), innerException, null);
+            DbException exception = new DbException(ErrorCodes.OptionsError, nameof(DbSchemaError), innerException, null);
 
             exception.Data["DatabaseVersion"] = version;
             exception.Data["DbSchemaName"] = dbSchemaName;
@@ -409,7 +409,7 @@ namespace HB.FullStack.Database
 
         internal static Exception DbSchemaError(string? dbSchemaName, string cause)
         {
-            DbException exception = new DbException(ErrorCodes.DbConfigError, cause, null, null);
+            DbException exception = new DbException(ErrorCodes.OptionsError, cause, null, null);
 
             exception.Data["DbSchemaName"] = dbSchemaName;
 

@@ -5,11 +5,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HB.FullStack.Server.Identity.Models
 {
+    //public interface IUserRole
+    //{
+    //    object RoleId { get; set; }
+    //    object UserId { get; set; }
+    //}
+
     /// <summary>
     /// 用户-角色 关系 实体
     /// </summary>
     //TODO: 把关系表定义到各个相关实体中，而不单独设置关系Model
-    public class UserRole : TimelessFlackIdDbModel
+    public class UserRole2 : TimelessFlackIdDbModel, IUserRole
     {
         [NoEmptyGuid]
         [DbForeignKey(typeof(User), false)]

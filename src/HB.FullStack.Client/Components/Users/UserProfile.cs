@@ -8,13 +8,16 @@ using System;
 using System.ComponentModel.DataAnnotations;
 
 using HB.FullStack.Client.Base;
+using HB.FullStack.Common;
 using HB.FullStack.Common.PropertyTrackable;
 using HB.FullStack.Common.Shared;
+using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Client.Components.Users
 {
     [SyncSetting(allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
-    public partial class UserProfile : ClientDbModel
+    [PropertyTrackableObject]
+    public partial class UserProfile : DbModel<Guid>, IExpired
     {
         [NoEmptyGuid]
         [TrackProperty]
@@ -36,6 +39,9 @@ namespace HB.FullStack.Client.Components.Users
 
         [TrackProperty]
         private string? _avatarFileName;
+
+        [TrackProperty]
+        private long? _expiredAt;
 
         public override Guid Id { get; set; }
         public override bool Deleted { get; set; }

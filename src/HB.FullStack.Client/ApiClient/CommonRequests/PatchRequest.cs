@@ -3,7 +3,7 @@ using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public sealed class PatchRequest<T> : ApiRequest where T : SharedResource
+    public sealed class PatchRequest<T> : ApiRequest where T : class, ISharedResource
     {
         [RequestBody]
         public PropertyChangePack RequestData { get; set; }

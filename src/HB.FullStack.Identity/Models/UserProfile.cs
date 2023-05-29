@@ -11,7 +11,16 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public class UserProfile : TimestampGuidDbModel
+    public interface IUserProfile
+    {
+        string? AvatarFileName { get; set; }
+        DateOnly? BirthDay { get; set; }
+        Gender? Gender { get; set; }
+        string NickName { get; set; }
+        object UserId { get; set; }
+    }
+
+    public class UserProfile : TimestampGuidDbModel, IUserProfile
     {
         [NoEmptyGuid]
         [DbForeignKey(typeof(User), true)]

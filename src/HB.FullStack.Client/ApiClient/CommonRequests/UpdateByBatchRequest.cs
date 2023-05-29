@@ -7,7 +7,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Client.ApiClient
 {
-    public sealed class UpdateByBatchRequest<T> : ApiRequest where T : SharedResource
+    public sealed class UpdateByBatchRequest<T> : ApiRequest where T : class, ISharedResource
     {
         [IdBarrier]
         [CollectionMemeberValidated(CanBeNullOrEmpty = false)]

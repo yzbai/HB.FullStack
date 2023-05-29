@@ -18,7 +18,7 @@ namespace HB.FullStack.Client.ApiClient
 {
     public static class IApiClientTokenExtensions
     {
-        internal static async Task FetchTokenByLoginNameAsync(this IApiClient apiClient, string loginName, string password)
+        internal static async Task FetchTokenByLoginNameAsync<TTokenRes>(this IApiClient apiClient, string loginName, string password) where TTokenRes :class, ITokenRes
         {
             TokenResGetByLoginNameRequest request = new TokenResGetByLoginNameRequest(
                 loginName,
@@ -26,7 +26,7 @@ namespace HB.FullStack.Client.ApiClient
                 apiClient.ApiClientOptions.TokenSiteSetting.SiteName,
                 apiClient.TokenPreferences.DeviceInfos);
 
-            TokenRes? res = await apiClient.GetAsync<TokenRes>(request).ConfigureAwait(false);
+            TTokenRes? res = await apiClient.GetAsync<TTokenRes>(request).ConfigureAwait(false);
 
             ThrowIf.Null(res, "Return a null TokenRes");
 

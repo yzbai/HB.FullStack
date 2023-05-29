@@ -215,5 +215,12 @@ namespace System
 
             return ex;
         }
+
+        internal static Exception OptionsError(string cause)
+        {
+            ClientException ex = new ClientException(ErrorCodes.OptionsError, cause);
+
+            return ex;
+        }
     }
 }

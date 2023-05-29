@@ -14,7 +14,7 @@ namespace HB.FullStack.Client.ApiClient
         byte[] GetFile();
     }
 
-    public sealed class UploadRequest<T> : ApiRequest, IUploadRequest where T : SharedResource
+    public sealed class UploadRequest<T> : ApiRequest, IUploadRequest where T : class, ISharedResource
     {
         private readonly byte[]? _file;
 

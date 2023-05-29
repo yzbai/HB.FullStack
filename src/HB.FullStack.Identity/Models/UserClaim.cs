@@ -6,10 +6,17 @@ using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Server.Identity.Models
 {
+    public interface IUserClaim
+    {
+        string ClaimType { get; set; }
+        string ClaimValue { get; set; }
+        object UserId { get; set; }
+    }
+
     /// <summary>
     /// 打包到Token里的信息，客户端不知
     /// </summary>
-    public class UserClaim : TimestampGuidDbModel
+    public class UserClaim : TimestampGuidDbModel, IUserClaim
     {
         [NoEmptyGuid]
         [DbForeignKey(typeof(User), false)]

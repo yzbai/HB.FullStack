@@ -60,16 +60,28 @@ namespace HB.FullStack.Client.ApiClient
             }
             void RangeResEndpoints()
             {
+                Type tokenResType = null!;
                 AddResEndpointsFromCode();
                 AddResEndpointsFromTokenSite();
                 AddResEndpointFromOtherSites();
 
                 void AddResEndpointsFromCode()
                 {
-                    IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(type => type.IsSubclassOf(typeof(SharedResource)));
+                    IEnumerable<Type> resTypes = ReflectionUtil.GetAllTypeByCondition(
+                        type => type.IsClass && !type.IsAbstract && type.IsAssignableTo(typeof(ISharedResource)));
 
                     foreach (Type resType in resTypes)
                     {
+                        if (resType.IsAssignableTo(typeof(ITokenRes)))
+                        {
+                            if (tokenResType != null)
+                            {
+                                throw ClientExceptions.OptionsError("Multiple ITokenRes Implements Exists.");
+                            }
+
+                            tokenResType = resType;
+                        }
+
                         ResEndpoint endpoint = new ResEndpoint(resType.Name);
 
                         //直接把TokenSite作为默认
@@ -109,12 +121,14 @@ namespace HB.FullStack.Client.ApiClient
                     foreach (ResEndpoint endpoint in ApiClientOptions.TokenSiteSetting.Endpoints)
                     {
                         endpoint.SiteSetting = ApiClientOptions.TokenSiteSetting;
+
+                        //Add or Override
                         _resEndpoints[endpoint.ResName] = endpoint;
                     }
 
-                    ResEndpoint toeknResEndpoint = new ResEndpoint(nameof(TokenRes));
+                    ResEndpoint toeknResEndpoint = new ResEndpoint(tokenResType.Name);
                     toeknResEndpoint.SiteSetting = ApiClientOptions.TokenSiteSetting;
-                    _resEndpoints[nameof(TokenRes)] = toeknResEndpoint;
+                    _resEndpoints[tokenResType.Name] = toeknResEndpoint;
                 }
 
                 void AddResEndpointFromOtherSites()
