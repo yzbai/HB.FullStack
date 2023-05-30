@@ -4,7 +4,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Common.Shared
 {
-    public interface IDirectoryTokenRes : ISharedResource
+    public class DirectoryTokenRes : ISharedResource
     {
          object UserId { get; set; }
 

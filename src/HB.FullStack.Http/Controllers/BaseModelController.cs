@@ -26,7 +26,7 @@ namespace HB.FullStack.Server.WebLib.Controllers
 
             Type modelType = typeof(TModel);
 
-            if (typeof(DbModel).IsAssignableFrom(modelType))
+            if (typeof(IModel).IsAssignableFrom(modelType))
             {
                 ModelDef = ModelDefFactory.GetDef(modelType, ModelKind.Db);
             }
