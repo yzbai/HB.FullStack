@@ -1,6 +1,5 @@
 ﻿using HB.FullStack.Server.Identity.Models;
 using HB.FullStack.Repository;
-using HB.FullStack.Database;
 using HB.FullStack.KVStore;
 
 using System;

@@ -56,7 +56,7 @@ namespace HB.FullStack.Server.Identity
             return exception;
         }
 
-        internal static Exception FoundTooMuch(Guid userId, Guid roleId, string cause)
+        internal static Exception FoundTooMuch(object userId, object roleId, string cause)
         {
             IdentityException exception = new IdentityException(ErrorCodes.FoundTooMuch, nameof(FoundTooMuch));
             exception.Data["UserId"] = userId;
@@ -146,7 +146,7 @@ namespace HB.FullStack.Server.Identity
             return exception;
         }
 
-        internal static Exception NotFound(Guid userId, Guid roleId, string cause)
+        internal static Exception NotFound(object userId, object roleId, string cause)
         {
             IdentityException exception = new IdentityException(ErrorCodes.NotFound, nameof(NotFound));
             exception.Data["UserId"] = userId;

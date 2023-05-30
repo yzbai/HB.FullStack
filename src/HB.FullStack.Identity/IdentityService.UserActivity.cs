@@ -8,11 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.Identity
 {
-    internal partial class IdentityService
+    internal partial class IdentityService<TId>
     {
         #region UserActivity
 
-        public async Task RecordUserActivityAsync(Guid? signInCredentialId, Guid? userId, string? ip, string? url, string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
+        public async Task RecordUserActivityAsync(TId? signInCredentialId, TId? userId, string? ip, string? url, 
+            string? httpMethod, string? arguments, int? resultStatusCode, string? resultType, ErrorCode? errorCode)
         {
             if (SerializeUtil.TryToJson(errorCode, out string? resultError))
             {
@@ -38,7 +39,7 @@ namespace HB.FullStack.Server.Identity
                 url = url[..SharedNames.Length.MAX_URL_LENGTH];
             }
 
-            UserActivity model = new UserActivity
+            UserActivity<TId> model = new UserActivity<TId>
             {
                 SignInCredentialId = signInCredentialId,
                 UserId = userId,

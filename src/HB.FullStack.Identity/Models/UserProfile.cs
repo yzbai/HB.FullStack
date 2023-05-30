@@ -22,9 +22,8 @@ namespace HB.FullStack.Server.Identity.Models
 
     public class UserProfile<TId> : DbModel<TId>
     {
-        [NoEmptyGuid]
         [DbForeignKey(typeof(User<>), true)]
-        public Guid UserId { get; set; }
+        public TId UserId { get; set; } = default!;
 
         [NickName(CanBeNull = false)]
         public string NickName { get; set; } = null!;

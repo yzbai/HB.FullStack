@@ -20,7 +20,7 @@ namespace HB.FullStack.Server.Identity
 
         #region Read
 
-        public Task<IList<TokenCredential<TId>>> GetByUserIdAsync(TId userId, TransactionContext? transactionContext)
+        public Task<IEnumerable<TokenCredential<TId>>> GetByUserIdAsync(TId userId, TransactionContext? transactionContext)
         {
             return DbReader.RetrieveAsync<TokenCredential<TId>>(s => s.UserId!.Equals(userId), transactionContext);
         }

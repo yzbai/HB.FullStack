@@ -473,7 +473,7 @@ namespace HB.FullStack.Server.Identity
 
         private async Task DeleteTokenCredentialsAsync(SignInExclusivity logOffType, TId userId, DeviceIdiom idiom, string lastUser, TransactionContext transactionContext)
         {
-            IList<TokenCredential<TId>> resultList = await _tokenCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false);
+            IList<TokenCredential<TId>> resultList = (await _tokenCredentialRepo.GetByUserIdAsync(userId, transactionContext).ConfigureAwait(false)).ToList();
 
             IList<TokenCredential<TId>> toDeletes = logOffType switch
             {
@@ -502,14 +502,14 @@ namespace HB.FullStack.Server.Identity
 
             async Task<IList<Claim>> GetClaimsAsync(User<TId> user, TokenCredential<TId> tokenCredential)
             {
-                IList<Role<TId>> roles = await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
-                IList<UserClaim<TId>> userClaims = await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false);
+                IList<Role<TId>> roles = (await _userRepo.GetRolesByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false)).ToList();
+                IList<UserClaim<TId>> userClaims = (await _userClaimRepo.GetByUserIdAsync(user.Id, transactionContext).ConfigureAwait(false)).ToList();
 
                 IList<Claim> claims = new List<Claim>
                 {
-                    new Claim(ClaimExtensionTypes.USER_ID, StringConvertCenter.ToStrngFrom<TId>(user.Id!, StringConvertPurpose.NONE) ),
+                    new Claim(ClaimExtensionTypes.USER_ID, StringConvertCenter.ToStringFrom<TId>(user.Id!, StringConvertPurpose.NONE) ),
                     new Claim(ClaimExtensionTypes.SECURITY_STAMP, user.SecurityStamp),
-                    new Claim(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID, StringConvertCenter.ToStrngFrom<TId>(tokenCredential.Id!, StringConvertPurpose.NONE)),
+                    new Claim(ClaimExtensionTypes.TOKEN_CREDENTIAL_ID, StringConvertCenter.ToStringFrom<TId>(tokenCredential.Id!, StringConvertPurpose.NONE)),
                     new Claim(ClaimExtensionTypes.CLIENT_ID, tokenCredential.ClientId),
                 };
 
@@ -551,7 +551,7 @@ namespace HB.FullStack.Server.Identity
 
         private async Task<LoginControl<TId>> GetOrCreateUserLoginControlAsync(string lastUser, TId userId)
         {
-            LoginControl<TId>? userLoginControl = await _userLoginControlRepo.GetAsync(userId).ConfigureAwait(false);
+            LoginControl<TId>? userLoginControl = await _userLoginControlRepo.GetByUserId(userId).ConfigureAwait(false);
 
             if (userLoginControl == null)
             {

@@ -70,7 +70,7 @@ namespace HB.FullStack.Server.Identity
                 }).ConfigureAwait(false);
         }
 
-        public async Task<IList<User<TId>>> GetByIdsAsync(IList<long> userIds, TransactionContext? transContext = null)
+        public async Task<IEnumerable<User<TId>>> GetByIdsAsync(IList<long> userIds, TransactionContext? transContext = null)
         {
             return await GetUsingCacheAsideAsync(
                 nameof(IDbModel.Id),
@@ -130,17 +130,17 @@ namespace HB.FullStack.Server.Identity
                                                                             .LeftJoin<User<TId>, UserRole<TId>>((u, ur) => u.Id!.Equals(ur.UserId))
                                                                             .LeftJoin<UserRole<TId>, Role<TId>>((ur, r) => ur.RoleId!.Equals(r.Id));
 
-        public async Task<IList<Role<TId>>> GetRolesByUserIdAsync(TId userId, TransactionContext? transactionContext)
+        public async Task<IEnumerable<Role<TId>>> GetRolesByUserIdAsync(TId userId, TransactionContext? transactionContext)
         {
             return await GetUsingCacheAsideAsync<Role<TId>>(
                 new CachedRolesByUserId<TId>(userId),
                 dbReader => GetRolesByUserIdCoreAsync(userId, transactionContext)).ConfigureAwait(false);
 
-            async Task<IList<Role<TId>>> GetRolesByUserIdCoreAsync(TId userId, TransactionContext? transactionContext)
+            async Task<IEnumerable<Role<TId>>> GetRolesByUserIdCoreAsync(TId userId, TransactionContext? transactionContext)
             {
                 var where = DbReader.Where<User<TId>>(u => u.Id!.Equals(userId));
 
-                IList<Tuple<User<TId>, UserRole<TId>?, Role<TId>?>> result = await DbReader.RetrieveAsync<User<TId>, UserRole<TId>, Role<TId>>(
+                IEnumerable<Tuple<User<TId>, UserRole<TId>?, Role<TId>?>> result = await DbReader.RetrieveAsync<User<TId>, UserRole<TId>, Role<TId>>(
                     FromUserToRole,
                     where,
                     transactionContext).ConfigureAwait(false);
@@ -174,10 +174,12 @@ namespace HB.FullStack.Server.Identity
         {
             ThrowIf.Null(transactionContext, nameof(transactionContext));
 
-            IList<UserRole<TId>> userRoles = await DbReader.RetrieveAsync<UserRole<TId>>(
+            IList<UserRole<TId>> userRoles = (await DbReader.RetrieveAsync<UserRole<TId>>(
                 ur => ur.UserId!.Equals(userId) && SqlStatement.In(ur.RoleId, false, roles.Select(r => r.Id)),
-                transactionContext).ConfigureAwait(false);
+                transactionContext).ConfigureAwait(false))
+                .ToList();
 
+            //Remark: 必须先tolist固定下来，否则下面的判断会导致漏删
             if (!userRoles.Any())
             {
                 return;

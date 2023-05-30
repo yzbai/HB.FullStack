@@ -13,7 +13,7 @@ namespace HB.FullStack.Server.Identity
     /// 当UserRole变化时，要Invalidate 对应key的条目
     /// 当Role变化，要Invalidate所有的条目
     /// </summary>
-    internal class CachedRolesByUserId<TId> : CachedItem<IList<Role<TId>>>
+    internal class CachedRolesByUserId<TId> : CachedItem<IEnumerable<Role<TId>>>
     {
         public CachedRolesByUserId(TId userId) : base(userId) { }
 

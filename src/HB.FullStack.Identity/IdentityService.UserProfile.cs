@@ -12,19 +12,19 @@ using HB.FullStack.Common.PropertyTrackable;
 
 namespace HB.FullStack.Server.Identity
 {
-    internal partial class IdentityService
+    internal partial class IdentityService<TId>
     {
-        public async Task<UserProfile> GetUserProfileByUserIdAsync(Guid userId, string lastUser)
+        public async Task<UserProfile<TId>> GetUserProfileByUserIdAsync(TId userId, string lastUser)
         {
-            TransactionContext  trans = await _transaction.BeginTransactionAsync<UserProfile>().ConfigureAwait(false);
+            TransactionContext  trans = await _transaction.BeginTransactionAsync<UserProfile<TId>>().ConfigureAwait(false);
 
             try
             {
-                UserProfile? userProfile = await _userProfileRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
+                UserProfile<TId>? userProfile = await _userProfileRepo.GetByUserIdAsync(userId, trans).ConfigureAwait(false);
 
                 if (userProfile == null)
                 {
-                    userProfile = new UserProfile
+                    userProfile = new UserProfile<TId>
                     {
                         UserId = userId,
                         NickName = Conventions.GetRandomNickName(),
@@ -47,13 +47,13 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task UpdateUserProfileAsync(PropertyChangeJsonPack cp, string lastUser)
+        public async Task UpdateUserProfileAsync(PropertyChangePack cp, string lastUser)
         {
-            TransactionContext trans = await _transaction.BeginTransactionAsync<UserProfile>().ConfigureAwait(false);
+            TransactionContext trans = await _transaction.BeginTransactionAsync<UserProfile<TId>>().ConfigureAwait(false);
 
             try
             {
-                await _userProfileRepo.UpdateProperties<UserProfile>(cp, lastUser, trans);
+                await _userProfileRepo.UpdateProperties<UserProfile<TId>>(cp, lastUser, trans);
 
                 await trans.CommitAsync().ConfigureAwait(false);
             }

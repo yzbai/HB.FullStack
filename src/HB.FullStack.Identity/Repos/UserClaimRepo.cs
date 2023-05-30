@@ -55,7 +55,7 @@ namespace HB.FullStack.Server.Identity
             return Task.CompletedTask;
         }
 
-        public Task<IList<UserClaim<TId>>> GetByUserIdAsync(TId userId, TransactionContext? transContext = null)
+        public Task<IEnumerable<UserClaim<TId>>> GetByUserIdAsync(TId userId, TransactionContext? transContext = null)
         {
             return GetUsingCacheAsideAsync(new CachedUserClaimsByUserId<TId>(userId), dbReader =>
             {

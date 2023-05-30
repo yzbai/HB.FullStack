@@ -10,7 +10,7 @@ using HB.FullStack.Server.Identity.Models;
 
 namespace HB.FullStack.Server.Identity
 {
-    internal partial class IdentityService
+    internal partial class IdentityService<TId>
     {
         public async Task RegisterUserAsync(RegisterContext context, string lastUser)
         {
@@ -19,8 +19,8 @@ namespace HB.FullStack.Server.Identity
             ThrowIf.NotValid(context, nameof(context));
             EnsureValidAudience(context);
 
-            TransactionContext transContext = await _transaction.BeginTransactionAsync<User>().ConfigureAwait(false);
-            User? user = null;
+            TransactionContext transContext = await _transaction.BeginTransactionAsync<User<TId>>().ConfigureAwait(false);
+            User<TId>? user = null;
             try
             {
                 switch (context)
@@ -37,13 +37,13 @@ namespace HB.FullStack.Server.Identity
                         }
 
                         //TODO: 安全检查，一般不建议使用LoginName和Password进行注册
-                        user = await CreateUserAsync(null, null, null, registerByLoginName.LoginName, registerByLoginName.Password, false, false, lastUser, transContext).ConfigureAwait(false);
+                        user = await CreateUserAsync(null, null, null, registerByLoginName.LoginName, registerByLoginName.Password, false, false, false, lastUser, transContext).ConfigureAwait(false);
 
                         break;
                     case RegisterBySms registerBySms:
                         await EnsureValidSmsCode(registerBySms, lastUser).ConfigureAwait(false);
 
-                        user = await CreateUserAsync(null, registerBySms.Mobile, null, null, null, true, false, lastUser, transContext).ConfigureAwait(false);
+                        user = await CreateUserAsync(null, registerBySms.Mobile, null, null, null, true, false, false, lastUser, transContext).ConfigureAwait(false);
                         break;
                     default:
                         break;
