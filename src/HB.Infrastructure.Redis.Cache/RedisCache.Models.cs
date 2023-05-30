@@ -414,13 +414,8 @@ end
         {
             ThrowIf.NullOrEmpty(models, nameof(models));
 
-            CacheModelDef? modelDef = _modelDefFactory.GetDef<TModel>();
-
-            if (modelDef == null)
-            {
-                throw CacheExceptions.NotEnabledForModel(typeof(TModel).FullName);
-            }
-
+            CacheModelDef? modelDef = _modelDefFactory.GetDef<TModel>() ?? throw CacheExceptions.NotEnabledForModel(typeof(TModel).FullName);
+            
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 

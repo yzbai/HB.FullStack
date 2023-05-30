@@ -25,7 +25,7 @@ namespace HB.FullStack.Common.Convert
         }
 
         [return: NotNullIfNotNull(nameof(value))]
-        public static string? ToStrngFrom<T>(T? value, StringConvertPurpose purpose)
+        public static string? ToStringFrom<T>(T? value, StringConvertPurpose purpose)
         {
             return ToStringFrom(typeof(T), value, purpose);
         }

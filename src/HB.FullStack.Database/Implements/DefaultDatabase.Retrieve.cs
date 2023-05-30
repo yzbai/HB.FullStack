@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 using HB.FullStack.Database.Convert;
@@ -35,12 +36,12 @@ namespace HB.FullStack.Database
 
         //TODO: 最大返回量检查
 
-        public async Task<IList<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(
+        public async Task<IEnumerable<TSelect>> RetrieveAsync<TSelect, TFrom, TWhere>(
             FromExpression<TFrom>? fromCondition,
             WhereExpression<TWhere>? whereCondition,
             TransactionContext? transContext = null)
-            where TSelect :class, IDbModel
-            where TFrom : class,IDbModel
+            where TSelect : class, IDbModel
+            where TFrom : class, IDbModel
             where TWhere : class, IDbModel
         {
             DbModelDef selectDef = ModelDefFactory.GetDef<TSelect>().ThrowIfNull(typeof(TSelect).FullName);
@@ -65,11 +66,9 @@ namespace HB.FullStack.Database
                     ? await fromDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await fromDef.Engine.ExecuteCommandReaderAsync(fromDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                var results = reader.ToDbModels<TSelect>(ModelDefFactory, selectDef);
+                IEnumerable<TSelect> results = reader.ToDbModels<TSelect>(ModelDefFactory, selectDef);
 
-                ReTrackIfTrackable(results, selectDef);
-
-                return results;
+                return selectDef.IsPropertyTrackable ? results.Select(ReTrackIfTrackable2) : results;
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -77,7 +76,7 @@ namespace HB.FullStack.Database
             }
         }
 
-        public async Task<IList<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
+        public async Task<IEnumerable<T>> RetrieveAsync<T>(FromExpression<T>? fromCondition, WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : class, IDbModel
         {
             DbModelDef modelDef = ModelDefFactory.GetDef<T>().ThrowIfNull(typeof(T).FullName);
@@ -93,11 +92,9 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandReaderAsync(modelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                IList<T> results = reader.ToDbModels<T>(ModelDefFactory, modelDef);
+                IEnumerable<T> results = reader.ToDbModels<T>(ModelDefFactory, modelDef);
 
-                ReTrackIfTrackable(results, modelDef);
-
-                return results;
+                return modelDef.IsPropertyTrackable ? results.Select(ReTrackIfTrackable2) : results;
             }
             catch (Exception ex) when (ex is not DbException)
             {
@@ -132,7 +129,7 @@ namespace HB.FullStack.Database
 
         #region 单表查询, Where
 
-        public Task<IList<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page, int? perPage, string? orderBy)
+        public Task<IEnumerable<T>> RetrieveAllAsync<T>(TransactionContext? transContext, int? page, int? perPage, string? orderBy)
             where T : class, IDbModel
         {
             WhereExpression<T> where = Where<T>().AddOrderAndLimits(page, perPage, orderBy);
@@ -146,7 +143,7 @@ namespace HB.FullStack.Database
             return ScalarAsync(null, whereCondition, transContext);
         }
 
-        public Task<IList<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
+        public Task<IEnumerable<T>> RetrieveAsync<T>(WhereExpression<T>? whereCondition, TransactionContext? transContext)
             where T : class, IDbModel
         {
             return RetrieveAsync(null, whereCondition, transContext);
@@ -207,7 +204,7 @@ namespace HB.FullStack.Database
             return ScalarAsync(null, whereCondition, transContext);
         }
 
-        public Task<IList<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page, int? perPage, string? orderBy)
+        public Task<IEnumerable<T>> RetrieveAsync<T>(Expression<Func<T, bool>> whereExpr, TransactionContext? transContext, int? page, int? perPage, string? orderBy)
             where T : class, IDbModel
         {
             WhereExpression<T> whereCondition = Where(whereExpr).AddOrderAndLimits(page, perPage, orderBy);
@@ -258,7 +255,10 @@ namespace HB.FullStack.Database
 
         #region 双表查询
 
-        public async Task<IList<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
+        public async Task<IEnumerable<Tuple<TSource, TTarget?>>> RetrieveAsync<TSource, TTarget>(
+            FromExpression<TSource> fromCondition,
+            WhereExpression<TSource>? whereCondition,
+            TransactionContext? transContext)
             where TSource : class, IDbModel
             where TTarget : class, IDbModel
         {
@@ -303,9 +303,25 @@ namespace HB.FullStack.Database
                     ? await sourceModelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await sourceModelDef.Engine.ExecuteCommandReaderAsync(sourceModelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                var results = reader.ToDbModels<TSource, TTarget>(ModelDefFactory, sourceModelDef, targetModelDef);
+                IEnumerable<Tuple<TSource, TTarget?>> results = reader.ToDbModels<TSource, TTarget>(ModelDefFactory, sourceModelDef, targetModelDef);
 
-                ReTrackIfTrackable(results, sourceModelDef, targetModelDef);
+                if (sourceModelDef.IsPropertyTrackable)
+                {
+                    results = results.Select(t =>
+                    {
+                        ReTrackIfTrackable2(t.Item1);
+                        return t;
+                    });
+                }
+
+                if (targetModelDef.IsPropertyTrackable)
+                {
+                    results = results.Select(t =>
+                    {
+                        if (t.Item2 != null) ReTrackIfTrackable2(t.Item2);
+                        return t;
+                    });
+                }
 
                 return results;
             }
@@ -338,8 +354,11 @@ namespace HB.FullStack.Database
 
         #region 三表查询
 
-        public async Task<IList<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(FromExpression<TSource> fromCondition, WhereExpression<TSource>? whereCondition, TransactionContext? transContext)
-            where TSource : class,IDbModel
+        public async Task<IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>>> RetrieveAsync<TSource, TTarget1, TTarget2>(
+            FromExpression<TSource> fromCondition, 
+            WhereExpression<TSource>? whereCondition, 
+            TransactionContext? transContext)
+            where TSource : class, IDbModel
             where TTarget1 : class, IDbModel
             where TTarget2 : class, IDbModel
         {
@@ -394,9 +413,34 @@ namespace HB.FullStack.Database
                     ? await sourceModelDef.Engine.ExecuteCommandReaderAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await sourceModelDef.Engine.ExecuteCommandReaderAsync(sourceModelDef.SlaverConnectionString, command).ConfigureAwait(false);
 
-                var results = reader.ToDbModels<TSource, TTarget1, TTarget2>(ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
+                IEnumerable<Tuple<TSource, TTarget1?, TTarget2?>> results = reader.ToDbModels<TSource, TTarget1, TTarget2>(ModelDefFactory, sourceModelDef, targetModelDef1, targetModelDef2);
 
-                ReTrackIfTrackable(results, sourceModelDef, targetModelDef1, targetModelDef2);
+                if (sourceModelDef.IsPropertyTrackable)
+                {
+                    results = results.Select(t =>
+                    {
+                        ReTrackIfTrackable2(t.Item1);
+                        return t;
+                    });
+                }
+
+                if (targetModelDef1.IsPropertyTrackable)
+                {
+                    results = results.Select(t =>
+                    {
+                        if (t.Item2 != null) ReTrackIfTrackable2(t.Item2);
+                        return t;
+                    });
+                }
+
+                if (targetModelDef2.IsPropertyTrackable)
+                {
+                    results = results.Select(t =>
+                    {
+                        if (t.Item3 != null) ReTrackIfTrackable2(t.Item3);
+                        return t;
+                    });
+                }
 
                 return results;
             }

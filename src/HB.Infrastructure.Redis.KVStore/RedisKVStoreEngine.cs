@@ -160,17 +160,17 @@ return array";
             throw FullStack.KVStore.Exceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
         }
 
-        public async Task<IEnumerable<Tuple<string?, long>>> ModelGetAsync(string storeName, string modelName, IEnumerable<string> modelKeys)
+        public async Task<IEnumerable<Tuple<byte[]?, long>>> GetAsync(string storeName, string modelName, IEnumerable<string> modelKeys)
         {
             if (!modelKeys.Any())
             {
-                return new List<Tuple<string?, long>>();
+                return new List<Tuple<byte[]?, long>>();
             }
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareModelGetRedisInfo(modelName, modelKeys, redisKeys, redisValues);
+            PrepareGetRedisInfo(modelName, modelKeys, redisKeys, redisValues);
 
             IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchGetLua;
@@ -182,7 +182,7 @@ return array";
                     redisKeys.ToArray(),
                     redisValues.ToArray()).ConfigureAwait(false);
 
-                return MapResultToStringWithTimestamp(result);
+                return MapResultToBytesAndTimestamp(result);
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
@@ -190,7 +190,7 @@ return array";
 
                 InitLoadedLuas();
 
-                return await ModelGetAsync(storeName, modelName, modelKeys).ConfigureAwait(false);
+                return await GetAsync(storeName, modelName, modelKeys).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -204,27 +204,43 @@ return array";
             {
                 throw FullStack.KVStore.Exceptions.Unkown(type: modelName, innerException: ex);
             }
-        }
 
-        private void PrepareModelGetRedisInfo(string modelName, IEnumerable<string> modelKeys, List<RedisKey> redisKeys, List<RedisValue> redisValues)
-        {
-            redisKeys.Add(ModelNameKey(modelName));
-            redisKeys.Add(ModelTimestampNameKey(modelName));
-
-            foreach (string modelKey in modelKeys)
+            void PrepareGetRedisInfo(string modelName, IEnumerable<string> modelKeys, List<RedisKey> redisKeys, List<RedisValue> redisValues)
             {
-                redisValues.Add(modelKey);
+                redisKeys.Add(ModelNameKey(modelName));
+                redisKeys.Add(ModelTimestampNameKey(modelName));
+
+                foreach (string modelKey in modelKeys)
+                {
+                    redisValues.Add(modelKey);
+                }
+            }
+
+            static IEnumerable<Tuple<byte[]?, long>> MapResultToBytesAndTimestamp(RedisResult result)
+            {
+                RedisResult[] results = (RedisResult[])result!;
+                byte[]?[] values = (byte[]?[])results[0]!;
+                long[] timestamps = (long[])results[1]!;
+
+                List<Tuple<byte[]?, long>> rt = new List<Tuple<byte[]?, long>>();
+
+                for (int i = 0; i < values.Length; ++i)
+                {
+                    rt.Add(new Tuple<byte[]?, long>(values[i], timestamps[i]));
+                }
+
+                return rt;
             }
         }
 
-        public async Task<IEnumerable<Tuple<string?, long>>> ModelGetAllAsync(string storeName, string modelName)
+        public async Task<IEnumerable<Tuple<byte[]?, long>>> GetAllAsync(string storeName, string modelName)
         {
             IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedGetAllLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
 
-            PrepareModelGetAllRedisInfo(modelName, redisKeys);
+            PrepareGetAllRedisInfo(modelName, redisKeys);
 
             try
             {
@@ -232,7 +248,7 @@ return array";
                     loadedScript,
                     new RedisKey[] { ModelNameKey(modelName), ModelTimestampNameKey(modelName) }).ConfigureAwait(false);
 
-                return MapGetAllResultToStringWithTimestamp(result);
+                return MapGetAllResultToBytesAndTimestamp(result);
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
             {
@@ -240,7 +256,7 @@ return array";
 
                 InitLoadedLuas();
 
-                return await ModelGetAllAsync(storeName, modelName).ConfigureAwait(false);
+                return await GetAllAsync(storeName, modelName).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -254,25 +270,43 @@ return array";
             {
                 throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
             }
+
+            void PrepareGetAllRedisInfo(string modelName, List<RedisKey> redisKeys)
+            {
+                redisKeys.Add(ModelNameKey(modelName));
+                redisKeys.Add(ModelTimestampNameKey(modelName));
+            }
+            
+            static IEnumerable<Tuple<byte[]?, long>> MapGetAllResultToBytesAndTimestamp(RedisResult result)
+            {
+                RedisResult[] results = (RedisResult[])result!;
+                Dictionary<string, RedisResult> values = results[0].ToDictionary();
+                Dictionary<string, RedisResult> timestamps = results[1].ToDictionary();
+
+                List<Tuple<byte[]?, long>> rt = new List<Tuple<byte[]?, long>>();
+
+                foreach (var kv in values)
+                {
+                    long timestamp = (long)timestamps[kv.Key];
+                    rt.Add(new Tuple<byte[]?, long>((byte[]?)kv.Value, timestamp));
+                }
+
+                return rt;
+            }
         }
 
-        private void PrepareModelGetAllRedisInfo(string modelName, List<RedisKey> redisKeys)
-        {
-            redisKeys.Add(ModelNameKey(modelName));
-            redisKeys.Add(ModelTimestampNameKey(modelName));
-        }
 
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, long newTimestamp)
+        public async Task AddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, long newTimestamp)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchAddLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareModelAddRedisInfo(modelName, newTimestamp, modelKeys, modelJsons, redisKeys, redisValues);
+            PrepareAddRedisInfo(modelName, newTimestamp, modelKeys, models, redisKeys, redisValues);
 
             try
             {
@@ -286,7 +320,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
+                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -295,7 +329,7 @@ return array";
 
                 InitLoadedLuas();
 
-                await ModelAddAsync(storeName, modelName, modelKeys, modelJsons, newTimestamp).ConfigureAwait(false);
+                await AddAsync(storeName, modelName, modelKeys, models, newTimestamp).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -309,41 +343,41 @@ return array";
             {
                 throw FullStack.KVStore.Exceptions.Unkown(modelName, storeName, modelKeys, ex);
             }
-        }
 
-        private void PrepareModelAddRedisInfo(string modelName, long newTimestamp, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, List<RedisKey> redisKeys, List<RedisValue> redisValues)
-        {
-            /// keys:modelNameKey, modelTimestampKey
-            /// argv:3(model_number),new_timestamp, model1_key, model2_key, model3_key, model1_value, model2_value, model3_value
-
-            redisKeys.Add(ModelNameKey(modelName));
-            redisKeys.Add(ModelTimestampNameKey(modelName));
-
-            redisValues.Add(modelKeys.Count());
-            redisValues.Add(newTimestamp);
-
-            foreach (string modelKey in modelKeys)
+            void PrepareAddRedisInfo(string modelName, long newTimestamp, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, List<RedisKey> redisKeys, List<RedisValue> redisValues)
             {
-                redisValues.Add(modelKey);
-            }
+                /// keys:modelNameKey, modelTimestampKey
+                /// argv:3(model_number),new_timestamp, model1_key, model2_key, model3_key, model1_value, model2_value, model3_value
 
-            foreach (string? json in modelJsons)
-            {
-                redisValues.Add(json);
+                redisKeys.Add(ModelNameKey(modelName));
+                redisKeys.Add(ModelTimestampNameKey(modelName));
+
+                redisValues.Add(modelKeys.Count());
+                redisValues.Add(newTimestamp);
+
+                foreach (string modelKey in modelKeys)
+                {
+                    redisValues.Add(modelKey);
+                }
+
+                foreach (var bytes in models)
+                {
+                    redisValues.Add(bytes);
+                }
             }
         }
 
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<long> modelTimestamps, long newTimestamp)
+        public async Task UpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, IEnumerable<long> modelTimestamps, long newTimestamp)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchUpdateLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareModelUpdateRedisInfo(modelName, newTimestamp, modelKeys, modelJsons, modelTimestamps, redisKeys, redisValues);
+            PrepareModelUpdateRedisInfo(modelName, newTimestamp, modelKeys, models, modelTimestamps, redisKeys, redisValues);
 
             try
             {
@@ -358,7 +392,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelJsons, errorCode: error);
+                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -367,7 +401,7 @@ return array";
 
                 InitLoadedLuas();
 
-                await ModelUpdateAsync(storeName, modelName, modelKeys, modelJsons, modelTimestamps, newTimestamp).ConfigureAwait(false);
+                await UpdateAsync(storeName, modelName, modelKeys, models, modelTimestamps, newTimestamp).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -381,46 +415,46 @@ return array";
             {
                 throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
             }
-        }
 
-        private void PrepareModelUpdateRedisInfo(string modelName, long newTimestamp, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<long> modelTimestamps, List<RedisKey> redisKeys, List<RedisValue> redisValues)
-        {
-            /// keys:modelNameKey, modelTimestampKey
-            /// argv:3(model_number), new_timestamp, model1_key, model2_key, model3_key, model1_value, model2_value, model3_value, model1_old_timestamp, model2_old_timestamp, model3_old_timestamp
-
-            redisKeys.Add(ModelNameKey(modelName));
-            redisKeys.Add(ModelTimestampNameKey(modelName));
-
-            redisValues.Add(modelKeys.Count());
-            redisValues.Add(newTimestamp);
-
-            foreach (string modelKey in modelKeys)
+            void PrepareModelUpdateRedisInfo(string modelName, long newTimestamp, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, IEnumerable<long> modelTimestamps, List<RedisKey> redisKeys, List<RedisValue> redisValues)
             {
-                redisValues.Add(modelKey);
-            }
+                /// keys:modelNameKey, modelTimestampKey
+                /// argv:3(model_number), new_timestamp, model1_key, model2_key, model3_key, model1_value, model2_value, model3_value, model1_old_timestamp, model2_old_timestamp, model3_old_timestamp
 
-            foreach (string? json in modelJsons)
-            {
-                redisValues.Add(json);
-            }
+                redisKeys.Add(ModelNameKey(modelName));
+                redisKeys.Add(ModelTimestampNameKey(modelName));
 
-            foreach (long timestamp in modelTimestamps)
-            {
-                redisValues.Add(timestamp);
+                redisValues.Add(modelKeys.Count());
+                redisValues.Add(newTimestamp);
+
+                foreach (string modelKey in modelKeys)
+                {
+                    redisValues.Add(modelKey);
+                }
+
+                foreach (var bytes in models)
+                {
+                    redisValues.Add(bytes);
+                }
+
+                foreach (long timestamp in modelTimestamps)
+                {
+                    redisValues.Add(timestamp);
+                }
             }
         }
 
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps)
+        public async Task DeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps)
         {
             byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchDeleteLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
 
-            PrepareModelDeleteRedisInfo(modelName, modelKeys, modelTimestamps, redisKeys, redisValues);
+            PrepareDeleteRedisInfo(modelName, modelKeys, modelTimestamps, redisKeys, redisValues);
 
             try
             {
@@ -435,7 +469,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, values: modelTimestamps, errorCode: error);
+                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -444,7 +478,7 @@ return array";
 
                 InitLoadedLuas();
 
-                await ModelDeleteAsync(storeName, modelName, modelKeys, modelTimestamps).ConfigureAwait(false);
+                await DeleteAsync(storeName, modelName, modelKeys, modelTimestamps).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -458,30 +492,30 @@ return array";
             {
                 throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
             }
+
+            void PrepareDeleteRedisInfo(string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps, List<RedisKey> redisKeys, List<RedisValue> redisValues)
+            {
+                /// keys:modelNameKey, modelTimestampKey
+                /// argv:3(model_number), model1_key, model2_key, model3_key, model1_old_timestamp, model2_old_timestamp, model3_old_timestamp
+
+                redisKeys.Add(ModelNameKey(modelName));
+                redisKeys.Add(ModelTimestampNameKey(modelName));
+
+                redisValues.Add(modelKeys.Count());
+
+                foreach (string modelKey in modelKeys)
+                {
+                    redisValues.Add(modelKey);
+                }
+
+                foreach (long timestamp in modelTimestamps)
+                {
+                    redisValues.Add(timestamp);
+                }
+            }
         }
 
-        private void PrepareModelDeleteRedisInfo(string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps, List<RedisKey> redisKeys, List<RedisValue> redisValues)
-        {
-            /// keys:modelNameKey, modelTimestampKey
-            /// argv:3(model_number), model1_key, model2_key, model3_key, model1_old_timestamp, model2_old_timestamp, model3_old_timestamp
-
-            redisKeys.Add(ModelNameKey(modelName));
-            redisKeys.Add(ModelTimestampNameKey(modelName));
-
-            redisValues.Add(modelKeys.Count());
-
-            foreach (string modelKey in modelKeys)
-            {
-                redisValues.Add(modelKey);
-            }
-
-            foreach (long timestamp in modelTimestamps)
-            {
-                redisValues.Add(timestamp);
-            }
-        }
-
-        public async Task<bool> ModelDeleteAllAsync(string storeName, string modelName)
+        public async Task<bool> DeleteAllAsync(string storeName, string modelName)
         {
             try
             {
@@ -547,37 +581,6 @@ return array";
             return error;
         }
 
-        private static IEnumerable<Tuple<string?, long>> MapResultToStringWithTimestamp(RedisResult result)
-        {
-            RedisResult[] results = (RedisResult[])result!;
-            string[] values = (string[])results[0]!;
-            long[] timestamps = (long[])results[1]!;
-
-            List<Tuple<string?, long>> rt = new List<Tuple<string?, long>>();
-
-            for (int i = 0; i < values.Length; ++i)
-            {
-                rt.Add(new Tuple<string?, long>(values[i], timestamps[i]));
-            }
-
-            return rt;
-        }
-
-        private static IEnumerable<Tuple<string?, long>> MapGetAllResultToStringWithTimestamp(RedisResult result)
-        {
-            RedisResult[] results = (RedisResult[])result!;
-            Dictionary<string, RedisResult> values = results[0].ToDictionary();
-            Dictionary<string, RedisResult> timestamps = results[1].ToDictionary();
-
-            List<Tuple<string?, long>> rt = new List<Tuple<string?, long>>();
-
-            foreach (var kv in values)
-            {
-                long timestamp = (long)timestamps[kv.Key];
-                rt.Add(new Tuple<string?, long>(kv.Value.ToString(), timestamp));
-            }
-
-            return rt;
-        }
+        
     }
 }

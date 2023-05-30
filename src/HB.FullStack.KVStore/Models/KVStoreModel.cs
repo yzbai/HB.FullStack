@@ -15,8 +15,8 @@ namespace HB.FullStack.KVStore.KVStoreModels
     public class KVStoreModel : ValidatableObject, IKVStoreModel
     {
         [Required]
-        [KVStoreSubstituteKey]
         [CacheModelKey]
+        [KVStoreSubstituteKey]
         public string SubstituteKey { get; set; } = SecurityUtil.CreateUniqueToken();
 
         public string? LastUser { get; set; }

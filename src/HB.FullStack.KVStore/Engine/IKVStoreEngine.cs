@@ -12,36 +12,35 @@ namespace HB.FullStack.KVStore.Engine
 
         void Close();
 
-        
         /// <summary>
         /// 返回 modelJson - timestamp
         /// </summary>
-        Task<IEnumerable<Tuple<string?, long>>> ModelGetAsync(string storeName, string modelName, IEnumerable<string> modelKeys);
+        Task<IEnumerable<Tuple<byte[]?, long>>> GetAsync(string storeName, string modelName, IEnumerable<string> modelKeys);
 
         /// <summary>
         /// 返回 modelJson - timestamp
         /// </summary>
-        Task<IEnumerable<Tuple<string?, long>>> ModelGetAllAsync(string storeName, string modelName);
+        Task<IEnumerable<Tuple<byte[]?, long>>> GetAllAsync(string storeName, string modelName);
 
 
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        Task ModelAddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, long newTimestamp);
+        Task AddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, long newTimestamp);
 
 
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        Task ModelUpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<string?> modelJsons, IEnumerable<long> modelTimestamps, long newTimestamp);
+        Task UpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, IEnumerable<long> timestamps, long newTimestamp);
 
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        Task ModelDeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps);
+        Task DeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> timestamps);
 
         
-        Task<bool> ModelDeleteAllAsync(string storeName, string modelName);
+        Task<bool> DeleteAllAsync(string storeName, string modelName);
 
 
     }

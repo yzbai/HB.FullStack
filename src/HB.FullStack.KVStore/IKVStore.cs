@@ -21,10 +21,6 @@ namespace HB.FullStack.KVStore
         }
 
 
-        //Task<T?> GetAsync<T>(long key) where T : class, IKVStoreModel 
-        //    => GetAsync<T>(key.ToString(Globals.Culture));
-
-
         Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<object> keys) where T : class, IKVStoreModel;
 
 
@@ -47,7 +43,7 @@ namespace HB.FullStack.KVStore
         Task UpdateAsync<T>(IEnumerable<T> items, string lastUser) where T : class, IKVStoreModel;
 
 
-        Task DeleteAsync<T>(T item, string lastUser) where T: class, IKVStoreModel;
+        Task DeleteAsync<T>(T item) where T: class, IKVStoreModel;
 
         Task DeleteAsync<T>(object key, long timestamp) where T : class, IKVStoreModel => DeleteAsync<T>(new object[] { key }, new long[] { timestamp });
 

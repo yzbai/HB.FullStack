@@ -38,7 +38,10 @@ namespace HB.FullStack.Database
                     item.Id = System.Convert.ToInt64(rt);
                 }
 
-                ReTrackIfTrackable(item, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(item);
+                }
             }
             catch (DbException ex)
             {
@@ -100,7 +103,10 @@ namespace HB.FullStack.Database
                     }
                 }
 
-                ReTrackIfTrackable(items, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(items);
+                }
             }
             catch (DbException ex)
             {

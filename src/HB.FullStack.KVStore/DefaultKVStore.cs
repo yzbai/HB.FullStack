@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+using HB.FullStack.Common;
 using HB.FullStack.Common.Convert;
 using HB.FullStack.KVStore.Engine;
 using HB.FullStack.KVStore.KVStoreModels;
@@ -24,7 +25,14 @@ namespace HB.FullStack.KVStore
             _modelDefFactory.Initialize(kvstoreEngine);
         }
 
-        private static string GetModelKey<T>(T item, KVStoreModelDef modelDef) where T : class, IKVStoreModel
+        public string GetKey<T>(T item) where T : class, IKVStoreModel
+        {
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
+
+            return GetKey(item, modelDef);
+        }
+
+        private static string GetKey<T>(T item, KVStoreModelDef modelDef) where T : class, IKVStoreModel
         {
             StringBuilder builder = new StringBuilder();
 
@@ -37,12 +45,21 @@ namespace HB.FullStack.KVStore
             return builder.RemoveLast().ToString();
         }
 
-        public string GetModelKey<T>(T item) where T : class, IKVStoreModel
+        //TODO: 支持一个Model多个Key的联合输入
+        private static IEnumerable<string> GetKeys(IEnumerable<object> keys, KVStoreModelDef modelDef)
         {
-            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
+            if (modelDef.OrderedKeyPropertyInfos.Count != 1)
+            {
+                throw new ArgumentException($"{modelDef.FullName} has one than one KVStore key.");
+            }
 
-            return GetModelKey(item, modelDef);
+            PropertyInfo keyPropertyInfo = modelDef.OrderedKeyPropertyInfos[0];
+
+            return keys
+                .Select(k => StringConvertCenter.ToStringFrom(keyPropertyInfo.PropertyType, k, StringConvertPurpose.NONE))
+                .ToList();
         }
+
 
         public async Task<IEnumerable<T?>> GetAsync<T>(IEnumerable<object> keys) where T : class, IKVStoreModel
         {
@@ -50,10 +67,10 @@ namespace HB.FullStack.KVStore
 
             try
             {
-                IEnumerable<Tuple<string?, long>> tuples = await _engine.ModelGetAsync(
+                IEnumerable<Tuple<byte[]?, long>> tuples = await _engine.GetAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!,
-                    keys).ConfigureAwait(false);
+                    GetKeys(keys, modelDef)).ConfigureAwait(false);
 
                 return MapTupleToModel<T>(tuples);
             }
@@ -68,7 +85,7 @@ namespace HB.FullStack.KVStore
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
             try
             {
-                IEnumerable<Tuple<string?, long>> tuples = await _engine.ModelGetAllAsync(
+                IEnumerable<Tuple<byte[]?, long>> tuples = await _engine.GetAllAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!).ConfigureAwait(false);
 
@@ -98,17 +115,23 @@ namespace HB.FullStack.KVStore
             {
                 long newTimestamp = TimeUtil.Timestamp;
 
+                IList<string> keys = new List<string>();
+                IList<byte[]?> modelBytes = new List<byte[]?>();
+
                 foreach (var t in items)
                 {
                     t.Timestamp = newTimestamp;
                     t.LastUser = lastUser;
+
+                    keys.Add(GetKey(t, modelDef));
+                    modelBytes.Add(SerializeUtil.Serialize(t));
                 }
 
-                await _engine.ModelAddAsync(
+                await _engine.AddAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!,
-                    items.Select(t => GetModelKey(t, modelDef)),
-                    items.Select(t => SerializeUtil.ToJson(t)),
+                    keys,
+                    modelBytes,
                     newTimestamp
                     ).ConfigureAwait(false);
             }
@@ -138,17 +161,24 @@ namespace HB.FullStack.KVStore
                 IEnumerable<long> originalTimestamps = items.Select(t => t.Timestamp).ToArray();
                 long newTimestamp = TimeUtil.Timestamp;
 
+                IList<string> keys = new List<string>();
+                IList<byte[]?> modelBytes = new List<byte[]?>();
+
+
                 foreach (var t in items)
                 {
                     t.Timestamp = newTimestamp;
                     t.LastUser = lastUser;
+
+                    keys.Add(GetKey(t, modelDef));
+                    modelBytes.Add(SerializeUtil.Serialize(t));
                 }
 
-                await _engine.ModelUpdateAsync(
+                await _engine.UpdateAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!,
-                    items.Select(t => GetModelKey(t, modelDef)).ToList(),
-                    items.Select(t => SerializeUtil.ToJson(t)).ToList(),
+                    keys,
+                    modelBytes,
                     originalTimestamps,
                     newTimestamp).ConfigureAwait(false);
             }
@@ -158,13 +188,35 @@ namespace HB.FullStack.KVStore
             }
         }
 
+        public async Task DeleteAsync<T>(T item) where T : class, IKVStoreModel
+        {
+            KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
+
+            var keys = new string[] { GetKey(item, modelDef) };
+            var timestamps = new long[] { item.Timestamp };
+
+            try
+            {
+                await _engine.DeleteAsync(
+                    modelDef.KVStoreName,
+                    modelDef.ModelType.FullName!,
+                    keys,
+                    timestamps
+                    ).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is not KVStoreException)
+            {
+                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, keys: keys, values: timestamps, innerException: ex);
+            }
+        }
+
         public async Task DeleteAllAsync<T>() where T : class, IKVStoreModel
         {
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
 
             try
             {
-                await _engine.ModelDeleteAllAsync(
+                await _engine.DeleteAllAsync(
                    modelDef.KVStoreName,
                    modelDef.ModelType.FullName!
                    ).ConfigureAwait(false);
@@ -191,10 +243,10 @@ namespace HB.FullStack.KVStore
 
             try
             {
-                await _engine.ModelDeleteAsync(
+                await _engine.DeleteAsync(
                     modelDef.KVStoreName,
                     modelDef.ModelType.FullName!,
-                    keys,
+                    GetKeys(keys, modelDef),
                     timestamps
                     ).ConfigureAwait(false);
             }
@@ -204,13 +256,13 @@ namespace HB.FullStack.KVStore
             }
         }
 
-        private static IEnumerable<T?> MapTupleToModel<T>(IEnumerable<Tuple<string?, long>> tuples) where T : class, IKVStoreModel
+        private static IEnumerable<T?> MapTupleToModel<T>(IEnumerable<Tuple<byte[]?, long>> tuples) where T : class, IKVStoreModel
         {
             List<T?> rt = new List<T?>();
 
             foreach (var t in tuples)
             {
-                T? item = SerializeUtil.FromJson<T>(t.Item1);
+                T? item = SerializeUtil.Deserialize<T>(t.Item1);
                 if (item == null)
                 {
                     rt.Add(null);
@@ -224,5 +276,7 @@ namespace HB.FullStack.KVStore
 
             return rt;
         }
+
+
     }
 }

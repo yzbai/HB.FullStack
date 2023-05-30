@@ -88,14 +88,13 @@ namespace HB.FullStack.KVStore
             return exception;
         }
 
-        public static Exception WriteError(string type, string storeName, object? keys, object? values, ErrorCode errorCode)
+        public static Exception WriteError(string type, string storeName, object? keys, ErrorCode errorCode)
         {
             KVStoreException exception = new KVStoreException(errorCode, nameof(WriteError));
 
             exception.Data["Type"] = type;
             exception.Data["StoreName"] = storeName;
             exception.Data["Keys"] = keys;
-            exception.Data["Values"] = values;
 
             return exception;
         }

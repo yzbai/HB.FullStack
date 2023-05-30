@@ -18,44 +18,43 @@ namespace HB.FullStack.Database.Convert
     {
         #region IDataReader Row To Model
 
-        public static IList<T> ToDbModels<T>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
+        public static IEnumerable<T> ToDbModels<T>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef modelDef)
             where T : class, IDbModel
         {
             Func<IDbModelDefFactory, IDataReader, object?> mapFunc = GetCachedDataReaderRowToModelFunc(reader, modelDef, 0, reader.FieldCount, false);
-
-            List<T> lst = new List<T>();
 
             while (reader.Read())
             {
                 object item = mapFunc.Invoke(modelDefFactory, reader)!;
 
-                lst.Add((T)item);
+                yield return (T)item;
             }
 
-            return lst;
+            //TODO: 是否需要yield return, 如果使用，只获取一个就中断不要后面了，reader的dispose怎么样？
         }
 
-        public static IList<Tuple<TSource, TTarget?>> ToDbModels<TSource, TTarget>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef)
+        public static IEnumerable<Tuple<TSource, TTarget?>> ToDbModels<TSource, TTarget>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef)
             where TSource : IDbModel
             where TTarget : IDbModel
         {
             Func<IDbModelDefFactory, IDataReader, object?> sourceFunc = GetCachedDataReaderRowToModelFunc(reader, sourceModelDef, 0, sourceModelDef.FieldCount, false);
             Func<IDbModelDefFactory, IDataReader, object?> targetFunc = GetCachedDataReaderRowToModelFunc(reader, targetModelDef, sourceModelDef.FieldCount, reader.FieldCount - sourceModelDef.FieldCount, true);
 
-            IList<Tuple<TSource, TTarget?>> lst = new List<Tuple<TSource, TTarget?>>();
+            //IList<Tuple<TSource, TTarget?>> lst = new List<Tuple<TSource, TTarget?>>();
 
             while (reader.Read())
             {
                 object source = sourceFunc.Invoke(modelDefFactory, reader)!;
                 object? target = targetFunc.Invoke(modelDefFactory, reader);
 
-                lst.Add(new Tuple<TSource, TTarget?>((TSource)source, (TTarget?)target));
+                //lst.Add(new Tuple<TSource, TTarget?>((TSource)source, (TTarget?)target));
+                yield return new Tuple<TSource, TTarget?>((TSource)source, (TTarget?)target);
             }
 
-            return lst;
+            //return lst;
         }
 
-        public static IList<Tuple<TSource, TTarget2?, TTarget3?>> ToDbModels<TSource, TTarget2, TTarget3>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
+        public static IEnumerable<Tuple<TSource, TTarget2?, TTarget3?>> ToDbModels<TSource, TTarget2, TTarget3>(this IDataReader reader, IDbModelDefFactory modelDefFactory, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
             where TSource : IDbModel
             where TTarget2 : IDbModel
             where TTarget3 : IDbModel
@@ -64,7 +63,7 @@ namespace HB.FullStack.Database.Convert
             Func<IDbModelDefFactory, IDataReader, object?> targetFunc1 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef1, sourceModelDef.FieldCount, targetModelDef1.FieldCount, true);
             Func<IDbModelDefFactory, IDataReader, object?> targetFunc2 = GetCachedDataReaderRowToModelFunc(reader, targetModelDef2, sourceModelDef.FieldCount + targetModelDef1.FieldCount, reader.FieldCount - (sourceModelDef.FieldCount + targetModelDef1.FieldCount), true);
 
-            IList<Tuple<TSource, TTarget2?, TTarget3?>> lst = new List<Tuple<TSource, TTarget2?, TTarget3?>>();
+            //IList<Tuple<TSource, TTarget2?, TTarget3?>> lst = new List<Tuple<TSource, TTarget2?, TTarget3?>>();
 
             while (reader.Read())
             {
@@ -72,10 +71,11 @@ namespace HB.FullStack.Database.Convert
                 object? target1 = targetFunc1.Invoke(modelDefFactory, reader);
                 object? target2 = targetFunc2.Invoke(modelDefFactory, reader);
 
-                lst.Add(new Tuple<TSource, TTarget2?, TTarget3?>((TSource)source, (TTarget2?)target1, (TTarget3?)target2));
+                //lst.Add(new Tuple<TSource, TTarget2?, TTarget3?>((TSource)source, (TTarget2?)target1, (TTarget3?)target2));
+                yield return new Tuple<TSource, TTarget2?, TTarget3?>((TSource)source, (TTarget2?)target1, (TTarget3?)target2);
             }
 
-            return lst;
+            //return lst;
         }
 
         private static readonly ConcurrentDictionary<string, Func<IDbModelDefFactory, IDataReader, object?>> _toDbModelFuncDict = new ConcurrentDictionary<string, Func<IDbModelDefFactory, IDataReader, object?>>();
@@ -136,9 +136,7 @@ namespace HB.FullStack.Database.Convert
 
             foreach (T model in models)
             {
-                parameters.AddRange(model.ToDbParameters(modelDef, modelDefFactory, parameterNameSuffix, number));
-
-                ++number;
+                parameters.AddRange(model.ToDbParameters(modelDef, modelDefFactory, parameterNameSuffix, number++));
             }
 
             return parameters;

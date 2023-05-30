@@ -26,7 +26,10 @@ namespace HB.FullStack.Database
 
                 await UpdatePropertiesAsync<T>(changePack, lastUser, transContext).ConfigureAwait(false);
 
-                ReTrackIfTrackable(item, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(item);
+                }
 
                 return;
             }
@@ -48,7 +51,10 @@ namespace HB.FullStack.Database
 
                 CheckFoundMatch(modelDef, rows, item, lastUser);
 
-                ReTrackIfTrackable(item, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(item);
+                }
             }
             catch (DbException ex)
             {
@@ -102,7 +108,10 @@ namespace HB.FullStack.Database
 
                 await UpdatePropertiesAsync<T>(propertyChangePacks, lastUser, transContext).ConfigureAwait(false);
 
-                ReTrackIfTrackable(items, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(items);
+                }
 
                 return;
             }
@@ -126,7 +135,10 @@ namespace HB.FullStack.Database
 
                 CheckFoundMatches(modelDef, reader, items, lastUser);
 
-                ReTrackIfTrackable(items, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(items);
+                }
             }
             catch (DbException ex)
             {

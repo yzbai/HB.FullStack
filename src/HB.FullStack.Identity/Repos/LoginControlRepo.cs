@@ -15,5 +15,10 @@ namespace HB.FullStack.Server.Identity
         public LoginControlRepo(IKVStore kvStore) : base(kvStore)
         {
         }
+
+        public Task<LoginControl<TId>?> GetByUserId(TId userId)
+        {
+            return GetAsync(userId!);
+        }
     }
 }

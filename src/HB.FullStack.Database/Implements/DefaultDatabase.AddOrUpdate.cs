@@ -33,7 +33,10 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                ReTrackIfTrackable(item, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(item);
+                }
             }
             catch (DbException ex)
             {
@@ -82,7 +85,10 @@ namespace HB.FullStack.Database
                     ? await modelDef.Engine.ExecuteCommandNonQueryAsync(transContext.Transaction, command).ConfigureAwait(false)
                     : await modelDef.Engine.ExecuteCommandNonQueryAsync(modelDef.MasterConnectionString, command).ConfigureAwait(false);
 
-                ReTrackIfTrackable(items, modelDef);
+                if (modelDef.IsPropertyTrackable)
+                {
+                    ReTrackIfTrackable2(items);
+                }
             }
             catch (DbException ex)
             {

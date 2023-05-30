@@ -267,95 +267,93 @@ namespace HB.FullStack.Database
             }
         }
 
-        private static void ReTrackIfTrackable<T>(T item, DbModelDef modelDef) where T : class, IDbModel
+        private static T ReTrackIfTrackable2<T>(T item) where T : class, IDbModel
         {
-            if (modelDef.IsPropertyTrackable)
+            IPropertyTrackableObject? trackableObject = item as IPropertyTrackableObject;
+
+            trackableObject?.Clear();
+            trackableObject?.StartTrack();
+
+            return item;
+        }
+
+        private static IList<T> ReTrackIfTrackable2<T>(IList<T> items) where T : class, IDbModel
+        {
+            foreach (var item in items)
             {
                 IPropertyTrackableObject? trackableObject = item as IPropertyTrackableObject;
 
                 trackableObject?.Clear();
                 trackableObject?.StartTrack();
             }
+
+            return items;
         }
 
-        private static void ReTrackIfTrackable<T>(IList<T> items, DbModelDef modelDef) where T : class, IDbModel
-        {
-            if (modelDef.IsPropertyTrackable)
-            {
-                foreach (var item in items)
-                {
-                    IPropertyTrackableObject? trackableObject = item as IPropertyTrackableObject;
+        //private void ReTrackIfTrackable2<TSource, TTarget>(IList<Tuple<TSource, TTarget?>> results, DbModelDef sourceModelDef, DbModelDef targetModelDef)
+        //   where TSource : IDbModel
+        //   where TTarget : IDbModel
+        //{
+        //    bool isSourceTrackable = sourceModelDef.IsPropertyTrackable;
+        //    bool isTargetTrackable = targetModelDef.IsPropertyTrackable;
 
-                    trackableObject?.Clear();
-                    trackableObject?.StartTrack();
-                }
-            }
-        }
+        //    if (isSourceTrackable || isTargetTrackable)
+        //    {
+        //        foreach (var tuple in results)
+        //        {
+        //            if (isSourceTrackable)
+        //            {
+        //                IPropertyTrackableObject? trackableItem1 = tuple.Item1 as IPropertyTrackableObject;
+        //                trackableItem1?.Clear();
+        //                trackableItem1?.StartTrack();
+        //            }
 
-        private void ReTrackIfTrackable<TSource, TTarget>(IList<Tuple<TSource, TTarget?>> results, DbModelDef sourceModelDef, DbModelDef targetModelDef)
-           where TSource : IDbModel
-           where TTarget : IDbModel
-        {
-            bool isSourceTrackable = sourceModelDef.IsPropertyTrackable;
-            bool isTargetTrackable = targetModelDef.IsPropertyTrackable;
+        //            if (isTargetTrackable)
+        //            {
+        //                IPropertyTrackableObject? trackableItem2 = tuple.Item2 as IPropertyTrackableObject;
+        //                trackableItem2?.Clear();
+        //                trackableItem2?.StartTrack();
+        //            }
+        //        }
+        //    }
+        //}
 
-            if (isSourceTrackable || isTargetTrackable)
-            {
-                foreach (var tuple in results)
-                {
-                    if (isSourceTrackable)
-                    {
-                        IPropertyTrackableObject? trackableItem1 = tuple.Item1 as IPropertyTrackableObject;
-                        trackableItem1?.Clear();
-                        trackableItem1?.StartTrack();
-                    }
+        //private void ReTrackIfTrackable2<TSource, TTarget1, TTarget2>(IList<Tuple<TSource, TTarget1?, TTarget2?>> results, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
+        //    where TSource : IDbModel
+        //    where TTarget1 : IDbModel
+        //    where TTarget2 : IDbModel
+        //{
+        //    bool isSourceTrackable = sourceModelDef.IsPropertyTrackable;
+        //    bool isTarget1Trackable = targetModelDef1.IsPropertyTrackable;
+        //    bool isTarget2Trackable = targetModelDef2.IsPropertyTrackable;
 
-                    if (isTargetTrackable)
-                    {
-                        IPropertyTrackableObject? trackableItem2 = tuple.Item2 as IPropertyTrackableObject;
-                        trackableItem2?.Clear();
-                        trackableItem2?.StartTrack();
-                    }
-                }
-            }
-        }
+        //    if (isSourceTrackable || isTarget1Trackable || isTarget2Trackable)
+        //    {
+        //        foreach (var triple in results)
+        //        {
+        //            if (isSourceTrackable)
+        //            {
+        //                IPropertyTrackableObject? trackableItem1 = triple.Item1 as IPropertyTrackableObject;
+        //                trackableItem1?.Clear();
+        //                trackableItem1?.StartTrack();
+        //            }
 
-        private void ReTrackIfTrackable<TSource, TTarget1, TTarget2>(IList<Tuple<TSource, TTarget1?, TTarget2?>> results, DbModelDef sourceModelDef, DbModelDef targetModelDef1, DbModelDef targetModelDef2)
-            where TSource : IDbModel
-            where TTarget1 : IDbModel
-            where TTarget2 : IDbModel
-        {
-            bool isSourceTrackable = sourceModelDef.IsPropertyTrackable;
-            bool isTarget1Trackable = targetModelDef1.IsPropertyTrackable;
-            bool isTarget2Trackable = targetModelDef2.IsPropertyTrackable;
+        //            if (isTarget1Trackable)
+        //            {
+        //                IPropertyTrackableObject? trackableItem2 = triple.Item2 as IPropertyTrackableObject;
+        //                trackableItem2?.Clear();
+        //                trackableItem2?.StartTrack();
+        //            }
 
-            if (isSourceTrackable || isTarget1Trackable || isTarget2Trackable)
-            {
-                foreach (var triple in results)
-                {
-                    if (isSourceTrackable)
-                    {
-                        IPropertyTrackableObject? trackableItem1 = triple.Item1 as IPropertyTrackableObject;
-                        trackableItem1?.Clear();
-                        trackableItem1?.StartTrack();
-                    }
-
-                    if (isTarget1Trackable)
-                    {
-                        IPropertyTrackableObject? trackableItem2 = triple.Item2 as IPropertyTrackableObject;
-                        trackableItem2?.Clear();
-                        trackableItem2?.StartTrack();
-                    }
-
-                    if (isTarget2Trackable)
-                    {
-                        IPropertyTrackableObject? trackableItem3 = triple.Item3 as IPropertyTrackableObject;
-                        trackableItem3?.Clear();
-                        trackableItem3?.StartTrack();
-                    }
-                }
-            }
-        }
+        //            if (isTarget2Trackable)
+        //            {
+        //                IPropertyTrackableObject? trackableItem3 = triple.Item3 as IPropertyTrackableObject;
+        //                trackableItem3?.Clear();
+        //                trackableItem3?.StartTrack();
+        //            }
+        //        }
+        //    }
+        //}
 
         private static void SetPrimaryValueIfNull<T>(IList<T> items, DbModelDef modelDef) where T : class, IDbModel
         {
