@@ -17,8 +17,11 @@ namespace HB.FullStack.Repository.CacheStrategies
     public static class CachedCollectionItemCacheStrategy
     {
         public static async Task<TResult?> GetUsingCacheAsideAsync<TResult>(
-            CachedCollectionItem<TResult> cacheCollectionItem, Func<IDbReader, Task<TResult>> dbRetrieve,
-            ICache cache, IMemoryLockManager memoryLockManager, IDatabase database, ILogger logger)
+            CachedCollectionItem<TResult> cacheCollectionItem, 
+            Func<IDbReader, Task<TResult>> dbRetrieve,
+            ICache cache, 
+            IMemoryLockManager memoryLockManager, 
+            IDatabase database)
             where TResult : class
         {
 
@@ -39,7 +42,7 @@ namespace HB.FullStack.Repository.CacheStrategies
 
                 if (result != null)
                 {
-                    logger.LogInformation("//TODO: 请求同一项CachedCollectionItem，等待锁并获取锁后，发现Cache已存在。Model:{ModelName},CacheKey:{CacheKey}",
+                    Globals.Logger.LogInformation("//TODO: 请求同一项CachedCollectionItem，等待锁并获取锁后，发现Cache已存在。Model:{ModelName},CacheKey:{CacheKey}",
                         cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey);
 
                     return result;
@@ -53,12 +56,12 @@ namespace HB.FullStack.Repository.CacheStrategies
                 {
                     long timestamp = (dbRt as ITimestamp)?.Timestamp ?? TimeUtil.Timestamp;
                     SetCache(cacheCollectionItem.SetValue(dbRt).SetTimestamp(timestamp), cache);
-                    logger.LogInformation("缓存 Missed. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}",
+                    Globals.Logger.LogInformation("缓存 Missed. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}",
                         cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey, cacheCollectionItem.ItemKey);
                 }
                 else
                 {
-                    logger.LogInformation("查询到空值. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}",
+                    Globals.Logger.LogInformation("查询到空值. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}",
                         cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey, cacheCollectionItem.ItemKey);
                 }
 
@@ -66,7 +69,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             }
             else
             {
-                logger.LogCritical("锁未能占用. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}, Lock Status:{LockStatus}",
+                Globals.Logger.LogCritical("锁未能占用. Model:{ModelName}, CacheCollectionKey:{CollectionKey}, CacheItemKey:{ItemKey}, Lock Status:{LockStatus}",
                     cacheCollectionItem.GetType().Name, cacheCollectionItem.CollectionKey, cacheCollectionItem.ItemKey, @lock.Status);
 
                 return await dbRetrieve(database).ConfigureAwait(false);

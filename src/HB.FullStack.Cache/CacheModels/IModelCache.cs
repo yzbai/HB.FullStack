@@ -13,7 +13,7 @@ namespace HB.FullStack.Cache
     /// </summary>
     public partial interface IModelCache
     {
-        Task<(IList<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TCacheModel : IModel;
+        Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TCacheModel : IModel;
 
         /// <summary>
         /// 并不把models作为一个整体看待，里面有的可能会因为timestamp冲突而不成功。

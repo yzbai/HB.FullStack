@@ -389,7 +389,7 @@ namespace HB.FullStack.Repository
 
         protected async Task<T?> GetUsingCacheAsideAsync<T>(string keyName, object keyValue, Func<IDbReader, Task<T?>> dbRetrieve) where T : IModel
         {
-            IList<T>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<T>(
+            IEnumerable<T>? results = await ModelCacheStrategy.GetUsingCacheAsideAsync<T>(
                 keyName,
                 new object[] { keyValue },
                 async dbReader =>
@@ -405,8 +405,7 @@ namespace HB.FullStack.Repository
                 },
                 Database,
                 Cache,
-                MemoryLockManager,
-                Logger).ConfigureAwait(false);
+                MemoryLockManager).ConfigureAwait(false);
 
             if (results.IsNullOrEmpty())
             {
@@ -419,9 +418,9 @@ namespace HB.FullStack.Repository
             return results.ElementAt(0);
         }
 
-        protected Task<IList<T>> GetUsingCacheAsideAsync<T>(string keyName, IEnumerable keyValues, Func<IDbReader, Task<IList<T>>> dbRetrieve) where T:IModel
+        protected Task<IEnumerable<T>> GetUsingCacheAsideAsync<T>(string keyName, IEnumerable keyValues, Func<IDbReader, Task<IEnumerable<T>>> dbRetrieve) where T:IModel
         {
-            return ModelCacheStrategy.GetUsingCacheAsideAsync<T>(keyName, keyValues, dbRetrieve, Database, Cache, MemoryLockManager, Logger);
+            return ModelCacheStrategy.GetUsingCacheAsideAsync<T>(keyName, keyValues, dbRetrieve, Database, Cache, MemoryLockManager);
         }
 
         #endregion
@@ -430,12 +429,12 @@ namespace HB.FullStack.Repository
 
         protected Task<T?> GetUsingCacheAsideAsync<T>(CachedItem<T> cachedItem, Func<IDbReader, Task<T>> dbRetrieve) where T : class
         {
-            return CachedItemCacheStrategy.GetUsingCacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
+            return CachedItemCacheStrategy.GetUsingCacheAsideAsync(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database);
         }
 
-        protected Task<IList<T>> GetUsingCacheAsideAsync<T>(CachedItem<IList<T>> cachedItem, Func<IDbReader, Task<IList<T>>> dbRetrieve) where T : class
+        protected Task<IEnumerable<T>> GetUsingCacheAsideAsync<T>(CachedItem<IEnumerable<T>> cachedItem, Func<IDbReader, Task<IEnumerable<T>>> dbRetrieve) where T : class
         {
-            return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IList<T>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+            return CachedItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<T>>(cachedItem, dbRetrieve, Cache, MemoryLockManager, Database)!;
         }
 
         public void InvalidateCache(ICachedItem cachedItem)
@@ -454,12 +453,12 @@ namespace HB.FullStack.Repository
 
         protected Task<T?> GetUsingCacheAsideAsync<T>(CachedCollectionItem<T> cachedCollectionItem, Func<IDbReader, Task<T>> dbRetrieve) where T : class
         {
-            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger);
+            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database);
         }
 
-        protected Task<IList<T>> GetUsingCacheAsideAsync<T>(CachedCollectionItem<IList<T>> cachedCollectionItem, Func<IDbReader, Task<IList<T>>> dbRetrieve) where T : class
+        protected Task<IEnumerable<T>> GetUsingCacheAsideAsync<T>(CachedCollectionItem<IEnumerable<T>> cachedCollectionItem, Func<IDbReader, Task<IEnumerable<T>>> dbRetrieve) where T : class
         {
-            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IList<T>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database, Logger)!;
+            return CachedCollectionItemCacheStrategy.GetUsingCacheAsideAsync<IEnumerable<T>>(cachedCollectionItem, dbRetrieve, Cache, MemoryLockManager, Database)!;
         }
 
         public void InvalidateCache(ICachedCollectionItem cachedCollectionItem)

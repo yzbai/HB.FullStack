@@ -20,14 +20,13 @@ namespace HB.FullStack.Repository.CacheStrategies
 {
     internal static class ModelCacheStrategy
     {
-        public static async Task<IList<TModel>> GetUsingCacheAsideAsync<TModel>(
+        public static async Task<IEnumerable<TModel>> GetUsingCacheAsideAsync<TModel>(
             string keyName,
             IEnumerable keyValues,
-            Func<IDbReader, Task<IList<TModel>>> dbRetrieve,
+            Func<IDbReader, Task<IEnumerable<TModel>>> dbRetrieve,
             IDatabase database,
             ICache cache,
-            IMemoryLockManager memoryLockManager,
-            ILogger logger) where TModel : IModel
+            IMemoryLockManager memoryLockManager) where TModel : IModel
         {
             if (!cache.IsModelCachable<TModel>())
             {
@@ -36,7 +35,7 @@ namespace HB.FullStack.Repository.CacheStrategies
 
             try
             {
-                (IList<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
+                (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
 
                 if (allExists)
                 {
@@ -47,7 +46,7 @@ namespace HB.FullStack.Repository.CacheStrategies
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                logger.LogCacheGetError(keyName, keyValues, ex);
+                Globals.Logger.LogCacheGetError(keyName, keyValues, ex);
             }
 
             //常规做法是先获取锁（参看历史）。
@@ -74,11 +73,11 @@ namespace HB.FullStack.Repository.CacheStrategies
                 try
                 {
                     //Double check
-                    (IList<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
+                    (IEnumerable<TModel>? cachedModels, bool allExists) = await cache.GetModelsAsync<TModel>(keyName, keyValues).ConfigureAwait(false);
 
                     if (allExists)
                     {
-                        logger.LogInformation("//TODO: 请求同一项Cache，等待锁并获取锁后，发现Cache已存在。Model:{Model},KeyName:{KeyName}, KeyValues:{@KeyValues}", typeof(TModel).Name, keyName, keyValues);
+                        Globals.Logger.LogInformation("//TODO: 请求同一项Cache，等待锁并获取锁后，发现Cache已存在。Model:{Model},KeyName:{KeyName}, KeyValues:{@KeyValues}", typeof(TModel).Name, keyName, keyValues);
                         return cachedModels!;
                     }
                 }
@@ -86,27 +85,27 @@ namespace HB.FullStack.Repository.CacheStrategies
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    logger.LogCacheGetError(keyName, keyValues, ex);
+                    Globals.Logger.LogCacheGetError(keyName, keyValues, ex);
                 }
 
-                IList<TModel> models = await dbRetrieve(database).ConfigureAwait(false);
+                IEnumerable<TModel> models = await dbRetrieve(database).ConfigureAwait(false);
 
                 if (models.IsNotNullOrEmpty())
                 {
                     SetCache(models, cache);
 
-                    logger.LogCacheMissed(typeof(TModel).Name, keyName, keyValues);
+                    Globals.Logger.LogCacheMissed(typeof(TModel).Name, keyName, keyValues);
                 }
                 else
                 {
-                    logger.LogCacheGetEmpty(typeof(TModel).Name, keyName, keyValues);
+                    Globals.Logger.LogCacheGetEmpty(typeof(TModel).Name, keyName, keyValues);
                 }
 
                 return models;
             }
             else
             {
-                logger.LogCacheLockAcquireFailed(typeof(TModel).Name, keyName, keyValues, @lock.Status.ToString());
+                Globals.Logger.LogCacheLockAcquireFailed(typeof(TModel).Name, keyName, keyValues, @lock.Status.ToString());
 
                 return await dbRetrieve(database).ConfigureAwait(false);
             }

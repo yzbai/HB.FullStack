@@ -350,7 +350,7 @@ end
             _modelDefFactory = modelDefFactory;
         }
 
-        public async Task<(IList<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : IModel
+        public async Task<(IEnumerable<TModel>?, bool)> GetModelsAsync<TModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TModel : IModel
         {
             ThrowIf.Null(keyValues, nameof(keyValues));
 
