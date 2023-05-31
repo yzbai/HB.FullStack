@@ -18,6 +18,7 @@ using HB.FullStack.Server.Services;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HB.FullStack.Server.Identity
@@ -38,7 +39,9 @@ namespace HB.FullStack.Server.Identity
         private readonly RoleRepo<TId> _roleRepo;
         private readonly UserActivityRepo<TId> _userActivityModelRepo;
 
+        private string _openIdConnectConfigurationString = null!;
         private string _jwtJsonWebKeySet = null!;
+
         private SigningCredentials _jwtSigningCredentials = null!;
         private IEnumerable<SecurityKey> _jwtSigningKeys = null!;
         private EncryptingCredentials _jwtContentEncryptCredentials = null!;
@@ -96,6 +99,8 @@ namespace HB.FullStack.Server.Identity
 
                 _jwtContentEncryptCredentials = CredentialHelper.GetEncryptingCredentials(contentEncryptionCert);
                 _jwtContentDecryptionSecurityKey = CredentialHelper.GetSecurityKey(contentEncryptionCert);
+
+                _openIdConnectConfigurationString = OpenIdConnectConfiguration.Write(_options.JwtSettings.OpenIdConnectConfiguration);
             }
 
             void InitValidAudiences()
@@ -110,6 +115,8 @@ namespace HB.FullStack.Server.Identity
                 }
             }
         }
+
+        public string OpenIdConnectConfigurationString => _openIdConnectConfigurationString;
 
         public string JsonWebKeySet => _jwtJsonWebKeySet;
 
@@ -254,7 +261,7 @@ namespace HB.FullStack.Server.Identity
 
                         if (user == null && signInBySms.RegisterIfNotExists)
                         {
-                            user = await CreateUserAsync(null, signInBySms.Mobile, null, null, null, true, false,false, lastUser, transactionContext).ConfigureAwait(false);
+                            user = await CreateUserAsync(null, signInBySms.Mobile, null, null, null, true, false, false, lastUser, transactionContext).ConfigureAwait(false);
                         }
                         break;
 
@@ -420,7 +427,7 @@ namespace HB.FullStack.Server.Identity
 
         public async Task DeleteTokenAsync(TId userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser)
         {
-            if(userId == null)
+            if (userId == null)
             {
                 throw new ArgumentNullException(nameof(userId));
             }

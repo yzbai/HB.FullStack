@@ -25,6 +25,9 @@ namespace System
 
         public static DateOnly UtcDateOnlyNow => DateOnly.FromDateTime(DateTime.UtcNow);
 
+        public static long ToTimestamp(this DateTimeOffset dateTimeOffset) => dateTimeOffset.UtcTicks;
+
+
         /// <summary>
         /// 把公历转换为人们口中的农历
         /// 机器农历里闰月是继续编下取的，可以有13个月

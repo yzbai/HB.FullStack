@@ -8,7 +8,7 @@ internal class Program
     {
         SharedSettings sharedSettings = SharedSettings.GetSharedSettings(EnvironmentUtil.AspNetCoreEnvironment.ThrowIfNullOrEmpty("AspNetCoreEnvironment is Empty."));
 
-        WebApiStartup.Run(args, new WebApiStartupSettings(
+        WebApiStartup.Run<long>(args, new WebApiStartupSettings(
             services => { },
             initHostOptions => { },
             directoryOptions =>

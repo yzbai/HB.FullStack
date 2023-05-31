@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.Server.WebLib.Services
 {
-    public class DirectoryTokenService : IDirectoryTokenService
+    public class DirectoryTokenService<TId> : IDirectoryTokenService<TId>
     {
         private readonly IAliyunStsService _aliyunStsService;
         private readonly DirectoryOptions _directoryOptions;
@@ -44,8 +44,10 @@ namespace HB.FullStack.Server.WebLib.Services
             return $"{userLevel ?? ""}_{directoryPermissionName}_{read}";
         }
 
-        public DirectoryToken? GetDirectoryToken(Guid requestUserId, string? userLevel, string directoryPermissionName, string? placeHolderValue, bool readOnly)
+        public DirectoryToken<TId>? GetDirectoryToken(TId requestUserId, string? userLevel, string directoryPermissionName, string? placeHolderValue, bool readOnly)
         {
+            ThrowIf.Null(requestUserId, nameof(requestUserId));
+
             string permissionKey = GetDirectoryPermissionKey(userLevel, directoryPermissionName, readOnly);
 
             if (!_directoryPermissionDict.TryGetValue(permissionKey, out DirectoryPermission? permission))
@@ -72,14 +74,14 @@ namespace HB.FullStack.Server.WebLib.Services
                 requestDirectory = requestDirectory.Replace(permission.PlaceHolderName!, placeHolderValue, StringComparison.Ordinal);
             }
 
-            StsToken? token = _aliyunStsService.RequestOssStsToken(requestUserId, _directoryOptions.AliyunOssBucketName, requestDirectory, readOnly, permission.ExpiryTime.TotalSeconds);
+            StsToken? token = _aliyunStsService.RequestOssStsToken(requestUserId.ToString()!, _directoryOptions.AliyunOssBucketName, requestDirectory, readOnly, permission.ExpiryTime.TotalSeconds);
 
             if (token == null)
             {
                 return null;
             }
 
-            DirectoryToken directoryToken = ToDirectoryToken(token);
+            DirectoryToken<TId> directoryToken = ToDirectoryToken(token);
 
             directoryToken.DirectoryPermissionName = permission.PermissionName;
             directoryToken.UserId = requestUserId;
@@ -87,14 +89,14 @@ namespace HB.FullStack.Server.WebLib.Services
             return directoryToken;
         }
 
-        private static DirectoryToken ToDirectoryToken(StsToken stsToken)
+        private static DirectoryToken<TId> ToDirectoryToken(StsToken stsToken)
         {
-            return new DirectoryToken
+            return new DirectoryToken<TId>
             {
                 SecurityToken = stsToken.SecurityToken,
                 AccessKeyId = stsToken.AccessKeyId,
                 AccessKeySecret = stsToken.AccessKeySecret,
-                ExpirationAt = stsToken.ExpirationAt,
+                ExpiredAt= stsToken.ExpiredAt,
                 ReadOnly = stsToken.ReadOnly
             };
         }

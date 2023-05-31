@@ -23,7 +23,7 @@ namespace System
         }
 
         [return: NotNull]
-        public static T Null<T>([ValidatedNotNull][NotNull] T? o, string paramName) where T : class
+        public static T Null<T>([ValidatedNotNull][NotNull] T? o, string paramName) //where T : class
         {
             if (o == null)
                 throw new ArgumentNullException($"Parameter:{paramName}");

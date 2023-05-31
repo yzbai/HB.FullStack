@@ -14,11 +14,6 @@ namespace Microsoft.AspNetCore.Builder
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseExceptionController(this IApplicationBuilder app)
-        {
-            return app.UseExceptionHandler($"/{WebConsts.GlobalException}");
-        }
-
         public static IApplicationBuilder UseOnlyHttps(this IApplicationBuilder app)
         {
             return app.Use(async (context, next) =>

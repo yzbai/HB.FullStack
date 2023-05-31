@@ -30,6 +30,7 @@ using Microsoft.Extensions.Hosting;
 using HB.FullStack.Server.WebLib.Controllers;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Server.WebLib.Middlewares;
+using HB.FullStack.Server.WebLib.Services;
 
 namespace HB.FullStack.Server.WebLib.Startup
 {
@@ -37,7 +38,7 @@ namespace HB.FullStack.Server.WebLib.Startup
     {
         private const string IdGen = "IdGen";
         private const string RedisLock = "RedisLock";
-        private const string RedisKVStore = "RedisKVStore";
+        private const string KVStore = "KVStore";
         private const string RedisCache = "RedisCache";
         private const string RedisEventBus = "RedisEventBus";
         private const string Database = "Database";
@@ -50,7 +51,7 @@ namespace HB.FullStack.Server.WebLib.Startup
         private const string AliyunSms = "AliyunSms";
 
         public static IConfiguration Configuration = null!;
-        public static void Run(string[] args, WebApiStartupSettings settings)
+        public static void Run<TId>(string[] args, WebApiStartupSettings settings)
         {
             try
             {
@@ -64,12 +65,12 @@ namespace HB.FullStack.Server.WebLib.Startup
 
                 Configuration = builder.Configuration;
 
-                ConfigureBuilder(builder, settings);
+                ConfigureBuilder<TId>(builder, settings);
 
                 //App
                 WebApplication app = builder.Build();
                 GlobalWebApplicationAccessor.Application = app;
-                ConfigureApplication(app, settings);
+                ConfigureApplication<TId>(app, settings);
 
                 //Run
                 app.Run();
@@ -84,7 +85,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             }
         }
 
-        private static void ConfigureBuilder(WebApplicationBuilder builder, WebApiStartupSettings settings)
+        private static void ConfigureBuilder<TId>(WebApplicationBuilder builder, WebApiStartupSettings settings)
         {
             builder.Host.UseSerilog();
 
@@ -95,14 +96,15 @@ namespace HB.FullStack.Server.WebLib.Startup
             services.AddIdGen(Configuration.GetSection(IdGen));
 
             services.AddSingleRedisDistributedLock(Configuration.GetSection(RedisLock));
-            services.AddRedisKVStore(Configuration.GetSection(RedisKVStore));
+            services.AddKVStore(Configuration.GetSection(KVStore), builder=> builder.AddRedis());
             services.AddRedisCache(Configuration.GetSection(RedisCache));
             services.AddRedisEventBus(Configuration.GetSection(RedisEventBus));
             services.AddDatabase(Configuration.GetSection(Database), builder => builder.AddMySQL());
-            services.AddIdentity(Configuration.GetSection(Identity));
             services.AddTCaptha(Configuration.GetSection(TCaptha));
             services.AddAliyunSts(Configuration.GetSection(AliyunSts));
             services.AddAliyunSms(Configuration.GetSection(AliyunSms));
+            
+            services.AddIdentity<TId>(Configuration.GetSection(Identity));
 
             //Direcotry
             services.AddDirectoryTokenService(settings.ConfigureDirectoryOptions);
@@ -133,7 +135,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             });
 
             //Controller
-            services.AddControllersWithConfiguration(addAuthentication: true);
+            services.AddControllersWithConfiguration<TId>(addAuthentication: true);
             services.AddSwaggerGen();
 
             //Healthy Check
@@ -152,10 +154,10 @@ namespace HB.FullStack.Server.WebLib.Startup
             //HB.FullStack.Server.WebLib Services
             services.AddSingleton<ISecurityService, DefaultSecurityService>();
             services.AddSingleton<ICommonResourceTokenService, CommonResourceTokenService>();
-            services.AddScoped<UserActivityFilter>();
+            services.AddScoped<UserActivityFilter<TId>>();
             services.AddScoped<CapthcaCheckFilter>();
             services.AddScoped<CheckCommonResourceTokenFilter>();
-            services.AddTransient<SecurityMiddleware>();
+            services.AddTransient<SecurityMiddleware<TId>>();
 
             //InitService
             services
@@ -168,7 +170,7 @@ namespace HB.FullStack.Server.WebLib.Startup
 
         }
 
-        private static void ConfigureApplication(WebApplication app, WebApiStartupSettings settings)
+        private static void ConfigureApplication<TId>(WebApplication app, WebApiStartupSettings settings)
         {
             if (app.Environment.IsDevelopment())
             {
@@ -179,10 +181,10 @@ namespace HB.FullStack.Server.WebLib.Startup
             //TODO: 使用RateLimiting
             //app.UseHealthChecks("/health");
 
-            app.UseMiddleware<SecurityMiddleware>();
+            app.UseMiddleware<SecurityMiddleware<TId>>();
 
             app
-                .UseExceptionController()
+                .UseExceptionHandler($"/GlobalException")
                 .UseForwardedHeaders()
                 .UseHttpMethodOverride();
 
@@ -233,6 +235,15 @@ namespace HB.FullStack.Server.WebLib.Startup
             //    endpoints.MapControllers();
             //});
 
+            app.MapGlobalException("/GlobalException");
+            
+            app.MapGroup("/.well-known/openid-configuration")
+                .MapOpenIdConfigurationApi<TId>();
+            
+            app.MapGroup("/api/DirectoryToken")
+                .MapDirectoryTokenApi<TId>()
+                .RequireAuthorization();
+            
             //.net 6
             app.MapControllers();
         }
@@ -277,7 +288,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             return services;
         }
 
-        static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services, bool addAuthentication = true)
+        static IServiceCollection AddControllersWithConfiguration<TId>(this IServiceCollection services, bool addAuthentication = true)
         {
             Assembly webAssembly = typeof(GlobalExceptionController).Assembly;
             Assembly serverAssembly = typeof(WebApiStartup).Assembly;
@@ -294,7 +305,7 @@ namespace HB.FullStack.Server.WebLib.Startup
                         //options.Filters.Add(new AuthorizeFilter(policy));
 
                         //options.Filters
-                        options.Filters.AddService<UserActivityFilter>();
+                        options.Filters.AddService<UserActivityFilter<TId>>();
                     }
                 })
                 .AddJsonOptions(options =>

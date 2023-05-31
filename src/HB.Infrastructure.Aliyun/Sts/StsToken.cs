@@ -8,7 +8,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.Infrastructure.Aliyun.Sts
 {
-    public class StsToken : ValidatableObject, IModel
+    public class StsToken : ValidatableObject, IModel, IExpired
     {
         public string RequestId { get; set; } = null!;
 
@@ -18,7 +18,6 @@ namespace HB.Infrastructure.Aliyun.Sts
 
         public string AccessKeySecret { get; set; } = null!;
 
-        public DateTimeOffset ExpirationAt { get; set; }
 
         public string ArId { get; set; } = null!;
 
@@ -27,5 +26,7 @@ namespace HB.Infrastructure.Aliyun.Sts
         public bool ReadOnly { get; set; }
 
         public ModelKind GetKind() => ModelKind.Plain;
+
+        public long? ExpiredAt { get; set; }
     }
 }

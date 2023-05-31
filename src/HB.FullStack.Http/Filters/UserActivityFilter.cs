@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 using AsyncAwaitBestPractices;
@@ -13,12 +15,12 @@ using Microsoft.Extensions.Logging;
 
 namespace HB.FullStack.Server.WebLib.Filters
 {
-    public class UserActivityFilter : IAsyncActionFilter
+    public class UserActivityFilter<TId> : IAsyncActionFilter
     {
-        private readonly ILogger<UserActivityFilter> _logger;
-        private readonly IIdentityService _identityService;
+        private readonly ILogger<UserActivityFilter<TId>> _logger;
+        private readonly IIdentityService<TId> _identityService;
 
-        public UserActivityFilter(ILogger<UserActivityFilter> logger, IIdentityService identityService)
+        public UserActivityFilter(ILogger<UserActivityFilter<TId>> logger, IIdentityService<TId> identityService)
         {
             _logger = logger;
             _identityService = identityService;
@@ -28,8 +30,10 @@ namespace HB.FullStack.Server.WebLib.Filters
         {
             try
             {
-                Guid? signInCredentialId = context.HttpContext?.User?.GetTokenCredentialId();
-                Guid? userId = context.HttpContext?.User?.GetUserId();
+                ClaimsPrincipal? principal = context.HttpContext?.User;
+
+                TId? userId =  principal!= null ? principal.GetUserId<TId>() : default;
+                TId? signInCredentialId = principal != null ? principal.GetTokenCredentialId<TId>() : default;
                 string? ip = context.HttpContext?.GetIpAddress();
                 string? url = context.HttpContext?.Request?.GetDisplayUrl();
                 string? httpMethod = context.HttpContext?.Request?.Method;
@@ -65,7 +69,7 @@ namespace HB.FullStack.Server.WebLib.Filters
                     .SafeFireAndForget(ex =>
                     {
                         //TODO:错误处理？
-                        _logger.LogError(ex, $"{nameof(_identityService.RecordUserActivityAsync)} 在 {nameof(UserActivityFilter)} 中调用出错。");
+                        _logger.LogError(ex, $"{nameof(_identityService.RecordUserActivityAsync)} 在 {nameof(UserActivityFilter<TId>)} 中调用出错。");
                     });
             }
 #pragma warning disable CA1031 // Do not catch general exception types

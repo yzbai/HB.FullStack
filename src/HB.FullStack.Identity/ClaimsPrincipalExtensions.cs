@@ -27,6 +27,11 @@ namespace System
             return StringConvertCenter.FromStringTo<TId>(userIdString, StringConvertPurpose.NONE);
         }
 
+        public static string? GetUserIdString(this ClaimsPrincipal principal)
+        {
+            return principal.GetClaimValue(ClaimExtensionTypes.USER_ID);
+        }
+
         public static string? GetUserLevel(this ClaimsPrincipal principal)
         {
             return principal.GetClaimValue(ClaimExtensionTypes.USER_LEVEL);

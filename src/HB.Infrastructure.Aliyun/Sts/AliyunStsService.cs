@@ -69,14 +69,14 @@ namespace HB.Infrastructure.Aliyun.Sts
             }
         }
 
-        private static string GetRoleSessionName(Guid userId)
+        private static string GetRoleSessionName(string userIdString)
         {
-            return "User" + userId.ToString();
+            return "User" + userIdString;
         }
 
-        public StsToken? RequestOssStsToken(Guid userId, string bucketName, string directory, bool readOnly, double expirySeconds)
+        public StsToken? RequestOssStsToken(string userIdString, string bucketName, string directory, bool readOnly, double expirySeconds)
         {
-            if (bucketName.IsNullOrEmpty() || userId.IsEmpty() || directory.IsNullOrEmpty())
+            if (bucketName.IsNullOrEmpty() || userIdString.IsNullOrEmpty() || directory.IsNullOrEmpty())
             {
                 return null;
             }
@@ -105,7 +105,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             {
                 AcceptFormat = FormatType.JSON,
                 RoleArn = assumedRole.Arn,
-                RoleSessionName = GetRoleSessionName(userId),
+                RoleSessionName = GetRoleSessionName(userIdString),
                 DurationSeconds = (long)(expirySeconds > assumedRole.MaxExpireSeconds ? assumedRole.MaxExpireSeconds : expirySeconds),
                 Policy = policy
             };
@@ -120,7 +120,7 @@ namespace HB.Infrastructure.Aliyun.Sts
                     SecurityToken = assumedRoleResponse.Credentials.SecurityToken,
                     AccessKeyId = assumedRoleResponse.Credentials.AccessKeyId,
                     AccessKeySecret = assumedRoleResponse.Credentials.AccessKeySecret,
-                    ExpirationAt = DateTimeOffset.Parse(assumedRoleResponse.Credentials.Expiration, Globals.Culture),
+                    ExpiredAt = DateTimeOffset.Parse(assumedRoleResponse.Credentials.Expiration, Globals.Culture).ToTimestamp(),
                     ArId = assumedRoleResponse.AssumedRoleUser.AssumedRoleId,
                     Arn = assumedRoleResponse.AssumedRoleUser.Arn,
                     ReadOnly = readOnly
@@ -131,7 +131,7 @@ namespace HB.Infrastructure.Aliyun.Sts
             catch (Exception ex)
             {
                 //TODO: 处理报错
-                throw AliyunExceptions.StsError(userId: userId, bucketname: bucketName, direcotry: directory, readOnly: readOnly, ex);
+                throw AliyunExceptions.StsError(userIdString: userIdString, bucketname: bucketName, direcotry: directory, readOnly: readOnly, ex);
             }
         }
     }

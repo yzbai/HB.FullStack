@@ -1,29 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 using System.Threading.Tasks;
 
 using HB.FullStack.Server.Identity;
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using AsyncAwaitBestPractices;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Http.Extensions;
-using System.Buffers;
 
 namespace HB.FullStack.Server.WebLib.Middlewares
 {
-    public class SecurityMiddleware : IMiddleware
+    public class SecurityMiddleware<TId> : IMiddleware
     {
-        private readonly ILogger<SecurityMiddleware> _logger;
-        private readonly IIdentityService _identityService;
+        private readonly ILogger<SecurityMiddleware<TId>> _logger;
+        private readonly IIdentityService<TId> _identityService;
 
-        public SecurityMiddleware(ILogger<SecurityMiddleware> logger, IIdentityService identityService)
+        public SecurityMiddleware(ILogger<SecurityMiddleware<TId>> logger, IIdentityService<TId> identityService)
         {
             _logger = logger;
             _identityService = identityService;
@@ -50,8 +41,10 @@ namespace HB.FullStack.Server.WebLib.Middlewares
 
                 CheckClientIdAndVersion(ip, clientId, clientVersion);
 
-                Guid? tokenCredentialId = context.User?.GetTokenCredentialId();
-                Guid? userId = context.User?.GetUserId();
+                var principal = context.User;
+
+                TId? tokenCredentialId = principal != null ? principal.GetTokenCredentialId<TId>() : default;
+                TId? userId = principal != null ? principal.GetUserId<TId>() : default;
 
                 await next(context);
 

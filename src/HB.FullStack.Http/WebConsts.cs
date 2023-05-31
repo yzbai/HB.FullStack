@@ -8,6 +8,5 @@ namespace HB.FullStack.Server
 {
     public  class WebConsts
     {
-        public const string GlobalException = "GlobalException";
     }
 }

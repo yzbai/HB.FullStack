@@ -25,12 +25,12 @@ namespace System
             return new WebException(ErrorCodes.UploadError, cause, innerEx, context);
         }
 
-        public static Exception ChangedPropertyPackError(string cause, PropertyChangeJsonPack? changePack, string? modelFullName)
+        public static Exception ChangedPropertyPackError(string cause, PropertyChangePack? changePack, string? modelFullName)
         {
             DbException ex = new DbException(ErrorCodes.ChangedPackError, cause, null, null);
 
             ex.Data["ModelFullName"] = modelFullName;
-            ex.Data["PropertyNames"] = changePack?.PropertyChanges.Select(c => c.PropertyName).ToJoinedString(",");
+            ex.Data["PropertyNames"] = changePack?.PropertyChanges.Select(c => c.Key).ToJoinedString(",");
 
             return ex;
         }

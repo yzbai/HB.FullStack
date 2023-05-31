@@ -9,8 +9,8 @@ using HB.FullStack.Common.Shared;
 
 namespace HB.FullStack.Server.WebLib.Services
 {
-    public interface IDirectoryTokenService
+    public interface IDirectoryTokenService<TId>
     {
-        DirectoryToken? GetDirectoryToken(Guid requestUserId, string? userLevel, string directoryPermissionName, string? placeHolderValue, bool readOnly);
+        DirectoryToken<TId>? GetDirectoryToken(TId requestUserId, string? userLevel, string directoryPermissionName, string? placeHolderValue, bool readOnly);
     }
 }

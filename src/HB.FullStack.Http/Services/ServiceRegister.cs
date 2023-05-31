@@ -11,11 +11,11 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class StsTokenServiceServiceRegister
     {
-        public static IServiceCollection AddDirectoryTokenService(this IServiceCollection services, Action<DirectoryOptions> configDirectoryOptions)
+        public static IServiceCollection AddDirectoryTokenService<TId>(this IServiceCollection services, Action<DirectoryOptions> configDirectoryOptions)
         {
             services.Configure(configDirectoryOptions);
 
-            services.AddSingleton<IDirectoryTokenService, DirectoryTokenService>();
+            services.AddSingleton<IDirectoryTokenService<TId>, DirectoryTokenService<TId>>();
 
             return services;
         }

@@ -1,37 +1,34 @@
 ﻿using System;
 
-using HB.FullStack.Server;
-
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
+
 
 namespace HB.FullStack.Server.WebLib.Controllers
 {
-    [ApiController]
-    public class GlobalExceptionController : BaseController
+    public static class GlobalExceptionApi
     {
-        private readonly ILogger _logger;
-
-        public GlobalExceptionController(ILogger<GlobalExceptionController> logger)
+        public static IEndpointRouteBuilder MapGlobalException(this IEndpointRouteBuilder builder, string template)
         {
-            _logger = logger;
+            builder.Map(template, HandleGlobalException);
+            
+            return builder;
         }
 
-        [AllowAnonymous]
-        [Route(WebConsts.GlobalException)]
-        public IActionResult ExceptionAsync()
+        private static IResult HandleGlobalException(HttpContext context)
         {
-            IExceptionHandlerPathFeature? exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+            IExceptionHandlerPathFeature? exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
 
             if (exceptionHandlerPathFeature == null)
             {
                 //TODO: 完善， 记录请求Request。
 
-                _logger.LogCritical("IExceptionHandlerPathFeature = null");
+                Globals.Logger.LogCritical("IExceptionHandlerPathFeature = null");
 
-                return new BadRequestObjectResult(ErrorCodes.ServerInternalError);
+                return Results.BadRequest(ErrorCodes.ServerInternalError);
             }
 
             string path = exceptionHandlerPathFeature.Path;
@@ -56,12 +53,9 @@ namespace HB.FullStack.Server.WebLib.Controllers
                 errorCode = errorCodeException.ErrorCode;
             }
 
-            _logger.LogError(exceptionHandlerPathFeature.Error, "GlobalExceptionController捕捉异常：RequestPath:{RequestPath}", path);
+            Globals.Logger.LogError(exceptionHandlerPathFeature.Error, "GlobalExceptionController捕捉异常：RequestPath:{RequestPath}", path);
 
-            return new BadRequestObjectResult(errorCode)
-            {
-                ContentTypes = { "application/problem+json" }
-            };
+            return Results.BadRequest(errorCode);
         }
     }
 }

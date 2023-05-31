@@ -10,9 +10,12 @@ namespace HB.FullStack.Server.Identity
 {
     public interface IIdentityService<TId>
     {
-        #region Token
+        #region OpenIdConfiguration
+
+        string OpenIdConnectConfigurationString { get; }
 
         string JsonWebKeySet { get; }
+        #region Token
 
         Task<Token<TId>> RefreshTokenAsync(RefreshContext context, string lastUser);
 

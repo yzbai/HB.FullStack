@@ -8,7 +8,7 @@ namespace HB.FullStack.Common.Models
 
     public interface ISharedResource : IModel, IExpired
     {
-        object? Id { get; set; }
+        //object? Id { get; set; }
     }
 
     public abstract class SharedResource2<TId> : ValidatableObject, ISharedResource
@@ -22,6 +22,6 @@ namespace HB.FullStack.Common.Models
 
         public abstract long? ExpiredAt { get; set; }
 
-        object? ISharedResource.Id { get => Id; set => Id = (TId?)value; }
+        //object? ISharedResource.Id { get => Id; set => Id = (TId?)value; }
     }
 }

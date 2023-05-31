@@ -7,9 +7,13 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Common.Shared
 {
-    public interface ISmsValidationCodeRes : ISharedResource
+    public class SmsValidationCodeRes : ValidatableObject, ISharedResource
     {
         public int Length { get; set; }
+
+        public long? ExpiredAt {get;set;}
+
+        public ModelKind GetKind() => ModelKind.Shared;
 
     }
 }
