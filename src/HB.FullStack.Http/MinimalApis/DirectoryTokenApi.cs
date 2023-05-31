@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
-namespace HB.FullStack.Server.WebLib.Controllers
+namespace HB.FullStack.Server.WebLib.MinimalApis
 {
     public static class DirectoryTokenApi
     {
@@ -27,8 +27,8 @@ namespace HB.FullStack.Server.WebLib.Controllers
         private static IResult GetByDirectoryPermissionName<TId>(
             [FromQuery][Required] string directoryPermissionName,
             [FromQuery] string? placeHolderValue,
-            [FromQuery][Required] bool readOnly, 
-            [FromServices]IDirectoryTokenService<TId> directoryTokenService,
+            [FromQuery][Required] bool readOnly,
+            [FromServices] IDirectoryTokenService<TId> directoryTokenService,
             ClaimsPrincipal User)
         {
             DirectoryToken<TId>? directoryToken = directoryTokenService.GetDirectoryToken(

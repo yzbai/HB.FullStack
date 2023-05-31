@@ -27,10 +27,10 @@ using Serilog;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using HB.FullStack.Server.WebLib.Controllers;
 using HB.FullStack.Common.Shared;
 using HB.FullStack.Server.WebLib.Middlewares;
 using HB.FullStack.Server.WebLib.Services;
+using HB.FullStack.Server.WebLib.MinimalApis;
 
 namespace HB.FullStack.Server.WebLib.Startup
 {
@@ -242,6 +242,16 @@ namespace HB.FullStack.Server.WebLib.Startup
             
             app.MapGroup("/api/DirectoryToken")
                 .MapDirectoryTokenApi<TId>()
+                .RequireAuthorization();
+
+            app.MapGroup("/api/ServerHealth")
+                .MapServerHealthApi();
+
+            app.MapGroup("/api/SmsValidationCode")
+                .MapSmsValidationCodeApi();
+
+            app.MapGroup("/api/UserProfile")
+                .MapUserProfileApi()
                 .RequireAuthorization();
             
             //.net 6

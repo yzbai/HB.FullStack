@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 
-namespace HB.FullStack.Server.WebLib.Controllers
+namespace HB.FullStack.Server.WebLib.MinimalApis
 {
     public static class OpenIdConfigurationApi
     {

@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
 
-namespace HB.FullStack.Server.WebLib.Controllers
+namespace HB.FullStack.Server.WebLib.MinimalApis
 {
     public static class GlobalExceptionApi
     {
         public static IEndpointRouteBuilder MapGlobalException(this IEndpointRouteBuilder builder, string template)
         {
             builder.Map(template, HandleGlobalException);
-            
+
             return builder;
         }
 
