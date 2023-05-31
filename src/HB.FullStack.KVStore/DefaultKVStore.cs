@@ -7,22 +7,27 @@ using System.Threading.Tasks;
 
 using HB.FullStack.Common;
 using HB.FullStack.Common.Convert;
+using HB.FullStack.KVStore.Config;
 using HB.FullStack.KVStore.Engine;
 using HB.FullStack.KVStore.KVStoreModels;
+
+using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.KVStore
 {
     public class DefaultKVStore : IKVStore
     {
+        private readonly KVStoreOptions _options;
         private readonly IKVStoreEngine _engine;
         private readonly IKVStoreModelDefFactory _modelDefFactory;
 
-        public DefaultKVStore(IKVStoreEngine kvstoreEngine, IKVStoreModelDefFactory kvStoreModelDefFactory)
+        public DefaultKVStore(IOptions<KVStoreOptions> options, IKVStoreEngine kvstoreEngine, IKVStoreModelDefFactory kvStoreModelDefFactory)
         {
+            _options = options.Value;
             _engine = kvstoreEngine;
             _modelDefFactory = kvStoreModelDefFactory;
 
-            _modelDefFactory.Initialize(kvstoreEngine);
+            _engine.Initialize(_options);
         }
 
         public string GetKey<T>(T item) where T : class, IKVStoreModel
@@ -68,7 +73,7 @@ namespace HB.FullStack.KVStore
             try
             {
                 IEnumerable<Tuple<byte[]?, long>> tuples = await _engine.GetAsync(
-                    modelDef.KVStoreName,
+                    modelDef.SchemaName,
                     modelDef.ModelType.FullName!,
                     GetKeys(keys, modelDef)).ConfigureAwait(false);
 
@@ -76,7 +81,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: modelDef.KVStoreName, key: keys, innerException: ex);
+                throw KVStoreExceptions.Unkown(type: typeof(T).FullName, storeName: modelDef.SchemaName, key: keys, innerException: ex);
             }
         }
 
@@ -86,14 +91,14 @@ namespace HB.FullStack.KVStore
             try
             {
                 IEnumerable<Tuple<byte[]?, long>> tuples = await _engine.GetAllAsync(
-                    modelDef.KVStoreName,
+                    modelDef.SchemaName,
                     modelDef.ModelType.FullName!).ConfigureAwait(false);
 
                 return MapTupleToModel<T>(tuples);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(type: typeof(T).FullName, storeName: modelDef.KVStoreName, key: null, innerException: ex);
+                throw KVStoreExceptions.Unkown(type: typeof(T).FullName, storeName: modelDef.SchemaName, key: null, innerException: ex);
             }
         }
 
@@ -128,7 +133,7 @@ namespace HB.FullStack.KVStore
                 }
 
                 await _engine.AddAsync(
-                    modelDef.KVStoreName,
+                    modelDef.SchemaName,
                     modelDef.ModelType.FullName!,
                     keys,
                     modelBytes,
@@ -138,7 +143,7 @@ namespace HB.FullStack.KVStore
             catch (Exception ex) when (ex is not KVStoreException)
             {
                 //TODO: 要像数据库那样Restore吗？
-                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, items, ex);
+                throw KVStoreExceptions.Unkown(modelDef.ModelType.FullName, modelDef.SchemaName, items, ex);
             }
         }
 
@@ -175,7 +180,7 @@ namespace HB.FullStack.KVStore
                 }
 
                 await _engine.UpdateAsync(
-                    modelDef.KVStoreName,
+                    modelDef.SchemaName,
                     modelDef.ModelType.FullName!,
                     keys,
                     modelBytes,
@@ -184,7 +189,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, items, ex);
+                throw KVStoreExceptions.Unkown(modelDef.ModelType.FullName, modelDef.SchemaName, items, ex);
             }
         }
 
@@ -198,7 +203,7 @@ namespace HB.FullStack.KVStore
             try
             {
                 await _engine.DeleteAsync(
-                    modelDef.KVStoreName,
+                    modelDef.SchemaName,
                     modelDef.ModelType.FullName!,
                     keys,
                     timestamps
@@ -206,7 +211,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, keys: keys, values: timestamps, innerException: ex);
+                throw KVStoreExceptions.Unkown(modelDef.ModelType.FullName, modelDef.SchemaName, keys: keys, values: timestamps, innerException: ex);
             }
         }
 
@@ -217,13 +222,13 @@ namespace HB.FullStack.KVStore
             try
             {
                 await _engine.DeleteAllAsync(
-                   modelDef.KVStoreName,
+                   modelDef.SchemaName,
                    modelDef.ModelType.FullName!
                    ).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, null, ex);
+                throw KVStoreExceptions.Unkown(modelDef.ModelType.FullName, modelDef.SchemaName, null, ex);
             }
         }
 
@@ -236,7 +241,7 @@ namespace HB.FullStack.KVStore
 
             if (keys.Count() != timestamps.Count())
             {
-                throw Exceptions.VersionsKeysNotEqualError();
+                throw KVStoreExceptions.VersionsKeysNotEqualError();
             }
 
             KVStoreModelDef modelDef = _modelDefFactory.GetDef<T>();
@@ -244,7 +249,7 @@ namespace HB.FullStack.KVStore
             try
             {
                 await _engine.DeleteAsync(
-                    modelDef.KVStoreName,
+                    modelDef.SchemaName,
                     modelDef.ModelType.FullName!,
                     GetKeys(keys, modelDef),
                     timestamps
@@ -252,7 +257,7 @@ namespace HB.FullStack.KVStore
             }
             catch (Exception ex) when (ex is not KVStoreException)
             {
-                throw Exceptions.Unkown(modelDef.ModelType.FullName, modelDef.KVStoreName, keys: keys, values: timestamps, innerException: ex);
+                throw KVStoreExceptions.Unkown(modelDef.ModelType.FullName, modelDef.SchemaName, keys: keys, values: timestamps, innerException: ex);
             }
         }
 

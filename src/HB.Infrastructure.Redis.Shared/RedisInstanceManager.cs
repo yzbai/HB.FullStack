@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +34,7 @@ namespace HB.Infrastructure.Redis.Shared
                     return cached2;
                 }
 
-                ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(setting.ConnectionString);
+                ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(setting.ConnectionString.ToString());
 
                 //TODO: 调查参数
                 //configurationOptions.KeepAlive = 30;
@@ -108,7 +107,7 @@ namespace HB.Infrastructure.Redis.Shared
                     return cached2;
                 }
 
-                ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(setting.ConnectionString);
+                ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(setting.ConnectionString.ToString());
 
                 //TODO: 调查参数
                 //configurationOptions.KeepAlive = 30;
@@ -177,7 +176,7 @@ namespace HB.Infrastructure.Redis.Shared
             return connection.GetServer(setting.ServerEndPoint);
         }
 
-        private static AsyncRetryPolicy AsyncReConnectPolicy(string connectionString, ILogger logger)
+        private static AsyncRetryPolicy AsyncReConnectPolicy(ConnectionString connectionString, ILogger logger)
         {
             //TODO: move this settings to options
             return Policy
@@ -192,7 +191,7 @@ namespace HB.Infrastructure.Redis.Shared
                             });
         }
 
-        private static RetryPolicy ReConnectPolicy(string connectionString, ILogger logger)
+        private static RetryPolicy ReConnectPolicy(ConnectionString connectionString, ILogger logger)
         {
             //TODO: move this settings to options
             return Policy
@@ -207,6 +206,7 @@ namespace HB.Infrastructure.Redis.Shared
                             });
         }
 
+        //TODO: 在什么时机可以调用关闭？
         public static void Close(RedisInstanceSetting setting)
         {
             if (_connectionDict.TryGetValue(setting.InstanceName, out ConnectionMultiplexer? connection))

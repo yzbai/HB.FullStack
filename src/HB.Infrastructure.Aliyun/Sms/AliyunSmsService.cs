@@ -8,6 +8,7 @@ using Aliyun.Acs.Core.Http;
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Cache;
+using HB.FullStack.Cache.CacheItems;
 using HB.FullStack.Common.Validate;
 using HB.FullStack.Server.Services;
 

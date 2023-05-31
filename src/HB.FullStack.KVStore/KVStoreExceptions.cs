@@ -2,7 +2,7 @@
 
 namespace HB.FullStack.KVStore
 {
-    public static class Exceptions
+    public static class KVStoreExceptions
     {
         public static Exception NoModelSchemaFound(string? type)
         {
@@ -88,24 +88,29 @@ namespace HB.FullStack.KVStore
             return exception;
         }
 
-        public static Exception WriteError(string type, string storeName, object? keys, ErrorCode errorCode)
+        public static Exception WriteError(string type, string schemaName, object? keys, ErrorCode errorCode)
         {
             KVStoreException exception = new KVStoreException(errorCode, nameof(WriteError));
 
             exception.Data["Type"] = type;
-            exception.Data["StoreName"] = storeName;
+            exception.Data["StoreName"] = schemaName;
             exception.Data["Keys"] = keys;
 
             return exception;
         }
 
-        public static Exception NoSuchInstance(string instanceName)
+        public static Exception NoSuchKVStoreSchema(string schemaName)
         {
-            KVStoreException exception = new KVStoreException(ErrorCodes.NoSuchInstance, nameof(NoSuchInstance));
+            KVStoreException exception = new KVStoreException(ErrorCodes.NotFound, nameof(NoSuchKVStoreSchema));
 
-            exception.Data["InstanceName"] = instanceName;
+            exception.Data["SchemaName"] = schemaName;
 
             return exception;
+        }
+
+        internal static Exception OptionsError(string cause)
+        {
+            return new KVStoreException(ErrorCodes.OptionsError, cause);
         }
     }
 }

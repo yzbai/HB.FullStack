@@ -1,14 +1,15 @@
-﻿namespace HB.FullStack.Cache
+﻿using HB.FullStack.Cache.CachedCollectionItems;
+using HB.FullStack.Cache.CacheItems;
+
+namespace HB.FullStack.Cache
 {
-    public interface ICache : IModelCache, ITimestampCache, ICollectionCache
+    public interface ICache : IModelCache, ICachedItemCache, ICachedCollectionCache
     {
-        void Close();
+        //void Close();
 
-        void Dispose();
+        //void Dispose();
 
-        CacheModelDef? GetDef<TCacheModel>();
-
-        bool IsModelCachable<T>();
+       
 
     }
 }

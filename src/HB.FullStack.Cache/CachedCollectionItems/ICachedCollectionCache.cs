@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Cache.CachedCollectionItems
 {
     /// <summary>
     /// string,int,generic 都可以存储空值
     /// Model操作不可以 
     /// </summary>
-    public interface ICollectionCache
+    public interface ICachedCollectionCache
     {
         Task<byte[]?> GetFromCollectionAsync(string collectionKey, string itemKey, CancellationToken token = default);
 

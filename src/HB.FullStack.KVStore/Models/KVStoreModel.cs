@@ -8,17 +8,11 @@ namespace HB.FullStack.KVStore.KVStoreModels
 {
     public interface IKVStoreModel : IModel, ITimestamp
     {
-        string SubstituteKey { get; set; }
         string? LastUser { get; set; }
     }
 
     public class KVStoreModel : ValidatableObject, IKVStoreModel
     {
-        [Required]
-        [CacheModelKey]
-        [KVStoreSubstituteKey]
-        public string SubstituteKey { get; set; } = SecurityUtil.CreateUniqueToken();
-
         public string? LastUser { get; set; }
 
         public long Timestamp { get; set; } = -1;

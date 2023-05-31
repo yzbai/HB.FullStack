@@ -5,6 +5,6 @@ namespace HB.FullStack.KVStore
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class KVStoreAttribute : Attribute
     {
-        public string? InstanceName { get; set; }
+        public string? SchemaName { get; set; }
     }
 }

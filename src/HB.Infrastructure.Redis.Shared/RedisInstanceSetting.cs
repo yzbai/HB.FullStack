@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+
 using StackExchange.Redis;
 
 namespace HB.Infrastructure.Redis.Shared
@@ -17,7 +15,7 @@ namespace HB.Infrastructure.Redis.Shared
         public string InstanceName { get; set; } = null!;
 
         [DisallowNull, NotNull]
-        public string ConnectionString { get; set; } = null!;
+        public ConnectionString ConnectionString { get; set; } = null!;
 
         public int DatabaseNumber
         {
@@ -50,7 +48,7 @@ namespace HB.Infrastructure.Redis.Shared
 
         private void ParseConfiguration()
         {
-            ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(ConnectionString);
+            ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(ConnectionString.ToString());
 
             if (configurationOptions.DefaultDatabase.HasValue)
             {

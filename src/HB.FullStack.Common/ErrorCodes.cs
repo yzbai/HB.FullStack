@@ -222,6 +222,8 @@
         public static ErrorCode SettingsError = new ErrorCode(nameof(SettingsError), "");
         #endregion
         #region
+
+        // Importrant
         public static ErrorCode NotFound = new ErrorCode(nameof(NotFound), "");
         public static ErrorCode IdentityNothingConfirmed = new ErrorCode(nameof(IdentityNothingConfirmed), "");
         public static ErrorCode IdentityMobileEmailLoginNameAllNull = new ErrorCode(nameof(IdentityMobileEmailLoginNameAllNull), "");

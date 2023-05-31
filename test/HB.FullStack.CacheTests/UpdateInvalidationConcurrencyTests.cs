@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using HB.FullStack.BaseTest;
 using HB.FullStack.Cache;
+using HB.FullStack.Cache.CacheItems;
 using HB.FullStack.Database.Engine;
 
 using Microsoft.Extensions.Caching.Distributed;

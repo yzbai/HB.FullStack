@@ -13,6 +13,10 @@ namespace HB.FullStack.Cache
     /// </summary>
     public partial interface IModelCache
     {
+        CacheModelDef? GetDef<TCacheModel>();
+
+        bool IsModelCachable<T>();
+
         Task<(IEnumerable<TCacheModel>?, bool)> GetModelsAsync<TCacheModel>(string keyName, IEnumerable keyValues, CancellationToken token = default) where TCacheModel : IModel;
 
         /// <summary>

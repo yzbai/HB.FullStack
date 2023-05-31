@@ -1,147 +1,132 @@
-﻿
+﻿global using SchemaName = System.String;
+
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 using HB.FullStack.Common.Models;
-using HB.FullStack.KVStore.Engine;
+using HB.FullStack.KVStore.Config;
+
+using Microsoft.Extensions.Options;
 
 namespace HB.FullStack.KVStore.KVStoreModels
 {
     internal class KVStoreModelDefFactory : IKVStoreModelDefFactory, IModelDefProvider
     {
-        private IDictionary<string, KVStoreModelSchema> _typeSchemaDict = null!;
-        private readonly ConcurrentDictionary<Type, KVStoreModelDef> _defDict = new ConcurrentDictionary<Type, KVStoreModelDef>();
-        private KVStoreSettings _settings = null!;
-        private string? _firstDefaultInstanceName = null!;
+        private readonly IDictionary<SchemaName, KVStoreSchema> _schemaDict = null!;
+        private readonly IDictionary<Type, KVStoreModelDef> _modelDefDict;
+        private readonly KVStoreSchema _defaultSchema;
+        private readonly KVStoreOptions _options;
 
-        public void Initialize(IKVStoreEngine kVStoreEngine)
+        public KVStoreModelDefFactory(IOptions<KVStoreOptions> options)
         {
-            _settings = kVStoreEngine.Settings;
-            _firstDefaultInstanceName = kVStoreEngine.FirstDefaultInstanceName;
+            _options = options.Value;
 
-            IEnumerable<Type> allModelTypes;
+            //schema
+            _schemaDict = _options.KVStoreSchemas.ToDictionary(s => s.Name);
 
-            if (_settings.AssembliesIncludeModel.IsNullOrEmpty())
-            {
-                allModelTypes = ReflectionUtil.GetAllTypeByCondition(kvstoreModelTypeCondition);
-            }
-            else
-            {
-                allModelTypes = ReflectionUtil.GetAllTypeByCondition(kVStoreEngine.Settings.AssembliesIncludeModel, kvstoreModelTypeCondition);
-            }
+            //default Schema
+            _defaultSchema = _options.KVStoreSchemas.FirstOrDefault(s => s.IsDefault) ?? _options.KVStoreSchemas[0];
 
-            _typeSchemaDict = ConstructeSchemaDict(allModelTypes);
+
+            IEnumerable<Type> allModelTypes = _options.KVStoreModelAssemblies.IsNullOrEmpty()
+                ? ReflectionUtil.GetAllTypeByCondition(kvstoreModelTypeCondition)
+                : ReflectionUtil.GetAllTypeByCondition(_options.KVStoreModelAssemblies, kvstoreModelTypeCondition);
+
+            _modelDefDict = ConstructeModelDefDict(allModelTypes);
 
             static bool kvstoreModelTypeCondition(Type t)
             {
                 return t.IsClass && !t.IsAbstract && !t.IsGenericType && t.IsAssignableTo(typeof(IKVStoreModel));
             }
-        }
 
-        private IDictionary<string, KVStoreModelSchema> ConstructeSchemaDict(IEnumerable<Type> allModelTypes)
-        {
-            IDictionary<string, KVStoreModelSchema> filedDict = _settings.KVStoreModels.ToDictionary(t => t.ModelTypeFullName);
-            IDictionary<string, KVStoreModelSchema> resultDict = new Dictionary<string, KVStoreModelSchema>();
-
-            foreach (var type in allModelTypes)
+            IDictionary<Type, KVStoreModelDef> ConstructeModelDefDict(IEnumerable<Type> allModelTypes)
             {
-                KVStoreAttribute? attribute = type.GetCustomAttribute<KVStoreAttribute>(true);
+                Dictionary<Type, KVStoreModelDef> resultModelDefDict = new Dictionary<Type, KVStoreModelDef>();
+                Dictionary<string, KVStoreSchema> optionsTypeSchemaDict = new Dictionary<SchemaName, KVStoreSchema>();
 
-                filedDict.TryGetValue(type.FullName!, out KVStoreModelSchema? fileConfigured);
-
-                string? instanceName = null;
-
-                if (attribute != null)
+                foreach (var schema in _options.KVStoreSchemas)
                 {
-                    instanceName = attribute.InstanceName.IsNullOrEmpty() ? _firstDefaultInstanceName : attribute.InstanceName!;
-                }
-
-                if (fileConfigured != null)
-                {
-                    instanceName = fileConfigured.InstanceName;
-                }
-
-                if (instanceName.IsNullOrEmpty())
-                {
-                    instanceName = _firstDefaultInstanceName;
-                }
-
-                KVStoreModelSchema modelSchema = new KVStoreModelSchema
-                {
-                    ModelTypeFullName = type.FullName!,
-                    InstanceName = instanceName!
-                };
-
-                resultDict.Add(type.FullName!, modelSchema);
-            }
-
-            return resultDict;
-        }
-
-        public KVStoreModelDef GetDef<T>()
-        {
-            return GetDef(typeof(T));
-        }
-
-        public KVStoreModelDef GetDef(Type type)
-        {
-            return _defDict.GetOrAdd(type, t => CreateModelDef(t));
-        }
-
-        private KVStoreModelDef CreateModelDef(Type type)
-        {
-            if (!_typeSchemaDict.TryGetValue(type.FullName!, out KVStoreModelSchema? storeModelSchema))
-            {
-                throw Exceptions.NoModelSchemaFound(type: type.FullName);
-            }
-
-            KVStoreModelDef modelDef = new KVStoreModelDef(storeModelSchema.InstanceName, type)
-            {
-                Kind = ModelKind.KV,
-                OrderedKeyPropertyInfos = GetOrderedKeyPropertyInfos(type)
-            };
-
-            return modelDef;
-
-            static IList<PropertyInfo> GetOrderedKeyPropertyInfos(Type type)
-            {
-                PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
-
-                PropertyInfo? backupKeyPropertyInfo = null;
-
-                Dictionary<int, PropertyInfo> keyPropertyInfos = new Dictionary<int, PropertyInfo>();
-
-                foreach (PropertyInfo info in properties)
-                {
-                    KVStoreKeyAttribute? keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>(true);
-
-                    if (keyAttr != null)
+                    foreach (var typeFullName in schema.ModelTypeFullNames)
                     {
-                        keyPropertyInfos.Add(keyAttr.Order, info);
-                    }
-                    else if (info.GetCustomAttribute<KVStoreSubstituteKeyAttribute>(true) != null)
-                    {
-                        backupKeyPropertyInfo = info;
+                        optionsTypeSchemaDict[typeFullName] = schema;
                     }
                 }
 
-                //如果KVStoreKey没有找到，就启用BackupKey
-
-                if (!keyPropertyInfos.Any())
+                foreach (var type in allModelTypes)
                 {
-                    if (backupKeyPropertyInfo == null)
+                    KVStoreModelDef modelDef = new KVStoreModelDef(type);
+
+                    //Schema
+                    if (optionsTypeSchemaDict.TryGetValue(type.FullName!, out KVStoreSchema? optionSchema))
                     {
-                        throw Exceptions.LackKVStoreKeyAttributeError(type: type.FullName);
+                        modelDef.KVStoreSchema = optionSchema;
+                    }
+                    else
+                    {
+                        KVStoreAttribute? attribute = type.GetCustomAttribute<KVStoreAttribute>(true);
+
+                        if (attribute != null && attribute.SchemaName.IsNotNullOrEmpty())
+                        {
+                            modelDef.KVStoreSchema = _schemaDict[attribute.SchemaName];
+                        }
+                        else
+                        {
+                            modelDef.KVStoreSchema = _defaultSchema;
+                        }
                     }
 
-                    keyPropertyInfos.Add(0, backupKeyPropertyInfo);
+                    modelDef.OrderedKeyPropertyInfos = GetOrderedKeyPropertyInfos(type);
+
+                    resultModelDefDict[type] = modelDef;
                 }
 
-                return keyPropertyInfos.OrderBy(p => p.Key).Select(p => p.Value).ToList();
+                return resultModelDefDict;
+
+                static IList<PropertyInfo> GetOrderedKeyPropertyInfos(Type type)
+                {
+
+                    PropertyInfo[] properties = type.GetTypeInfo().GetProperties();
+
+                    Dictionary<int, PropertyInfo> keyPropertyInfos = new Dictionary<int, PropertyInfo>();
+
+                    foreach (PropertyInfo info in properties)
+                    {
+                        KVStoreKeyAttribute? keyAttr = info.GetCustomAttribute<KVStoreKeyAttribute>(true);
+
+                        if (keyAttr != null)
+                        {
+                            keyPropertyInfos.Add(keyAttr.Order, info);
+                        }
+                    }
+
+                    //如果KVStoreKey没有找到，就启用BackupKey
+
+                    if (!keyPropertyInfos.Any())
+                    {
+                        throw KVStoreExceptions.OptionsError($"{type.FullName} do not has a {nameof(KVStoreKeyAttribute)}.");
+                    }
+
+                    return keyPropertyInfos.OrderBy(p => p.Key).Select(p => p.Value).ToList();
+                }
             }
+        }
+
+
+        public KVStoreModelDef GetDef<T>() where T:class, IKVStoreModel
+        {
+            return GetDef(typeof(T))!;
+        }
+
+        public KVStoreModelDef? GetDef(Type type)
+        {
+            if(_modelDefDict.TryGetValue(type, out var modelDef))
+            {
+                return modelDef;
+            }
+
+            return null;
         }
 
         #region IModelDefProvider Memebers

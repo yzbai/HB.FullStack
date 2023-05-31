@@ -1,6 +1,4 @@
-﻿using HB.FullStack.Cache;
-
-using Microsoft.Extensions.Caching.Distributed;
+﻿using Microsoft.Extensions.Caching.Distributed;
 
 using System;
 using System.Collections.Generic;
@@ -9,9 +7,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Cache.CachedCollectionItems
 {
-    public static class ICollectionCacheExtension
+    public static class ICachedCollectionCacheExtension
     {
         public static async Task<T?> GetFromCollectionAsync<T>(this ICache cache, string collectionKey, string itemKey, CancellationToken token = default) where T : class
         {

@@ -1,21 +1,15 @@
-﻿using System.Threading;
+﻿using Microsoft.Extensions.Caching.Distributed;
 using System.Threading.Tasks;
+using System.Threading;
 
-using Microsoft.Extensions.Caching.Distributed;
-
-
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Cache.CacheItems
 {
-    /// <summary>
-    /// string,int,generic 都可以存储空值
-    /// Model操作不可以 
-    /// </summary>
-    public interface ITimestampCache
+    public interface ICachedItemCache
     {
         Task<byte[]?> GetAsync(string key, CancellationToken token = default);
 
         /// <summary>
-        /// timestamp即ICacheModel.Timestamp
+        /// 如果timestamp小于Cache中的，则Set失败
         /// </summary>
         Task<bool> SetAsync(string key, byte[] value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default);
 

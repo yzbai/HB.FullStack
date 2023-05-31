@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceRegiser
+    public static class DbServiceRegiser
     {
         public static IServiceCollection AddDatabase(this IServiceCollection services, Action<DbOptions> optionsAction, Action<IDbEngineBuilder> configureDbEngineBuilder)
         {

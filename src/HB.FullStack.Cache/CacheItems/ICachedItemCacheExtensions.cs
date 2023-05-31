@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HB.FullStack.Cache
+namespace HB.FullStack.Cache.CacheItems
 {
     /// <summary>
     /// 这里的timestamp表明数据的LastTime，类似version
     /// </summary>
-    public static class ITimestampCacheExtensions
+    public static class ICachedItemCacheExtensions
     {
 
         public static Task<bool> SetIntAsync(this ICache cache, string key, int value, long timestamp, DistributedCacheEntryOptions options, CancellationToken token = default)
@@ -28,7 +28,7 @@ namespace HB.FullStack.Cache
                     return null;
                 }
 
-                return System.Convert.ToInt32(value, Globals.Culture);
+                return Convert.ToInt32(value, Globals.Culture);
             }
             catch (FormatException ex)
             {

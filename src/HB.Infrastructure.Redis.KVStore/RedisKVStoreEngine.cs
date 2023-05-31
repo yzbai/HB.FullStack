@@ -1,4 +1,4 @@
-﻿using HB.FullStack.KVStore;
+﻿using HB.FullStack.KVStore.Config;
 using HB.FullStack.KVStore.Engine;
 using HB.Infrastructure.Redis.Shared;
 
@@ -26,7 +26,7 @@ namespace HB.Infrastructure.Redis.KVStore
 
     public class RedisKVStoreEngine : IKVStoreEngine
     {
-        
+
         /// <summary>
         /// keys:modelNameKey, modelTimestampKey
         /// argv:3(model_number),new_timestamp, model1_key, model2_key, model3_key, model1_value, model2_value, model3_value
@@ -102,23 +102,27 @@ array[1]=redis.call('HGETALL',KEYS[1])
 array[2]=redis.call('HGETALL',KEYS[2])
 return array";
 
-        private readonly RedisKVStoreOptions _options;
         private readonly ILogger _logger;
+        private KVStoreOptions _options = null!;
 
-        private readonly IDictionary<string, RedisInstanceSetting> _instanceSettingDict;
+        private IDictionary<string, RedisInstanceSetting> _instanceSettingDict = null!;
         private readonly IDictionary<string, LoadedLuas> _loadedLuaDict = new Dictionary<string, LoadedLuas>();
 
-        public KVStoreSettings Settings
-        { get { return _options.KVStoreSettings; } }
 
-        public string FirstDefaultInstanceName
-        { get { return _options.ConnectionSettings[0].InstanceName; } }
-
-        public RedisKVStoreEngine(IOptions<RedisKVStoreOptions> options, ILogger<RedisKVStoreEngine> logger)
+        public RedisKVStoreEngine(ILogger<RedisKVStoreEngine> logger)
         {
             _logger = logger;
-            _options = options.Value;
-            _instanceSettingDict = _options.ConnectionSettings.ToDictionary(s => s.InstanceName);
+        }
+
+        public void Initialize(KVStoreOptions options)
+        {
+            _options = options;
+
+            _instanceSettingDict = options.KVStoreSchemas.Select(s => new RedisInstanceSetting
+            {
+                InstanceName = s.Name,
+                ConnectionString = s.ConnectionString
+            }).ToDictionary(r => r.InstanceName);
 
             InitLoadedLuas();
 
@@ -127,9 +131,10 @@ return array";
 
         private void InitLoadedLuas()
         {
-            foreach (RedisInstanceSetting setting in _options.ConnectionSettings)
+            foreach (RedisInstanceSetting setting in _instanceSettingDict.Values)
             {
                 IServer server = RedisInstanceManager.GetServer(setting, _logger);
+
                 LoadedLuas loadedLuas = new LoadedLuas
                 {
                     LoadedBatchAddLua = server.ScriptLoad(LUA_BATCH_ADD_2),
@@ -157,10 +162,10 @@ return array";
                 return loadedLuas2;
             }
 
-            throw FullStack.KVStore.Exceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
+            throw FullStack.KVStore.KVStoreExceptions.CacheLoadedLuaNotFound(instanceName: instanceName);
         }
 
-        public async Task<IEnumerable<Tuple<byte[]?, long>>> GetAsync(string storeName, string modelName, IEnumerable<string> modelKeys)
+        public async Task<IEnumerable<Tuple<byte[]?, long>>> GetAsync(string schemaName, string modelName, IEnumerable<string> modelKeys)
         {
             if (!modelKeys.Any())
             {
@@ -172,8 +177,8 @@ return array";
 
             PrepareGetRedisInfo(modelName, modelKeys, redisKeys, redisValues);
 
-            IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchGetLua;
+            IDatabase db = await GetDatabaseAsync(schemaName).ConfigureAwait(false);
+            byte[] loadedScript = GetLoadedLuas(schemaName).LoadedBatchGetLua;
 
             try
             {
@@ -190,19 +195,19 @@ return array";
 
                 InitLoadedLuas();
 
-                return await GetAsync(storeName, modelName, modelKeys).ConfigureAwait(false);
+                return await GetAsync(schemaName, modelName, modelKeys).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw FullStack.KVStore.Exceptions.Unkown(type: modelName, innerException: ex);
+                throw FullStack.KVStore.KVStoreExceptions.Unkown(type: modelName, innerException: ex);
             }
 
             void PrepareGetRedisInfo(string modelName, IEnumerable<string> modelKeys, List<RedisKey> redisKeys, List<RedisValue> redisValues)
@@ -233,10 +238,10 @@ return array";
             }
         }
 
-        public async Task<IEnumerable<Tuple<byte[]?, long>>> GetAllAsync(string storeName, string modelName)
+        public async Task<IEnumerable<Tuple<byte[]?, long>>> GetAllAsync(string schemaName, string modelName)
         {
-            IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
-            byte[] loadedScript = GetLoadedLuas(storeName).LoadedGetAllLua;
+            IDatabase db = await GetDatabaseAsync(schemaName).ConfigureAwait(false);
+            byte[] loadedScript = GetLoadedLuas(schemaName).LoadedGetAllLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
 
@@ -256,19 +261,19 @@ return array";
 
                 InitLoadedLuas();
 
-                return await GetAllAsync(storeName, modelName).ConfigureAwait(false);
+                return await GetAllAsync(schemaName, modelName).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisConnectionFailed(type: modelName, innerException: ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisTimeout(type: modelName, innerException: ex);
             }
             catch (Exception ex)
             {
-                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.Unkown(modelName, ex);
             }
 
             void PrepareGetAllRedisInfo(string modelName, List<RedisKey> redisKeys)
@@ -276,7 +281,7 @@ return array";
                 redisKeys.Add(ModelNameKey(modelName));
                 redisKeys.Add(ModelTimestampNameKey(modelName));
             }
-            
+
             static IEnumerable<Tuple<byte[]?, long>> MapGetAllResultToBytesAndTimestamp(RedisResult result)
             {
                 RedisResult[] results = (RedisResult[])result!;
@@ -299,9 +304,9 @@ return array";
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task AddAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, long newTimestamp)
+        public async Task AddAsync(string schemaName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, long newTimestamp)
         {
-            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchAddLua;
+            byte[] loadedScript = GetLoadedLuas(schemaName).LoadedBatchAddLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -310,7 +315,7 @@ return array";
 
             try
             {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+                IDatabase db = await GetDatabaseAsync(schemaName).ConfigureAwait(false);
                 RedisResult result = await db.ScriptEvaluateAsync(
                     loadedScript,
                     redisKeys.ToArray(),
@@ -320,7 +325,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, errorCode: error);
+                    throw FullStack.KVStore.KVStoreExceptions.WriteError(type: modelName, schemaName: schemaName, keys: modelKeys, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -329,19 +334,19 @@ return array";
 
                 InitLoadedLuas();
 
-                await AddAsync(storeName, modelName, modelKeys, models, newTimestamp).ConfigureAwait(false);
+                await AddAsync(schemaName, modelName, modelKeys, models, newTimestamp).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw FullStack.KVStore.Exceptions.Unkown(modelName, storeName, modelKeys, ex);
+                throw FullStack.KVStore.KVStoreExceptions.Unkown(modelName, schemaName, modelKeys, ex);
             }
 
             void PrepareAddRedisInfo(string modelName, long newTimestamp, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, List<RedisKey> redisKeys, List<RedisValue> redisValues)
@@ -370,9 +375,9 @@ return array";
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task UpdateAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, IEnumerable<long> modelTimestamps, long newTimestamp)
+        public async Task UpdateAsync(string schemaName, string modelName, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, IEnumerable<long> modelTimestamps, long newTimestamp)
         {
-            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchUpdateLua;
+            byte[] loadedScript = GetLoadedLuas(schemaName).LoadedBatchUpdateLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -381,7 +386,7 @@ return array";
 
             try
             {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+                IDatabase db = await GetDatabaseAsync(schemaName).ConfigureAwait(false);
 
                 RedisResult result = await db.ScriptEvaluateAsync(
                     loadedScript,
@@ -392,7 +397,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, errorCode: error);
+                    throw FullStack.KVStore.KVStoreExceptions.WriteError(type: modelName, schemaName: schemaName, keys: modelKeys, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -401,19 +406,19 @@ return array";
 
                 InitLoadedLuas();
 
-                await UpdateAsync(storeName, modelName, modelKeys, models, modelTimestamps, newTimestamp).ConfigureAwait(false);
+                await UpdateAsync(schemaName, modelName, modelKeys, models, modelTimestamps, newTimestamp).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.Unkown(modelName, ex);
             }
 
             void PrepareModelUpdateRedisInfo(string modelName, long newTimestamp, IEnumerable<string> modelKeys, IEnumerable<byte[]?> models, IEnumerable<long> modelTimestamps, List<RedisKey> redisKeys, List<RedisValue> redisValues)
@@ -447,9 +452,9 @@ return array";
         /// <summary>
         /// modelKeys作为一个整体，有一个发生主键冲突，则全部失败
         /// </summary>
-        public async Task DeleteAsync(string storeName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps)
+        public async Task DeleteAsync(string schemaName, string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps)
         {
-            byte[] loadedScript = GetLoadedLuas(storeName).LoadedBatchDeleteLua;
+            byte[] loadedScript = GetLoadedLuas(schemaName).LoadedBatchDeleteLua;
 
             List<RedisKey> redisKeys = new List<RedisKey>();
             List<RedisValue> redisValues = new List<RedisValue>();
@@ -458,7 +463,7 @@ return array";
 
             try
             {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+                IDatabase db = await GetDatabaseAsync(schemaName).ConfigureAwait(false);
 
                 RedisResult result = await db.ScriptEvaluateAsync(
                     loadedScript,
@@ -469,7 +474,7 @@ return array";
 
                 if (error != ErrorCode.Empty)
                 {
-                    throw FullStack.KVStore.Exceptions.WriteError(type: modelName, storeName: storeName, keys: modelKeys, errorCode: error);
+                    throw FullStack.KVStore.KVStoreExceptions.WriteError(type: modelName, schemaName: schemaName, keys: modelKeys, errorCode: error);
                 }
             }
             catch (RedisServerException ex) when (ex.Message.StartsWith("NOSCRIPT", StringComparison.Ordinal))
@@ -478,19 +483,19 @@ return array";
 
                 InitLoadedLuas();
 
-                await DeleteAsync(storeName, modelName, modelKeys, modelTimestamps).ConfigureAwait(false);
+                await DeleteAsync(schemaName, modelName, modelKeys, modelTimestamps).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.Unkown(modelName, ex);
             }
 
             void PrepareDeleteRedisInfo(string modelName, IEnumerable<string> modelKeys, IEnumerable<long> modelTimestamps, List<RedisKey> redisKeys, List<RedisValue> redisValues)
@@ -515,44 +520,44 @@ return array";
             }
         }
 
-        public async Task<bool> DeleteAllAsync(string storeName, string modelName)
+        public async Task<bool> DeleteAllAsync(string schemaName, string modelName)
         {
             try
             {
-                IDatabase db = await GetDatabaseAsync(storeName).ConfigureAwait(false);
+                IDatabase db = await GetDatabaseAsync(schemaName).ConfigureAwait(false);
 
                 return await db.KeyDeleteAsync(ModelNameKey(modelName)).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisConnectionFailed(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisConnectionFailed(modelName, ex);
             }
             catch (RedisTimeoutException ex)
             {
-                throw FullStack.KVStore.Exceptions.KVStoreRedisTimeout(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.KVStoreRedisTimeout(modelName, ex);
             }
             catch (Exception ex)
             {
-                throw FullStack.KVStore.Exceptions.Unkown(modelName, ex);
+                throw FullStack.KVStore.KVStoreExceptions.Unkown(modelName, ex);
             }
         }
 
-        public void Close()
-        {
-            foreach (var kv in _instanceSettingDict)
-            {
-                RedisInstanceManager.Close(kv.Value);
-            }
-        }
+        //public void Close()
+        //{
+        //    foreach (var kv in _instanceSettingDict)
+        //    {
+        //        RedisInstanceManager.Close(kv.Value);
+        //    }
+        //}
 
-        private async Task<IDatabase> GetDatabaseAsync(string instanceName)
+        private async Task<IDatabase> GetDatabaseAsync(string schemaName)
         {
-            if (_instanceSettingDict.TryGetValue(instanceName, out RedisInstanceSetting? setting))
+            if (_instanceSettingDict.TryGetValue(schemaName, out RedisInstanceSetting? setting))
             {
                 return await RedisInstanceManager.GetDatabaseAsync(setting, _logger).ConfigureAwait(false);
             }
 
-            throw FullStack.KVStore.Exceptions.NoSuchInstance(instanceName: instanceName);
+            throw FullStack.KVStore.KVStoreExceptions.NoSuchKVStoreSchema(schemaName: schemaName);
         }
 
         private string ModelNameKey(string modelName)
@@ -581,6 +586,6 @@ return array";
             return error;
         }
 
-        
+
     }
 }
