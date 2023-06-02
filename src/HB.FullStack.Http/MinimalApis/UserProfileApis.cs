@@ -16,8 +16,11 @@ using Microsoft.AspNetCore.Routing;
 
 namespace HB.FullStack.Server.WebLib.MinimalApis
 {
-    public static class UserProfileApi
+    public static class UserProfileApis
     {
+
+        //TODO: 统一配置
+        public const int EFFECTIVE_SECONDS = 5 * 60;
         public static RouteGroupBuilder MapUserProfileApi<TId>(this RouteGroupBuilder group)
         {
             group.MapGet(SharedNames.Conditions.ByUserId, GetUserProfileByUserId<TId>);
@@ -46,7 +49,7 @@ namespace HB.FullStack.Server.WebLib.MinimalApis
             return new UserProfileRes<TId>
             {
                 Id = obj.Id,
-                ExpiredAt = ?,//TODO: 统一配置
+                ExpiredAt = TimeUtil.ExpireAfterSeconds(EFFECTIVE_SECONDS),
 
                 UserId = obj.UserId,
                 NickName = obj.NickName,

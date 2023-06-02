@@ -18,7 +18,7 @@ namespace HB.FullStack.Server.Identity.Models
         [DbField(NotNull = true, NeedIndex = true)]
         public string RefreshToken { get; set; } = default!;
 
-        public DateTimeOffset? ExpireAt { get; set; }
+        public DateTimeOffset? RefreshTokenExpireAt { get; set; }
 
         public long RefreshCount { get; set; }
 
@@ -66,7 +66,7 @@ namespace HB.FullStack.Server.Identity.Models
         public TokenCredential(
             TId userId,
             string refreshToken,
-            DateTimeOffset? expireAt,
+            DateTimeOffset? refreshTokenExpiredAt,
             string clientId,
             string clientVersion,
             string clientIp,
@@ -79,7 +79,7 @@ namespace HB.FullStack.Server.Identity.Models
         {
             UserId = userId;
             RefreshToken = refreshToken;
-            ExpireAt = expireAt;
+            RefreshTokenExpireAt = refreshTokenExpiredAt;
 
             ClientId = clientId;
             ClientVersion = clientVersion;

@@ -11,33 +11,22 @@ namespace HB.FullStack.Server.Identity
     {
         private static readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
 
-        /// <summary>
-        /// Create Jwt.
-        /// </summary>
-        /// <param name="claims">Contet used to create jwt.</param>
-        /// <param name="issuer">Issuer.</param>
-        /// <param name="audience">Audience.</param>
-        /// <param name="tokenExpiryTime">Jwt Expiry Time.</param>
-        /// <param name="signingCredentials">Credentials Used for Signing.</param>
-        /// <param name="contentEncryptingCredentials">Credentials Used for Content Encrypting.</param>
-        /// <returns></returns>
         public static string CreateJwt(
             IEnumerable<Claim> claims,
             string issuer,
             string? audience,
-            TimeSpan tokenExpiryTime,
+            DateTimeOffset avaliableAt,
+            DateTimeOffset expiredAt,
             SigningCredentials signingCredentials,
             EncryptingCredentials contentEncryptingCredentials)
         {
-            DateTime utcNow = DateTime.UtcNow;
-
             JwtSecurityToken token = _tokenHandler.CreateJwtSecurityToken(
                 issuer,
                 audience,
                 new ClaimsIdentity(claims),
-                utcNow,
-                utcNow + tokenExpiryTime,
-                utcNow,
+                avaliableAt.DateTime,
+                expiredAt.DateTime,
+                DateTime.UtcNow,
                 signingCredentials,
                 contentEncryptingCredentials);
 

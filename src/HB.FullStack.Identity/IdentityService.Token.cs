@@ -140,7 +140,7 @@ namespace HB.FullStack.Server.Identity
                 (
                     userId: user.Id,
                     refreshToken: SecurityUtil.CreateUniqueToken(),
-                    expireAt: TimeUtil.UtcNow + (context.RememberMe ? _options.SignInSettings.RefreshTokenLongExpireTimeSpan : _options.SignInSettings.RefreshTokenShortExpireTimeSpan),
+                    refreshTokenExpiredAt: TimeUtil.UtcNow + (context.RememberMe ? _options.SignInSettings.RefreshTokenLongExpireAfter : _options.SignInSettings.RefreshTokenShortExpireAfter),
 
                     clientId: context.ClientInfos.ClientId,
                     clientVersion: context.ClientInfos.ClientVersion,
@@ -157,9 +157,8 @@ namespace HB.FullStack.Server.Identity
                 await _tokenCredentialRepo.AddAsync(tokenCredential, lastUser, transactionContext).ConfigureAwait(false);
 
                 //构造 Jwt
-                string accessToken = await ConstructAccessTokenAsync(user, tokenCredential, context.Audience, transactionContext).ConfigureAwait(false);
 
-                Token<TId> token = new Token<TId>(accessToken, tokenCredential.RefreshToken, user);
+                Token<TId> token = await ConstructAccessTokenAsync(user, tokenCredential, context.Audience, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
@@ -320,7 +319,7 @@ namespace HB.FullStack.Server.Identity
                 }
 
                 //验证SignInCredential过期问题,即RefreshToken是否过期
-                if (tokenCredential.ExpireAt < TimeUtil.UtcNow)
+                if (tokenCredential.RefreshTokenExpireAt < TimeUtil.UtcNow)
                 {
                     throw IdentityExceptions.RefreshSignInReceiptError("SignInCredential过期", null, null);
                 }
@@ -343,11 +342,11 @@ namespace HB.FullStack.Server.Identity
                 await _tokenCredentialRepo.UpdateAsync(tokenCredential, lastUser, transactionContext).ConfigureAwait(false);
 
                 // 发布新的AccessToken
-                string accessToken = await ConstructAccessTokenAsync(user, tokenCredential, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
+                Token<TId> token = await ConstructAccessTokenAsync(user, tokenCredential, claimsPrincipal.GetAudience()!, transactionContext).ConfigureAwait(false);
 
                 await _transaction.CommitAsync(transactionContext).ConfigureAwait(false);
 
-                return new Token<TId>(accessToken, tokenCredential.RefreshToken, user);
+                return token;
             }
             catch
             {
@@ -394,11 +393,11 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task DeleteTokenAsync(TId signInCredentialId, string lastUser)
+        public async Task DeleteTokenAsync(TId? signInCredentialId, string lastUser)
         {
             if (signInCredentialId == null)
             {
-                throw new ArgumentNullException(nameof(signInCredentialId));
+                return;
             }
 
             TransactionContext transContext = await _transaction.BeginTransactionAsync<TokenCredential<TId>>().ConfigureAwait(false);
@@ -425,11 +424,11 @@ namespace HB.FullStack.Server.Identity
             }
         }
 
-        public async Task DeleteTokenAsync(TId userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser)
+        public async Task DeleteTokenAsync(TId? userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser)
         {
             if (userId == null)
             {
-                throw new ArgumentNullException(nameof(userId));
+                return;
             }
 
             TransactionContext transactionContext = await _transaction.BeginTransactionAsync<TokenCredential<TId>>().ConfigureAwait(false);
@@ -493,19 +492,23 @@ namespace HB.FullStack.Server.Identity
             await _tokenCredentialRepo.DeleteAsync(toDeletes, lastUser, transactionContext).ConfigureAwait(false);
         }
 
-        private async Task<string> ConstructAccessTokenAsync(User<TId> user, TokenCredential<TId> signInCredential, string audience, TransactionContext transactionContext)
+        private async Task<Token<TId>> ConstructAccessTokenAsync(User<TId> user, TokenCredential<TId> tokenCredential, string audience, TransactionContext transactionContext)
         {
-            IList<Claim> jwtClaims = await GetClaimsAsync(user, signInCredential).ConfigureAwait(false);
+            IList<Claim> jwtClaims = await GetClaimsAsync(user, tokenCredential).ConfigureAwait(false);
+
+            DateTimeOffset tokenAvaliableAt = TimeUtil.UtcNow;
+            DateTimeOffset tokenExpiredAt = TimeUtil.UtcNow + _options.SignInSettings.AccessTokenExpireAfter;
 
             string jwt = JwtHelper.CreateJwt(
                 jwtClaims,
                 _options.JwtSettings.OpenIdConnectConfiguration.Issuer,
                 _options.JwtSettings.NeedAudienceToBeChecked ? audience : null,
-                _options.SignInSettings.AccessTokenExpireTimeSpan,
+                tokenAvaliableAt,
+                tokenExpiredAt,
                 _jwtSigningCredentials,
                 _jwtContentEncryptCredentials);
 
-            return jwt;
+            return new Token<TId>(jwt, tokenCredential.RefreshToken, user, tokenExpiredAt.ToTimestamp());
 
             async Task<IList<Claim>> GetClaimsAsync(User<TId> user, TokenCredential<TId> tokenCredential)
             {

@@ -27,6 +27,11 @@ namespace System
 
         public static long ToTimestamp(this DateTimeOffset dateTimeOffset) => dateTimeOffset.UtcTicks;
 
+        public static long ExpireAfterSeconds(int seconds)
+        {
+            return DateTimeOffset.UtcNow.AddSeconds(seconds).UtcTicks;
+        }
+
 
         /// <summary>
         /// 把公历转换为人们口中的农历

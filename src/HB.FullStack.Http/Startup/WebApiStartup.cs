@@ -107,7 +107,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             services.AddIdentity<TId>(Configuration.GetSection(Identity));
 
             //Direcotry
-            services.AddDirectoryTokenService(settings.ConfigureDirectoryOptions);
+            services.AddDirectoryTokenService<TId>(settings.ConfigureDirectoryOptions);
 
             //DataProtection
             services.AddDataProtectionWithCertInRedis(settings => Configuration.GetSection(DataProtection).Bind(settings));
@@ -250,8 +250,14 @@ namespace HB.FullStack.Server.WebLib.Startup
             app.MapGroup("/api/SmsValidationCode")
                 .MapSmsValidationCodeApi();
 
+            app.MapGroup("/api/Token")
+                .MapTokenApis<TId>();
+
+            app.MapGroup("/api/User")
+                .MapUserApis<TId>();
+
             app.MapGroup("/api/UserProfile")
-                .MapUserProfileApi()
+                .MapUserProfileApi<TId>()
                 .RequireAuthorization();
             
             //.net 6
@@ -300,7 +306,6 @@ namespace HB.FullStack.Server.WebLib.Startup
 
         static IServiceCollection AddControllersWithConfiguration<TId>(this IServiceCollection services, bool addAuthentication = true)
         {
-            Assembly webAssembly = typeof(GlobalExceptionController).Assembly;
             Assembly serverAssembly = typeof(WebApiStartup).Assembly;
 
             //authenticationBuilder.AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
@@ -334,7 +339,7 @@ namespace HB.FullStack.Server.WebLib.Startup
                         };
                     };
                 })
-                .PartManager.ApplicationParts.AddRange(new AssemblyPart[] { new AssemblyPart(webAssembly), new AssemblyPart(serverAssembly) });
+                .PartManager.ApplicationParts.AddRange(new AssemblyPart[] { new AssemblyPart(serverAssembly) });
 
             services.AddEndpointsApiExplorer();
 

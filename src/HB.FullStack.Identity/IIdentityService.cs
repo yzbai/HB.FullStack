@@ -15,15 +15,18 @@ namespace HB.FullStack.Server.Identity
         string OpenIdConnectConfigurationString { get; }
 
         string JsonWebKeySet { get; }
+
+        #endregion
+
         #region Token
 
         Task<Token<TId>> RefreshTokenAsync(RefreshContext context, string lastUser);
 
         Task<Token<TId>> GetTokenAsync(SignInContext context, string lastUser);
 
-        Task DeleteTokenAsync(TId userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser);
+        Task DeleteTokenAsync(TId? userId, DeviceIdiom idiom, SignInExclusivity logOffType, string lastUser);
 
-        Task DeleteTokenAsync(TId signInCredentialId, string lastUser);
+        Task DeleteTokenAsync(TId? signInCredentialId, string lastUser);
 
         #endregion
 

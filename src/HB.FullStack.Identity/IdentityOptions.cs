@@ -51,7 +51,7 @@ namespace HB.FullStack.Server.Identity
         public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; } = new OpenIdConnectConfiguration();
 
         /// <summary>
-        /// 连续两次请求Refresh最小时间间隔, 应该小于AccessToken的过期时间<see cref="SignInSettings.AccessTokenExpireTimeSpan"/>
+        /// 连续两次请求Refresh最小时间间隔, 应该小于AccessToken的过期时间<see cref="SignInSettings.AccessTokenExpireAfter"/>
         /// </summary>
         public TimeSpan RefreshIntervalTimeSpan { get; set; } = TimeSpan.FromSeconds(30);
 
@@ -59,9 +59,9 @@ namespace HB.FullStack.Server.Identity
 
     public class SignInSettings
     {
-        public TimeSpan RefreshTokenLongExpireTimeSpan { get; set; } = TimeSpan.FromDays(365);
-        public TimeSpan RefreshTokenShortExpireTimeSpan { get; set; } = TimeSpan.FromDays(1);
-        public TimeSpan AccessTokenExpireTimeSpan { get; set; } = TimeSpan.FromMinutes(5);
+        public TimeSpan RefreshTokenLongExpireAfter { get; set; } = TimeSpan.FromDays(365);
+        public TimeSpan RefreshTokenShortExpireAfter { get; set; } = TimeSpan.FromDays(1);
+        public TimeSpan AccessTokenExpireAfter { get; set; } = TimeSpan.FromMinutes(5);
 
         #region LoginControl
 

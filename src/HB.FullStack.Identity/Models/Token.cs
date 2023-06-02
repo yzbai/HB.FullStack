@@ -11,7 +11,7 @@ using HB.FullStack.Common.Models;
 
 namespace HB.FullStack.Server.Identity.Models
 {
-    public class Token<TId> : ValidatableObject, IModel
+    public class Token<TId> : ValidatableObject, IModel, IExpired
     {
         public TId UserId { get; set; } = default!;
 
@@ -33,11 +33,11 @@ namespace HB.FullStack.Server.Identity.Models
 
         public string RefreshToken { get; set; } = null!;
 
-        //public DateTimeOffset TokenCreatedTime { get; set; }
+        public long? ExpiredAt { get; set; }
 
         public Token() { }
 
-        public Token(string accessToken, string refreshToken, User<TId> user)
+        public Token(string accessToken, string refreshToken, User<TId> user, long expiredAt)
         {
             UserId = user.Id;
             UserLevel = user.UserLevel;
@@ -49,9 +49,10 @@ namespace HB.FullStack.Server.Identity.Models
             TwoFactorEnabled = user.TwoFactorEnabled;
             AccessToken = accessToken;
             RefreshToken = refreshToken;
-            //TokenCreatedTime = DateTimeOffset.UtcNow;
+            ExpiredAt = expiredAt;
         }
 
         public ModelKind GetKind() => ModelKind.Plain;
+
     }
 }
