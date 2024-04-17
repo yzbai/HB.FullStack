@@ -249,7 +249,8 @@ namespace HB.FullStack.BaseTest
                     }
                 }, builder => { builder.AddMySQL().AddSQLite(); })
                 .AddRedisCache(Configuration.GetSection("RedisCache"))
-                .AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
+                .AddKVStore(Configuration.GetSection("KVStore"), builder=>builder.AddRedis())
+                //.AddRedisKVStore(Configuration.GetSection("RedisKVStore"))
                 .AddRedisEventBus(Configuration.GetSection("RedisEventBus"))
                 .AddMemoryLock()
                 .AddSingleRedisDistributedLock(Configuration.GetSection("RedisLock"))

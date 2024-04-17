@@ -62,6 +62,8 @@ namespace HB.FullStack.Server.WebLib.Startup
 
                 //Builder
                 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+                //builder.Logging.ClearProviders();
+
 
                 Configuration = builder.Configuration;
 
@@ -196,6 +198,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             app
                 .Use((httpContext, next) =>
                 {
+                    //TODO: check this
                     httpContext.Request.EnableBuffering();
                     return next();
                 })
@@ -229,11 +232,7 @@ namespace HB.FullStack.Server.WebLib.Startup
             //    RequestPath = "/Files/Protected"
             //}))
 
-            //.net 5, .net 6 add this by default
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapControllers();
-            //});
+            
 
             app.MapGlobalException("/GlobalException");
             
@@ -262,6 +261,12 @@ namespace HB.FullStack.Server.WebLib.Startup
             
             //.net 6
             app.MapControllers();
+
+            //.net 5, .net 6 add this by default
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllers();
+            //});
         }
         static IServiceCollection AddDataProtectionWithCertInRedis(this IServiceCollection services, Action<DataProtectionSettings> action)
         {
