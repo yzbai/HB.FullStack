@@ -1,6 +1,5 @@
 ﻿using HB.FullStack.Client.Abstractions;
 using HB.FullStack.Client.ApiClient;
-using HB.FullStack.Client.Components.Users;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,6 +11,7 @@ namespace Todo.Client.ConsoleApp
     {
         public const string SITE_TODO_SERVER_MAIN = "Todo.Server.Main";
         public const string SITE_TODO_SERVER_MAIN_BASE_URL = "https://localhost:7157/api/";
+
 
         static async Task Main(string[] args)
         {
@@ -55,7 +55,7 @@ namespace Todo.Client.ConsoleApp
                         BaseUrl = new Uri(SITE_TODO_SERVER_MAIN_BASE_URL)
                     };
                 });
-            
+
             AddConsoleService(services);
         }
 

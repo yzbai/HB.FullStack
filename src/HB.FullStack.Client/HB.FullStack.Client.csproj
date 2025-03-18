@@ -2,7 +2,6 @@
 	<Import Project="..\..\common.props" />
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
 	 
 		<!--<ProduceReferenceAssembly>true</ProduceReferenceAssembly>-->
 		
@@ -15,14 +14,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.4" />
-		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="7.0.4" />
-		<PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.3" />
+		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.3" />
+		<PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.14.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.Common.SourceGenerators\HB.FullStack.Common.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\HB.Infrastructure.IdGen\HB.Infrastructure.IdGen.csproj" />
 		<ProjectReference Include="..\HB.Infrastructure.SQLite\HB.Infrastructure.SQLite.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
 	</ItemGroup>
 
 </Project>

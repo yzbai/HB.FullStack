@@ -4,17 +4,18 @@
 
 	<Import Project="..\..\common.props" />
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Polly" Version="7.2.3" />
-		<PackageReference Include="StackExchange.Redis" Version="2.6.104" />
+		<PackageReference Include="Polly" Version="8.5.2" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\HB.FullStack.KVStore\HB.FullStack.KVStore.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
 	</ItemGroup>
 
 </Project>

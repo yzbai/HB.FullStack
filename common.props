@@ -1,9 +1,20 @@
 <Project>
-	
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<LangVersion>Latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />-->
+		<AnalysisMode>All</AnalysisMode>
+
+		<!--<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
+		<ImplicitUsings>disable</ImplicitUsings>
+	</PropertyGroup>
 	
 	<PropertyGroup>
 		<VersionSuffix>$(VersionSuffix)</VersionSuffix>
-		<Version>2.0.3</Version>
+		<Version>9.0.0</Version>
 		<Version Condition=" '$(VersionSuffix)' != '' ">$(Version)-$(VersionSuffix)</Version>
 		<Product>HB.FullStack</Product>
 		<Authors>yzbai@brlite.com</Authors>
@@ -22,17 +33,14 @@
 		<!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-
-
-		<LangVersion>Latest</LangVersion>
-		<Nullable>enable</Nullable>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<WarningsAsErrors />
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<!--<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
-		<ImplicitUsings>disable</ImplicitUsings>
 		
 	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
