@@ -23,7 +23,7 @@ using Microsoft.VisualStudio.Threading;
 
 namespace HB.FullStack.Client.Base
 {
-    public abstract class BaseRepo<TModel> : BaseRepo where TModel : IDbModel, IExpired, IPropertyTrackableObject
+    public abstract class BaseRepo<TModel> : BaseRepo where TModel : class, IDbModel, IExpired, IPropertyTrackableObject
     {
         private readonly ILogger _logger;
         private readonly IClientModelSettingFactory _clientModelSettingFactory;

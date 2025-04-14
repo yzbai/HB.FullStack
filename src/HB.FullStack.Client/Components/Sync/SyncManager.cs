@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 
 using HB.FullStack.Client.Abstractions;
-using HB.FullStack.Client.Base;
 using HB.FullStack.Common;
 using HB.FullStack.Common.Convert;
 using HB.FullStack.Common.Models;
@@ -131,9 +130,8 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = offlineChangeType,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelIdString = StringConvertCenter.ToString(
-                        model.Id.ThrowIfNull(nameof(model.Id)), 
-                        modelDef.PrimaryKeyPropertyDef.Type, StringConvertPurpose.NONE).ThrowIfNull(nameof(OfflineChange.ModelIdString)),
+                    ModelIdString = StringConvertCenter.ToStringFrom(
+                        modelDef.PrimaryKeyPropertyDef.Type, model.Id.ThrowIfNull(nameof(model.Id)), StringConvertPurpose.NONE).ThrowIfNull(nameof(OfflineChange.ModelIdString)),
                     ModelFullName = modelDef.FullName
                 };
 
@@ -157,9 +155,9 @@ namespace HB.FullStack.Client.Components.Sync
                 {
                     Type = OfflineChangeType.UpdateProperties,
                     Status = OfflineChangeStatus.Waiting,
-                    ModelIdString = StringConvertCenter.ToString( 
-                        changedPack.AddtionalProperties["Id"].To(modelDef.PrimaryKeyPropertyDef.Type).ThrowIfNull(nameof(changedPack)),
+                    ModelIdString = StringConvertCenter.ToStringFrom(
                         modelDef.PrimaryKeyPropertyDef.Type,
+                        changedPack.AddtionalProperties["Id"].To(modelDef.PrimaryKeyPropertyDef.Type).ThrowIfNull(nameof(changedPack)),
                         StringConvertPurpose.NONE).ThrowIfNull(nameof(OfflineChange.ModelIdString)),
                     ModelFullName = modelDef.FullName,
                     ChangePack = changedPack

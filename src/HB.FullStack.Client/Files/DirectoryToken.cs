@@ -12,7 +12,7 @@ using HB.FullStack.Common.PropertyTrackable;
 namespace HB.FullStack.Client.Files
 {
     [SyncSetting(allowOfflineRead: false, allowOfflineAdd: false, allowOfflineDelete: false, allowOfflineUpdate: false)]
-    public partial class DirectoryToken : ClientDbModel
+    public partial class DirectoryToken : IDbModel<Guid>
     {
         public override Guid Id { get; set; }
 
