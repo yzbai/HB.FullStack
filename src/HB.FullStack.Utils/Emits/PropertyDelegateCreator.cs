@@ -1,101 +1,176 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 
-using HB.FullStack.Common.Meta;
-
 namespace System
 {
-    public static partial class MetaAccess
+    public static class PropertyDelegateCreator
     {
-        #region Property Access
-
-        #endregion
-
-        #region Batch Property Access
-
-        public static Func<object, object?[]> CreateGetPropertyValuesDelegate(Type type, IEnumerable<PropertyInfo> propertyInfos)
+        public static Func<object, object?> CreateGetDelegate(PropertyInfo property)
         {
-            DynamicMethod dm = new DynamicMethod($"{type.Name}_GetSomePropertyValues_{Guid.NewGuid()}", typeof(object?[]), new[] { typeof(object) }, true);
+            ArgumentNullException.ThrowIfNull(property);
+
+            MethodInfo? getMethod = property.GetGetMethod(true)
+                ?? throw new ArgumentException($"In {nameof(PropertyDelegateCreator)}.{nameof(CreateGetDelegate)}, {nameof(property.DeclaringType.FullName)}.{nameof(property.Name)} do not have a GET Method.");
+
+            Type declaringType = property.DeclaringType
+                ?? throw new ArgumentException($"In {nameof(PropertyDelegateCreator)}.{nameof(CreateGetDelegate)}, {nameof(property.Name)} do not have a DeclareTyping.");
+
+            DynamicMethod dm = new DynamicMethod(
+                $"GetDelegate_{declaringType.Name}_{property.Name}_{Guid.CreateVersion7()}",
+                typeof(object),
+                [typeof(object)],
+                declaringType,
+                true);
+
             ILGenerator il = dm.GetILGenerator();
+            LocalBuilder inputObjectLocal = il.DeclareLocal(typeof(object));
 
-            LocalBuilder rtArray = il.DeclareLocal(typeof(object?[]));
-            LocalBuilder typeValueLocal = il.DeclareLocal(type);
-
-            //objectLocal = arg_0
-            il.Emit(OpCodes.Ldarg_0);//[object-value]
-            il.Emit(OpCodes.Unbox_Any, type); //[type-value]
-            il.Emit(OpCodes.Stloc, typeValueLocal);//empty
-
-            //rtArray = new object[]
-            EmitUtils.EmitInt32(il, propertyInfos.Count());
-            il.Emit(OpCodes.Newarr, typeof(object));
-            il.Emit(OpCodes.Stloc, rtArray);
-
-            int index = 0;
-            foreach (PropertyInfo propertyInfo in propertyInfos)
+            if (!getMethod.IsStatic)
             {
-                Type propertyType = propertyInfo.PropertyType;
-                MethodInfo getMethodInfo = propertyInfo.GetGetMethod()!;
+                il.ThrowIfArgumentIsNull(
+                    0,
+                    "inputObject",
+                    $"At {dm.Name}, Input Object is Null.");
 
-                il.Emit(OpCodes.Ldloc, rtArray);//[rtList]
-
-                EmitUtils.EmitGetPropertyValue(il, typeValueLocal, propertyInfo); //[rtList]["propertyName="][propertyInfo-object-value]
-
-                //[rtList][propertyInfo-object-value]
-
-                EmitUtils.EmitInt32(il, index);//[rtList][propertyInfo-object-value][index]
-
-                il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArraySetValueMethod, null);
-
-                index++;
+                //赋值给inputObjectLocal
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Stloc, inputObjectLocal);
             }
 
-            il.Emit(OpCodes.Ldloc, rtArray);
+            il.EmitGetPropertyValue(inputObjectLocal, property);
 
             il.Emit(OpCodes.Ret);
+
+            return (Func<object, object?>)dm.CreateDelegate(typeof(Func<object, object?>));
+        }
+
+        public static Action<object, object?> CreateSetDelegate(PropertyInfo property)
+        {
+            ArgumentNullException.ThrowIfNull(property);
+
+            MethodInfo setMethod = property.GetSetMethod(true)
+                ?? throw new ArgumentException($"In {nameof(PropertyDelegateCreator)}.{nameof(CreateSetDelegate)}, {nameof(property.DeclaringType.FullName)}.{nameof(property.Name)} do not have a SET Method.");
+
+            Type declaringType = property.DeclaringType
+                ?? throw new ArgumentException($"In {nameof(PropertyDelegateCreator)}.{nameof(CreateSetDelegate)}, {nameof(property.Name)} do not have a DeclareTyping.");
+
+            DynamicMethod dm = new DynamicMethod(
+                $"SetDelegate_{declaringType.Name}_{property.Name}_{Guid.CreateVersion7()}",
+                null,
+                [typeof(object), typeof(object)],
+                declaringType,
+                true);
+
+            ILGenerator il = dm.GetILGenerator();
+
+            LocalBuilder objectLocal = il.DeclareLocal(typeof(object));
+            LocalBuilder propertyValueLocal = il.DeclareLocal(typeof(object));
+
+            if (!setMethod.IsStatic)
+            {
+                il.ThrowIfArgumentIsNull(
+                    0,
+                    "inputObject",
+                    $"At {dm.Name}  Input Object is Null.");
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Stloc, objectLocal);
+            }
+
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Stloc, propertyValueLocal);
+
+            il.EmitSetPropertyValue(objectLocal, propertyValueLocal, property);
+
+            il.Emit(OpCodes.Ret);
+
+            return (Action<object, object?>)dm.CreateDelegate(typeof(Action<object, object?>));
+        }
+
+        public static Func<object, object?[]> CreateBatchGetDelegate(IList<PropertyInfo> propertyInfos, Type type)
+        {
+            ThrowIf.NullOrEmpty(propertyInfos, nameof(propertyInfos));
+
+            DynamicMethod dm = new DynamicMethod(
+                $"BatchGetDelegate_{type.Name}_{Guid.CreateVersion7()}",
+                typeof(object?[]),
+                [typeof(object)],
+                true);
+
+            EmitBatchGetDelegateCode(false, dm, propertyInfos, type);
 
             Type funType = Expression.GetFuncType(typeof(object), typeof(object?[]));
 
             return (Func<object, object?[]>)dm.CreateDelegate(funType);
         }
 
-        public static Func<object, PropertyNameValue[]> CreateGetPropertyValuesDelegate2(Type type, IEnumerable<PropertyInfo> propertyInfos)
+        public static Func<object, PropertyNameValue[]> CreateBatchGetDelegate2(IList<PropertyInfo> propertyInfos, Type type)
         {
-            DynamicMethod dm = new DynamicMethod($"{type.Name}_GetSomePropertyValues2_{Guid.NewGuid()}", typeof(PropertyNameValue[]), new[] { typeof(object) }, true);
+            ThrowIf.NullOrEmpty(propertyInfos, nameof(propertyInfos));
+
+            DynamicMethod dm = new DynamicMethod(
+                $"BatchGetDelegate2_{type.Name}_{Guid.CreateVersion7()}",
+                typeof(PropertyNameValue[]),
+                [typeof(object)],
+                true);
+
+            EmitBatchGetDelegateCode(true, dm, propertyInfos, type);
+
+            Type funType = Expression.GetFuncType(typeof(object), typeof(PropertyNameValue[]));
+
+            return (Func<object, PropertyNameValue[]>)dm.CreateDelegate(funType);
+        }
+
+        private static void EmitBatchGetDelegateCode(bool returntPropertyNameValue, DynamicMethod dm, IList<PropertyInfo> propertyInfos, Type type)
+        {
             ILGenerator il = dm.GetILGenerator();
 
             LocalBuilder rtArray = il.DeclareLocal(typeof(object?[]));
-            LocalBuilder typeValueLocal = il.DeclareLocal(type);
+            LocalBuilder inputObjectValueLocal = il.DeclareLocal(type);
 
             //objectLocal = arg_0
             il.Emit(OpCodes.Ldarg_0);//[object-value]
             il.Emit(OpCodes.Unbox_Any, type); //[type-value]
-            il.Emit(OpCodes.Stloc, typeValueLocal);//empty
+            il.Emit(OpCodes.Stloc, inputObjectValueLocal);//empty
 
             //rtArray = new object[]
-            EmitUtils.EmitInt32(il, propertyInfos.Count());
+            il.EmitInt32(propertyInfos.Count);
             il.Emit(OpCodes.Newarr, typeof(PropertyNameValue));
             il.Emit(OpCodes.Stloc, rtArray);
 
+            bool needCheckInputObject = true;
             int index = 0;
+
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
-                Type propertyType = propertyInfo.PropertyType;
-                MethodInfo getMethodInfo = propertyInfo.GetGetMethod()!;
+                //如果碰到不是Static的PropertyInfo，那么需要检查inputObject是否是null
+                if (needCheckInputObject && !propertyInfo.GetGetMethod()!.IsStatic)
+                {
+                    il.ThrowIfArgumentIsNull(
+                        0,
+                        "inputObject",
+                        $"At {dm.Name} Input Object is Null.");
+
+                    needCheckInputObject = false;
+                }
 
                 il.Emit(OpCodes.Ldloc, rtArray);//[rtArray]
-                il.Emit(OpCodes.Ldstr, propertyInfo.Name);//[rtArray][propertyName]
 
-                EmitUtils.EmitGetPropertyValue(il, typeValueLocal, propertyInfo); //[rtArray][propertyName][propertyInfo-object-value]
+                if (returntPropertyNameValue)
+                {
+                    il.Emit(OpCodes.Ldstr, propertyInfo.Name);//[rtArray][propertyName]
+                }
 
-                il.Emit(OpCodes.Newobj, CommonReflectionInfos.PropertyValueConstructorInfo); //[rtArray][propertyValue]
+                il.EmitGetPropertyValue(inputObjectValueLocal, propertyInfo); //[rtArray][propertyName][propertyInfo-object-value]
 
-                EmitUtils.EmitInt32(il, index);//[rtList][propertyValue][index]
+                if (returntPropertyNameValue)
+                {
+                    il.Emit(OpCodes.Newobj, CommonReflectionInfos.PropertyValueConstructorInfo); //[rtArray][propertyValue]
+                }
+
+                il.EmitInt32(index);//[rtList][propertyValue][index]
 
                 il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArraySetValueMethod, null);
 
@@ -105,18 +180,19 @@ namespace System
             il.Emit(OpCodes.Ldloc, rtArray);
 
             il.Emit(OpCodes.Ret);
-
-            Type funType = Expression.GetFuncType(typeof(object), typeof(PropertyNameValue[]));
-
-            return (Func<object, PropertyNameValue[]>)dm.CreateDelegate(funType);
         }
 
         /// <summary>
-        /// 创建 将object转换为query字符串的 代理
+        /// 创建 将Property转换为{PropertyName}={PropertyValueString}这样query字符串的 代理
         /// </summary>
-        public static Func<object, List<string>> CreateConvertPropertiesToQueriesDelegate(Type type, IEnumerable<PropertyInfo> propertyInfos)
+        public static Func<object, List<string>> CreateGetQueryStringDelegate(IList<PropertyInfo> propertyInfos, Type type)
         {
-            DynamicMethod dm = new DynamicMethod($"{type.Name}_GetSomePropertyValues_{Guid.NewGuid()}", typeof(List<string>), new[] { typeof(object) }, true);
+            DynamicMethod dm = new DynamicMethod(
+                $"{type.FullName}_{nameof(CreateGetQueryStringDelegate)}_{Guid.NewGuid()}",
+                typeof(List<string>),
+                [typeof(object)],
+                true);
+
             ILGenerator il = dm.GetILGenerator();
 
             LocalBuilder rtList = il.DeclareLocal(typeof(List<string>));
@@ -140,19 +216,22 @@ namespace System
             Type funType = Expression.GetFuncType(typeof(object), typeof(List<string>));
 
             return (Func<object, List<string>>)dm.CreateDelegate(funType);
-
         }
 
-        private static void EmitPropertiesToQueries(ILGenerator il, IEnumerable<PropertyInfo> propertyInfos, LocalBuilder objectValueLocal, LocalBuilder rtList, string? queryNamePrefix)
+        private static void EmitPropertiesToQueries(
+            ILGenerator il,
+            IList<PropertyInfo> propertyInfos,
+            LocalBuilder objectValueLocal,
+            LocalBuilder rtList,
+            string? queryNamePrefix)
         {
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 Type propertyType = propertyInfo.PropertyType;
-                MethodInfo getMethodInfo = propertyInfo.GetGetMethod()!;
 
                 LocalBuilder localBoxedPropertyValue = il.DeclareLocal(typeof(object));
 
-                EmitUtils.EmitGetPropertyValue(il, objectValueLocal, propertyInfo); //[propertyInfo-boxed-value]
+                ILGeneratorExtensions.EmitGetPropertyValue(il, objectValueLocal, propertyInfo); //[propertyInfo-boxed-value]
 
                 il.Emit(OpCodes.Stloc, localBoxedPropertyValue);
 
@@ -166,7 +245,7 @@ namespace System
                 //如果为array,遍历每一个
                 //如果为负责类型，
 
-                if (ReflectionUtil.IsValueTypeOrString(propertyType))
+                if (propertyType.IsValueTypeOrString())
                 {
                     il.Emit(OpCodes.Ldloc, rtList);//[rtList]
 
@@ -176,9 +255,9 @@ namespace System
 
                     il.Emit(OpCodes.Ldloc, localBoxedPropertyValue);
 
-                    EmitUtils.EmitLoadType(il, propertyType);
+                    ILGeneratorExtensions.EmitLoadType(il, propertyType);
 
-                    EmitUtils.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
+                    ILGeneratorExtensions.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
 
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][propertyInfo-string]
 
@@ -191,7 +270,7 @@ namespace System
                 }
                 else if (propertyType.IsArray)
                 {
-                    if (!ReflectionUtil.IsValueTypeOrString(propertyType.GetElementType()))
+                    if (!propertyType.GetElementType().IsValueTypeOrString())
                     {
                         throw new NotSupportedException("不支持非基础类型的数组");
                     }
@@ -204,14 +283,14 @@ namespace System
 
                     //GetDef localArrayLength
                     il.Emit(OpCodes.Ldloc, localBoxedPropertyValue);//[propertyInfo-boxed-value]
-                    EmitUtils.EmitInt32(il, 0); //[propertyInfo-boxed-value][0]
+                    ILGeneratorExtensions.EmitInt32(il, 0); //[propertyInfo-boxed-value][0]
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetLengthMethod, null); //[length]
                     il.Emit(OpCodes.Stloc, localArrayLength); //empty
 
                     #region for loop
 
                     //i = 0
-                    EmitUtils.EmitInt32(il, 0);
+                    ILGeneratorExtensions.EmitInt32(il, 0);
                     il.Emit(OpCodes.Stloc, localI);
 
                     //goto condition
@@ -234,8 +313,8 @@ namespace System
 
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetValueMethod, null); //[rtList]["propertyName="][item]
 
-                    EmitUtils.EmitLoadType(il, propertyType.GetElementType()!);//[rtList]["propertyName="][item][itemType]
-                    EmitUtils.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
+                    ILGeneratorExtensions.EmitLoadType(il, propertyType.GetElementType()!);//[rtList]["propertyName="][item][itemType]
+                    ILGeneratorExtensions.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][item-string]
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=item-string"]
 
@@ -248,7 +327,7 @@ namespace System
 
                     //i++
                     il.Emit(OpCodes.Ldloc, localI);
-                    EmitUtils.EmitInt32(il, 1);
+                    ILGeneratorExtensions.EmitInt32(il, 1);
                     il.Emit(OpCodes.Add);
                     il.Emit(OpCodes.Stloc, localI);
 
@@ -264,14 +343,14 @@ namespace System
                     #endregion
 
                 }
-                else if (typeof(IEnumerable).IsAssignableFrom(propertyType))
+                else if (typeof(IEnumerable<>).IsAssignableFrom(propertyType))
                 {
                     if (!propertyType.IsGenericType)
                     {
                         throw new NotSupportedException("不支持非基础类型的数组");
                     }
 
-                    LocalBuilder localEnumerator = il.DeclareLocal(typeof(IEnumerator));
+                    LocalBuilder localEnumerator = il.DeclareLocal(typeof(IEnumerator<>));
                     Label labelCondition = il.DefineLabel();
                     Label labelTrue = il.DefineLabel();
 
@@ -297,8 +376,8 @@ namespace System
 
                     il.EmitCall(OpCodes.Callvirt, CommonReflectionInfos.EnumeratorGetCurrentMethod, null); //[rtList]["propertyName="][item]
 
-                    EmitUtils.EmitLoadType(il, propertyType.GetGenericArguments()[0]);//[rtList]["propertyName="][item][itemType]
-                    EmitUtils.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
+                    ILGeneratorExtensions.EmitLoadType(il, propertyType.GetGenericArguments()[0]);//[rtList]["propertyName="][item][itemType]
+                    ILGeneratorExtensions.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][item-string]
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=item-string"]
 
@@ -328,8 +407,5 @@ namespace System
                 #endregion
             }
         }
-
-        #endregion
-
     }
 }

@@ -26,10 +26,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		common.props = common.props
 		common.maui.props = common.maui.props
-		src\Directory.Build.props = src\Directory.Build.props
+		common.props = common.props
 		common.test.props = common.test.props
+		src\Directory.Build.props = src\Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 		global_back.json = global_back.json
 		publish_to_nuget.ps1 = publish_to_nuget.ps1
@@ -111,6 +111,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Client.MobileApp", "Samples\Todo.Clients\Todo.Client.MobileApp\Todo.Client.MobileApp.csproj", "{41F6F6C9-B865-4DBB-969A-7EE464BA38C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HB.FullStack.Client.MauiLib", "src\HB.FullStack.Client.MauiLib\HB.FullStack.Client.MauiLib.csproj", "{28BCD0EE-4A18-45BD-A724-8520799E17C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "src\ClassLibrary1\ClassLibrary1.csproj", "{52DECB10-ACDA-4B61-B14B-F07D3DBC97EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.Utils", "src\HB.FullStack.Utils\HB.FullStack.Utils.csproj", "{CB9B1ACA-EF8A-45BE-A2D8-7A8C7DD04B46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.FullStack.Utils.Tests", "test\HB.FullStack.Utils.Tests\HB.FullStack.Utils.Tests.csproj", "{5B284D60-0352-454A-8B4A-17588C6626B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -276,6 +282,18 @@ Global
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52DECB10-ACDA-4B61-B14B-F07D3DBC97EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52DECB10-ACDA-4B61-B14B-F07D3DBC97EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52DECB10-ACDA-4B61-B14B-F07D3DBC97EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52DECB10-ACDA-4B61-B14B-F07D3DBC97EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB9B1ACA-EF8A-45BE-A2D8-7A8C7DD04B46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB9B1ACA-EF8A-45BE-A2D8-7A8C7DD04B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB9B1ACA-EF8A-45BE-A2D8-7A8C7DD04B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB9B1ACA-EF8A-45BE-A2D8-7A8C7DD04B46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B284D60-0352-454A-8B4A-17588C6626B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B284D60-0352-454A-8B4A-17588C6626B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B284D60-0352-454A-8B4A-17588C6626B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B284D60-0352-454A-8B4A-17588C6626B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -321,6 +339,9 @@ Global
 		{F4523E2B-38D9-4C7E-8C4F-C3298755C06F} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 		{41F6F6C9-B865-4DBB-969A-7EE464BA38C6} = {CAA7A8D2-B0DB-47CD-9BB2-88320BF40A67}
 		{28BCD0EE-4A18-45BD-A724-8520799E17C0} = {3BAF3F98-EE2A-467F-BF25-2BAB1409F511}
+		{52DECB10-ACDA-4B61-B14B-F07D3DBC97EC} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
+		{CB9B1ACA-EF8A-45BE-A2D8-7A8C7DD04B46} = {5DDFD808-395F-4463-BDDC-D56089B1E77C}
+		{5B284D60-0352-454A-8B4A-17588C6626B3} = {356DFEDA-0A17-4566-BC17-3E8C5BF527ED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0CFD761-FEBD-4484-9C43-758D92B96523}

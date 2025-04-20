@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HB.FullStack.Client.Abstractions;
+using HB.FullStack.Common.Meta;
 using HB.FullStack.Common.Models;
 using HB.FullStack.Common.Shared;
 

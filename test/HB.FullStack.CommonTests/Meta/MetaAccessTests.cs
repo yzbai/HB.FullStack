@@ -42,7 +42,7 @@ namespace HB.FullStack.CommonTests.Meta
         {
             MetaAccessObj obj = new MetaAccessObj();
 
-            PropertyNameValue[] values = MetaAccess.GetPropertyValuesByAttribute<AddtionalPropertyAttribute>(obj);
+            PropertyNameValue[] values = MetaAccess.GetPropertyNameValuesByAttribute<AddtionalPropertyAttribute>(obj);
 
             Assert.IsTrue(values[0].Name == nameof(MetaAccessObj.Name) && values[0].Value!.ToString() == "TestName");
 

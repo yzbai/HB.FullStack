@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\..\common.props" />
+
+	<ItemGroup>
+	  <Reference Include="Microsoft.VisualStudio.Validation">
+	    <HintPath>D:\nuget\globalpackages\microsoft.visualstudio.validation\17.8.8\lib\net6.0\Microsoft.VisualStudio.Validation.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+</Project>

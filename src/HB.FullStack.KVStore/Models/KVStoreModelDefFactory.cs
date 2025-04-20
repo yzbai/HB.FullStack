@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using HB.FullStack.Common.Meta;
 using HB.FullStack.Common.Models;
 using HB.FullStack.KVStore.Config;
 

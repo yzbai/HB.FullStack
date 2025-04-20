@@ -4,8 +4,8 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<WarningsAsErrors />-->
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
 		<AnalysisMode>All</AnalysisMode>
 
 		<!--<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->

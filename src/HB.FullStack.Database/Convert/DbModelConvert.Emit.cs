@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 
+using HB.FullStack.Common.Meta;
 using HB.FullStack.Database.DbModels;
 
 namespace HB.FullStack.Database.Convert
@@ -116,7 +117,7 @@ namespace HB.FullStack.Database.Convert
                         {
                             il.Emit(OpCodes.Ldtoken, trueType);
                             il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);
-                            EmitUtil.EmitInt32(il, (int)def.EngineType);
+                            EmitUtils.EmitInt32(il, (int)def.EngineType);
 
                             //TODO: 不能直接把globalTypeConverter变量加进来吗?
                             il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);//stack is now [target][target][DbPropertyConverter]
@@ -128,7 +129,7 @@ namespace HB.FullStack.Database.Convert
                     //===获取数据库值=========================================================================
 
                     il.Emit(OpCodes.Ldarg_1);//stack is now [...][reader]
-                    EmitUtil.EmitInt32(il, index + startIndex);// stack is now [...][reader][index]
+                    EmitUtils.EmitInt32(il, index + startIndex);// stack is now [...][reader][index]
                     il.EmitCall(OpCodes.Callvirt, _dataReaderGetItemMethod, null);// stack is now [...][value-as-object]
 
                     //处理Null
@@ -209,7 +210,7 @@ namespace HB.FullStack.Database.Convert
                                 }
                                 else
                                 {
-                                    EmitUtil.FlexibleConvertBoxedFromHeadOfStack(il, dbValueType, trueType);
+                                    EmitUtils.FlexibleConvertBoxedFromHeadOfStack(il, dbValueType, trueType);
                                 }
 
                                 //stack is now[target][target][typed-value]
@@ -301,7 +302,7 @@ namespace HB.FullStack.Database.Convert
             il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);
             il.Emit(OpCodes.Stloc, modelTypeLocal);
 
-            EmitUtil.EmitInt32(il, modelDef.FieldCount);
+            EmitUtils.EmitInt32(il, modelDef.FieldCount);
             il.Emit(OpCodes.Newarr, typeof(KeyValuePair<string, object>));
             il.Emit(OpCodes.Stloc, array);
 
@@ -373,7 +374,7 @@ namespace HB.FullStack.Database.Convert
                         il.Emit(OpCodes.Stloc, tmpTrueTypeLocal);
                         il.Emit(OpCodes.Ldloc, tmpTrueTypeLocal);
 
-                        EmitUtil.EmitInt32(il, (int)modelDef.EngineType);
+                        EmitUtils.EmitInt32(il, (int)modelDef.EngineType);
                         il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);//[rtArray][key][typeconverter]
 
                         il.Emit(OpCodes.Ldloc, tmpObj);//[rtArray][key][typeconverter][property_value_obj]
@@ -426,7 +427,7 @@ namespace HB.FullStack.Database.Convert
                 //emiter.Box<KeyValuePair<string, object>>();
                 //[rtArray][kv_obj]
 
-                EmitUtil.EmitInt32(il, index);
+                EmitUtils.EmitInt32(il, index);
                 //emiter.LoadConstant(index);
                 //[rtArray][kv_obj][index]
 
@@ -494,7 +495,7 @@ namespace HB.FullStack.Database.Convert
             il.EmitCall(OpCodes.Call, CommonReflectionInfos.GetTypeFromHandleMethod, null);
             il.Emit(OpCodes.Stloc, modelTypeLocal);
 
-            EmitUtil.EmitInt32(il, propertyNames.Count);
+            EmitUtils.EmitInt32(il, propertyNames.Count);
             il.Emit(OpCodes.Newarr, typeof(KeyValuePair<string, object>));
             il.Emit(OpCodes.Stloc, rtArray);
 
@@ -521,7 +522,7 @@ namespace HB.FullStack.Database.Convert
 
                 il.Emit(OpCodes.Ldloc, propertyValues);//[rtArray][key][propetyValues]
 
-                EmitUtil.EmitInt32(il, index); //[rtArray][key][propetyValues][index]
+                EmitUtils.EmitInt32(il, index); //[rtArray][key][propetyValues][index]
 
                 il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetValueMethod, null); //[rtArray][key][property_value_obj(boxed)]
 
@@ -589,7 +590,7 @@ namespace HB.FullStack.Database.Convert
                         il.Emit(OpCodes.Ldloc, tmpTrueTypeLocal);
                         //emiter.LoadLocal(tmpTrueTypeLocal);
 
-                        EmitUtil.EmitInt32(il, (int)modelDef.EngineType);
+                        EmitUtils.EmitInt32(il, (int)modelDef.EngineType);
                         //emiter.LoadConstant((int)engineType);
                         il.EmitCall(OpCodes.Call, _getGlobalTypeConverterMethod, null);
                         //emiter.Call(DBModelConverterEmit._getGlobalTypeConverterMethod);
@@ -653,7 +654,7 @@ namespace HB.FullStack.Database.Convert
                 //emiter.Box<KeyValuePair<string, object>>();
                 //[rtArray][kv_obj]
 
-                EmitUtil.EmitInt32(il, index);
+                EmitUtils.EmitInt32(il, index);
                 //emiter.LoadConstant(index);
                 //[rtArray][kv_obj][index]
 
