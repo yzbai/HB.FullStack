@@ -35,6 +35,6 @@ namespace System
         public static readonly MethodInfo ObjectToStringMethod = typeof(object).GetMethod(nameof(ToString))!;
         public static readonly FieldInfo DbNullValueFiled = typeof(DBNull).GetField("Value")!;
 
-        public static readonly ConstructorInfo PropertyValueConstructorInfo = typeof(PropertyNameValue).GetConstructor(new Type[] { typeof(string), typeof(object) })!;
+        public static readonly ConstructorInfo PropertyValueConstructorInfo = typeof(NameValuePair).GetConstructor(new Type[] { typeof(string), typeof(object) })!;
     }
 }

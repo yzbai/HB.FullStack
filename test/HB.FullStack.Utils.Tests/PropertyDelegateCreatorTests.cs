@@ -13,6 +13,24 @@ namespace HB.FullStack.Utils.Tests
             public static string StaticProperty2 { get; set; } = "StaticValue2";
             public int? NullableProperty { get; set; }
             public List<int> ListProperty { get; set; } = new List<int> { 1, 2, 3 };
+
+            public string[] Strings { get; set; } = ["string1", "string2"];
+
+            public TestInnerClass InnerClass { get; set; } = new TestInnerClass();
+
+            public List<TestInnerClass> Inners { get; set; } = [
+                new TestInnerClass { InnerName="11" },
+                new TestInnerClass{ InnerName = "22"}];
+        }
+
+        private class TestInnerClass
+        {
+            public string InnerName { get; set; } = "InnerName";
+
+            public int InnerAge { get; set; } = 26;
+
+            public List<int> ListProperty { get; set; } = new List<int> { 1, 2, 3 };
+
         }
 
         private class TestClassWithPrivateSetter
@@ -121,7 +139,7 @@ namespace HB.FullStack.Utils.Tests
             var properties = new List<PropertyInfo>
             {
                 typeof(TestClass).GetProperty(nameof(TestClass.Name))!,
-                typeof(TestClass).GetProperty(nameof(TestClass.Age))!
+                typeof(TestClass).GetProperty(nameof(TestClass.Age))!,
             };
             var instance = new TestClass { Name = "BatchName2", Age = 35 };
 
@@ -140,22 +158,41 @@ namespace HB.FullStack.Utils.Tests
         [TestMethod]
         public void CreateGetQueryStringDelegate_ShouldReturnCorrectQueryStrings()
         {
+            var correctString = "Name=DefaultName&Age=25&ListProperty=1&ListProperty=2&ListProperty=3&Strings=string1&Strings=string2&InnerClass.InnerName=InnerName&InnerClass.InnerAge=26&InnerClass.ListProperty=1&InnerClass.ListProperty=2&InnerClass.ListProperty=3&Inners[0].InnerName=11&Inners[0].InnerAge=26&Inners[0].ListProperty=1&Inners[0].ListProperty=2&Inners[0].ListProperty=3&Inners[1].InnerName=22&Inners[1].InnerAge=26&Inners[1].ListProperty=1&Inners[1].ListProperty=2&Inners[1].ListProperty=3";
+
             // Arrange
             var properties = new List<PropertyInfo>
             {
                 typeof(TestClass).GetProperty(nameof(TestClass.Name))!,
-                typeof(TestClass).GetProperty(nameof(TestClass.Age))!
+                typeof(TestClass).GetProperty(nameof(TestClass.Age))!,
+                typeof(TestClass).GetProperty(nameof(TestClass.ListProperty))!,
+                typeof(TestClass).GetProperty(nameof(TestClass.Strings))!,
+                typeof(TestClass).GetProperty(nameof(TestClass.InnerClass))!,
+                typeof(TestClass).GetProperty(nameof(TestClass.Inners))!,
+            };
+
+            var instance = new TestClass();
+
+            // Act
+            var queryStringDelegate = PropertyDelegateCreator.CreateGetQueryStringDelegate(properties, typeof(TestClass));
+            var result = string.Join('&', queryStringDelegate(instance));
+
+            // Assert
+            Assert.AreEqual(correctString, result);
+        }
+
+        [TestMethod]
+        public void CreateGetQueryStringDelegate_ShouldThrowIfContainsStaticProperty()
+        {
+            var properties = new List<PropertyInfo>
+            {
+                typeof(TestClass).GetProperty(nameof(TestClass.StaticProperty))!
             };
             var instance = new TestClass { Name = "QueryName", Age = 40 };
 
             // Act
-            var queryStringDelegate = PropertyDelegateCreator.CreateGetQueryStringDelegate(properties, typeof(TestClass));
-            var result = queryStringDelegate(instance);
-
-            // Assert
-            Assert.AreEqual(2, result.Count);
-            Assert.AreEqual("Name=QueryName", result[0]);
-            Assert.AreEqual("Age=40", result[1]);
+            Assert.ThrowsException<ArgumentException>(
+                () => PropertyDelegateCreator.CreateGetQueryStringDelegate(properties, typeof(TestClass)));
         }
 
         [TestMethod]

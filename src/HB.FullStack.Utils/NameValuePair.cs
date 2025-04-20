@@ -1,12 +1,12 @@
 ﻿namespace System
 {
-    public class PropertyNameValue
+    public class NameValuePair
     {
         public string Name { get; set; } = null!;
 
         public object? Value { get; set; }
 
-        public PropertyNameValue(string propertyName, object? value)
+        public NameValuePair(string propertyName, object? value)
         {
             Name = propertyName;
             Value = value;

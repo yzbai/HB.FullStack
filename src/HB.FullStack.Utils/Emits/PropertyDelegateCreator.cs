@@ -106,24 +106,24 @@ namespace System
             return (Func<object, object?[]>)dm.CreateDelegate(funType);
         }
 
-        public static Func<object, PropertyNameValue[]> CreateBatchGetDelegate2(IList<PropertyInfo> propertyInfos, Type type)
+        public static Func<object, NameValuePair[]> CreateBatchGetDelegate2(IList<PropertyInfo> propertyInfos, Type type)
         {
             ThrowIf.NullOrEmpty(propertyInfos, nameof(propertyInfos));
 
             DynamicMethod dm = new DynamicMethod(
                 $"BatchGetDelegate2_{type.Name}_{Guid.CreateVersion7()}",
-                typeof(PropertyNameValue[]),
+                typeof(NameValuePair[]),
                 [typeof(object)],
                 true);
 
             EmitBatchGetDelegateCode(true, dm, propertyInfos, type);
 
-            Type funType = Expression.GetFuncType(typeof(object), typeof(PropertyNameValue[]));
+            Type funType = Expression.GetFuncType(typeof(object), typeof(NameValuePair[]));
 
-            return (Func<object, PropertyNameValue[]>)dm.CreateDelegate(funType);
+            return (Func<object, NameValuePair[]>)dm.CreateDelegate(funType);
         }
 
-        private static void EmitBatchGetDelegateCode(bool returntPropertyNameValue, DynamicMethod dm, IList<PropertyInfo> propertyInfos, Type type)
+        private static void EmitBatchGetDelegateCode(bool returntNameValuePair, DynamicMethod dm, IList<PropertyInfo> propertyInfos, Type type)
         {
             ILGenerator il = dm.GetILGenerator();
 
@@ -137,7 +137,7 @@ namespace System
 
             //rtArray = new object[]
             il.EmitInt32(propertyInfos.Count);
-            il.Emit(OpCodes.Newarr, typeof(PropertyNameValue));
+            il.Emit(OpCodes.Newarr, returntNameValuePair ? typeof(NameValuePair) : typeof(object));
             il.Emit(OpCodes.Stloc, rtArray);
 
             bool needCheckInputObject = true;
@@ -158,14 +158,14 @@ namespace System
 
                 il.Emit(OpCodes.Ldloc, rtArray);//[rtArray]
 
-                if (returntPropertyNameValue)
+                if (returntNameValuePair)
                 {
                     il.Emit(OpCodes.Ldstr, propertyInfo.Name);//[rtArray][propertyName]
                 }
 
                 il.EmitGetPropertyValue(inputObjectValueLocal, propertyInfo); //[rtArray][propertyName][propertyInfo-object-value]
 
-                if (returntPropertyNameValue)
+                if (returntNameValuePair)
                 {
                     il.Emit(OpCodes.Newobj, CommonReflectionInfos.PropertyValueConstructorInfo); //[rtArray][propertyValue]
                 }
@@ -198,6 +198,8 @@ namespace System
             LocalBuilder rtList = il.DeclareLocal(typeof(List<string>));
             LocalBuilder objectValueLocal = il.DeclareLocal(type);
 
+            il.ThrowIfArgumentIsNull(0, "inputObject", $"At {dm.Name}, InputObject is Null");
+
             //objectValueLocal = arg_0
             il.Emit(OpCodes.Ldarg_0);//[object-value]
             il.Emit(OpCodes.Unbox_Any, type); //[type-value]
@@ -221,7 +223,7 @@ namespace System
         private static void EmitPropertiesToQueries(
             ILGenerator il,
             IList<PropertyInfo> propertyInfos,
-            LocalBuilder objectValueLocal,
+            LocalBuilder inputObject,
             LocalBuilder rtList,
             string? queryNamePrefix)
         {
@@ -229,11 +231,11 @@ namespace System
             {
                 Type propertyType = propertyInfo.PropertyType;
 
-                LocalBuilder localBoxedPropertyValue = il.DeclareLocal(typeof(object));
+                LocalBuilder curBoxedPropertyValue = il.DeclareLocal(typeof(object));
 
-                ILGeneratorExtensions.EmitGetPropertyValue(il, objectValueLocal, propertyInfo); //[propertyInfo-boxed-value]
+                il.EmitGetPropertyValue(inputObject, propertyInfo); //[propertyInfo-boxed-value]
 
-                il.Emit(OpCodes.Stloc, localBoxedPropertyValue);
+                il.Emit(OpCodes.Stloc, curBoxedPropertyValue);
 
                 #region to string
 
@@ -249,15 +251,15 @@ namespace System
                 {
                     il.Emit(OpCodes.Ldloc, rtList);//[rtList]
 
-                    #region Prepare List Item
+                    #region generate query string
 
                     il.Emit(OpCodes.Ldstr, string.IsNullOrEmpty(queryNamePrefix) ? $"{propertyInfo.Name}=" : $"{queryNamePrefix}.{propertyInfo.Name}="); //[rtList]["propertyName="]
 
-                    il.Emit(OpCodes.Ldloc, localBoxedPropertyValue);
+                    il.Emit(OpCodes.Ldloc, curBoxedPropertyValue);
 
-                    ILGeneratorExtensions.EmitLoadType(il, propertyType);
+                    il.EmitLoadType(propertyType);
 
-                    ILGeneratorExtensions.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
+                    il.EmitInt32((int)StringConvertPurpose.HTTP_QUERY);
 
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][propertyInfo-string]
 
@@ -282,7 +284,7 @@ namespace System
                     Label labelTrue = il.DefineLabel();
 
                     //GetDef localArrayLength
-                    il.Emit(OpCodes.Ldloc, localBoxedPropertyValue);//[propertyInfo-boxed-value]
+                    il.Emit(OpCodes.Ldloc, curBoxedPropertyValue);//[propertyInfo-boxed-value]
                     ILGeneratorExtensions.EmitInt32(il, 0); //[propertyInfo-boxed-value][0]
                     il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetLengthMethod, null); //[length]
                     il.Emit(OpCodes.Stloc, localArrayLength); //empty
@@ -307,7 +309,7 @@ namespace System
 
                     il.Emit(OpCodes.Ldstr, string.IsNullOrEmpty(queryNamePrefix) ? $"{propertyInfo.Name}=" : $"{queryNamePrefix}.{propertyInfo.Name}="); //[rtList]["propertyName="]
 
-                    il.Emit(OpCodes.Ldloc, localBoxedPropertyValue); //[rtList]["propertyName="][Boxed-Array]
+                    il.Emit(OpCodes.Ldloc, curBoxedPropertyValue); //[rtList]["propertyName="][Boxed-Array]
 
                     il.Emit(OpCodes.Ldloc, localI); //[rtList]["propertyName="][Boxed-Array][i]
 
@@ -343,19 +345,19 @@ namespace System
                     #endregion
 
                 }
-                else if (typeof(IEnumerable<>).IsAssignableFrom(propertyType))
+                else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(propertyType))
                 {
                     if (!propertyType.IsGenericType)
                     {
                         throw new NotSupportedException("不支持非基础类型的数组");
                     }
 
-                    LocalBuilder localEnumerator = il.DeclareLocal(typeof(IEnumerator<>));
+                    LocalBuilder localEnumerator = il.DeclareLocal(typeof(System.Collections.IEnumerable));
                     Label labelCondition = il.DefineLabel();
                     Label labelTrue = il.DefineLabel();
 
                     //get enumerator
-                    il.Emit(OpCodes.Ldloc, localBoxedPropertyValue);//[propertyValue]
+                    il.Emit(OpCodes.Ldloc, curBoxedPropertyValue);//[propertyValue]
                     il.EmitCall(OpCodes.Callvirt, CommonReflectionInfos.IEnumerableGetEnumeratorMethod, null);//[emulator]
                     il.Emit(OpCodes.Stloc, localEnumerator);
 
@@ -401,7 +403,7 @@ namespace System
 
                     string newQueryNamePrefix = string.IsNullOrEmpty(queryNamePrefix) ? propertyInfo.Name : $"{queryNamePrefix}.{propertyInfo.Name}";
 
-                    EmitPropertiesToQueries(il, propertyType.GetProperties(), localBoxedPropertyValue, rtList, newQueryNamePrefix);
+                    EmitPropertiesToQueries(il, propertyType.GetProperties(), curBoxedPropertyValue, rtList, newQueryNamePrefix);
                 }
 
                 #endregion

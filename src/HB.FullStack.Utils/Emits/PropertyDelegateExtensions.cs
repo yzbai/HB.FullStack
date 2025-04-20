@@ -8,7 +8,7 @@ namespace System
     {
         private static readonly ConcurrentDictionary<string, Func<object, object?>> _propertyGetDelegateCache = new ConcurrentDictionary<string, Func<object, object?>>();
         private static readonly ConcurrentDictionary<string, Action<object, object?>> _propertySetDelegateCache = new ConcurrentDictionary<string, Action<object, object?>>();
-        private static readonly ConcurrentDictionary<string, Func<object, PropertyNameValue[]>> _cache = new ConcurrentDictionary<string, Func<object, PropertyNameValue[]>>();
+        private static readonly ConcurrentDictionary<string, Func<object, NameValuePair[]>> _cache = new ConcurrentDictionary<string, Func<object, NameValuePair[]>>();
 
         public static Func<object, object?> GetGetDelegate(this PropertyInfo? property)
         {
@@ -34,7 +34,7 @@ namespace System
             return _propertySetDelegateCache.GetOrAdd(key, _ => PropertyDelegateCreator.CreateSetDelegate(property));
         }
 
-        public static PropertyNameValue[] GetPropertyNameValuesByAttribute<TAttr>(this object? obj) where TAttr : Attribute
+        public static NameValuePair[] GetPropertyNameValuesByAttribute<TAttr>(this object? obj) where TAttr : Attribute
         {
             if (obj == null)
             {
