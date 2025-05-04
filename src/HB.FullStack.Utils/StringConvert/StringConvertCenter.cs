@@ -20,6 +20,11 @@ namespace System
             _stringConverters[type] = stringConverter;
         }
 
+        public static bool HasStringConverter(this Type type)
+        {
+            return _stringConverters.ContainsKey(type);
+        }
+
         [return: NotNullIfNotNull(nameof(value))]
         public static string? ToStringFrom<T>(this T? value, StringConvertPurpose purpose)
         {

@@ -220,6 +220,179 @@ namespace System
             return (Func<object, List<string>>)dm.CreateDelegate(funType);
         }
 
+        /// <summary>
+        /// 将inputObject中的Property转换为QueryString形式，存放在rtList中
+        /// </summary>
+        /// <param name="il"></param>
+        /// <param name="property"></param>
+        /// <param name="inputObject"></param>
+        /// <param name="rtList"></param>
+        /// <param name="queryNamePrefix"></param>
+        private static void EmitAddPropertyQueryStringToList(
+            ILGenerator il,
+            Type propertyType,
+            string queryName,
+            LocalBuilder boxedPropertyValue,
+            LocalBuilder list)
+        {
+            if (propertyType.IsValueTypeOrString() || propertyType.HasStringConverter())
+            {
+                il.Emit(OpCodes.Ldloc, list);//[rtList]
+
+                il.Emit(OpCodes.Ldstr, queryName); //[rtList]["propertyName="]
+
+                il.Emit(OpCodes.Ldloc, boxedPropertyValue);
+
+                il.EmitLoadType(propertyType);
+
+                il.EmitInt32((int)StringConvertPurpose.HTTP_QUERY);
+
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][propertyInfo-string]
+
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=propertyInfo-string"]
+
+                //Add to rtList
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringListAddMethod, null);//emtpy
+            }
+            else if (propertyType.IsArray)
+            {
+                if (!propertyType.GetElementType().IsValueTypeOrString())
+                {
+                    throw new NotSupportedException("不支持非基础类型的数组");
+                }
+
+                LocalBuilder localI = il.DeclareLocal(typeof(int));
+                LocalBuilder localArrayLength = il.DeclareLocal(typeof(int));
+                LocalBuilder curItem = il.DeclareLocal(typeof(object));
+
+                Label labelCondition = il.DefineLabel();
+                Label labelTrue = il.DefineLabel();
+
+                //GetDef localArrayLength
+                il.Emit(OpCodes.Ldloc, boxedPropertyValue);//[propertyInfo-boxed-value]
+                ILGeneratorExtensions.EmitInt32(il, 0); //[propertyInfo-boxed-value][0]
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetLengthMethod, null); //[length]
+                il.Emit(OpCodes.Stloc, localArrayLength); //empty
+
+                #region for loop
+
+                //i = 0
+                il.EmitInt32(0);
+                il.Emit(OpCodes.Stloc, localI);
+
+                //goto condition
+                il.Emit(OpCodes.Br, labelCondition);
+
+                //true loop
+                il.MarkLabel(labelTrue);
+
+                #region InnerOperation
+
+                //curItem 赋值
+                il.Emit(OpCodes.Ldloc, boxedPropertyValue); //[Boxed-Array]
+                il.Emit(OpCodes.Ldloc, localI); //[Boxed-Array][i]
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.ArrayGetValueMethod, null); //[item]
+                il.Emit(OpCodes.Stloc, curItem);
+
+
+                递归调用
+
+
+
+                ILGeneratorExtensions.EmitLoadType(il, propertyType.GetElementType()!);//[rtList]["propertyName="][item][itemType]
+                ILGeneratorExtensions.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][item-string]
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=item-string"]
+
+
+
+                // Add To List
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringListAddMethod, null);//empty
+
+                #endregion
+
+                //i++
+                il.Emit(OpCodes.Ldloc, localI);
+                ILGeneratorExtensions.EmitInt32(il, 1);
+                il.Emit(OpCodes.Add);
+                il.Emit(OpCodes.Stloc, localI);
+
+                //condition
+                il.MarkLabel(labelCondition);
+                il.Emit(OpCodes.Ldloc, localI);
+                il.Emit(OpCodes.Ldloc, localArrayLength);
+                il.Emit(OpCodes.Clt);
+                il.Emit(OpCodes.Brtrue, labelTrue);
+
+                //for end
+
+                #endregion
+
+            }
+            else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(propertyType))
+            {
+                if (!propertyType.IsGenericType)
+                {
+                    throw new NotSupportedException("不支持非基础类型的数组");
+                }
+
+                LocalBuilder localEnumerator = il.DeclareLocal(typeof(System.Collections.IEnumerable));
+                Label labelCondition = il.DefineLabel();
+                Label labelTrue = il.DefineLabel();
+
+                //get enumerator
+                il.Emit(OpCodes.Ldloc, propertyValue);//[propertyValue]
+                il.EmitCall(OpCodes.Callvirt, CommonReflectionInfos.IEnumerableGetEnumeratorMethod, null);//[emulator]
+                il.Emit(OpCodes.Stloc, localEnumerator);
+
+                //goto condition
+                il.Emit(OpCodes.Br, labelCondition);
+
+                //True loop
+                il.MarkLabel(labelTrue);
+
+                #region InnerOperation
+
+                il.Emit(OpCodes.Ldloc, rtList);//[rtList]
+
+                #region Prepare List Item
+                il.Emit(OpCodes.Ldstr, string.IsNullOrEmpty(queryNamePrefix) ? $"{propertyInfo.Name}=" : $"{queryNamePrefix}.{propertyInfo.Name}="); //[rtList]["propertyName="]
+
+                il.Emit(OpCodes.Ldloc, localEnumerator); //[rtList]["propertyName="][enumerator]
+
+                il.EmitCall(OpCodes.Callvirt, CommonReflectionInfos.EnumeratorGetCurrentMethod, null); //[rtList]["propertyName="][item]
+
+                ILGeneratorExtensions.EmitLoadType(il, propertyType.GetGenericArguments()[0]);//[rtList]["propertyName="][item][itemType]
+                ILGeneratorExtensions.EmitInt32(il, (int)StringConvertPurpose.HTTP_QUERY);
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.ConvertToStringMethod, null); //[rtList]["propertyName="][item-string]
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringConcatMethod, null);//[rtArrray]["propertyName=item-string"]
+
+                #endregion
+
+                //Add to List
+                il.EmitCall(OpCodes.Call, CommonReflectionInfos.StringListAddMethod, null);//empty
+
+                #endregion
+
+                //condition
+                il.MarkLabel(labelCondition);
+                il.Emit(OpCodes.Ldloc, localEnumerator);
+                il.EmitCall(OpCodes.Callvirt, CommonReflectionInfos.EnumeratorMoveNextMethod, null);
+                il.Emit(OpCodes.Brtrue, labelTrue);
+
+            }
+            else
+            {
+                //复杂类遍历Properties
+
+                string newQueryNamePrefix = string.IsNullOrEmpty(queryNamePrefix) ? propertyInfo.Name : $"{queryNamePrefix}.{propertyInfo.Name}";
+
+                EmitPropertiesToQueries(il, propertyType.GetProperties(), propertyValue, rtList, newQueryNamePrefix);
+            }
+
+#endregion
+        }
+
         private static void EmitPropertiesToQueries(
             ILGenerator il,
             IList<PropertyInfo> propertyInfos,
